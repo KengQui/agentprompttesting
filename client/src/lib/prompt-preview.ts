@@ -9,18 +9,29 @@ export interface PromptPreviewContext {
   guardrails?: string;
 }
 
-export const promptStyleInfo: Record<PromptStyle, { name: string; description: string }> = {
+export const promptStyleInfo: Record<PromptStyle, { 
+  name: string; 
+  description: string;
+  detailedDescription: string;
+  link: string;
+}> = {
   anthropic: {
     name: "Anthropic (Claude)",
     description: "Uses XML tags for clear section separation. Best for complex instructions.",
+    detailedDescription: "Anthropic's Claude models work best with XML-style tags to clearly separate different sections of a prompt. This format uses tags like <role>, <purpose>, <context>, and <constraints> to organize instructions. The structured approach helps Claude understand the boundaries between different types of information and follow complex multi-part instructions more reliably.",
+    link: "https://docs.anthropic.com/claude/docs/prompt-engineering",
   },
   gemini: {
     name: "Google Gemini",
     description: "Uses Markdown headers with constraints at the end. Direct and structured.",
+    detailedDescription: "Google's Gemini models respond well to Markdown-formatted prompts with clear section headers (##). This style places the most important constraints and guardrails at the end of the prompt, as Gemini tends to give more weight to instructions that appear later. The format is clean, readable, and works well for most use cases.",
+    link: "https://ai.google.dev/gemini-api/docs/prompting-intro",
   },
   openai: {
     name: "OpenAI",
     description: "Uses Markdown with bold emphasis and explicit role definitions.",
+    detailedDescription: "OpenAI's GPT models work well with Markdown formatting that uses bold text (**like this**) to emphasize key terms and explicit role definitions at the start. This style clearly states what the assistant 'is' and what it should do, with organized sections for different aspects of behavior. OpenAI models respond well to direct, assertive instructions.",
+    link: "https://platform.openai.com/docs/guides/prompt-engineering",
   },
 };
 

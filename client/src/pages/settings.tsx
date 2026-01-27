@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useParams, useLocation } from "wouter";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { ArrowLeft, Save, Trash2, Bot, Briefcase, Shield, AlertTriangle, Loader2, BookOpen, Upload, X, FileText, Code, Pencil, RotateCcw } from "lucide-react";
+import { ArrowLeft, Save, Trash2, Bot, Briefcase, Shield, AlertTriangle, Loader2, BookOpen, Upload, X, FileText, Code, Pencil, RotateCcw, HelpCircle, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -11,7 +11,15 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -453,27 +461,79 @@ export default function SettingsPage() {
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
-                <Label className="mb-2 block">Prompt Style</Label>
-                <Tabs
+                <div className="flex items-center gap-2 mb-3">
+                  <Label>Prompt Style</Label>
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className="h-6 px-2 text-xs text-muted-foreground hover:text-foreground"
+                        data-testid="settings-button-learn-more-styles"
+                      >
+                        <HelpCircle className="h-3.5 w-3.5 mr-1" />
+                        Learn more
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="max-w-lg">
+                      <DialogHeader>
+                        <DialogTitle>Prompt Engineering Styles</DialogTitle>
+                        <DialogDescription>
+                          Different AI providers have developed distinct best practices for prompt engineering. Choose the style that works best for your use case.
+                        </DialogDescription>
+                      </DialogHeader>
+                      <div className="space-y-4 mt-4">
+                        {(["anthropic", "gemini", "openai"] as PromptStyle[]).map((style) => (
+                          <div key={style} className="space-y-2">
+                            <div className="flex items-center justify-between">
+                              <h4 className="font-medium">{promptStyleInfo[style].name}</h4>
+                              <a
+                                href={promptStyleInfo[style].link}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-xs text-primary hover:underline flex items-center gap-1"
+                                data-testid={`settings-link-${style}-docs`}
+                              >
+                                View docs
+                                <ExternalLink className="h-3 w-3" />
+                              </a>
+                            </div>
+                            <p className="text-sm text-muted-foreground">
+                              {promptStyleInfo[style].detailedDescription}
+                            </p>
+                          </div>
+                        ))}
+                      </div>
+                    </DialogContent>
+                  </Dialog>
+                </div>
+                <RadioGroup
                   value={formData.promptStyle || "anthropic"}
                   onValueChange={(value) => {
                     updateFormData({ promptStyle: value as PromptStyle, customPrompt: "" });
                     setEditedPrompt("");
                     setIsEditingPrompt(false);
                   }}
+                  className="grid grid-cols-3 gap-3"
+                  data-testid="settings-prompt-style-radio-group"
                 >
-                  <TabsList className="grid w-full grid-cols-3" data-testid="settings-prompt-style-tabs">
-                    <TabsTrigger value="anthropic" data-testid="settings-tab-anthropic">
-                      Anthropic
-                    </TabsTrigger>
-                    <TabsTrigger value="gemini" data-testid="settings-tab-gemini">
-                      Gemini
-                    </TabsTrigger>
-                    <TabsTrigger value="openai" data-testid="settings-tab-openai">
-                      OpenAI
-                    </TabsTrigger>
-                  </TabsList>
-                </Tabs>
+                  {(["anthropic", "gemini", "openai"] as PromptStyle[]).map((style) => (
+                    <div key={style} className="flex items-center space-x-2">
+                      <RadioGroupItem 
+                        value={style} 
+                        id={`settings-style-${style}`}
+                        data-testid={`settings-radio-${style}`}
+                      />
+                      <Label 
+                        htmlFor={`settings-style-${style}`} 
+                        className="text-sm cursor-pointer"
+                      >
+                        {promptStyleInfo[style].name}
+                      </Label>
+                    </div>
+                  ))}
+                </RadioGroup>
                 <p className="text-xs text-muted-foreground mt-2">
                   {promptStyleInfo[formData.promptStyle || "anthropic"].description}
                 </p>
