@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { useLocation } from "wouter";
 import { useMutation } from "@tanstack/react-query";
-import { ArrowLeft, ArrowRight, Check, Briefcase, Shield, AlertTriangle, Eye, Bot, BookOpen, Upload, X, FileText, Code, Pencil, RotateCcw, HelpCircle, ExternalLink } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check, Briefcase, Shield, AlertTriangle, Eye, Bot, BookOpen, Upload, X, FileText, Code, Pencil, RotateCcw, HelpCircle, ExternalLink, Info, Sparkles, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -21,6 +21,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { generatePromptPreview, promptStyleInfo } from "@/lib/prompt-preview";
+import { validationRulesTemplate, guardrailsTemplate } from "@/lib/config-templates";
 import type { WizardStepData, Agent, DomainDocument, PromptStyle } from "@shared/schema";
 
 const steps = [
@@ -319,6 +320,47 @@ function Step4ValidationRules({
   data: WizardStepData;
   onUpdate: (data: Partial<WizardStepData>) => void;
 }) {
+  const [isGenerating, setIsGenerating] = useState(false);
+  const { toast } = useToast();
+
+  const handleUseTemplate = () => {
+    onUpdate({ validationRules: validationRulesTemplate });
+  };
+
+  const handleGenerate = async () => {
+    if (!data.businessUseCase) {
+      toast({
+        title: "Business use case required",
+        description: "Please complete Step 1 with your business use case before generating.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsGenerating(true);
+    try {
+      const response = await apiRequest("POST", "/api/generate/validation-rules", {
+        businessUseCase: data.businessUseCase,
+        domainKnowledge: data.domainKnowledge,
+        domainDocuments: data.domainDocuments,
+      });
+      const result = await response.json();
+      onUpdate({ validationRules: result.validationRules });
+      toast({
+        title: "Validation rules generated",
+        description: "Review and customize the generated rules as needed.",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Generation failed",
+        description: error?.message || "Failed to generate validation rules. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
   return (
     <Card>
       <CardHeader>
@@ -328,26 +370,61 @@ function Step4ValidationRules({
           <Badge variant="secondary">Optional</Badge>
         </CardTitle>
         <CardDescription>
-          Define rules to validate user inputs and agent outputs. This helps ensure consistent, high-quality responses.
+          Define input/output validation requirements
         </CardDescription>
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
+          <div className="flex items-start gap-3 rounded-lg border bg-muted/50 p-4">
+            <Info className="h-5 w-5 text-muted-foreground mt-0.5 shrink-0" />
+            <div>
+              <p className="font-medium text-sm">What are validation rules?</p>
+              <p className="text-sm text-muted-foreground">
+                Validation rules help ensure your agent processes data correctly and provides accurate responses. Define rules for input formats, required fields, and response constraints.
+              </p>
+            </div>
+          </div>
+
           <div>
-            <Label htmlFor="validationRules">Input/Output Validation Rules</Label>
+            <div className="flex items-center justify-between mb-2">
+              <Label htmlFor="validationRules">Validation Configuration</Label>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={handleUseTemplate}
+                  className="text-sm text-primary hover:underline"
+                  data-testid="button-use-template-validation"
+                >
+                  Use Template
+                </button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={handleGenerate}
+                  disabled={isGenerating}
+                  data-testid="button-generate-validation"
+                >
+                  {isGenerating ? (
+                    <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                  ) : (
+                    <Sparkles className="h-4 w-4 mr-1" />
+                  )}
+                  Generate
+                </Button>
+              </div>
+            </div>
             <Textarea
               id="validationRules"
-              placeholder="e.g., 
-- User input must be in English
-- Responses should not exceed 500 words
-- Always include relevant documentation links
-- Format code examples with proper syntax highlighting
-- Reject requests for personal information..."
+              placeholder="Add validation rules to ensure data quality (Markdown or YAML format)..."
               value={data.validationRules}
               onChange={(e) => onUpdate({ validationRules: e.target.value })}
-              className="mt-2 min-h-[200px] resize-none"
+              className="min-h-[200px] resize-none font-mono text-sm"
               data-testid="textarea-validation-rules"
             />
+            <p className="text-xs text-muted-foreground mt-1">
+              Optional: Add validation rules to ensure data quality (Markdown or YAML format)
+            </p>
           </div>
         </div>
       </CardContent>
@@ -362,6 +439,47 @@ function Step5Guardrails({
   data: WizardStepData;
   onUpdate: (data: Partial<WizardStepData>) => void;
 }) {
+  const [isGenerating, setIsGenerating] = useState(false);
+  const { toast } = useToast();
+
+  const handleUseTemplate = () => {
+    onUpdate({ guardrails: guardrailsTemplate });
+  };
+
+  const handleGenerate = async () => {
+    if (!data.businessUseCase) {
+      toast({
+        title: "Business use case required",
+        description: "Please complete Step 1 with your business use case before generating.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsGenerating(true);
+    try {
+      const response = await apiRequest("POST", "/api/generate/guardrails", {
+        businessUseCase: data.businessUseCase,
+        domainKnowledge: data.domainKnowledge,
+        domainDocuments: data.domainDocuments,
+      });
+      const result = await response.json();
+      onUpdate({ guardrails: result.guardrails });
+      toast({
+        title: "Guardrails generated",
+        description: "Review and customize the generated guardrails as needed.",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Generation failed",
+        description: error?.message || "Failed to generate guardrails. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
   return (
     <Card>
       <CardHeader>
@@ -371,27 +489,61 @@ function Step5Guardrails({
           <Badge variant="secondary">Optional</Badge>
         </CardTitle>
         <CardDescription>
-          Set safety boundaries and restrictions for your agent. Define what the agent should never do.
+          Set safety boundaries and content restrictions
         </CardDescription>
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
+          <div className="flex items-start gap-3 rounded-lg border bg-muted/50 p-4">
+            <Info className="h-5 w-5 text-muted-foreground mt-0.5 shrink-0" />
+            <div>
+              <p className="font-medium text-sm">Why are guardrails important?</p>
+              <p className="text-sm text-muted-foreground">
+                Guardrails protect your brand by preventing inappropriate responses, ensuring compliance, and maintaining consistent behavior even in edge cases.
+              </p>
+            </div>
+          </div>
+
           <div>
-            <Label htmlFor="guardrails">Safety Boundaries & Restrictions</Label>
+            <div className="flex items-center justify-between mb-2">
+              <Label htmlFor="guardrails">Guardrails Configuration</Label>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={handleUseTemplate}
+                  className="text-sm text-primary hover:underline"
+                  data-testid="button-use-template-guardrails"
+                >
+                  Use Template
+                </button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={handleGenerate}
+                  disabled={isGenerating}
+                  data-testid="button-generate-guardrails"
+                >
+                  {isGenerating ? (
+                    <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                  ) : (
+                    <Sparkles className="h-4 w-4 mr-1" />
+                  )}
+                  Generate
+                </Button>
+              </div>
+            </div>
             <Textarea
               id="guardrails"
-              placeholder="e.g.,
-- Never provide medical, legal, or financial advice
-- Do not share confidential company information
-- Refuse requests involving illegal activities
-- Redirect complex issues to human support
-- Never impersonate a real person
-- Do not generate harmful or offensive content..."
+              placeholder="Define what your agent should NOT do (Markdown or YAML format)..."
               value={data.guardrails}
               onChange={(e) => onUpdate({ guardrails: e.target.value })}
-              className="mt-2 min-h-[200px] resize-none"
+              className="min-h-[200px] resize-none font-mono text-sm"
               data-testid="textarea-guardrails"
             />
+            <p className="text-xs text-muted-foreground mt-1">
+              Optional: Define what your agent should NOT do (Markdown or YAML format)
+            </p>
           </div>
         </div>
       </CardContent>
