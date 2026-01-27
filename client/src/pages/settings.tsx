@@ -1,7 +1,7 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useParams, useLocation } from "wouter";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { ArrowLeft, Save, Trash2, Bot, Briefcase, Shield, AlertTriangle, Loader2 } from "lucide-react";
+import { ArrowLeft, Save, Trash2, Bot, Briefcase, Shield, AlertTriangle, Loader2, BookOpen, Upload, X, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -24,7 +24,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest } from "@/lib/queryClient";
-import type { Agent, UpdateAgent, AgentStatus } from "@shared/schema";
+import type { Agent, UpdateAgent, AgentStatus, DomainDocument } from "@shared/schema";
 
 export default function SettingsPage() {
   const params = useParams<{ id: string }>();
@@ -36,18 +36,71 @@ export default function SettingsPage() {
     queryKey: ["/api/agents", params.id],
   });
 
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [isUploading, setIsUploading] = useState(false);
+
   // Initialize form data when agent loads
   useEffect(() => {
     if (agent && !formData) {
       setFormData({
         name: agent.name,
         businessUseCase: agent.businessUseCase,
+        domainKnowledge: agent.domainKnowledge,
+        domainDocuments: agent.domainDocuments,
         validationRules: agent.validationRules,
         guardrails: agent.guardrails,
         status: agent.status,
       });
     }
   }, [agent, formData]);
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    setIsUploading(true);
+    try {
+      for (const file of Array.from(files)) {
+        const formDataObj = new FormData();
+        formDataObj.append('file', file);
+
+        const response = await fetch('/api/upload-document', {
+          method: 'POST',
+          body: formDataObj,
+        });
+
+        if (!response.ok) {
+          const error = await response.json();
+          throw new Error(error.message || 'Failed to upload file');
+        }
+
+        const document: DomainDocument = await response.json();
+        const currentDocs = formData?.domainDocuments || [];
+        updateFormData({ domainDocuments: [...currentDocs, document] });
+
+        toast({
+          title: "Document uploaded",
+          description: `${file.name} has been added to domain knowledge.`,
+        });
+      }
+    } catch (error: any) {
+      toast({
+        title: "Upload failed",
+        description: error.message || "Failed to upload document",
+        variant: "destructive",
+      });
+    } finally {
+      setIsUploading(false);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    }
+  };
+
+  const removeDocument = (id: string) => {
+    const currentDocs = formData?.domainDocuments || [];
+    updateFormData({ domainDocuments: currentDocs.filter(doc => doc.id !== id) });
+  };
 
   const updateMutation = useMutation({
     mutationFn: async (data: UpdateAgent) => {
@@ -245,6 +298,91 @@ export default function SettingsPage() {
                 className="min-h-[120px] resize-none"
                 data-testid="textarea-business-usecase"
               />
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <BookOpen className="h-5 w-5 text-primary" />
+                Domain Knowledge
+                <Badge variant="secondary">Optional</Badge>
+              </CardTitle>
+              <CardDescription>
+                Knowledge base and reference documents for the agent
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div>
+                <Label htmlFor="domainKnowledge">Knowledge Base</Label>
+                <Textarea
+                  id="domainKnowledge"
+                  value={formData.domainKnowledge || ""}
+                  onChange={(e) => updateFormData({ domainKnowledge: e.target.value })}
+                  className="mt-2 min-h-[120px] resize-none"
+                  placeholder="Add domain knowledge..."
+                  data-testid="textarea-domain-knowledge"
+                />
+              </div>
+
+              <div className="border-t pt-4">
+                <Label>Uploaded Documents</Label>
+                <p className="text-sm text-muted-foreground mb-3">
+                  Upload text files (.txt, .md, .csv, .json) up to 5MB each
+                </p>
+                
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept=".txt,.md,.csv,.json"
+                  multiple
+                  onChange={handleFileUpload}
+                  className="hidden"
+                  data-testid="input-file-upload"
+                />
+                
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={isUploading}
+                  className="gap-2"
+                  data-testid="button-upload-document"
+                >
+                  <Upload className="h-4 w-4" />
+                  {isUploading ? "Uploading..." : "Choose Files"}
+                </Button>
+
+                {formData.domainDocuments && formData.domainDocuments.length > 0 && (
+                  <div className="mt-4 space-y-2">
+                    {formData.domainDocuments.map((doc) => (
+                      <div
+                        key={doc.id}
+                        className="flex items-center justify-between gap-2 rounded-md border bg-muted/30 p-2"
+                        data-testid={`document-${doc.id}`}
+                      >
+                        <div className="flex items-center gap-2 min-w-0">
+                          <FileText className="h-4 w-4 flex-shrink-0 text-muted-foreground" />
+                          <span className="text-sm truncate">{doc.filename}</span>
+                          <Badge variant="secondary" className="text-xs">
+                            {Math.round(doc.content.length / 1000)}k chars
+                          </Badge>
+                        </div>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => removeDocument(doc.id)}
+                          className="h-7 w-7 flex-shrink-0"
+                          data-testid={`button-remove-document-${doc.id}`}
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
             </CardContent>
           </Card>
 

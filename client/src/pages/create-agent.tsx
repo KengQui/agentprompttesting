@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useLocation } from "wouter";
 import { useMutation } from "@tanstack/react-query";
-import { ArrowLeft, ArrowRight, Check, Briefcase, Shield, AlertTriangle, Eye, Bot } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check, Briefcase, Shield, AlertTriangle, Eye, Bot, BookOpen, Upload, X, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -11,14 +11,15 @@ import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest } from "@/lib/queryClient";
-import type { WizardStepData, Agent } from "@shared/schema";
+import type { WizardStepData, Agent, DomainDocument } from "@shared/schema";
 
 const steps = [
   { id: 1, name: "Business Use Case", icon: Briefcase, description: "Define the problem this agent solves" },
   { id: 2, name: "Agent Name", icon: Bot, description: "Name your agent" },
-  { id: 3, name: "Validation Rules", icon: Shield, description: "Set input/output validation rules" },
-  { id: 4, name: "Guardrails", icon: AlertTriangle, description: "Define safety boundaries" },
-  { id: 5, name: "Review", icon: Eye, description: "Preview and create your agent" },
+  { id: 3, name: "Domain Knowledge", icon: BookOpen, description: "Add knowledge and documents" },
+  { id: 4, name: "Validation Rules", icon: Shield, description: "Set input/output validation rules" },
+  { id: 5, name: "Guardrails", icon: AlertTriangle, description: "Define safety boundaries" },
+  { id: 6, name: "Review", icon: Eye, description: "Preview and create your agent" },
 ];
 
 function StepIndicator({ currentStep }: { currentStep: number }) {
@@ -145,7 +146,163 @@ function Step2AgentName({
   );
 }
 
-function Step3ValidationRules({
+function Step3DomainKnowledge({
+  data,
+  onUpdate,
+}: {
+  data: WizardStepData;
+  onUpdate: (data: Partial<WizardStepData>) => void;
+}) {
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const { toast } = useToast();
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    setIsUploading(true);
+    try {
+      for (const file of Array.from(files)) {
+        const formData = new FormData();
+        formData.append('file', file);
+
+        const response = await fetch('/api/upload-document', {
+          method: 'POST',
+          body: formData,
+        });
+
+        if (!response.ok) {
+          const error = await response.json();
+          throw new Error(error.message || 'Failed to upload file');
+        }
+
+        const document: DomainDocument = await response.json();
+        onUpdate({ 
+          domainDocuments: [...(data.domainDocuments || []), document] 
+        });
+
+        toast({
+          title: "Document uploaded",
+          description: `${file.name} has been added to domain knowledge.`,
+        });
+      }
+    } catch (error: any) {
+      toast({
+        title: "Upload failed",
+        description: error.message || "Failed to upload document",
+        variant: "destructive",
+      });
+    } finally {
+      setIsUploading(false);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    }
+  };
+
+  const removeDocument = (id: string) => {
+    onUpdate({
+      domainDocuments: (data.domainDocuments || []).filter(doc => doc.id !== id)
+    });
+  };
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <BookOpen className="h-5 w-5 text-primary" />
+          Domain Knowledge
+          <Badge variant="secondary">Optional</Badge>
+        </CardTitle>
+        <CardDescription>
+          Add knowledge that your agent should know about. You can type it in or upload documents.
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-6">
+          <div>
+            <Label htmlFor="domainKnowledge">Knowledge Base (Type here)</Label>
+            <Textarea
+              id="domainKnowledge"
+              placeholder="e.g., 
+- Our company was founded in 2020
+- We offer three subscription tiers: Basic, Pro, and Enterprise
+- Our support hours are 9 AM - 6 PM EST
+- Product returns are accepted within 30 days..."
+              value={data.domainKnowledge}
+              onChange={(e) => onUpdate({ domainKnowledge: e.target.value })}
+              className="mt-2 min-h-[150px] resize-none"
+              data-testid="textarea-domain-knowledge"
+            />
+          </div>
+
+          <div className="border-t pt-4">
+            <Label>Upload Documents</Label>
+            <p className="text-sm text-muted-foreground mb-3">
+              Upload text files (.txt, .md, .csv, .json) up to 5MB each
+            </p>
+            
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept=".txt,.md,.csv,.json"
+              multiple
+              onChange={handleFileUpload}
+              className="hidden"
+              data-testid="input-file-upload"
+            />
+            
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={isUploading}
+              className="gap-2"
+              data-testid="button-upload-document"
+            >
+              <Upload className="h-4 w-4" />
+              {isUploading ? "Uploading..." : "Choose Files"}
+            </Button>
+
+            {data.domainDocuments && data.domainDocuments.length > 0 && (
+              <div className="mt-4 space-y-2">
+                <Label className="text-sm">Uploaded Documents</Label>
+                {data.domainDocuments.map((doc) => (
+                  <div
+                    key={doc.id}
+                    className="flex items-center justify-between gap-2 rounded-md border bg-muted/30 p-2"
+                    data-testid={`document-${doc.id}`}
+                  >
+                    <div className="flex items-center gap-2 min-w-0">
+                      <FileText className="h-4 w-4 flex-shrink-0 text-muted-foreground" />
+                      <span className="text-sm truncate">{doc.filename}</span>
+                      <Badge variant="secondary" className="text-xs">
+                        {Math.round(doc.content.length / 1000)}k chars
+                      </Badge>
+                    </div>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => removeDocument(doc.id)}
+                      className="h-7 w-7 flex-shrink-0"
+                      data-testid={`button-remove-document-${doc.id}`}
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+function Step4ValidationRules({
   data,
   onUpdate,
 }: {
@@ -188,7 +345,7 @@ function Step3ValidationRules({
   );
 }
 
-function Step4Guardrails({
+function Step5Guardrails({
   data,
   onUpdate,
 }: {
@@ -232,10 +389,16 @@ function Step4Guardrails({
   );
 }
 
-function Step5Review({ data }: { data: WizardStepData }) {
+function Step6Review({ data }: { data: WizardStepData }) {
+  const domainDocsCount = data.domainDocuments?.length || 0;
+  const domainKnowledgeValue = data.domainKnowledge 
+    ? data.domainKnowledge 
+    : (domainDocsCount > 0 ? `${domainDocsCount} document(s) uploaded` : "");
+
   const sections = [
     { label: "Business Use Case", value: data.businessUseCase, icon: Briefcase },
     { label: "Agent Name", value: data.name, icon: Bot },
+    { label: "Domain Knowledge", value: domainKnowledgeValue, icon: BookOpen, optional: true },
     { label: "Validation Rules", value: data.validationRules, icon: Shield, optional: true },
     { label: "Guardrails", value: data.guardrails, icon: AlertTriangle, optional: true },
   ];
@@ -289,6 +452,8 @@ export default function CreateAgent() {
     businessUseCase: "",
     name: "",
     description: "",
+    domainKnowledge: "",
+    domainDocuments: [],
     validationRules: "",
     guardrails: "",
   });
@@ -327,8 +492,9 @@ export default function CreateAgent() {
         return formData.name.trim().length > 0;
       case 3:
       case 4:
-        return true; // Optional steps
       case 5:
+        return true; // Optional steps
+      case 6:
         return true;
       default:
         return false;
@@ -336,7 +502,7 @@ export default function CreateAgent() {
   };
 
   const handleNext = () => {
-    if (currentStep < 5) {
+    if (currentStep < 6) {
       setCurrentStep(currentStep + 1);
     } else {
       createMutation.mutate(formData);
@@ -358,11 +524,13 @@ export default function CreateAgent() {
       case 2:
         return <Step2AgentName data={formData} onUpdate={updateFormData} />;
       case 3:
-        return <Step3ValidationRules data={formData} onUpdate={updateFormData} />;
+        return <Step3DomainKnowledge data={formData} onUpdate={updateFormData} />;
       case 4:
-        return <Step4Guardrails data={formData} onUpdate={updateFormData} />;
+        return <Step4ValidationRules data={formData} onUpdate={updateFormData} />;
       case 5:
-        return <Step5Review data={formData} />;
+        return <Step5Guardrails data={formData} onUpdate={updateFormData} />;
+      case 6:
+        return <Step6Review data={formData} />;
       default:
         return null;
     }
@@ -417,7 +585,7 @@ export default function CreateAgent() {
             className="gap-2"
             data-testid="button-next"
           >
-            {currentStep === 5 ? (
+            {currentStep === 6 ? (
               createMutation.isPending ? (
                 "Creating..."
               ) : (

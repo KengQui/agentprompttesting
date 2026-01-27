@@ -1,9 +1,17 @@
 # Agent Studio - AI Agent Configuration Platform
 
 ## Overview
-Agent Studio is a web application for creating, configuring, and managing AI agents. Users can define business use cases, system prompts, validation rules, and guardrails through an intuitive 5-step wizard interface.
+Agent Studio is a web application for creating, configuring, and managing AI agents. Users can define business use cases, domain knowledge, validation rules, and guardrails through an intuitive 6-step wizard interface.
 
 ## Recent Changes
+- **January 27, 2026**: Added Domain Knowledge feature with document upload
+  - New Domain Knowledge step (Step 3) in the creation wizard
+  - Users can type domain knowledge directly or upload documents
+  - Supported file types: .txt, .md, .csv, .json (up to 5MB each)
+  - File upload endpoint: POST /api/upload-document
+  - Domain knowledge and documents are included in the AI system prompt
+  - Settings page updated with Domain Knowledge section and file upload
+
 - **January 27, 2026**: Moved agent personality to platform-owner controlled file
   - Created `personality-prompt.txt` in project root for platform owner to edit
   - Backend now reads personality from this file instead of per-agent settings
@@ -38,7 +46,7 @@ Agent Studio is a web application for creating, configuring, and managing AI age
 ### Frontend (`client/src/`)
 - **Pages**:
   - `pages/home.tsx` - Agent listing with cards
-  - `pages/create-agent.tsx` - 5-step wizard for creating agents
+  - `pages/create-agent.tsx` - 6-step wizard for creating agents
   - `pages/chat.tsx` - Chat interface for testing agents
   - `pages/settings.tsx` - Edit/delete agent configuration
 - **Tech Stack**: React, TypeScript, TanStack Query, Wouter, Tailwind CSS, Shadcn UI
@@ -48,6 +56,7 @@ Agent Studio is a web application for creating, configuring, and managing AI age
   - `GET/POST /api/agents` - List/create agents
   - `GET/PATCH/DELETE /api/agents/:id` - Agent CRUD operations
   - `GET/POST/DELETE /api/agents/:id/messages` - Chat message operations
+  - `POST /api/upload-document` - Upload domain knowledge documents
 - **Storage** (`storage.ts`): In-memory storage with YAML/JSON file persistence
 
 ### Data Persistence (`agents/`)

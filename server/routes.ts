@@ -15,17 +15,16 @@ const upload = multer({
     fileSize: 5 * 1024 * 1024, // 5MB limit
   },
   fileFilter: (req, file, cb) => {
-    // Allow text-based files
+    // Only allow plain text files that can be read as UTF-8
+    const allowedExtensions = ['.txt', '.md', '.csv', '.json'];
     const allowedMimes = [
       'text/plain',
       'text/markdown',
       'text/csv',
-      'application/json',
-      'application/pdf',
-      'application/msword',
-      'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+      'application/json'
     ];
-    if (allowedMimes.includes(file.mimetype) || file.originalname.endsWith('.txt') || file.originalname.endsWith('.md')) {
+    const ext = file.originalname.toLowerCase().slice(file.originalname.lastIndexOf('.'));
+    if (allowedExtensions.includes(ext) || allowedMimes.includes(file.mimetype)) {
       cb(null, true);
     } else {
       cb(new Error('Only text-based files are allowed (.txt, .md, .csv, .json)'));
