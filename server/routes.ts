@@ -98,13 +98,6 @@ export async function registerRoutes(
 
   // Send a message to an agent with Gemini AI response
   app.post("/api/agents/:id/messages", async (req, res) => {
-    let isRequestClosed = false;
-    
-    // Track if client disconnects (e.g., user cancels)
-    req.on("close", () => {
-      isRequestClosed = true;
-    });
-    
     try {
       const agent = await storage.getAgent(req.params.id);
       if (!agent) {
@@ -119,24 +112,12 @@ export async function registerRoutes(
         return res.status(400).json({ message: parsed.error.errors[0]?.message || "Content is required" });
       }
 
-      // Check if request was cancelled before adding user message
-      if (isRequestClosed) {
-        console.log("Request cancelled before processing");
-        return;
-      }
-
       // Add user message
       const userMessage = await storage.addMessage({
         agentId: req.params.id,
         role: "user",
         content: parsed.data.content,
       });
-
-      // Check if request was cancelled before AI generation
-      if (isRequestClosed) {
-        console.log("Request cancelled before AI generation");
-        return;
-      }
 
       // Get chat history for context
       const allMessages = await storage.getMessages(req.params.id);
@@ -164,12 +145,6 @@ export async function registerRoutes(
         responseContent = `I apologize, but I'm having trouble generating a response. ${aiError.message?.includes("GEMINI_API_KEY") ? "The Gemini API key may not be configured correctly." : "Please try again."}`;
       }
 
-      // Check if request was cancelled before saving assistant response
-      if (isRequestClosed) {
-        console.log("Request cancelled - not saving assistant response");
-        return;
-      }
-
       // Add assistant message
       const assistantMessage = await storage.addMessage({
         agentId: req.params.id,
@@ -177,18 +152,8 @@ export async function registerRoutes(
         content: responseContent,
       });
 
-      // Final check before sending response
-      if (isRequestClosed) {
-        console.log("Request cancelled before sending response");
-        return;
-      }
-
       res.json([userMessage, assistantMessage]);
     } catch (error) {
-      if (isRequestClosed) {
-        console.log("Request was cancelled");
-        return;
-      }
       console.error("Error sending message:", error);
       res.status(500).json({ message: "Failed to send message" });
     }

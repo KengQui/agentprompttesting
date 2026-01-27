@@ -1,0 +1,30 @@
+[
+  {
+    "id": "d401bfe5-f7ed-4aba-9d75-a3d40b3bd19f",
+    "agentId": "33035046-879e-48a3-a6cf-0aa2aa247d76",
+    "role": "user",
+    "content": "Hello",
+    "timestamp": "2026-01-27T19:06:27.595Z"
+  },
+  {
+    "id": "c4d948fa-a6b6-4f73-83ec-b5e2d940c945",
+    "agentId": "33035046-879e-48a3-a6cf-0aa2aa247d76",
+    "role": "assistant",
+    "content": "Hello! How can I help you with your payroll questions today?\n",
+    "timestamp": "2026-01-27T19:06:28.298Z"
+  },
+  {
+    "id": "110387f5-d42b-49d1-be91-e4da1d451226",
+    "agentId": "33035046-879e-48a3-a6cf-0aa2aa247d76",
+    "role": "user",
+    "content": "What is my vacation balance?",
+    "timestamp": "2026-01-27T19:07:05.640Z"
+  },
+  {
+    "id": "8cbdcecd-e736-4513-b075-18a00b6d17d9",
+    "agentId": "33035046-879e-48a3-a6cf-0aa2aa247d76",
+    "role": "assistant",
+    "content": "I can help with that! Could you please provide your employee ID so I can look up your current vacation balance?\n",
+    "timestamp": "2026-01-27T19:07:06.270Z"
+  }
+]

@@ -1,8 +1,10 @@
 import { GoogleGenAI } from "@google/genai";
 
-// Gemini AI integration using Google AI Studio
+// Google AI Studio SDK integration for Gemini
 // Requires GEMINI_API_KEY secret to be set
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || "" });
+const ai = new GoogleGenAI({
+  apiKey: process.env.GEMINI_API_KEY || "",
+});
 
 export interface AgentContext {
   name: string;
@@ -41,7 +43,7 @@ export async function generateAgentResponse(
 
   try {
     const response = await ai.models.generateContent({
-      model: "gemini-2.5-flash",
+      model: "gemini-2.0-flash",
       config: {
         systemInstruction: systemPrompt,
       },
@@ -49,9 +51,9 @@ export async function generateAgentResponse(
     });
 
     return response.text || "I apologize, but I was unable to generate a response. Please try again.";
-  } catch (error) {
-    console.error("Gemini API error:", error);
-    throw new Error(`Failed to generate response: ${error}`);
+  } catch (error: any) {
+    console.error("Gemini API error:", error?.message || error);
+    throw new Error(`Failed to generate response: ${error?.message || error}`);
   }
 }
 
