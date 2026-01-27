@@ -31,7 +31,7 @@ Agent Studio is a web application for creating, configuring, and managing AI age
 
 | Feature | Description | Location |
 |---------|-------------|----------|
-| Agent Creation Wizard | 5-step guided process to create new agents | `/create-agent` |
+| Agent Creation Wizard | 5-step guided process to create new agents (Business Use Case, Agent Name, Validation Rules, Guardrails, Review) | `/create-agent` |
 | Agent Dashboard | View and manage all created agents | `/` (home) |
 | Chat Interface | Interactive testing environment for agents | `/chat/:agentId` |
 | Agent Settings | Edit or delete existing agents | `/settings/:agentId` |
@@ -323,7 +323,8 @@ If you're unsure about something, be honest about your limitations.
 ### January 27, 2026 - Platform-Controlled Personality
 - Moved chatbot personality to `personality-prompt.txt` file
 - Platform owner can now edit personality without touching code
-- Removed System Prompt field from agent settings (admins can't change personality)
+- Removed System Prompt/Description field from agent creation wizard and settings
+- Wizard Step 2 now only asks for Agent Name (no personality/description field)
 - Personality is shared across all agents
 
 ### January 27, 2026 - Intermediate Chatbot Features

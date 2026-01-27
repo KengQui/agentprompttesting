@@ -7,7 +7,8 @@ Agent Studio is a web application for creating, configuring, and managing AI age
 - **January 27, 2026**: Moved agent personality to platform-owner controlled file
   - Created `personality-prompt.txt` in project root for platform owner to edit
   - Backend now reads personality from this file instead of per-agent settings
-  - Removed System Prompt field from agent settings page (admins can't change personality)
+  - Removed System Prompt/Description field from agent settings page and creation wizard
+  - Wizard Step 2 now only asks for Agent Name (no personality/description field)
 
 - **January 27, 2026**: Added per-agent turn management system
   - Created modular component architecture: turn-manager, flow-controller, state-manager, orchestrator

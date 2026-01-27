@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
 import { useMutation } from "@tanstack/react-query";
-import { ArrowLeft, ArrowRight, Check, Briefcase, FileText, Shield, AlertTriangle, Eye, Bot } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check, Briefcase, Shield, AlertTriangle, Eye, Bot } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -15,7 +15,7 @@ import type { WizardStepData, Agent } from "@shared/schema";
 
 const steps = [
   { id: 1, name: "Business Use Case", icon: Briefcase, description: "Define the problem this agent solves" },
-  { id: 2, name: "Description", icon: FileText, description: "Name and configure the agent's personality" },
+  { id: 2, name: "Agent Name", icon: Bot, description: "Name your agent" },
   { id: 3, name: "Validation Rules", icon: Shield, description: "Set input/output validation rules" },
   { id: 4, name: "Guardrails", icon: AlertTriangle, description: "Define safety boundaries" },
   { id: 5, name: "Review", icon: Eye, description: "Preview and create your agent" },
@@ -108,7 +108,7 @@ function Step1BusinessUseCase({
   );
 }
 
-function Step2Description({
+function Step2AgentName({
   data,
   onUpdate,
 }: {
@@ -119,15 +119,15 @@ function Step2Description({
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <FileText className="h-5 w-5 text-primary" />
-          Agent Description
+          <Bot className="h-5 w-5 text-primary" />
+          Agent Name
         </CardTitle>
         <CardDescription>
-          Give your agent a name and define its personality through a system prompt.
+          Give your agent a name that describes its purpose.
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="space-y-6">
+        <div className="space-y-4">
           <div>
             <Label htmlFor="name">Agent Name</Label>
             <Input
@@ -137,17 +137,6 @@ function Step2Description({
               onChange={(e) => onUpdate({ name: e.target.value })}
               className="mt-2"
               data-testid="input-agent-name"
-            />
-          </div>
-          <div>
-            <Label htmlFor="description">System Prompt / Personality</Label>
-            <Textarea
-              id="description"
-              placeholder="e.g., You are a helpful customer support agent. You are friendly, professional, and always aim to resolve customer issues efficiently. You have access to our product documentation and can help with troubleshooting, billing questions, and feature explanations..."
-              value={data.description}
-              onChange={(e) => onUpdate({ description: e.target.value })}
-              className="mt-2 min-h-[200px] resize-none"
-              data-testid="textarea-description"
             />
           </div>
         </div>
@@ -169,7 +158,7 @@ function Step3ValidationRules({
         <CardTitle className="flex items-center gap-2">
           <Shield className="h-5 w-5 text-primary" />
           Validation Rules
-          <Badge variant="secondary" size="sm">Optional</Badge>
+          <Badge variant="secondary">Optional</Badge>
         </CardTitle>
         <CardDescription>
           Define rules to validate user inputs and agent outputs. This helps ensure consistent, high-quality responses.
@@ -212,7 +201,7 @@ function Step4Guardrails({
         <CardTitle className="flex items-center gap-2">
           <AlertTriangle className="h-5 w-5 text-primary" />
           Guardrails
-          <Badge variant="secondary" size="sm">Optional</Badge>
+          <Badge variant="secondary">Optional</Badge>
         </CardTitle>
         <CardDescription>
           Set safety boundaries and restrictions for your agent. Define what the agent should never do.
@@ -247,7 +236,6 @@ function Step5Review({ data }: { data: WizardStepData }) {
   const sections = [
     { label: "Business Use Case", value: data.businessUseCase, icon: Briefcase },
     { label: "Agent Name", value: data.name, icon: Bot },
-    { label: "System Prompt", value: data.description, icon: FileText },
     { label: "Validation Rules", value: data.validationRules, icon: Shield, optional: true },
     { label: "Guardrails", value: data.guardrails, icon: AlertTriangle, optional: true },
   ];
@@ -273,7 +261,7 @@ function Step5Review({ data }: { data: WizardStepData }) {
                   <Icon className="h-4 w-4 text-muted-foreground" />
                   <h4 className="font-medium">{section.label}</h4>
                   {section.optional && !section.value && (
-                    <Badge variant="secondary" size="sm">Not set</Badge>
+                    <Badge variant="secondary">Not set</Badge>
                   )}
                 </div>
                 <div
@@ -368,7 +356,7 @@ export default function CreateAgent() {
       case 1:
         return <Step1BusinessUseCase data={formData} onUpdate={updateFormData} />;
       case 2:
-        return <Step2Description data={formData} onUpdate={updateFormData} />;
+        return <Step2AgentName data={formData} onUpdate={updateFormData} />;
       case 3:
         return <Step3ValidationRules data={formData} onUpdate={updateFormData} />;
       case 4:
