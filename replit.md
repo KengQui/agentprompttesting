@@ -42,7 +42,8 @@ Agent Studio is a web application for creating, configuring, and managing AI age
 - **Font**: Inter (sans-serif), JetBrains Mono (code)
 
 ## User Preferences
-- No OpenAI integration - using simulated responses
+- Using Google Gemini AI (via Google AI Studio) for agent responses
+- Requires GEMINI_API_KEY secret to be configured
 
 ## Running the Project
 ```bash

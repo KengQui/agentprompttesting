@@ -3,6 +3,7 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { insertAgentSchema, updateAgentSchema } from "@shared/schema";
 import { z } from "zod";
+import { generateAgentResponse } from "./gemini";
 
 export async function registerRoutes(
   httpServer: Server,
@@ -95,7 +96,7 @@ export async function registerRoutes(
     }
   });
 
-  // Send a message to an agent (simulated response without AI)
+  // Send a message to an agent with Gemini AI response
   app.post("/api/agents/:id/messages", async (req, res) => {
     try {
       const agent = await storage.getAgent(req.params.id);
@@ -116,8 +117,31 @@ export async function registerRoutes(
         content: parsed.data.content,
       });
 
-      // Generate simulated response based on agent configuration
-      const responseContent = generateSimulatedResponse(agent, parsed.data.content);
+      // Get chat history for context
+      const allMessages = await storage.getMessages(req.params.id);
+      const chatHistory = allMessages.slice(0, -1).map((msg) => ({
+        role: msg.role as "user" | "assistant",
+        content: msg.content,
+      }));
+
+      // Generate AI response using Gemini
+      let responseContent: string;
+      try {
+        responseContent = await generateAgentResponse(
+          {
+            name: agent.name,
+            businessUseCase: agent.businessUseCase,
+            description: agent.description,
+            validationRules: agent.validationRules,
+            guardrails: agent.guardrails,
+          },
+          parsed.data.content,
+          chatHistory
+        );
+      } catch (aiError: any) {
+        console.error("AI generation error:", aiError);
+        responseContent = `I apologize, but I'm having trouble generating a response. ${aiError.message?.includes("GEMINI_API_KEY") ? "The Gemini API key may not be configured correctly." : "Please try again."}`;
+      }
 
       // Add assistant message
       const assistantMessage = await storage.addMessage({
@@ -149,21 +173,4 @@ export async function registerRoutes(
   });
 
   return httpServer;
-}
-
-// Generate a simulated response based on agent configuration
-function generateSimulatedResponse(agent: { name: string; description: string; businessUseCase: string }, userMessage: string): string {
-  const responses = [
-    `Hello! I'm ${agent.name}, and I'm here to help you. Based on my configuration, I'm designed to ${agent.businessUseCase ? agent.businessUseCase.substring(0, 100) + "..." : "assist you with your questions"}.`,
-    `Thank you for your message. As ${agent.name}, I understand you're asking about "${userMessage.substring(0, 50)}${userMessage.length > 50 ? "..." : ""}". Let me help you with that.`,
-    `I appreciate your question! While I'm currently running in demo mode without AI integration, in a full setup I would use my configured system prompt to provide a tailored response.`,
-    `Great question! ${agent.name} is designed to help with scenarios like yours. To enable full AI responses, an OpenAI API key would need to be configured.`,
-    `I'm ${agent.name}, your configured AI assistant. In production mode with AI integration, I would use the following personality:\n\n"${agent.description ? agent.description.substring(0, 150) + "..." : "Helpful assistant"}"\n\nHow else can I help you today?`,
-  ];
-
-  // Pick a response based on message content hash
-  const hash = userMessage.split("").reduce((a, b) => ((a << 5) - a + b.charCodeAt(0)) | 0, 0);
-  const index = Math.abs(hash) % responses.length;
-  
-  return responses[index];
 }
