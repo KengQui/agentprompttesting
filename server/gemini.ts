@@ -95,7 +95,7 @@ export async function generateValidationRules(context: GenerationContext): Promi
   }
 
   const domainDocsText = context.domainDocuments?.length 
-    ? context.domainDocuments.map(doc => `${doc.name}: ${doc.content}`).join("\n\n")
+    ? context.domainDocuments.map(doc => `${doc.filename}: ${doc.content}`).join("\n\n")
     : "";
 
   const systemPrompt = `You are an expert at creating validation rules for AI agents. Based on the business use case and domain knowledge provided, generate appropriate validation rules in Markdown format.
@@ -137,7 +137,7 @@ export async function generateGuardrails(context: GenerationContext): Promise<st
   }
 
   const domainDocsText = context.domainDocuments?.length 
-    ? context.domainDocuments.map(doc => `${doc.name}: ${doc.content}`).join("\n\n")
+    ? context.domainDocuments.map(doc => `${doc.filename}: ${doc.content}`).join("\n\n")
     : "";
 
   const systemPrompt = `You are an expert at creating safety guardrails for AI agents. Based on the business use case and domain knowledge provided, generate appropriate guardrails in Markdown format.
