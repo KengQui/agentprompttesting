@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useParams, useLocation } from "wouter";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { ArrowLeft, Save, Trash2, Bot, Briefcase, Shield, AlertTriangle, Loader2, BookOpen, Upload, X, FileText, Code, Pencil, RotateCcw, HelpCircle, ExternalLink } from "lucide-react";
+import { ArrowLeft, Save, Trash2, Bot, Briefcase, Shield, AlertTriangle, Loader2, BookOpen, Upload, X, FileText, Code, Pencil, RotateCcw, HelpCircle, ExternalLink, Info, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -34,6 +34,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { generatePromptPreview, promptStyleInfo } from "@/lib/prompt-preview";
+import { validationRulesTemplate, guardrailsTemplate } from "@/lib/config-templates";
 import type { Agent, UpdateAgent, AgentStatus, DomainDocument, PromptStyle } from "@shared/schema";
 
 export default function SettingsPage() {
@@ -51,6 +52,9 @@ export default function SettingsPage() {
 
   const [isEditingPrompt, setIsEditingPrompt] = useState(false);
   const [editedPrompt, setEditedPrompt] = useState("");
+
+  const [isGeneratingValidation, setIsGeneratingValidation] = useState(false);
+  const [isGeneratingGuardrails, setIsGeneratingGuardrails] = useState(false);
 
   // Initialize form data when agent loads
   useEffect(() => {
@@ -116,6 +120,82 @@ export default function SettingsPage() {
   const removeDocument = (id: string) => {
     const currentDocs = formData?.domainDocuments || [];
     updateFormData({ domainDocuments: currentDocs.filter(doc => doc.id !== id) });
+  };
+
+  const handleUseValidationTemplate = () => {
+    updateFormData({ validationRules: validationRulesTemplate });
+  };
+
+  const handleUseGuardrailsTemplate = () => {
+    updateFormData({ guardrails: guardrailsTemplate });
+  };
+
+  const handleGenerateValidationRules = async () => {
+    if (!formData?.businessUseCase) {
+      toast({
+        title: "Business use case required",
+        description: "Please add a business use case before generating.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsGeneratingValidation(true);
+    try {
+      const response = await apiRequest("POST", "/api/generate/validation-rules", {
+        businessUseCase: formData.businessUseCase,
+        domainKnowledge: formData.domainKnowledge,
+        domainDocuments: formData.domainDocuments,
+      });
+      const result = await response.json();
+      updateFormData({ validationRules: result.validationRules });
+      toast({
+        title: "Validation rules generated",
+        description: "Review and customize the generated rules as needed.",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Generation failed",
+        description: error?.message || "Failed to generate validation rules.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsGeneratingValidation(false);
+    }
+  };
+
+  const handleGenerateGuardrails = async () => {
+    if (!formData?.businessUseCase) {
+      toast({
+        title: "Business use case required",
+        description: "Please add a business use case before generating.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsGeneratingGuardrails(true);
+    try {
+      const response = await apiRequest("POST", "/api/generate/guardrails", {
+        businessUseCase: formData.businessUseCase,
+        domainKnowledge: formData.domainKnowledge,
+        domainDocuments: formData.domainDocuments,
+      });
+      const result = await response.json();
+      updateFormData({ guardrails: result.guardrails });
+      toast({
+        title: "Guardrails generated",
+        description: "Review and customize the generated guardrails as needed.",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Generation failed",
+        description: error?.message || "Failed to generate guardrails.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsGeneratingGuardrails(false);
+    }
   };
 
   const updateMutation = useMutation({
@@ -410,17 +490,63 @@ export default function SettingsPage() {
                 <Badge variant="secondary">Optional</Badge>
               </CardTitle>
               <CardDescription>
-                Input/output validation rules for quality control
+                Define input/output validation requirements
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <Textarea
-                value={formData.validationRules || ""}
-                onChange={(e) => updateFormData({ validationRules: e.target.value })}
-                className="min-h-[120px] resize-none"
-                placeholder="Add validation rules..."
-                data-testid="textarea-validation-rules"
-              />
+              <div className="space-y-4">
+                <div className="flex items-start gap-3 rounded-lg border bg-muted/50 p-4">
+                  <Info className="h-5 w-5 text-muted-foreground mt-0.5 shrink-0" />
+                  <div>
+                    <p className="font-medium text-sm">What are validation rules?</p>
+                    <p className="text-sm text-muted-foreground">
+                      Validation rules help ensure your agent processes data correctly and provides accurate responses. Define rules for input formats, required fields, and response constraints.
+                    </p>
+                  </div>
+                </div>
+
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <Label htmlFor="validationRules">Validation Configuration</Label>
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={handleUseValidationTemplate}
+                        className="text-sm text-primary hover:underline"
+                        data-testid="settings-button-use-template-validation"
+                      >
+                        Use Template
+                      </button>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={handleGenerateValidationRules}
+                        disabled={isGeneratingValidation}
+                        data-testid="settings-button-generate-validation"
+                      >
+                        {isGeneratingValidation ? (
+                          <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                        ) : (
+                          <Sparkles className="h-4 w-4 mr-1" />
+                        )}
+                        Generate
+                      </Button>
+                    </div>
+                  </div>
+                  <Textarea
+                    id="validationRules"
+                    value={formData.validationRules || ""}
+                    onChange={(e) => updateFormData({ validationRules: e.target.value })}
+                    className="min-h-[160px] resize-none font-mono text-sm"
+                    placeholder="Add validation rules to ensure data quality (Markdown or YAML format)..."
+                    data-testid="textarea-validation-rules"
+                  />
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Optional: Add validation rules to ensure data quality (Markdown or YAML format)
+                  </p>
+                </div>
+              </div>
             </CardContent>
           </Card>
 
@@ -432,17 +558,63 @@ export default function SettingsPage() {
                 <Badge variant="secondary">Optional</Badge>
               </CardTitle>
               <CardDescription>
-                Safety boundaries and restrictions
+                Set safety boundaries and content restrictions
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <Textarea
-                value={formData.guardrails || ""}
-                onChange={(e) => updateFormData({ guardrails: e.target.value })}
-                className="min-h-[120px] resize-none"
-                placeholder="Add guardrails..."
-                data-testid="textarea-guardrails"
-              />
+              <div className="space-y-4">
+                <div className="flex items-start gap-3 rounded-lg border bg-muted/50 p-4">
+                  <Info className="h-5 w-5 text-muted-foreground mt-0.5 shrink-0" />
+                  <div>
+                    <p className="font-medium text-sm">Why are guardrails important?</p>
+                    <p className="text-sm text-muted-foreground">
+                      Guardrails protect your brand by preventing inappropriate responses, ensuring compliance, and maintaining consistent behavior even in edge cases.
+                    </p>
+                  </div>
+                </div>
+
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <Label htmlFor="guardrails">Guardrails Configuration</Label>
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={handleUseGuardrailsTemplate}
+                        className="text-sm text-primary hover:underline"
+                        data-testid="settings-button-use-template-guardrails"
+                      >
+                        Use Template
+                      </button>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={handleGenerateGuardrails}
+                        disabled={isGeneratingGuardrails}
+                        data-testid="settings-button-generate-guardrails"
+                      >
+                        {isGeneratingGuardrails ? (
+                          <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                        ) : (
+                          <Sparkles className="h-4 w-4 mr-1" />
+                        )}
+                        Generate
+                      </Button>
+                    </div>
+                  </div>
+                  <Textarea
+                    id="guardrails"
+                    value={formData.guardrails || ""}
+                    onChange={(e) => updateFormData({ guardrails: e.target.value })}
+                    className="min-h-[160px] resize-none font-mono text-sm"
+                    placeholder="Define what your agent should NOT do (Markdown or YAML format)..."
+                    data-testid="textarea-guardrails"
+                  />
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Optional: Define what your agent should NOT do (Markdown or YAML format)
+                  </p>
+                </div>
+              </div>
             </CardContent>
           </Card>
 
