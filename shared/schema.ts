@@ -4,12 +4,24 @@ import { z } from "zod";
 export const agentStatusEnum = z.enum(["draft", "configured", "active"]);
 export type AgentStatus = z.infer<typeof agentStatusEnum>;
 
+// Domain document schema
+export const domainDocumentSchema = z.object({
+  id: z.string(),
+  filename: z.string(),
+  content: z.string(),
+  uploadedAt: z.string(),
+});
+
+export type DomainDocument = z.infer<typeof domainDocumentSchema>;
+
 // Agent schema
 export const agentSchema = z.object({
   id: z.string(),
   name: z.string().min(1, "Name is required"),
   businessUseCase: z.string().min(1, "Business use case is required"),
   description: z.string().default(""),
+  domainKnowledge: z.string().default(""),
+  domainDocuments: z.array(domainDocumentSchema).default([]),
   validationRules: z.string().default(""),
   guardrails: z.string().default(""),
   status: agentStatusEnum.default("draft"),
@@ -56,6 +68,8 @@ export const wizardStepSchema = z.object({
   businessUseCase: z.string().default(""),
   name: z.string().default(""),
   description: z.string().default(""),
+  domainKnowledge: z.string().default(""),
+  domainDocuments: z.array(domainDocumentSchema).default([]),
   validationRules: z.string().default(""),
   guardrails: z.string().default(""),
 });
