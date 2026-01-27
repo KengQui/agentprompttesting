@@ -273,7 +273,7 @@ export async function registerRoutes(
   // Generate validation rules using AI
   app.post("/api/generate/validation-rules", async (req, res) => {
     try {
-      const { businessUseCase, domainKnowledge, domainDocuments } = req.body;
+      const { businessUseCase, domainKnowledge, domainDocuments, model } = req.body;
       
       if (!businessUseCase) {
         return res.status(400).json({ message: "Business use case is required" });
@@ -283,6 +283,7 @@ export async function registerRoutes(
         businessUseCase,
         domainKnowledge,
         domainDocuments,
+        model,
       };
 
       const validationRules = await generateValidationRules(context);
@@ -296,7 +297,7 @@ export async function registerRoutes(
   // Generate guardrails using AI
   app.post("/api/generate/guardrails", async (req, res) => {
     try {
-      const { businessUseCase, domainKnowledge, domainDocuments } = req.body;
+      const { businessUseCase, domainKnowledge, domainDocuments, model } = req.body;
       
       if (!businessUseCase) {
         return res.status(400).json({ message: "Business use case is required" });
@@ -306,6 +307,7 @@ export async function registerRoutes(
         businessUseCase,
         domainKnowledge,
         domainDocuments,
+        model,
       };
 
       const guardrails = await generateGuardrails(context);
@@ -332,6 +334,7 @@ export async function registerRoutes(
         validationRules: z.string().optional(),
         guardrails: z.string().optional(),
         promptStyle: z.enum(["anthropic", "gemini", "openai"]),
+        model: z.enum(["gemini-2.5-flash", "gemini-2.5-pro", "gemini-3-flash", "gemini-3-pro"]).optional(),
       });
 
       const parsed = systemPromptRequestSchema.safeParse(req.body);
@@ -347,6 +350,7 @@ export async function registerRoutes(
         validationRules: parsed.data.validationRules,
         guardrails: parsed.data.guardrails,
         promptStyle: parsed.data.promptStyle,
+        model: parsed.data.model,
       };
 
       const systemPrompt = await generateSystemPrompt(context);

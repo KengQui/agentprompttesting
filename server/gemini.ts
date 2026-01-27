@@ -1,6 +1,7 @@
 import { GoogleGenAI } from "@google/genai";
 import { generatePrompt, type PromptContext } from "./prompt-templates";
-import type { PromptStyle, DomainDocument } from "@shared/schema";
+import type { PromptStyle, DomainDocument, GeminiModel } from "@shared/schema";
+import { defaultGenerationModel } from "@shared/schema";
 
 // Google AI Studio SDK integration for Gemini
 // Requires GEMINI_API_KEY secret to be set
@@ -87,9 +88,11 @@ export interface GenerationContext {
   businessUseCase: string;
   domainKnowledge?: string;
   domainDocuments?: DomainDocument[];
+  model?: GeminiModel;
 }
 
 export async function generateValidationRules(context: GenerationContext): Promise<string> {
+  const modelToUse = context.model || defaultGenerationModel;
   if (!process.env.GEMINI_API_KEY) {
     throw new Error("GEMINI_API_KEY is not configured");
   }
@@ -117,7 +120,7 @@ Generate validation rules for an AI agent handling this use case.`;
 
   try {
     const response = await ai.models.generateContent({
-      model: "gemini-2.0-flash",
+      model: modelToUse,
       config: {
         systemInstruction: systemPrompt,
       },
@@ -132,6 +135,7 @@ Generate validation rules for an AI agent handling this use case.`;
 }
 
 export async function generateGuardrails(context: GenerationContext): Promise<string> {
+  const modelToUse = context.model || defaultGenerationModel;
   if (!process.env.GEMINI_API_KEY) {
     throw new Error("GEMINI_API_KEY is not configured");
   }
@@ -159,7 +163,7 @@ Generate safety guardrails for an AI agent handling this use case.`;
 
   try {
     const response = await ai.models.generateContent({
-      model: "gemini-2.0-flash",
+      model: modelToUse,
       config: {
         systemInstruction: systemPrompt,
       },
@@ -181,9 +185,11 @@ export interface SystemPromptContext {
   validationRules?: string;
   guardrails?: string;
   promptStyle: PromptStyle;
+  model?: GeminiModel;
 }
 
 export async function generateSystemPrompt(context: SystemPromptContext): Promise<string> {
+  const modelToUse = context.model || defaultGenerationModel;
   if (!process.env.GEMINI_API_KEY) {
     throw new Error("GEMINI_API_KEY is not configured");
   }
@@ -234,7 +240,7 @@ Generate a complete system prompt following the ${context.promptStyle} prompt en
 
   try {
     const response = await ai.models.generateContent({
-      model: "gemini-2.0-flash",
+      model: modelToUse,
       config: {
         systemInstruction: systemPrompt,
       },

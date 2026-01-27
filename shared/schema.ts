@@ -8,6 +8,26 @@ export type AgentStatus = z.infer<typeof agentStatusEnum>;
 export const promptStyleEnum = z.enum(["anthropic", "gemini", "openai"]);
 export type PromptStyle = z.infer<typeof promptStyleEnum>;
 
+// Gemini model enum for generation
+export const geminiModelEnum = z.enum([
+  "gemini-2.5-flash",
+  "gemini-2.5-pro",
+  "gemini-3-flash",
+  "gemini-3-pro",
+]);
+export type GeminiModel = z.infer<typeof geminiModelEnum>;
+
+// Model display names for UI
+export const geminiModelDisplayNames: Record<GeminiModel, string> = {
+  "gemini-2.5-flash": "Gemini 2.5 Flash",
+  "gemini-2.5-pro": "Gemini 2.5 Pro",
+  "gemini-3-flash": "Gemini 3 Flash",
+  "gemini-3-pro": "Gemini 3 Pro",
+};
+
+// Default model for generation
+export const defaultGenerationModel: GeminiModel = "gemini-2.5-pro";
+
 // Domain document schema
 export const domainDocumentSchema = z.object({
   id: z.string(),
