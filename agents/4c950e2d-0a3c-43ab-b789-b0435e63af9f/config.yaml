@@ -1,0 +1,16 @@
+name: "Product Support Bot"
+status: configured
+createdAt: 2026-01-27T22:28:00.965Z
+updatedAt: 2026-01-27T22:28:00.965Z
+
+businessUseCase: |
+  Help customers with product inquiries
+
+description: |
+  
+
+validationRules: |
+  Always provide product prices when asked
+
+guardrails: |
+  Never discuss competitor products

@@ -13,6 +13,7 @@ Agent Studio is a web application for creating, configuring, and managing AI age
   - Preview and edit the generated prompt before creating the agent
   - Custom prompts are saved and used instead of auto-generated ones
   - Prompt configuration added to both wizard and settings page
+  - Shared utility: `client/src/lib/prompt-preview.ts` for consistent preview generation
 
 - **January 27, 2026**: Added Domain Knowledge feature with document upload
   - New Domain Knowledge step (Step 3) in the creation wizard
