@@ -4,6 +4,15 @@
 Agent Studio is a web application for creating, configuring, and managing AI agents. Users can define business use cases, domain knowledge, validation rules, and guardrails through an intuitive 6-step wizard interface.
 
 ## Recent Changes
+- **January 27, 2026**: AI-Powered System Prompt Generation
+  - Gemini now generates custom system prompts based on selected style (Anthropic, Gemini, OpenAI)
+  - The generated prompt incorporates all agent configuration (name, use case, domain knowledge, rules, guardrails)
+  - Backend endpoint: POST /api/generate/system-prompt
+  - Loading state with spinner while Gemini generates the prompt
+  - Regenerate button to create a new prompt
+  - Falls back to local template if API fails or required fields are missing
+  - Auto-regenerates when configuration changes (name, use case, knowledge, rules, guardrails, style)
+
 - **January 27, 2026**: Added Prompt Style Selector with multi-provider templates
   - Users can choose between Anthropic, Gemini, and OpenAI prompt styles
   - Each style follows that provider's best practices for prompt engineering
