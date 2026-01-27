@@ -846,26 +846,20 @@ function Step6Review({
 
           <div className="space-y-2">
             <div className="flex items-center justify-between flex-wrap gap-2">
+              <Label>Prompt Preview</Label>
               <div className="flex items-center gap-2">
-                <Label>Prompt Preview</Label>
-                <Badge variant="secondary" className="text-xs gap-1">
-                  <Sparkles className="h-3 w-3" />
-                  AI Generated
-                </Badge>
-              </div>
-              <div className="flex gap-2">
+                <span className="text-sm text-muted-foreground">AI model used</span>
                 {!isGenerating && !isEditing && (
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <Button
                         type="button"
-                        variant="ghost"
+                        variant="outline"
                         size="sm"
                         className="gap-1 h-7"
                         data-testid="button-regenerate-prompt"
                       >
-                        <Sparkles className="h-3 w-3" />
-                        Regenerate
+                        {geminiModelDisplayNames[selectedModel]}
                         <ChevronDown className="h-3 w-3" />
                       </Button>
                     </DropdownMenuTrigger>
@@ -886,32 +880,46 @@ function Step6Review({
                     </DropdownMenuContent>
                   </DropdownMenu>
                 )}
-                {data.customPrompt && !isGenerating && (
+                {isGenerating && (
                   <Button
                     type="button"
-                    variant="ghost"
+                    variant="outline"
                     size="sm"
-                    onClick={handleResetPrompt}
                     className="gap-1 h-7"
-                    data-testid="button-reset-prompt"
+                    disabled
                   >
-                    <RotateCcw className="h-3 w-3" />
-                    Reset
+                    <Loader2 className="h-3 w-3 animate-spin" />
+                    Generating...
                   </Button>
                 )}
+              </div>
+            </div>
+            <div className="flex items-center justify-end gap-2">
+              {data.customPrompt && !isGenerating && (
                 <Button
                   type="button"
                   variant="ghost"
                   size="sm"
-                  onClick={isEditing ? handleSaveEdit : handleEditToggle}
+                  onClick={handleResetPrompt}
                   className="gap-1 h-7"
-                  disabled={isGenerating}
-                  data-testid="button-edit-prompt"
+                  data-testid="button-reset-prompt"
                 >
-                  <Pencil className="h-3 w-3" />
-                  {isEditing ? "Save" : "Edit"}
+                  <RotateCcw className="h-3 w-3" />
+                  Reset
                 </Button>
-              </div>
+              )}
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={isEditing ? handleSaveEdit : handleEditToggle}
+                className="gap-1 h-7"
+                disabled={isGenerating}
+                data-testid="button-edit-prompt"
+              >
+                <Pencil className="h-3 w-3" />
+                {isEditing ? "Save" : "Edit"}
+              </Button>
             </div>
             
             <p className="text-xs text-muted-foreground">
