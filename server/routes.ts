@@ -3,7 +3,7 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { insertAgentSchema, updateAgentSchema } from "@shared/schema";
 import { z } from "zod";
-import { generateAgentResponse } from "./gemini";
+import { generateAgentResponse, generateValidationRules, generateGuardrails, type GenerationContext } from "./gemini";
 import { loadAgentComponents, clearAgentCache, hasCustomComponents } from "./agent-loader";
 import multer from "multer";
 import { v4 as uuidv4 } from "uuid";
@@ -267,6 +267,52 @@ export async function registerRoutes(
     } catch (error) {
       console.error("Error uploading document:", error);
       res.status(500).json({ message: "Failed to upload document" });
+    }
+  });
+
+  // Generate validation rules using AI
+  app.post("/api/generate/validation-rules", async (req, res) => {
+    try {
+      const { businessUseCase, domainKnowledge, domainDocuments } = req.body;
+      
+      if (!businessUseCase) {
+        return res.status(400).json({ message: "Business use case is required" });
+      }
+
+      const context: GenerationContext = {
+        businessUseCase,
+        domainKnowledge,
+        domainDocuments,
+      };
+
+      const validationRules = await generateValidationRules(context);
+      res.json({ validationRules });
+    } catch (error: any) {
+      console.error("Error generating validation rules:", error);
+      res.status(500).json({ message: error?.message || "Failed to generate validation rules" });
+    }
+  });
+
+  // Generate guardrails using AI
+  app.post("/api/generate/guardrails", async (req, res) => {
+    try {
+      const { businessUseCase, domainKnowledge, domainDocuments } = req.body;
+      
+      if (!businessUseCase) {
+        return res.status(400).json({ message: "Business use case is required" });
+      }
+
+      const context: GenerationContext = {
+        businessUseCase,
+        domainKnowledge,
+        domainDocuments,
+      };
+
+      const guardrails = await generateGuardrails(context);
+      res.json({ guardrails });
+    } catch (error: any) {
+      console.error("Error generating guardrails:", error);
+      res.status(500).json({ message: error?.message || "Failed to generate guardrails" });
     }
   });
 
