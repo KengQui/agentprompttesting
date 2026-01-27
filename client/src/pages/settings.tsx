@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useParams, useLocation } from "wouter";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { ArrowLeft, Save, Trash2, Bot, Briefcase, Shield, AlertTriangle, Loader2, BookOpen, Upload, X, FileText } from "lucide-react";
+import { ArrowLeft, Save, Trash2, Bot, Briefcase, Shield, AlertTriangle, Loader2, BookOpen, Upload, X, FileText, Code, Pencil, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -11,6 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -24,7 +25,8 @@ import {
 } from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest } from "@/lib/queryClient";
-import type { Agent, UpdateAgent, AgentStatus, DomainDocument } from "@shared/schema";
+import { generatePromptPreview, promptStyleInfo } from "@/lib/prompt-preview";
+import type { Agent, UpdateAgent, AgentStatus, DomainDocument, PromptStyle } from "@shared/schema";
 
 export default function SettingsPage() {
   const params = useParams<{ id: string }>();
@@ -39,6 +41,9 @@ export default function SettingsPage() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isUploading, setIsUploading] = useState(false);
 
+  const [isEditingPrompt, setIsEditingPrompt] = useState(false);
+  const [editedPrompt, setEditedPrompt] = useState("");
+
   // Initialize form data when agent loads
   useEffect(() => {
     if (agent && !formData) {
@@ -49,8 +54,11 @@ export default function SettingsPage() {
         domainDocuments: agent.domainDocuments,
         validationRules: agent.validationRules,
         guardrails: agent.guardrails,
+        promptStyle: agent.promptStyle,
+        customPrompt: agent.customPrompt,
         status: agent.status,
       });
+      setEditedPrompt(agent.customPrompt || "");
     }
   }, [agent, formData]);
 
@@ -427,6 +435,113 @@ export default function SettingsPage() {
                 placeholder="Add guardrails..."
                 data-testid="textarea-guardrails"
               />
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Code className="h-5 w-5 text-primary" />
+                Prompt Configuration
+                {formData.customPrompt && (
+                  <Badge variant="secondary">Customized</Badge>
+                )}
+              </CardTitle>
+              <CardDescription>
+                Choose a prompt style and optionally customize the system prompt
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div>
+                <Label className="mb-2 block">Prompt Style</Label>
+                <Tabs
+                  value={formData.promptStyle || "anthropic"}
+                  onValueChange={(value) => {
+                    updateFormData({ promptStyle: value as PromptStyle, customPrompt: "" });
+                    setEditedPrompt("");
+                    setIsEditingPrompt(false);
+                  }}
+                >
+                  <TabsList className="grid w-full grid-cols-3" data-testid="settings-prompt-style-tabs">
+                    <TabsTrigger value="anthropic" data-testid="settings-tab-anthropic">
+                      Anthropic
+                    </TabsTrigger>
+                    <TabsTrigger value="gemini" data-testid="settings-tab-gemini">
+                      Gemini
+                    </TabsTrigger>
+                    <TabsTrigger value="openai" data-testid="settings-tab-openai">
+                      OpenAI
+                    </TabsTrigger>
+                  </TabsList>
+                </Tabs>
+                <p className="text-xs text-muted-foreground mt-2">
+                  {promptStyleInfo[formData.promptStyle || "anthropic"].description}
+                </p>
+              </div>
+
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <Label>Custom Prompt</Label>
+                  <div className="flex gap-2">
+                    {formData.customPrompt && (
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                          updateFormData({ customPrompt: "" });
+                          setEditedPrompt("");
+                          setIsEditingPrompt(false);
+                        }}
+                        className="gap-1 h-7"
+                        data-testid="settings-button-reset-prompt"
+                      >
+                        <RotateCcw className="h-3 w-3" />
+                        Reset
+                      </Button>
+                    )}
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => {
+                        if (isEditingPrompt) {
+                          updateFormData({ customPrompt: editedPrompt });
+                        } else {
+                          setEditedPrompt(formData.customPrompt || "");
+                        }
+                        setIsEditingPrompt(!isEditingPrompt);
+                      }}
+                      className="gap-1 h-7"
+                      data-testid="settings-button-edit-prompt"
+                    >
+                      <Pencil className="h-3 w-3" />
+                      {isEditingPrompt ? "Save" : "Edit"}
+                    </Button>
+                  </div>
+                </div>
+                
+                <p className="text-xs text-muted-foreground mb-2">
+                  The actual prompt uses your platform's personality from personality-prompt.txt
+                </p>
+                
+                {isEditingPrompt ? (
+                  <Textarea
+                    value={editedPrompt}
+                    onChange={(e) => setEditedPrompt(e.target.value)}
+                    className="min-h-[200px] font-mono text-xs resize-none"
+                    placeholder="Enter a custom system prompt..."
+                    data-testid="settings-textarea-edit-prompt"
+                  />
+                ) : (
+                  <div 
+                    className="rounded-md bg-muted/50 p-4 text-xs font-mono max-h-[200px] overflow-y-auto whitespace-pre-wrap"
+                    data-testid="settings-prompt-preview"
+                  >
+                    {formData.customPrompt || generatePromptPreview(formData.promptStyle || "anthropic", formData)}
+                  </div>
+                )}
+              </div>
             </CardContent>
           </Card>
 

@@ -1,7 +1,7 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useLocation } from "wouter";
 import { useMutation } from "@tanstack/react-query";
-import { ArrowLeft, ArrowRight, Check, Briefcase, Shield, AlertTriangle, Eye, Bot, BookOpen, Upload, X, FileText } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check, Briefcase, Shield, AlertTriangle, Eye, Bot, BookOpen, Upload, X, FileText, Code, Pencil, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -9,9 +9,11 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest } from "@/lib/queryClient";
-import type { WizardStepData, Agent, DomainDocument } from "@shared/schema";
+import { generatePromptPreview, promptStyleInfo } from "@/lib/prompt-preview";
+import type { WizardStepData, Agent, DomainDocument, PromptStyle } from "@shared/schema";
 
 const steps = [
   { id: 1, name: "Business Use Case", icon: Briefcase, description: "Define the problem this agent solves" },
@@ -389,7 +391,54 @@ function Step5Guardrails({
   );
 }
 
-function Step6Review({ data }: { data: WizardStepData }) {
+function Step6Review({
+  data,
+  onUpdate,
+}: {
+  data: WizardStepData;
+  onUpdate: (data: Partial<WizardStepData>) => void;
+}) {
+  const [isEditing, setIsEditing] = useState(false);
+  const [editedPrompt, setEditedPrompt] = useState("");
+  const selectedStyle = data.promptStyle || "anthropic";
+
+  useEffect(() => {
+    if (!data.customPrompt) {
+      const generated = generatePromptPreview(selectedStyle, data);
+      setEditedPrompt(generated);
+    } else {
+      setEditedPrompt(data.customPrompt);
+    }
+  }, [selectedStyle, data.customPrompt]);
+
+  const handleStyleChange = (style: string) => {
+    const newStyle = style as PromptStyle;
+    onUpdate({ promptStyle: newStyle, customPrompt: "" });
+    setIsEditing(false);
+  };
+
+  const handleEditToggle = () => {
+    if (!isEditing) {
+      const generated = generatePromptPreview(selectedStyle, data);
+      setEditedPrompt(data.customPrompt || generated);
+    }
+    setIsEditing(!isEditing);
+  };
+
+  const handleSaveEdit = () => {
+    onUpdate({ customPrompt: editedPrompt });
+    setIsEditing(false);
+  };
+
+  const handleResetPrompt = () => {
+    onUpdate({ customPrompt: "" });
+    const generated = generatePromptPreview(selectedStyle, data);
+    setEditedPrompt(generated);
+    setIsEditing(false);
+  };
+
+  const displayPrompt = data.customPrompt || generatePromptPreview(selectedStyle, data);
+
   const domainDocsCount = data.domainDocuments?.length || 0;
   const domainKnowledgeValue = data.domainKnowledge 
     ? data.domainKnowledge 
@@ -404,43 +453,137 @@ function Step6Review({ data }: { data: WizardStepData }) {
   ];
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Eye className="h-5 w-5 text-primary" />
-          Review Configuration
-        </CardTitle>
-        <CardDescription>
-          Review your agent configuration before creating it. You can edit these settings later.
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <div className="space-y-6">
-          {sections.map((section) => {
-            const Icon = section.icon;
-            return (
-              <div key={section.label} className="space-y-2">
-                <div className="flex items-center gap-2">
-                  <Icon className="h-4 w-4 text-muted-foreground" />
-                  <h4 className="font-medium">{section.label}</h4>
-                  {section.optional && !section.value && (
-                    <Badge variant="secondary">Not set</Badge>
-                  )}
+    <div className="space-y-6">
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Eye className="h-5 w-5 text-primary" />
+            Review Configuration
+          </CardTitle>
+          <CardDescription>
+            Review your agent configuration before creating it.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            {sections.map((section) => {
+              const Icon = section.icon;
+              return (
+                <div key={section.label} className="flex items-start gap-3">
+                  <Icon className="h-4 w-4 mt-1 text-muted-foreground flex-shrink-0" />
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2">
+                      <h4 className="font-medium text-sm">{section.label}</h4>
+                      {section.optional && !section.value && (
+                        <Badge variant="secondary" className="text-xs">Not set</Badge>
+                      )}
+                    </div>
+                    <p
+                      className="text-sm text-muted-foreground mt-0.5 break-words"
+                      data-testid={`review-${section.label.toLowerCase().replace(/\s+/g, "-")}`}
+                    >
+                      {section.value ? (
+                        section.value.length > 100 ? section.value.slice(0, 100) + "..." : section.value
+                      ) : (
+                        <span className="italic">Not provided</span>
+                      )}
+                    </p>
+                  </div>
                 </div>
-                <div
-                  className="rounded-md bg-muted/50 p-3 text-sm"
-                  data-testid={`review-${section.label.toLowerCase().replace(/\s+/g, "-")}`}
+              );
+            })}
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Code className="h-5 w-5 text-primary" />
+            Generated Prompt
+            {data.customPrompt && (
+              <Badge variant="secondary">Customized</Badge>
+            )}
+          </CardTitle>
+          <CardDescription>
+            This is the system prompt that will be sent to the AI. Choose a style or edit directly.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div>
+            <Label className="mb-2 block">Prompt Style</Label>
+            <Tabs value={selectedStyle} onValueChange={handleStyleChange}>
+              <TabsList className="grid w-full grid-cols-3" data-testid="prompt-style-tabs">
+                <TabsTrigger value="anthropic" data-testid="tab-anthropic">
+                  Anthropic
+                </TabsTrigger>
+                <TabsTrigger value="gemini" data-testid="tab-gemini">
+                  Gemini
+                </TabsTrigger>
+                <TabsTrigger value="openai" data-testid="tab-openai">
+                  OpenAI
+                </TabsTrigger>
+              </TabsList>
+            </Tabs>
+            <p className="text-xs text-muted-foreground mt-2">
+              {promptStyleInfo[selectedStyle].description}
+            </p>
+          </div>
+
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <Label>Prompt Preview</Label>
+              <div className="flex gap-2">
+                {data.customPrompt && (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={handleResetPrompt}
+                    className="gap-1 h-7"
+                    data-testid="button-reset-prompt"
+                  >
+                    <RotateCcw className="h-3 w-3" />
+                    Reset
+                  </Button>
+                )}
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={isEditing ? handleSaveEdit : handleEditToggle}
+                  className="gap-1 h-7"
+                  data-testid="button-edit-prompt"
                 >
-                  {section.value || (
-                    <span className="text-muted-foreground italic">Not provided</span>
-                  )}
-                </div>
+                  <Pencil className="h-3 w-3" />
+                  {isEditing ? "Save" : "Edit"}
+                </Button>
               </div>
-            );
-          })}
-        </div>
-      </CardContent>
-    </Card>
+            </div>
+            
+            <p className="text-xs text-muted-foreground">
+              The actual prompt uses your platform's personality from personality-prompt.txt
+            </p>
+            
+            {isEditing ? (
+              <Textarea
+                value={editedPrompt}
+                onChange={(e) => setEditedPrompt(e.target.value)}
+                className="min-h-[300px] font-mono text-xs resize-none"
+                data-testid="textarea-edit-prompt"
+              />
+            ) : (
+              <div 
+                className="rounded-md bg-muted/50 p-4 text-xs font-mono whitespace-pre-wrap max-h-[300px] overflow-y-auto"
+                data-testid="prompt-preview"
+              >
+                {displayPrompt}
+              </div>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+    </div>
   );
 }
 
@@ -456,6 +599,8 @@ export default function CreateAgent() {
     domainDocuments: [],
     validationRules: "",
     guardrails: "",
+    promptStyle: "anthropic",
+    customPrompt: "",
   });
 
   const createMutation = useMutation({
@@ -530,7 +675,7 @@ export default function CreateAgent() {
       case 5:
         return <Step5Guardrails data={formData} onUpdate={updateFormData} />;
       case 6:
-        return <Step6Review data={formData} />;
+        return <Step6Review data={formData} onUpdate={updateFormData} />;
       default:
         return null;
     }

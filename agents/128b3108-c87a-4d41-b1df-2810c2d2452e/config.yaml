@@ -1,0 +1,16 @@
+name: "PromptStyleTestAgent"
+status: configured
+createdAt: 2026-01-27T22:20:18.377Z
+updatedAt: 2026-01-27T22:20:18.377Z
+
+businessUseCase: |
+  Help customers with product inquiries
+
+description: |
+  
+
+validationRules: |
+  
+
+guardrails: |
+  

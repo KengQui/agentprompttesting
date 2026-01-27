@@ -4,6 +4,16 @@
 Agent Studio is a web application for creating, configuring, and managing AI agents. Users can define business use cases, domain knowledge, validation rules, and guardrails through an intuitive 6-step wizard interface.
 
 ## Recent Changes
+- **January 27, 2026**: Added Prompt Style Selector with multi-provider templates
+  - Users can choose between Anthropic, Gemini, and OpenAI prompt styles
+  - Each style follows that provider's best practices for prompt engineering
+  - Anthropic: XML tags (<role>, <purpose>, <context>, <constraints>)
+  - Gemini: Markdown headers with constraints at end
+  - OpenAI: Markdown with bold emphasis and explicit role definitions
+  - Preview and edit the generated prompt before creating the agent
+  - Custom prompts are saved and used instead of auto-generated ones
+  - Prompt configuration added to both wizard and settings page
+
 - **January 27, 2026**: Added Domain Knowledge feature with document upload
   - New Domain Knowledge step (Step 3) in the creation wizard
   - Users can type domain knowledge directly or upload documents

@@ -21,18 +21,33 @@ function getPersonalityPrompt(): string {
   }
 }
 
+const MAX_DOMAIN_KNOWLEDGE_CHARS = 50000;
+const MAX_DOC_PREVIEW_CHARS = 10000;
+
 function buildDomainKnowledgeSection(context: PromptContext): string {
   let section = "";
+  let totalChars = 0;
   
   if (context.domainKnowledge) {
-    section += context.domainKnowledge;
+    const truncatedKnowledge = context.domainKnowledge.slice(0, MAX_DOMAIN_KNOWLEDGE_CHARS);
+    section += truncatedKnowledge;
+    totalChars += truncatedKnowledge.length;
   }
   
   if (context.domainDocuments && context.domainDocuments.length > 0) {
     if (section) section += "\n\n";
     section += "Reference Documents:";
+    
     for (const doc of context.domainDocuments) {
-      section += `\n\n--- ${doc.filename} ---\n${doc.content}`;
+      const remainingBudget = MAX_DOMAIN_KNOWLEDGE_CHARS - totalChars;
+      if (remainingBudget <= 0) break;
+      
+      const maxDocChars = Math.min(MAX_DOC_PREVIEW_CHARS, remainingBudget);
+      const truncatedContent = doc.content.slice(0, maxDocChars);
+      const suffix = doc.content.length > maxDocChars ? "\n[Document truncated...]" : "";
+      
+      section += `\n\n--- ${doc.filename} ---\n${truncatedContent}${suffix}`;
+      totalChars += truncatedContent.length + doc.filename.length + 20;
     }
   }
   
