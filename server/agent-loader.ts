@@ -3,10 +3,14 @@
  * 
  * Dynamically loads per-agent components if they exist.
  * Falls back to base components if no custom components are defined.
+ * 
+ * Note: This uses tsx runtime for dynamic TS imports. For production builds,
+ * agent components should be pre-compiled or bundled.
  */
 
 import * as fs from 'fs';
 import * as path from 'path';
+import { fileURLToPath } from 'url';
 import { Orchestrator, createOrchestrator } from './components/orchestrator';
 import type { AgentConfig } from './components/types';
 
@@ -32,7 +36,11 @@ export async function loadAgentComponents(agentId: string, agentConfig: AgentCon
 
   if (fs.existsSync(orchestratorPath)) {
     try {
-      const agentModule = await import(path.join(agentComponentsPath, 'index.ts'));
+      // Use file:// URL for dynamic imports (works with tsx runtime)
+      const indexPath = path.join(agentComponentsPath, 'index.ts');
+      const moduleUrl = `file://${indexPath}`;
+      
+      const agentModule = await import(moduleUrl);
       if (agentModule.createOrchestrator) {
         orchestrator = agentModule.createOrchestrator(agentConfig);
         hasCustomComponents = true;

@@ -4,6 +4,7 @@ import * as path from "path";
 import type { Agent, InsertAgent, UpdateAgent, ChatMessage, InsertChatMessage } from "@shared/schema";
 
 const AGENTS_DIR = "./agents";
+const COMPONENT_TEMPLATES_DIR = "./server/components";
 
 function ensureDir(dir: string) {
   if (!fs.existsSync(dir)) {
@@ -21,6 +22,176 @@ function getConfigPath(agentId: string) {
 
 function getChatPath(agentId: string) {
   return path.join(getAgentDir(agentId), "chat.json");
+}
+
+function getComponentsDir(agentId: string) {
+  return path.join(getAgentDir(agentId), "components");
+}
+
+function copyComponentTemplates(agentId: string, agentName: string) {
+  const componentsDir = getComponentsDir(agentId);
+  ensureDir(componentsDir);
+
+  const sanitizedName = agentName.replace(/[^a-zA-Z0-9]/g, '');
+  const className = sanitizedName.charAt(0).toUpperCase() + sanitizedName.slice(1);
+
+  const turnManagerContent = `/**
+ * Turn Manager - ${agentName}
+ * 
+ * Customized intent classification for this agent.
+ * Modify keywords to match your domain-specific language.
+ */
+
+import { TurnManager as BaseTurnManager, TurnManagerConfig } from '../../../server/components/turn-manager';
+
+const CONFIG: TurnManagerConfig = {
+  useLlmFallback: true,
+  
+  goBackKeywords: ['back', 'previous', 'return', 'undo', 'earlier', 'start over'],
+  
+  correctionKeywords: [
+    'change', 'actually', 'meant', 'should be', 'revise', 'update', 
+    'i mean', 'correct the', 'correction', 'let me rephrase'
+  ],
+  
+  clarificationKeywords: [
+    'what', 'how', 'why', 'explain', 'help', "don't understand",
+    'tell me', 'can you', 'could you', 'would you', 'describe',
+    'confused', 'clarify', 'understand', 'more info', 'details'
+  ],
+  
+  confirmationKeywords: [
+    'yes', 'yeah', 'yep', 'y', 'yup', 'sure', 'ok', 'okay',
+    'confirm', 'correct', 'right', "that's right", 'looks good',
+    'sounds good', 'that works', 'perfect', 'great', 'thanks'
+  ],
+  
+  rejectionKeywords: [
+    'no', 'nope', 'n', 'nah', 'not quite', 'not exactly', 'not right',
+    'incorrect', 'wrong', 'disagree', 'not what i meant'
+  ]
+};
+
+export class ${className}TurnManager extends BaseTurnManager {
+  constructor() {
+    super(CONFIG);
+  }
+}
+
+export function createTurnManager(): ${className}TurnManager {
+  return new ${className}TurnManager();
+}
+`;
+
+  const flowControllerContent = `/**
+ * Flow Controller - ${agentName}
+ * 
+ * Define your conversation flow steps here.
+ * Customize questions, validation, and help text.
+ */
+
+import { 
+  FlowController as BaseFlowController, 
+  FlowControllerConfig,
+  FlowStep 
+} from '../../../server/components/flow-controller';
+
+const STEPS: FlowStep[] = [
+  {
+    id: 'greeting',
+    question: "What can I help you with today?",
+    field: 'initial_request',
+    type: 'text',
+    helpText: 'Describe your question or issue.'
+  }
+];
+
+const CONFIG: FlowControllerConfig = {
+  steps: STEPS,
+  welcomeMessage: "Hello! I'm here to help. What can I do for you?",
+  completionMessage: "Thanks for chatting! Let me know if you need anything else."
+};
+
+export class ${className}FlowController extends BaseFlowController {
+  constructor() {
+    super(CONFIG);
+  }
+}
+
+export function createFlowController(): ${className}FlowController {
+  return new ${className}FlowController();
+}
+`;
+
+  const orchestratorContent = `/**
+ * Orchestrator - ${agentName}
+ * 
+ * Coordinates all components for this agent.
+ * Override handlers to customize behavior.
+ */
+
+import { 
+  Orchestrator as BaseOrchestrator
+} from '../../../server/components/orchestrator';
+import { ${className}TurnManager } from './turn-manager';
+import { ${className}FlowController } from './flow-controller';
+import type { ClassificationResult, TurnResult, AgentConfig } from '../../../server/components/types';
+
+export class ${className}Orchestrator extends BaseOrchestrator {
+  constructor(agentConfig: AgentConfig) {
+    super({
+      agentConfig,
+      flowController: {
+        steps: [
+          {
+            id: 'greeting',
+            question: "What can I help you with today?",
+            field: 'initial_request',
+            type: 'text'
+          }
+        ],
+        welcomeMessage: \`Hello! I'm \${agentConfig.name}. \${agentConfig.businessUseCase}\`,
+        completionMessage: "Thanks for chatting! Let me know if you need anything else."
+      }
+    });
+
+    this.turnManager = new ${className}TurnManager();
+    this.flowController = new ${className}FlowController();
+  }
+
+  protected async handleAnswerQuestion(
+    conversationId: string, 
+    classification: ClassificationResult, 
+    userInput: string
+  ): Promise<TurnResult> {
+    return {
+      intent: 'answer_question',
+      response: userInput,
+      nextAction: 'generate_ai_response'
+    };
+  }
+}
+
+export function createOrchestrator(agentConfig: AgentConfig): ${className}Orchestrator {
+  return new ${className}Orchestrator(agentConfig);
+}
+`;
+
+  const indexContent = `/**
+ * ${agentName} Components
+ * 
+ * Custom components for this agent.
+ */
+
+export { ${className}TurnManager, createTurnManager } from './turn-manager';
+export { ${className}FlowController, createFlowController } from './flow-controller';
+export { ${className}Orchestrator, createOrchestrator } from './orchestrator';
+`;
+
+  fs.writeFileSync(path.join(componentsDir, 'turn-manager.ts'), turnManagerContent, 'utf-8');
+  fs.writeFileSync(path.join(componentsDir, 'flow-controller.ts'), flowControllerContent, 'utf-8');
+  fs.writeFileSync(path.join(componentsDir, 'orchestrator.ts'), orchestratorContent, 'utf-8');
+  fs.writeFileSync(path.join(componentsDir, 'index.ts'), indexContent, 'utf-8');
 }
 
 export interface IStorage {
@@ -205,6 +376,15 @@ guardrails: |
 
     this.agents.set(id, agent);
     this.saveAgentToDisk(agent);
+    
+    // Copy component templates for new agent
+    try {
+      copyComponentTemplates(id, agent.name);
+      console.log(`[storage] Created component templates for agent ${id}`);
+    } catch (error) {
+      console.error(`[storage] Failed to create component templates for agent ${id}:`, error);
+    }
+    
     return agent;
   }
 
