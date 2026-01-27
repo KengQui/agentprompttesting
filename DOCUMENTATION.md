@@ -66,6 +66,7 @@ Agent Studio is a web application for creating, configuring, and managing AI age
 
 ```
 agent-studio/
+├── personality-prompt.txt  # Platform-wide chatbot personality (edit this!)
 ├── client/src/           # Frontend React application
 │   ├── pages/            # Page components
 │   │   ├── home.tsx      # Agent dashboard
@@ -280,6 +281,26 @@ DELETE /api/agents/:id/messages
 
 ## Configuration
 
+### Chatbot Personality (Platform Owner)
+
+The chatbot's personality is controlled by the **platform owner** (you), not by individual admins or agents.
+
+**To change the chatbot's personality:**
+1. Open `personality-prompt.txt` in the project root
+2. Edit the text to define how your chatbot should behave
+3. Save the file - changes take effect immediately
+
+**Example content:**
+```
+You are a helpful, friendly, and professional AI assistant.
+
+Be conversational and approachable while maintaining accuracy.
+Always aim to provide clear, concise, and helpful responses.
+If you're unsure about something, be honest about your limitations.
+```
+
+> **Note:** This personality applies to all agents. Individual agents can still have their own business use case, validation rules, and guardrails - but the core personality is shared.
+
 ### Required Environment Variables
 
 | Variable | Description | Required |
@@ -298,6 +319,12 @@ DELETE /api/agents/:id/messages
 ---
 
 ## Version History
+
+### January 27, 2026 - Platform-Controlled Personality
+- Moved chatbot personality to `personality-prompt.txt` file
+- Platform owner can now edit personality without touching code
+- Removed System Prompt field from agent settings (admins can't change personality)
+- Personality is shared across all agents
 
 ### January 27, 2026 - Intermediate Chatbot Features
 - Added cancel response functionality (server-side support)
