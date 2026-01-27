@@ -1,0 +1,16 @@
+[
+  {
+    "id": "53a13469-f690-436e-8dfc-3b82e46179f2",
+    "agentId": "1e4b9355-e58c-4b71-ab62-20009e2a23e6",
+    "role": "user",
+    "content": "Hi there!",
+    "timestamp": "2026-01-27T16:02:05.680Z"
+  },
+  {
+    "id": "b57abce0-3c0c-4100-8d8c-1c7ff9b8f231",
+    "agentId": "1e4b9355-e58c-4b71-ab62-20009e2a23e6",
+    "role": "assistant",
+    "content": "Hello! I'm Helper Bot, and I'm here to help you. Based on my configuration, I'm designed to Customer support assistance for product questions....",
+    "timestamp": "2026-01-27T16:02:05.681Z"
+  }
+]

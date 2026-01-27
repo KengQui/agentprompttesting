@@ -1,0 +1,16 @@
+name: "Support Bot"
+status: draft
+createdAt: 2026-01-27T15:57:11.349Z
+updatedAt: 2026-01-27T15:57:11.349Z
+
+businessUseCase: |
+  This agent helps customers with product inquiries and support questions. It should be friendly and professional.
+
+description: |
+  You are a helpful customer support agent. Be friendly and professional.
+
+validationRules: |
+  
+
+guardrails: |
+  
