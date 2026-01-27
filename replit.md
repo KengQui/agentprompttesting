@@ -4,6 +4,12 @@
 Agent Studio is a web application for creating, configuring, and managing AI agents. Users can define business use cases, domain knowledge, validation rules, and guardrails through an intuitive 6-step wizard interface.
 
 ## Recent Changes
+- **January 27, 2026**: Model Selection for AI Generation
+  - Added dropdown menu to Generate buttons for validation rules and guardrails
+  - Users can choose between Gemini 2.5 Flash, 2.5 Pro (default), 3 Flash, and 3 Pro
+  - Model selection available in both wizard and settings page
+  - Uses correct API model names (gemini-3-flash-preview, gemini-3-pro-preview for Gemini 3 models)
+
 - **January 27, 2026**: AI-Powered System Prompt Generation
   - Gemini now generates custom system prompts based on selected style (Anthropic, Gemini, OpenAI)
   - The generated prompt incorporates all agent configuration (name, use case, domain knowledge, rules, guardrails)
