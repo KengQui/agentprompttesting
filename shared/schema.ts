@@ -12,8 +12,8 @@ export type PromptStyle = z.infer<typeof promptStyleEnum>;
 export const geminiModelEnum = z.enum([
   "gemini-2.5-flash",
   "gemini-2.5-pro",
-  "gemini-3-flash",
-  "gemini-3-pro",
+  "gemini-3-flash-preview",
+  "gemini-3-pro-preview",
 ]);
 export type GeminiModel = z.infer<typeof geminiModelEnum>;
 
@@ -21,8 +21,8 @@ export type GeminiModel = z.infer<typeof geminiModelEnum>;
 export const geminiModelDisplayNames: Record<GeminiModel, string> = {
   "gemini-2.5-flash": "Gemini 2.5 Flash",
   "gemini-2.5-pro": "Gemini 2.5 Pro",
-  "gemini-3-flash": "Gemini 3 Flash",
-  "gemini-3-pro": "Gemini 3 Pro",
+  "gemini-3-flash-preview": "Gemini 3 Flash",
+  "gemini-3-pro-preview": "Gemini 3 Pro",
 };
 
 // Default model for generation
