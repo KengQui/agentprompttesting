@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useParams, useLocation } from "wouter";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { ArrowLeft, Save, Trash2, Bot, Briefcase, Shield, AlertTriangle, Loader2, BookOpen, Upload, X, FileText, Code, Pencil, RotateCcw, HelpCircle, ExternalLink, Info, Sparkles } from "lucide-react";
+import { ArrowLeft, Save, Trash2, Bot, Briefcase, Shield, AlertTriangle, Loader2, BookOpen, Upload, X, FileText, Code, Pencil, RotateCcw, HelpCircle, ExternalLink, Info, Sparkles, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -31,11 +31,18 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { generatePromptPreview, promptStyleInfo } from "@/lib/prompt-preview";
 import { validationRulesTemplate, guardrailsTemplate } from "@/lib/config-templates";
-import type { Agent, UpdateAgent, AgentStatus, DomainDocument, PromptStyle } from "@shared/schema";
+import type { Agent, UpdateAgent, AgentStatus, DomainDocument, PromptStyle, GeminiModel } from "@shared/schema";
+import { geminiModelDisplayNames, defaultGenerationModel } from "@shared/schema";
 
 export default function SettingsPage() {
   const params = useParams<{ id: string }>();
@@ -130,7 +137,7 @@ export default function SettingsPage() {
     updateFormData({ guardrails: guardrailsTemplate });
   };
 
-  const handleGenerateValidationRules = async () => {
+  const handleGenerateValidationRules = async (model: GeminiModel) => {
     if (!formData?.businessUseCase) {
       toast({
         title: "Business use case required",
@@ -146,12 +153,13 @@ export default function SettingsPage() {
         businessUseCase: formData.businessUseCase,
         domainKnowledge: formData.domainKnowledge,
         domainDocuments: formData.domainDocuments,
+        model,
       });
       const result = await response.json();
       updateFormData({ validationRules: result.validationRules });
       toast({
         title: "Validation rules generated",
-        description: "Review and customize the generated rules as needed.",
+        description: `Generated using ${geminiModelDisplayNames[model]}.`,
       });
     } catch (error: any) {
       toast({
@@ -164,7 +172,7 @@ export default function SettingsPage() {
     }
   };
 
-  const handleGenerateGuardrails = async () => {
+  const handleGenerateGuardrails = async (model: GeminiModel) => {
     if (!formData?.businessUseCase) {
       toast({
         title: "Business use case required",
@@ -180,12 +188,13 @@ export default function SettingsPage() {
         businessUseCase: formData.businessUseCase,
         domainKnowledge: formData.domainKnowledge,
         domainDocuments: formData.domainDocuments,
+        model,
       });
       const result = await response.json();
       updateFormData({ guardrails: result.guardrails });
       toast({
         title: "Guardrails generated",
-        description: "Review and customize the generated guardrails as needed.",
+        description: `Generated using ${geminiModelDisplayNames[model]}.`,
       });
     } catch (error: any) {
       toast({
@@ -517,23 +526,40 @@ export default function SettingsPage() {
                       >
                         Use Template
                       </button>
-                      <div className="flex items-center gap-2">
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="sm"
-                          onClick={handleGenerateValidationRules}
-                          disabled={isGeneratingValidation}
-                          data-testid="settings-button-generate-validation"
-                        >
-                          {isGeneratingValidation ? (
-                            <Loader2 className="h-4 w-4 mr-1 animate-spin" />
-                          ) : (
-                            <Sparkles className="h-4 w-4 mr-1" />
-                          )}
-                          Generate
-                        </Button>
-                        <span className="text-xs text-muted-foreground">Powered by Gemini 2.0 Flash</span>
+                      <div className="flex items-center gap-1">
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              disabled={isGeneratingValidation}
+                              data-testid="settings-button-generate-validation"
+                            >
+                              {isGeneratingValidation ? (
+                                <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                              ) : (
+                                <Sparkles className="h-4 w-4 mr-1" />
+                              )}
+                              Generate
+                              <ChevronDown className="h-3 w-3 ml-1" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            {(Object.keys(geminiModelDisplayNames) as GeminiModel[]).map((model) => (
+                              <DropdownMenuItem
+                                key={model}
+                                onClick={() => handleGenerateValidationRules(model)}
+                                data-testid={`settings-menu-item-validation-model-${model}`}
+                              >
+                                {geminiModelDisplayNames[model]}
+                                {model === defaultGenerationModel && (
+                                  <Badge variant="secondary" className="ml-2 text-xs">Default</Badge>
+                                )}
+                              </DropdownMenuItem>
+                            ))}
+                          </DropdownMenuContent>
+                        </DropdownMenu>
                       </div>
                     </div>
                   </div>
@@ -588,23 +614,40 @@ export default function SettingsPage() {
                       >
                         Use Template
                       </button>
-                      <div className="flex items-center gap-2">
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="sm"
-                          onClick={handleGenerateGuardrails}
-                          disabled={isGeneratingGuardrails}
-                          data-testid="settings-button-generate-guardrails"
-                        >
-                          {isGeneratingGuardrails ? (
-                            <Loader2 className="h-4 w-4 mr-1 animate-spin" />
-                          ) : (
-                            <Sparkles className="h-4 w-4 mr-1" />
-                          )}
-                          Generate
-                        </Button>
-                        <span className="text-xs text-muted-foreground">Powered by Gemini 2.0 Flash</span>
+                      <div className="flex items-center gap-1">
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              disabled={isGeneratingGuardrails}
+                              data-testid="settings-button-generate-guardrails"
+                            >
+                              {isGeneratingGuardrails ? (
+                                <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                              ) : (
+                                <Sparkles className="h-4 w-4 mr-1" />
+                              )}
+                              Generate
+                              <ChevronDown className="h-3 w-3 ml-1" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            {(Object.keys(geminiModelDisplayNames) as GeminiModel[]).map((model) => (
+                              <DropdownMenuItem
+                                key={model}
+                                onClick={() => handleGenerateGuardrails(model)}
+                                data-testid={`settings-menu-item-guardrails-model-${model}`}
+                              >
+                                {geminiModelDisplayNames[model]}
+                                {model === defaultGenerationModel && (
+                                  <Badge variant="secondary" className="ml-2 text-xs">Default</Badge>
+                                )}
+                              </DropdownMenuItem>
+                            ))}
+                          </DropdownMenuContent>
+                        </DropdownMenu>
                       </div>
                     </div>
                   </div>

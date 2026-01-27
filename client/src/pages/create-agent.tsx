@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { useLocation } from "wouter";
 import { useMutation } from "@tanstack/react-query";
-import { ArrowLeft, ArrowRight, Check, Briefcase, Shield, AlertTriangle, Eye, Bot, BookOpen, Upload, X, FileText, Code, Pencil, RotateCcw, HelpCircle, ExternalLink, Info, Sparkles, Loader2 } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check, Briefcase, Shield, AlertTriangle, Eye, Bot, BookOpen, Upload, X, FileText, Code, Pencil, RotateCcw, HelpCircle, ExternalLink, Info, Sparkles, Loader2, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -18,11 +18,18 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { generatePromptPreview, promptStyleInfo } from "@/lib/prompt-preview";
 import { validationRulesTemplate, guardrailsTemplate } from "@/lib/config-templates";
-import type { WizardStepData, Agent, DomainDocument, PromptStyle } from "@shared/schema";
+import type { WizardStepData, Agent, DomainDocument, PromptStyle, GeminiModel } from "@shared/schema";
+import { geminiModelDisplayNames, defaultGenerationModel } from "@shared/schema";
 
 const steps = [
   { id: 1, name: "Business Use Case", icon: Briefcase, description: "Define the problem this agent solves" },
@@ -321,13 +328,14 @@ function Step4ValidationRules({
   onUpdate: (data: Partial<WizardStepData>) => void;
 }) {
   const [isGenerating, setIsGenerating] = useState(false);
+  const [selectedModel, setSelectedModel] = useState<GeminiModel>(defaultGenerationModel);
   const { toast } = useToast();
 
   const handleUseTemplate = () => {
     onUpdate({ validationRules: validationRulesTemplate });
   };
 
-  const handleGenerate = async () => {
+  const handleGenerate = async (model: GeminiModel) => {
     if (!data.businessUseCase) {
       toast({
         title: "Business use case required",
@@ -343,12 +351,13 @@ function Step4ValidationRules({
         businessUseCase: data.businessUseCase,
         domainKnowledge: data.domainKnowledge,
         domainDocuments: data.domainDocuments,
+        model,
       });
       const result = await response.json();
       onUpdate({ validationRules: result.validationRules });
       toast({
         title: "Validation rules generated",
-        description: "Review and customize the generated rules as needed.",
+        description: `Generated using ${geminiModelDisplayNames[model]}.`,
       });
     } catch (error: any) {
       toast({
@@ -397,23 +406,43 @@ function Step4ValidationRules({
                 >
                   Use Template
                 </button>
-                <div className="flex items-center gap-2">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={handleGenerate}
-                    disabled={isGenerating}
-                    data-testid="button-generate-validation"
-                  >
-                    {isGenerating ? (
-                      <Loader2 className="h-4 w-4 mr-1 animate-spin" />
-                    ) : (
-                      <Sparkles className="h-4 w-4 mr-1" />
-                    )}
-                    Generate
-                  </Button>
-                  <span className="text-xs text-muted-foreground">Powered by Gemini 2.0 Flash</span>
+                <div className="flex items-center gap-1">
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        disabled={isGenerating}
+                        data-testid="button-generate-validation"
+                      >
+                        {isGenerating ? (
+                          <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                        ) : (
+                          <Sparkles className="h-4 w-4 mr-1" />
+                        )}
+                        Generate
+                        <ChevronDown className="h-3 w-3 ml-1" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      {(Object.keys(geminiModelDisplayNames) as GeminiModel[]).map((model) => (
+                        <DropdownMenuItem
+                          key={model}
+                          onClick={() => {
+                            setSelectedModel(model);
+                            handleGenerate(model);
+                          }}
+                          data-testid={`menu-item-model-${model}`}
+                        >
+                          {geminiModelDisplayNames[model]}
+                          {model === defaultGenerationModel && (
+                            <Badge variant="secondary" className="ml-2 text-xs">Default</Badge>
+                          )}
+                        </DropdownMenuItem>
+                      ))}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </div>
               </div>
             </div>
@@ -443,13 +472,14 @@ function Step5Guardrails({
   onUpdate: (data: Partial<WizardStepData>) => void;
 }) {
   const [isGenerating, setIsGenerating] = useState(false);
+  const [selectedModel, setSelectedModel] = useState<GeminiModel>(defaultGenerationModel);
   const { toast } = useToast();
 
   const handleUseTemplate = () => {
     onUpdate({ guardrails: guardrailsTemplate });
   };
 
-  const handleGenerate = async () => {
+  const handleGenerate = async (model: GeminiModel) => {
     if (!data.businessUseCase) {
       toast({
         title: "Business use case required",
@@ -465,12 +495,13 @@ function Step5Guardrails({
         businessUseCase: data.businessUseCase,
         domainKnowledge: data.domainKnowledge,
         domainDocuments: data.domainDocuments,
+        model,
       });
       const result = await response.json();
       onUpdate({ guardrails: result.guardrails });
       toast({
         title: "Guardrails generated",
-        description: "Review and customize the generated guardrails as needed.",
+        description: `Generated using ${geminiModelDisplayNames[model]}.`,
       });
     } catch (error: any) {
       toast({
@@ -519,23 +550,43 @@ function Step5Guardrails({
                 >
                   Use Template
                 </button>
-                <div className="flex items-center gap-2">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={handleGenerate}
-                    disabled={isGenerating}
-                    data-testid="button-generate-guardrails"
-                  >
-                    {isGenerating ? (
-                      <Loader2 className="h-4 w-4 mr-1 animate-spin" />
-                    ) : (
-                      <Sparkles className="h-4 w-4 mr-1" />
-                    )}
-                    Generate
-                  </Button>
-                  <span className="text-xs text-muted-foreground">Powered by Gemini 2.0 Flash</span>
+                <div className="flex items-center gap-1">
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        disabled={isGenerating}
+                        data-testid="button-generate-guardrails"
+                      >
+                        {isGenerating ? (
+                          <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                        ) : (
+                          <Sparkles className="h-4 w-4 mr-1" />
+                        )}
+                        Generate
+                        <ChevronDown className="h-3 w-3 ml-1" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      {(Object.keys(geminiModelDisplayNames) as GeminiModel[]).map((model) => (
+                        <DropdownMenuItem
+                          key={model}
+                          onClick={() => {
+                            setSelectedModel(model);
+                            handleGenerate(model);
+                          }}
+                          data-testid={`menu-item-guardrails-model-${model}`}
+                        >
+                          {geminiModelDisplayNames[model]}
+                          {model === defaultGenerationModel && (
+                            <Badge variant="secondary" className="ml-2 text-xs">Default</Badge>
+                          )}
+                        </DropdownMenuItem>
+                      ))}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </div>
               </div>
             </div>
