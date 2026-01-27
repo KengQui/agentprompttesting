@@ -253,7 +253,7 @@ export default function SettingsPage() {
               <CardTitle className="flex items-center gap-2">
                 <Shield className="h-5 w-5 text-primary" />
                 Validation Rules
-                <Badge variant="secondary" size="sm">Optional</Badge>
+                <Badge variant="secondary">Optional</Badge>
               </CardTitle>
               <CardDescription>
                 Input/output validation rules for quality control
@@ -275,7 +275,7 @@ export default function SettingsPage() {
               <CardTitle className="flex items-center gap-2">
                 <AlertTriangle className="h-5 w-5 text-primary" />
                 Guardrails
-                <Badge variant="secondary" size="sm">Optional</Badge>
+                <Badge variant="secondary">Optional</Badge>
               </CardTitle>
               <CardDescription>
                 Safety boundaries and restrictions
