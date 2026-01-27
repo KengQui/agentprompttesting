@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useParams, useLocation } from "wouter";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { ArrowLeft, Save, Trash2, Bot, Briefcase, FileText, Shield, AlertTriangle, Loader2 } from "lucide-react";
+import { ArrowLeft, Save, Trash2, Bot, Briefcase, Shield, AlertTriangle, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -42,7 +42,6 @@ export default function SettingsPage() {
       setFormData({
         name: agent.name,
         businessUseCase: agent.businessUseCase,
-        description: agent.description,
         validationRules: agent.validationRules,
         guardrails: agent.guardrails,
         status: agent.status,
@@ -245,26 +244,6 @@ export default function SettingsPage() {
                 onChange={(e) => updateFormData({ businessUseCase: e.target.value })}
                 className="min-h-[120px] resize-none"
                 data-testid="textarea-business-usecase"
-              />
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <FileText className="h-5 w-5 text-primary" />
-                System Prompt
-              </CardTitle>
-              <CardDescription>
-                The agent's personality and behavior instructions
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Textarea
-                value={formData.description || ""}
-                onChange={(e) => updateFormData({ description: e.target.value })}
-                className="min-h-[150px] resize-none"
-                data-testid="textarea-description"
               />
             </CardContent>
           </Card>

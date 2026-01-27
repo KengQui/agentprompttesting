@@ -1,10 +1,23 @@
 import { GoogleGenAI } from "@google/genai";
+import * as fs from "fs";
+import * as path from "path";
 
 // Google AI Studio SDK integration for Gemini
 // Requires GEMINI_API_KEY secret to be set
 const ai = new GoogleGenAI({
   apiKey: process.env.GEMINI_API_KEY || "",
 });
+
+// Read personality prompt from file (you can edit this file directly)
+function getPersonalityPrompt(): string {
+  try {
+    const promptPath = path.join(process.cwd(), "personality-prompt.txt");
+    return fs.readFileSync(promptPath, "utf-8").trim();
+  } catch (error) {
+    console.warn("Could not read personality-prompt.txt, using default");
+    return "You are a helpful AI assistant.";
+  }
+}
 
 export interface AgentContext {
   name: string;
@@ -58,15 +71,16 @@ export async function generateAgentResponse(
 }
 
 function buildSystemPrompt(agent: AgentContext): string {
+  const personalityPrompt = getPersonalityPrompt();
+  
   let systemPrompt = `You are an AI assistant named "${agent.name}".`;
 
   if (agent.businessUseCase) {
     systemPrompt += `\n\nYour purpose: ${agent.businessUseCase}`;
   }
 
-  if (agent.description) {
-    systemPrompt += `\n\nYour personality and behavior: ${agent.description}`;
-  }
+  // Use the personality from the txt file instead of agent.description
+  systemPrompt += `\n\nYour personality and behavior:\n${personalityPrompt}`;
 
   if (agent.validationRules) {
     systemPrompt += `\n\nValidation rules you must follow:\n${agent.validationRules}`;
