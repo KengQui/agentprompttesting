@@ -517,21 +517,24 @@ export default function SettingsPage() {
                       >
                         Use Template
                       </button>
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        onClick={handleGenerateValidationRules}
-                        disabled={isGeneratingValidation}
-                        data-testid="settings-button-generate-validation"
-                      >
-                        {isGeneratingValidation ? (
-                          <Loader2 className="h-4 w-4 mr-1 animate-spin" />
-                        ) : (
-                          <Sparkles className="h-4 w-4 mr-1" />
-                        )}
-                        Generate
-                      </Button>
+                      <div className="flex items-center gap-2">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={handleGenerateValidationRules}
+                          disabled={isGeneratingValidation}
+                          data-testid="settings-button-generate-validation"
+                        >
+                          {isGeneratingValidation ? (
+                            <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                          ) : (
+                            <Sparkles className="h-4 w-4 mr-1" />
+                          )}
+                          Generate
+                        </Button>
+                        <span className="text-xs text-muted-foreground">Powered by Gemini 2.0 Flash</span>
+                      </div>
                     </div>
                   </div>
                   <Textarea
@@ -585,21 +588,24 @@ export default function SettingsPage() {
                       >
                         Use Template
                       </button>
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        onClick={handleGenerateGuardrails}
-                        disabled={isGeneratingGuardrails}
-                        data-testid="settings-button-generate-guardrails"
-                      >
-                        {isGeneratingGuardrails ? (
-                          <Loader2 className="h-4 w-4 mr-1 animate-spin" />
-                        ) : (
-                          <Sparkles className="h-4 w-4 mr-1" />
-                        )}
-                        Generate
-                      </Button>
+                      <div className="flex items-center gap-2">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={handleGenerateGuardrails}
+                          disabled={isGeneratingGuardrails}
+                          data-testid="settings-button-generate-guardrails"
+                        >
+                          {isGeneratingGuardrails ? (
+                            <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                          ) : (
+                            <Sparkles className="h-4 w-4 mr-1" />
+                          )}
+                          Generate
+                        </Button>
+                        <span className="text-xs text-muted-foreground">Powered by Gemini 2.0 Flash</span>
+                      </div>
                     </div>
                   </div>
                   <Textarea

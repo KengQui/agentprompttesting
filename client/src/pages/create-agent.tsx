@@ -397,21 +397,24 @@ function Step4ValidationRules({
                 >
                   Use Template
                 </button>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={handleGenerate}
-                  disabled={isGenerating}
-                  data-testid="button-generate-validation"
-                >
-                  {isGenerating ? (
-                    <Loader2 className="h-4 w-4 mr-1 animate-spin" />
-                  ) : (
-                    <Sparkles className="h-4 w-4 mr-1" />
-                  )}
-                  Generate
-                </Button>
+                <div className="flex items-center gap-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={handleGenerate}
+                    disabled={isGenerating}
+                    data-testid="button-generate-validation"
+                  >
+                    {isGenerating ? (
+                      <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                    ) : (
+                      <Sparkles className="h-4 w-4 mr-1" />
+                    )}
+                    Generate
+                  </Button>
+                  <span className="text-xs text-muted-foreground">Powered by Gemini 2.0 Flash</span>
+                </div>
               </div>
             </div>
             <Textarea
@@ -516,21 +519,24 @@ function Step5Guardrails({
                 >
                   Use Template
                 </button>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={handleGenerate}
-                  disabled={isGenerating}
-                  data-testid="button-generate-guardrails"
-                >
-                  {isGenerating ? (
-                    <Loader2 className="h-4 w-4 mr-1 animate-spin" />
-                  ) : (
-                    <Sparkles className="h-4 w-4 mr-1" />
-                  )}
-                  Generate
-                </Button>
+                <div className="flex items-center gap-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={handleGenerate}
+                    disabled={isGenerating}
+                    data-testid="button-generate-guardrails"
+                  >
+                    {isGenerating ? (
+                      <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                    ) : (
+                      <Sparkles className="h-4 w-4 mr-1" />
+                    )}
+                    Generate
+                  </Button>
+                  <span className="text-xs text-muted-foreground">Powered by Gemini 2.0 Flash</span>
+                </div>
               </div>
             </div>
             <Textarea
