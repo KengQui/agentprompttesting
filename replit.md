@@ -4,6 +4,14 @@
 Agent Studio is a web application for creating, configuring, and managing AI agents. Users can define business use cases, system prompts, validation rules, and guardrails through an intuitive 5-step wizard interface.
 
 ## Recent Changes
+- **January 27, 2026**: Added per-agent turn management system
+  - Created modular component architecture: turn-manager, flow-controller, state-manager, orchestrator
+  - Per-agent components in `agents/{id}/components/` with customizable templates
+  - Keyword-based intent detection with LLM fallback for ambiguous cases
+  - Supported intents: answer_question, go_back, change_previous_answer, request_clarification
+  - Automatic component template generation for new agents
+  - Intent context passed to Gemini for better response generation
+
 - **January 27, 2026**: Added intermediate chatbot features
   - Cancel response: Users can abort AI responses mid-generation (server-side support)
   - Character limit: 2000 character limit with visual counter (warning at 80%, error when exceeded)
