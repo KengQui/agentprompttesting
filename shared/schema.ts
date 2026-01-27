@@ -19,14 +19,14 @@ export type GeminiModel = z.infer<typeof geminiModelEnum>;
 
 // Model display names for UI
 export const geminiModelDisplayNames: Record<GeminiModel, string> = {
-  "gemini-2.5-flash": "Gemini 2.5 Flash",
+  "gemini-2.5-flash": "Gemini 2.5 Flash (UKG)",
   "gemini-2.5-pro": "Gemini 2.5 Pro",
   "gemini-3-flash-preview": "Gemini 3 Flash",
   "gemini-3-pro-preview": "Gemini 3 Pro",
 };
 
 // Default model for generation
-export const defaultGenerationModel: GeminiModel = "gemini-2.5-pro";
+export const defaultGenerationModel: GeminiModel = "gemini-2.5-flash";
 
 // Domain document schema
 export const domainDocumentSchema = z.object({

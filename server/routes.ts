@@ -334,7 +334,7 @@ export async function registerRoutes(
         validationRules: z.string().optional(),
         guardrails: z.string().optional(),
         promptStyle: z.enum(["anthropic", "gemini", "openai"]),
-        model: z.enum(["gemini-2.5-flash", "gemini-2.5-pro", "gemini-3-flash", "gemini-3-pro"]).optional(),
+        model: z.enum(["gemini-2.5-flash", "gemini-2.5-pro", "gemini-3-flash-preview", "gemini-3-pro-preview"]).optional(),
       });
 
       const parsed = systemPromptRequestSchema.safeParse(req.body);

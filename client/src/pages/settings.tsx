@@ -553,9 +553,6 @@ export default function SettingsPage() {
                                 data-testid={`settings-menu-item-validation-model-${model}`}
                               >
                                 {geminiModelDisplayNames[model]}
-                                {model === defaultGenerationModel && (
-                                  <Badge variant="secondary" className="ml-2 text-xs">Default</Badge>
-                                )}
                               </DropdownMenuItem>
                             ))}
                           </DropdownMenuContent>
@@ -641,9 +638,6 @@ export default function SettingsPage() {
                                 data-testid={`settings-menu-item-guardrails-model-${model}`}
                               >
                                 {geminiModelDisplayNames[model]}
-                                {model === defaultGenerationModel && (
-                                  <Badge variant="secondary" className="ml-2 text-xs">Default</Badge>
-                                )}
                               </DropdownMenuItem>
                             ))}
                           </DropdownMenuContent>

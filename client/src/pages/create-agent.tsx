@@ -436,9 +436,6 @@ function Step4ValidationRules({
                           data-testid={`menu-item-model-${model}`}
                         >
                           {geminiModelDisplayNames[model]}
-                          {model === defaultGenerationModel && (
-                            <Badge variant="secondary" className="ml-2 text-xs">Default</Badge>
-                          )}
                         </DropdownMenuItem>
                       ))}
                     </DropdownMenuContent>
@@ -580,9 +577,6 @@ function Step5Guardrails({
                           data-testid={`menu-item-guardrails-model-${model}`}
                         >
                           {geminiModelDisplayNames[model]}
-                          {model === defaultGenerationModel && (
-                            <Badge variant="secondary" className="ml-2 text-xs">Default</Badge>
-                          )}
                         </DropdownMenuItem>
                       ))}
                     </DropdownMenuContent>
@@ -620,9 +614,11 @@ function Step6Review({
   const [generatedPrompt, setGeneratedPrompt] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
   const [generationError, setGenerationError] = useState<string | null>(null);
+  const [selectedModel, setSelectedModel] = useState<GeminiModel>(defaultGenerationModel);
   const selectedStyle = data.promptStyle || "anthropic";
 
-  const generatePrompt = async (style: PromptStyle) => {
+  const generatePrompt = async (style: PromptStyle, model?: GeminiModel) => {
+    const modelToUse = model || selectedModel;
     if (!data.name || !data.businessUseCase) {
       const fallback = generatePromptPreview(style, data);
       setGeneratedPrompt(fallback);
@@ -641,6 +637,7 @@ function Step6Review({
         validationRules: data.validationRules,
         guardrails: data.guardrails,
         promptStyle: style,
+        model: modelToUse,
       });
       const result = await response.json();
       setGeneratedPrompt(result.systemPrompt);
@@ -858,17 +855,36 @@ function Step6Review({
               </div>
               <div className="flex gap-2">
                 {!isGenerating && !isEditing && (
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    onClick={handleRegeneratePrompt}
-                    className="gap-1 h-7"
-                    data-testid="button-regenerate-prompt"
-                  >
-                    <Sparkles className="h-3 w-3" />
-                    Regenerate
-                  </Button>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className="gap-1 h-7"
+                        data-testid="button-regenerate-prompt"
+                      >
+                        <Sparkles className="h-3 w-3" />
+                        Regenerate
+                        <ChevronDown className="h-3 w-3" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      {(Object.keys(geminiModelDisplayNames) as GeminiModel[]).map((model) => (
+                        <DropdownMenuItem
+                          key={model}
+                          onClick={() => {
+                            setSelectedModel(model);
+                            onUpdate({ customPrompt: "" });
+                            generatePrompt(selectedStyle, model);
+                          }}
+                          data-testid={`menu-item-prompt-model-${model}`}
+                        >
+                          {geminiModelDisplayNames[model]}
+                        </DropdownMenuItem>
+                      ))}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 )}
                 {data.customPrompt && !isGenerating && (
                   <Button
