@@ -44,8 +44,8 @@ function StepIndicator({ currentStep }: { currentStep: number }) {
   const progress = ((currentStep - 1) / (steps.length - 1)) * 100;
 
   return (
-    <div className="mb-8">
-      <div className="flex items-center justify-between mb-4">
+    <div className="flex flex-col h-full">
+      <div className="flex-1 flex flex-col gap-2">
         {steps.map((step, index) => {
           const isCompleted = currentStep > step.id;
           const isCurrent = currentStep === step.id;
@@ -54,12 +54,10 @@ function StepIndicator({ currentStep }: { currentStep: number }) {
           return (
             <div
               key={step.id}
-              className={`flex flex-col items-center ${
-                index !== steps.length - 1 ? "flex-1" : ""
-              }`}
+              className="flex items-center gap-3"
             >
               <div
-                className={`flex h-10 w-10 items-center justify-center rounded-full border-2 transition-colors ${
+                className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full border-2 transition-colors ${
                   isCompleted
                     ? "border-primary bg-primary text-primary-foreground"
                     : isCurrent
@@ -74,18 +72,30 @@ function StepIndicator({ currentStep }: { currentStep: number }) {
                   <Icon className="h-5 w-5" />
                 )}
               </div>
-              <span
-                className={`mt-2 text-xs font-medium hidden sm:block ${
-                  isCurrent ? "text-primary" : "text-muted-foreground"
-                }`}
-              >
-                {step.name}
-              </span>
+              <div className="flex flex-col">
+                <span
+                  className={`text-sm font-medium ${
+                    isCurrent ? "text-primary" : isCompleted ? "text-foreground" : "text-muted-foreground"
+                  }`}
+                >
+                  {step.name}
+                </span>
+                <span className="text-xs text-muted-foreground hidden lg:block">
+                  {step.description}
+                </span>
+              </div>
+              {index !== steps.length - 1 && (
+                <div className="absolute left-5 mt-12 h-4 w-0.5 bg-muted" style={{ display: 'none' }} />
+              )}
             </div>
           );
         })}
       </div>
-      <Progress value={progress} className="h-2" />
+      <div className="mt-6 pt-4 border-t">
+        <div className="text-xs text-muted-foreground mb-2">Progress</div>
+        <Progress value={progress} className="h-2" />
+        <div className="text-xs text-muted-foreground mt-1">{Math.round(progress)}% complete</div>
+      </div>
     </div>
   );
 }
@@ -1085,12 +1095,18 @@ export default function CreateAgent() {
         </div>
       </header>
 
-      <main className="container mx-auto max-w-2xl px-4 py-8">
-        <StepIndicator currentStep={currentStep} />
-        
-        {renderStep()}
+      <main className="container mx-auto max-w-5xl px-4 py-8">
+        <div className="flex gap-8">
+          <aside className="hidden md:block w-64 shrink-0">
+            <div className="sticky top-24 p-4 rounded-lg border bg-card">
+              <StepIndicator currentStep={currentStep} />
+            </div>
+          </aside>
+          
+          <div className="flex-1 min-w-0">
+            {renderStep()}
 
-        <div className="mt-6 flex items-center justify-between gap-4">
+            <div className="mt-6 flex items-center justify-between gap-4">
           <Button
             variant="outline"
             onClick={handleBack}
@@ -1122,6 +1138,8 @@ export default function CreateAgent() {
               </>
             )}
           </Button>
+            </div>
+          </div>
         </div>
       </main>
     </div>
