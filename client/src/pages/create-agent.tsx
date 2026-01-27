@@ -566,27 +566,68 @@ function Step6Review({
 }) {
   const [isEditing, setIsEditing] = useState(false);
   const [editedPrompt, setEditedPrompt] = useState("");
+  const [generatedPrompt, setGeneratedPrompt] = useState("");
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [generationError, setGenerationError] = useState<string | null>(null);
   const selectedStyle = data.promptStyle || "anthropic";
 
-  useEffect(() => {
-    if (!data.customPrompt) {
-      const generated = generatePromptPreview(selectedStyle, data);
-      setEditedPrompt(generated);
-    } else {
-      setEditedPrompt(data.customPrompt);
+  const generatePrompt = async (style: PromptStyle) => {
+    if (!data.name || !data.businessUseCase) {
+      const fallback = generatePromptPreview(style, data);
+      setGeneratedPrompt(fallback);
+      setEditedPrompt(fallback);
+      return;
     }
-  }, [selectedStyle, data.customPrompt]);
+    
+    setIsGenerating(true);
+    setGenerationError(null);
+    try {
+      const response = await apiRequest("POST", "/api/generate/system-prompt", {
+        name: data.name,
+        businessUseCase: data.businessUseCase,
+        domainKnowledge: data.domainKnowledge,
+        domainDocuments: data.domainDocuments,
+        validationRules: data.validationRules,
+        guardrails: data.guardrails,
+        promptStyle: style,
+      });
+      const result = await response.json();
+      setGeneratedPrompt(result.systemPrompt);
+      setEditedPrompt(result.systemPrompt);
+    } catch (error: any) {
+      console.error("Failed to generate system prompt:", error);
+      setGenerationError(error.message || "Failed to generate prompt");
+      const fallback = generatePromptPreview(style, data);
+      setGeneratedPrompt(fallback);
+      setEditedPrompt(fallback);
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
+  useEffect(() => {
+    if (data.customPrompt) {
+      setEditedPrompt(data.customPrompt);
+      setGeneratedPrompt(data.customPrompt);
+    } else if (data.name && data.businessUseCase) {
+      generatePrompt(selectedStyle);
+    } else {
+      const fallback = generatePromptPreview(selectedStyle, data);
+      setGeneratedPrompt(fallback);
+      setEditedPrompt(fallback);
+    }
+  }, [data.name, data.businessUseCase, data.domainKnowledge, data.domainDocuments, data.validationRules, data.guardrails, selectedStyle]);
 
   const handleStyleChange = (style: string) => {
     const newStyle = style as PromptStyle;
     onUpdate({ promptStyle: newStyle, customPrompt: "" });
     setIsEditing(false);
+    generatePrompt(newStyle);
   };
 
   const handleEditToggle = () => {
     if (!isEditing) {
-      const generated = generatePromptPreview(selectedStyle, data);
-      setEditedPrompt(data.customPrompt || generated);
+      setEditedPrompt(data.customPrompt || generatedPrompt);
     }
     setIsEditing(!isEditing);
   };
@@ -598,12 +639,16 @@ function Step6Review({
 
   const handleResetPrompt = () => {
     onUpdate({ customPrompt: "" });
-    const generated = generatePromptPreview(selectedStyle, data);
-    setEditedPrompt(generated);
+    generatePrompt(selectedStyle);
     setIsEditing(false);
   };
 
-  const displayPrompt = data.customPrompt || generatePromptPreview(selectedStyle, data);
+  const handleRegeneratePrompt = () => {
+    onUpdate({ customPrompt: "" });
+    generatePrompt(selectedStyle);
+  };
+
+  const displayPrompt = data.customPrompt || generatedPrompt;
 
   const domainDocsCount = data.domainDocuments?.length || 0;
   const domainKnowledgeValue = data.domainKnowledge 
@@ -752,10 +797,29 @@ function Step6Review({
           </div>
 
           <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <Label>Prompt Preview</Label>
+            <div className="flex items-center justify-between flex-wrap gap-2">
+              <div className="flex items-center gap-2">
+                <Label>Prompt Preview</Label>
+                <Badge variant="secondary" className="text-xs gap-1">
+                  <Sparkles className="h-3 w-3" />
+                  AI Generated
+                </Badge>
+              </div>
               <div className="flex gap-2">
-                {data.customPrompt && (
+                {!isGenerating && !isEditing && (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={handleRegeneratePrompt}
+                    className="gap-1 h-7"
+                    data-testid="button-regenerate-prompt"
+                  >
+                    <Sparkles className="h-3 w-3" />
+                    Regenerate
+                  </Button>
+                )}
+                {data.customPrompt && !isGenerating && (
                   <Button
                     type="button"
                     variant="ghost"
@@ -774,6 +838,7 @@ function Step6Review({
                   size="sm"
                   onClick={isEditing ? handleSaveEdit : handleEditToggle}
                   className="gap-1 h-7"
+                  disabled={isGenerating}
                   data-testid="button-edit-prompt"
                 >
                   <Pencil className="h-3 w-3" />
@@ -783,10 +848,25 @@ function Step6Review({
             </div>
             
             <p className="text-xs text-muted-foreground">
-              The actual prompt uses your platform's personality from personality-prompt.txt
+              Gemini generates a custom prompt based on your configuration and selected style.
             </p>
+
+            {generationError && (
+              <div className="flex items-center gap-2 p-2 rounded-md bg-destructive/10 text-destructive text-xs">
+                <AlertTriangle className="h-3 w-3" />
+                {generationError} - Using fallback template.
+              </div>
+            )}
             
-            {isEditing ? (
+            {isGenerating ? (
+              <div 
+                className="rounded-md bg-muted/50 p-4 min-h-[300px] flex flex-col items-center justify-center gap-3"
+                data-testid="prompt-loading"
+              >
+                <Loader2 className="h-6 w-6 animate-spin text-primary" />
+                <p className="text-sm text-muted-foreground">Generating prompt with Gemini...</p>
+              </div>
+            ) : isEditing ? (
               <Textarea
                 value={editedPrompt}
                 onChange={(e) => setEditedPrompt(e.target.value)}
@@ -798,7 +878,7 @@ function Step6Review({
                 className="rounded-md bg-muted/50 p-4 text-xs font-mono whitespace-pre-wrap max-h-[300px] overflow-y-auto"
                 data-testid="prompt-preview"
               >
-                {displayPrompt}
+                {displayPrompt || "No prompt generated yet."}
               </div>
             )}
           </div>

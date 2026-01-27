@@ -3,7 +3,7 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { insertAgentSchema, updateAgentSchema } from "@shared/schema";
 import { z } from "zod";
-import { generateAgentResponse, generateValidationRules, generateGuardrails, type GenerationContext } from "./gemini";
+import { generateAgentResponse, generateValidationRules, generateGuardrails, generateSystemPrompt, type GenerationContext, type SystemPromptContext } from "./gemini";
 import { loadAgentComponents, clearAgentCache, hasCustomComponents } from "./agent-loader";
 import multer from "multer";
 import { v4 as uuidv4 } from "uuid";
@@ -313,6 +313,47 @@ export async function registerRoutes(
     } catch (error: any) {
       console.error("Error generating guardrails:", error);
       res.status(500).json({ message: error?.message || "Failed to generate guardrails" });
+    }
+  });
+
+  // Generate system prompt using AI based on prompt style
+  app.post("/api/generate/system-prompt", async (req, res) => {
+    try {
+      const systemPromptRequestSchema = z.object({
+        name: z.string().min(1, "Name is required"),
+        businessUseCase: z.string().min(1, "Business use case is required"),
+        domainKnowledge: z.string().optional(),
+        domainDocuments: z.array(z.object({
+          id: z.string(),
+          filename: z.string(),
+          content: z.string(),
+          uploadedAt: z.string(),
+        })).optional(),
+        validationRules: z.string().optional(),
+        guardrails: z.string().optional(),
+        promptStyle: z.enum(["anthropic", "gemini", "openai"]),
+      });
+
+      const parsed = systemPromptRequestSchema.safeParse(req.body);
+      if (!parsed.success) {
+        return res.status(400).json({ message: parsed.error.errors[0]?.message || "Invalid request" });
+      }
+
+      const context: SystemPromptContext = {
+        name: parsed.data.name,
+        businessUseCase: parsed.data.businessUseCase,
+        domainKnowledge: parsed.data.domainKnowledge,
+        domainDocuments: parsed.data.domainDocuments,
+        validationRules: parsed.data.validationRules,
+        guardrails: parsed.data.guardrails,
+        promptStyle: parsed.data.promptStyle,
+      };
+
+      const systemPrompt = await generateSystemPrompt(context);
+      res.json({ systemPrompt });
+    } catch (error: any) {
+      console.error("Error generating system prompt:", error);
+      res.status(500).json({ message: error?.message || "Failed to generate system prompt" });
     }
   });
 
