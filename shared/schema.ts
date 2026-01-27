@@ -4,6 +4,10 @@ import { z } from "zod";
 export const agentStatusEnum = z.enum(["draft", "configured", "active"]);
 export type AgentStatus = z.infer<typeof agentStatusEnum>;
 
+// Prompt style enum
+export const promptStyleEnum = z.enum(["anthropic", "gemini", "openai"]);
+export type PromptStyle = z.infer<typeof promptStyleEnum>;
+
 // Domain document schema
 export const domainDocumentSchema = z.object({
   id: z.string(),
@@ -24,6 +28,8 @@ export const agentSchema = z.object({
   domainDocuments: z.array(domainDocumentSchema).default([]),
   validationRules: z.string().default(""),
   guardrails: z.string().default(""),
+  promptStyle: promptStyleEnum.default("anthropic"),
+  customPrompt: z.string().default(""),
   status: agentStatusEnum.default("draft"),
   createdAt: z.string(),
   updatedAt: z.string(),
@@ -72,6 +78,8 @@ export const wizardStepSchema = z.object({
   domainDocuments: z.array(domainDocumentSchema).default([]),
   validationRules: z.string().default(""),
   guardrails: z.string().default(""),
+  promptStyle: promptStyleEnum.default("anthropic"),
+  customPrompt: z.string().default(""),
 });
 
 export type WizardStepData = z.infer<typeof wizardStepSchema>;
