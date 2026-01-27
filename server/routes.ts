@@ -5,6 +5,33 @@ import { insertAgentSchema, updateAgentSchema } from "@shared/schema";
 import { z } from "zod";
 import { generateAgentResponse } from "./gemini";
 import { loadAgentComponents, clearAgentCache, hasCustomComponents } from "./agent-loader";
+import multer from "multer";
+import { v4 as uuidv4 } from "uuid";
+
+// Configure multer for file uploads (memory storage for text extraction)
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: {
+    fileSize: 5 * 1024 * 1024, // 5MB limit
+  },
+  fileFilter: (req, file, cb) => {
+    // Allow text-based files
+    const allowedMimes = [
+      'text/plain',
+      'text/markdown',
+      'text/csv',
+      'application/json',
+      'application/pdf',
+      'application/msword',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+    ];
+    if (allowedMimes.includes(file.mimetype) || file.originalname.endsWith('.txt') || file.originalname.endsWith('.md')) {
+      cb(null, true);
+    } else {
+      cb(new Error('Only text-based files are allowed (.txt, .md, .csv, .json)'));
+    }
+  }
+});
 
 export async function registerRoutes(
   httpServer: Server,
@@ -136,6 +163,8 @@ export async function registerRoutes(
         name: agent.name,
         businessUseCase: agent.businessUseCase,
         description: agent.description,
+        domainKnowledge: agent.domainKnowledge,
+        domainDocuments: agent.domainDocuments,
         validationRules: agent.validationRules,
         guardrails: agent.guardrails,
       };
@@ -215,6 +244,30 @@ export async function registerRoutes(
     } catch (error) {
       console.error("Error checking components:", error);
       res.status(500).json({ message: "Failed to check components" });
+    }
+  });
+
+  // Upload domain knowledge document (returns parsed document)
+  app.post("/api/upload-document", upload.single('file'), async (req, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ message: "No file uploaded" });
+      }
+
+      // Extract text content from the file
+      const content = req.file.buffer.toString('utf-8');
+      
+      const document = {
+        id: uuidv4(),
+        filename: req.file.originalname,
+        content: content.substring(0, 50000), // Limit content to 50k chars
+        uploadedAt: new Date().toISOString(),
+      };
+
+      res.json(document);
+    } catch (error) {
+      console.error("Error uploading document:", error);
+      res.status(500).json({ message: "Failed to upload document" });
     }
   });
 

@@ -19,10 +19,19 @@ function getPersonalityPrompt(): string {
   }
 }
 
+export interface DomainDocument {
+  id: string;
+  filename: string;
+  content: string;
+  uploadedAt: string;
+}
+
 export interface AgentContext {
   name: string;
   businessUseCase: string;
   description: string;
+  domainKnowledge?: string;
+  domainDocuments?: DomainDocument[];
   validationRules: string;
   guardrails: string;
 }
@@ -81,6 +90,19 @@ function buildSystemPrompt(agent: AgentContext): string {
 
   // Use the personality from the txt file instead of agent.description
   systemPrompt += `\n\nYour personality and behavior:\n${personalityPrompt}`;
+
+  // Add domain knowledge if available
+  if (agent.domainKnowledge) {
+    systemPrompt += `\n\nDomain Knowledge:\n${agent.domainKnowledge}`;
+  }
+
+  // Add content from uploaded documents
+  if (agent.domainDocuments && agent.domainDocuments.length > 0) {
+    systemPrompt += `\n\nReference Documents:`;
+    for (const doc of agent.domainDocuments) {
+      systemPrompt += `\n\n--- Document: ${doc.filename} ---\n${doc.content}`;
+    }
+  }
 
   if (agent.validationRules) {
     systemPrompt += `\n\nValidation rules you must follow:\n${agent.validationRules}`;
