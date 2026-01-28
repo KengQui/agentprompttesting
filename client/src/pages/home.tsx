@@ -32,7 +32,7 @@ function AgentCard({ agent }: { agent: Agent }) {
     <Card className="group hover-elevate flex flex-col">
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between gap-3">
-          <div className="flex items-center gap-3 min-w-0">
+          <div className="flex flex-col gap-3 min-w-0">
             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-primary/10">
               <Bot className="h-5 w-5 text-primary" />
             </div>
@@ -86,7 +86,7 @@ function AgentCardSkeleton() {
     <Card className="flex flex-col">
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between gap-3">
-          <div className="flex items-center gap-3">
+          <div className="flex flex-col gap-3">
             <Skeleton className="h-10 w-10 rounded-md" />
             <div className="space-y-2">
               <Skeleton className="h-4 w-32" />
