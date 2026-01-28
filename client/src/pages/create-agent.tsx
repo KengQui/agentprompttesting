@@ -1475,7 +1475,7 @@ function Step7Review({
                   onUpdate({ customPrompt: e.target.value });
                 }}
                 placeholder="Write your system prompt here. This is the instruction that will be sent to the AI to define its behavior, personality, and capabilities..."
-                className="min-h-[300px] font-mono text-xs"
+                className="min-h-[100px] resize-y font-mono text-xs"
                 data-testid="textarea-custom-prompt"
               />
             ) : isGenerating ? (
