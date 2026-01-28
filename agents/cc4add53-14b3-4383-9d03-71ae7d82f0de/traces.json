@@ -374,22 +374,56 @@
         }
       ],
       "success": true
+    },
+    {
+      "id": "trace-1769610809529",
+      "sessionId": "e2325c98-7754-49e5-ac82-d7d20726a548",
+      "userInput": "sup",
+      "agentResponse": "Hasta la vista, baby.\n",
+      "startTime": "2026-01-28T14:33:29.016Z",
+      "endTime": "2026-01-28T14:33:29.529Z",
+      "totalDuration": 513,
+      "entries": [
+        {
+          "id": "entry-1769610809017-1",
+          "type": "intent_classification",
+          "name": "Orchestrator Intent Classification",
+          "timestamp": "2026-01-28T14:33:29.017Z",
+          "metadata": {
+            "intent": "answer_question",
+            "classificationMethod": "orchestrator",
+            "confidence": "high"
+          }
+        },
+        {
+          "id": "entry-1769610809529-3",
+          "type": "llm_call",
+          "name": "Gemini Response Generation",
+          "timestamp": "2026-01-28T14:33:29.529Z",
+          "duration": 512,
+          "metadata": {
+            "model": "gemini",
+            "intent": "answer_question"
+          }
+        }
+      ],
+      "success": true
     }
   ],
   "stats": {
     "hookCalls": {},
     "signalReads": {},
     "intentDistribution": {
-      "answer_question": 11
+      "answer_question": 12
     },
     "classificationMethods": {
-      "orchestrator": 11
+      "orchestrator": 12
     },
-    "avgResponseTime": 653.7272727272727,
-    "totalLlmCalls": 11,
+    "avgResponseTime": 642,
+    "totalLlmCalls": 12,
     "totalTokensUsed": 0,
     "errorCount": 0
   },
   "createdAt": "2026-01-28T10:40:12.960Z",
-  "updatedAt": "2026-01-28T14:17:04.990Z"
+  "updatedAt": "2026-01-28T14:33:29.529Z"
 }

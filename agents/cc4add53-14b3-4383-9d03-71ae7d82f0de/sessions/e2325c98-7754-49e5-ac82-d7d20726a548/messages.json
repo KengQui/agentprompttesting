@@ -14,5 +14,21 @@
     "role": "assistant",
     "content": "I'm a cybernetic organism, a Terminator, model 101.\n",
     "timestamp": "2026-01-28T14:17:04.990Z"
+  },
+  {
+    "id": "4d2d5d44-975e-4ab2-aa3e-2f88b8b5c1f6",
+    "agentId": "cc4add53-14b3-4383-9d03-71ae7d82f0de",
+    "sessionId": "e2325c98-7754-49e5-ac82-d7d20726a548",
+    "role": "user",
+    "content": "sup",
+    "timestamp": "2026-01-28T14:33:29.016Z"
+  },
+  {
+    "id": "478b5b7d-399a-42da-a0b4-adf67cc7aacf",
+    "agentId": "cc4add53-14b3-4383-9d03-71ae7d82f0de",
+    "sessionId": "e2325c98-7754-49e5-ac82-d7d20726a548",
+    "role": "assistant",
+    "content": "Hasta la vista, baby.\n",
+    "timestamp": "2026-01-28T14:33:29.530Z"
   }
 ]
