@@ -102,16 +102,49 @@
         }
       ],
       "success": true
+    },
+    {
+      "id": "trace-1769640957767",
+      "sessionId": "84102dd0-fdd6-4719-b28a-ad6e4a75d99e",
+      "userInput": "how about this year?",
+      "agentResponse": "Describe your question or issue.",
+      "startTime": "2026-01-28T22:55:57.767Z",
+      "endTime": "2026-01-28T22:55:57.767Z",
+      "totalDuration": 0,
+      "entries": [
+        {
+          "id": "entry-1769640957767-1",
+          "type": "intent_classification",
+          "name": "Orchestrator Intent Classification",
+          "timestamp": "2026-01-28T22:55:57.767Z",
+          "metadata": {
+            "intent": "request_clarification",
+            "classificationMethod": "orchestrator",
+            "confidence": "high"
+          }
+        },
+        {
+          "id": "entry-1769640957767-2",
+          "type": "hook_call",
+          "name": "Orchestrator Direct Response",
+          "timestamp": "2026-01-28T22:55:57.767Z",
+          "metadata": {}
+        }
+      ],
+      "success": true
     }
   ],
   "stats": {
-    "hookCalls": {},
+    "hookCalls": {
+      "Orchestrator Direct Response": 1
+    },
     "signalReads": {},
     "intentDistribution": {
-      "answer_question": 3
+      "answer_question": 3,
+      "request_clarification": 1
     },
     "classificationMethods": {
-      "orchestrator": 3
+      "orchestrator": 4
     },
     "avgResponseTime": 18980,
     "totalLlmCalls": 3,
@@ -119,5 +152,5 @@
     "errorCount": 0
   },
   "createdAt": "2026-01-28T22:47:34.209Z",
-  "updatedAt": "2026-01-28T22:53:18.928Z"
+  "updatedAt": "2026-01-28T22:55:57.767Z"
 }

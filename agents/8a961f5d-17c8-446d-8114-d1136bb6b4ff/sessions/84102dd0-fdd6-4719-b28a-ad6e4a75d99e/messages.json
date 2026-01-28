@@ -30,5 +30,21 @@
     "role": "assistant",
     "content": "Okay, John Smith. Let's calculate your 401k contributions for last year, 2025.\n\nHere's a breakdown:\n\n*   **Contribution per pay period:** $180.25\n*   **Number of pay periods in 2025:** 26\n\n**Total 401k Contribution for 2025:** $4,686.50\n\nSo, in 2025, you contributed a total of $4,686.50 to your 401k.\n",
     "timestamp": "2026-01-28T22:53:18.928Z"
+  },
+  {
+    "id": "706edc25-e786-4087-93c1-c0651ffb994c",
+    "agentId": "8a961f5d-17c8-446d-8114-d1136bb6b4ff",
+    "sessionId": "84102dd0-fdd6-4719-b28a-ad6e4a75d99e",
+    "role": "user",
+    "content": "how about this year?",
+    "timestamp": "2026-01-28T22:55:57.767Z"
+  },
+  {
+    "id": "d324adda-9320-4898-be9f-06a6ad899d91",
+    "agentId": "8a961f5d-17c8-446d-8114-d1136bb6b4ff",
+    "sessionId": "84102dd0-fdd6-4719-b28a-ad6e4a75d99e",
+    "role": "assistant",
+    "content": "Describe your question or issue.",
+    "timestamp": "2026-01-28T22:55:57.768Z"
   }
 ]
