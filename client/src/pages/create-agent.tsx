@@ -1521,7 +1521,7 @@ export default function CreateAgent() {
     sampleDatasets: [],
     validationRules: "",
     guardrails: "",
-    promptStyle: "anthropic",
+    promptStyle: "custom",
     customPrompt: "",
   });
 

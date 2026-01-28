@@ -4,6 +4,11 @@
 Agent Studio is a web application for creating, configuring, and managing AI agents. Users can define business use cases, domain knowledge, validation rules, guardrails, and sample datasets through an intuitive 7-step wizard interface.
 
 ## Recent Changes
+- **January 28, 2026**: Changed Prompt Style Default in Step 7
+  - "Write Your Own" is now the default prompt style instead of Anthropic
+  - Users start with a blank prompt textarea to write their own custom prompt
+  - Prompt generation only happens when user explicitly selects another style (Anthropic, Gemini, OpenAI)
+
 - **January 28, 2026**: Added Recovery Manager Component with Guardrail Conflict Detection
   - New RecoveryManager class in `server/components/recovery-manager.ts`
   - Handles error recovery and escalation to human support
