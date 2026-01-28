@@ -1116,13 +1116,13 @@ function Step7Review({
   data: WizardStepData;
   onUpdate: (data: Partial<WizardStepData>) => void;
 }) {
-  const [isEditing, setIsEditing] = useState(false);
-  const [editedPrompt, setEditedPrompt] = useState("");
-  const [generatedPrompt, setGeneratedPrompt] = useState("");
+  const selectedStyle = data.promptStyle || "custom";
+  const [isEditing, setIsEditing] = useState(selectedStyle === "custom");
+  const [editedPrompt, setEditedPrompt] = useState(data.customPrompt || "");
+  const [generatedPrompt, setGeneratedPrompt] = useState(data.customPrompt || "");
   const [isGenerating, setIsGenerating] = useState(false);
   const [generationError, setGenerationError] = useState<string | null>(null);
   const [selectedModel, setSelectedModel] = useState<GeminiModel>(defaultGenerationModel);
-  const selectedStyle = data.promptStyle || "anthropic";
 
   const generatePrompt = async (style: PromptStyle, model?: GeminiModel) => {
     const modelToUse = model || selectedModel;
