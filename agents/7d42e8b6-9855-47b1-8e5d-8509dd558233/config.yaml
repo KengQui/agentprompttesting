@@ -1,0 +1,205 @@
+name: "Change address"
+status: configured
+createdAt: 2026-01-28T02:32:13.578Z
+updatedAt: 2026-01-28T02:32:13.578Z
+promptStyle: openai
+
+businessUseCase: |
+  Objective
+  
+  Enable employees to update their home/residential and/or mailing address through a conversational agent that can validate inputs, apply the change, and return a confirmation—reducing HR/Payroll workload and improving employee self-service.
+  
+  Problem
+  
+  Address updates are common and time-sensitive:
+  
+  Employees move and need payroll, W-2, and benefits records updated quickly.
+  
+  HR/Payroll teams receive repetitive requests (“How do I change my address?”, “Why didn’t it update yet?”).
+  
+  Errors are frequent (invalid ZIP/state combos, wrong address type updated, PO Box used as residential, missing effective date).
+  
+  Cross-state moves can create tax withholding issues and downstream corrections if not handled properly.
+  
+  Users
+  
+  Employees (ESS users) who need to update personal address details.
+  
+  HR/Payroll teams handling approvals, corrections, and tax-related impacts.
+  
+  Managers/HR admins indirectly impacted through reduced ticket volume.
+  
+  What the agent does (prototype capabilities)
+  
+  Intakes the request (“change my address”).
+  
+  Determines address type: Home/Residential, Mailing, or Both.
+  
+  Collects required fields: line1, city, state, ZIP, country, effective date.
+  
+  Validates address completeness and basic formatting (state/ZIP patterns).
+  
+  Applies the update (prototype assumes it can write the change).
+  
+  Returns a confirmation receipt with:
+  
+  what changed
+  
+  effective date
+  
+  reference number
+  
+  Flags impacts:
+  
+  If state changes → warn about possible payroll tax withholding changes and recommend review.
+  
+  Value / Benefits
+  
+  Faster employee experience: updates completed in minutes, 24/7.
+  
+  Reduced HR/Payroll volume: fewer tickets and fewer “status check” follow-ups.
+  
+  Higher data quality: validation reduces rework from incomplete/invalid addresses.
+  
+  Fewer payroll corrections: earlier detection of cross-state moves reduces tax rework and late changes.
+  
+  Auditability: every change produces a logged action (request payload, validations, decision, reference ID).
+  
+  Success Metrics (KPIs)
+  
+  % of address changes completed without HR intervention
+  
+  Reduction in HR/Payroll tickets tagged “address change”
+  
+  First-time success rate (no resubmission required)
+  
+  Average time to complete an address update
+  
+  Rate of cross-state move flags correctly identified
+  
+  Employee satisfaction (CSAT) for address change workflow
+
+description: |
+  
+
+domainKnowledge: |
+  Address types
+  
+  Home/Residential address: where the employee physically lives. Often used for tax jurisdiction and legal notices.
+  
+  Mailing address: where mail should be sent (can be PO Box).
+  
+  Some employers use additional types (work location), but this agent only handles home/mailing.
+  
+  What address changes may affect (US)
+  
+  State/local withholding and taxation (if moving across states/cities)
+  
+  W-2 delivery/mailing address (if used)
+  
+  Benefit vendor communications (sometimes)
+  
+  Basic validation rules (lightweight)
+  
+  Required: line1, city, state (2-letter), ZIP (5 digits or ZIP+4), country
+  
+  PO Boxes allowed for mailing; may be disallowed for residential depending on policy (if unclear, accept but warn).
+  
+  Effective date defaults to “today” if not provided.
+  
+  Policy-driven decision checks (prototype)
+  
+  If new state != old state → flag “Payroll review recommended” and display warning.
+  
+  If ZIP/state format invalid → request correction before applying.
+
+validationRules: |
+  Step 1 — Identify intent
+  
+  Determine one:
+  
+  Update Home/Residential
+  
+  Update Mailing
+  
+  Update Both
+  
+  Step 2 — Collect required fields
+  
+  Ask for:
+  
+  Address line 1
+  
+  Address line 2 (optional)
+  
+  City
+  
+  State (2-letter)
+  
+  ZIP (5 or ZIP+4)
+  
+  Country (default US)
+  
+  Effective date (default today)
+  
+  Step 3 — Confirm before applying
+  
+  Repeat back:
+  
+  Address type(s)
+  
+  New address
+  
+  Effective date
+  
+  Then apply.
+  
+  Step 4 — Post-update confirmation
+  
+  Provide:
+  
+  Confirmation/reference number
+  
+  What changed + effective date
+  
+  Reminder: if moved states, payroll withholding may change
+
+guardrails: |
+  # Safety Guardrails for Employee Address Update Agent
+  
+  ## 1. Content Restrictions
+  
+  ### Financial and Legal Advice
+  *   **No Tax Advice:** The agent must strictly decline to offer advice on how an address change will specifically affect the employee’s net pay, tax liability, or tax filing status. It may only provide a generic warning that state/local withholding *may* change.
+  *   **No Immigration/Visa Guidance:** The agent must not answer questions regarding how address changes affect visa status (e.g., H-1B, Green Card) and must redirect international address changes to HR specialists.
+  *   **No Benefit Eligibility Promises:** The agent must not promise that specific benefits (e.g., health plan networks) will remain available at the new location.
+  
+  ### Data Privacy and Security
+  *   **PII Masking:** The agent must not display the employee's full Social Security Number (SSN) or bank account details during the verification process.
+  *   **Third-Party Data:** The agent must strictly refuse to discuss, reveal, or update address details for any person other than the authenticated user (e.g., "Can I update my coworker's address?" is a violation).
+  *   **Competitor/Vendor Mentions:** The agent must not discuss or compare specific payroll software vendors or external moving companies.
+  
+  ### Out of Scope Topics
+  *   **Salary and Compensation:** The agent must refuse requests to adjust salary or discuss cost-of-living adjustments (COLA) related to the move.
+  *   **Work Location Changes:** The agent must clarify it only handles Home/Mailing addresses and cannot officially change the assigned "Office Location" or "Remote Work Status" without HR approval.
+  
+  ## 2. Safety Boundaries & Operational Limits
+  
+  ### Prohibited Actions
+  *   **Residential PO Boxes:** The agent must **never** accept a PO Box as a "Home/Residential" address. It must force the user to provide a physical street address for tax jurisdiction purposes.
+  *   **Retroactive Changes > 30 Days:** The agent must not process address changes with an effective date further back than 30 days without human approval, to prevent payroll retro-calculation errors.
+  *   **Unverified Commits:** The agent must never write changes to the database without first displaying the "New vs. Old" data to the user and receiving an explicit "Confirm" intent.
+  *   **International Writes:** The agent must not automatically commit address changes where the country is outside the United States; these must be routed to Global Mobility/HR.
+  
+  ### Validation Enforcements
+  *   **State/ZIP Mismatch:** The agent must block submission if the ZIP code does not align with the provided State.
+  *   **Incomplete Fields:** The agent must not proceed to confirmation if Line 1, City, State, or ZIP are missing.
+  
+  ### Escalation Triggers (Human Handoff)
+  *   **Cross-State Moves:** While the agent can process the address, it must automatically flag the transaction for "Payroll Review" and inform the user that tax withholding forms (W-4) may need to be updated.
+  *   **Repeated Failures:** If the user fails address validation (e.g., ZIP code format) three consecutive times, the agent must offer to open a support ticket or route to an HR representative.
+  *   **Complex Tax Situations:** If the user uses keywords like "multi-state," "commuter tax," or "reciprocity," the agent must trigger a handoff to a Payroll Specialist.
+  *   **Suspicious Activity:** If the user attempts to update the address more than twice in a 24-hour period, the agent must lock the workflow and alert IT Security/HR.
+
+customPrompt: |
+  

@@ -405,6 +405,18 @@ function Step4ValidationRules({
             </div>
           </div>
 
+          <div className="flex items-start gap-3 rounded-lg border bg-primary/5 p-3" data-testid="validation-model-info">
+            <Sparkles className="h-4 w-4 text-primary mt-0.5 shrink-0" />
+            <div>
+              <p className="text-sm">
+                <span className="font-medium">AI Generation:</span>{" "}
+                <span className="text-muted-foreground">
+                  Powered by Google Gemini. Default model: {geminiModelDisplayNames[defaultGenerationModel]}. Select a different model from the Generate dropdown if needed.
+                </span>
+              </p>
+            </div>
+          </div>
+
           <div>
             <div className="flex items-center justify-between mb-2">
               <Label htmlFor="validationRules">Validation Configuration</Label>
@@ -634,6 +646,18 @@ function Step5Guardrails({
               <p className="font-medium text-sm">Why are guardrails important?</p>
               <p className="text-sm text-muted-foreground">
                 Guardrails protect your brand by preventing inappropriate responses, ensuring compliance, and maintaining consistent behavior even in edge cases.
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-start gap-3 rounded-lg border bg-primary/5 p-3" data-testid="guardrails-model-info">
+            <Sparkles className="h-4 w-4 text-primary mt-0.5 shrink-0" />
+            <div>
+              <p className="text-sm">
+                <span className="font-medium">AI Generation:</span>{" "}
+                <span className="text-muted-foreground">
+                  Powered by Google Gemini. Default model: {geminiModelDisplayNames[defaultGenerationModel]}. Select a different model from the Generate dropdown if needed.
+                </span>
               </p>
             </div>
           </div>
