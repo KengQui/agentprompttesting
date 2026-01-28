@@ -27,7 +27,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { generatePromptPreview, promptStyleInfo } from "@/lib/prompt-preview";
-import { validationRulesTemplate, guardrailsTemplate, sampleDataTemplate } from "@/lib/config-templates";
+import { validationRulesTemplate, guardrailsTemplate } from "@/lib/config-templates";
 import type { WizardStepData, Agent, DomainDocument, SampleDataset, PromptStyle, GeminiModel } from "@shared/schema";
 import { geminiModelDisplayNames, defaultGenerationModel } from "@shared/schema";
 
@@ -676,24 +676,6 @@ function Step6SampleData({
     onUpdate({ sampleDatasets: currentDatasets.filter(d => d.id !== id) });
   };
 
-  const handleUseTemplate = () => {
-    const templateDataset: SampleDataset = {
-      id: crypto.randomUUID(),
-      name: "Sample Customer Data (JSON)",
-      description: "Template sample customer data",
-      content: sampleDataTemplate,
-      format: "json",
-      isGenerated: false,
-      createdAt: new Date().toISOString(),
-    };
-    const currentDatasets = data.sampleDatasets || [];
-    onUpdate({ sampleDatasets: [...currentDatasets, templateDataset] });
-    toast({
-      title: "Template added",
-      description: "Sample data template has been added.",
-    });
-  };
-
   const handleGenerate = async (model: GeminiModel) => {
     if (!data.businessUseCase) {
       toast({
@@ -791,17 +773,6 @@ function Step6SampleData({
                   </Button>
                 </div>
               </div>
-              <div className="text-center text-sm text-muted-foreground">or</div>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={handleUseTemplate}
-                className="w-full"
-                data-testid="button-use-template-sample-data"
-              >
-                <FileText className="h-4 w-4 mr-2" />
-                Use Template
-              </Button>
             </div>
 
             <div className="space-y-4">
@@ -812,14 +783,14 @@ function Step6SampleData({
                 </p>
               </div>
               <div>
-                <Label htmlFor="dataType" className="text-xs">Data Type</Label>
-                <Input
-                  id="dataType"
+                <Label htmlFor="dataDescription" className="text-xs">Describe the data you need</Label>
+                <Textarea
+                  id="dataDescription"
                   value={dataType}
                   onChange={(e) => setDataType(e.target.value)}
-                  placeholder="e.g., customer records, product catalog"
-                  className="mt-1"
-                  data-testid="input-data-type"
+                  placeholder="Describe the sample data you need, e.g.: Generate 10 customer records with names, emails, order IDs, products, and order status. Include a mix of delivered, shipped, and processing orders."
+                  className="mt-1 min-h-[80px] resize-none"
+                  data-testid="textarea-data-description"
                 />
               </div>
               <div className="grid grid-cols-2 gap-2">

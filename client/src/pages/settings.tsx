@@ -40,7 +40,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { generatePromptPreview, promptStyleInfo } from "@/lib/prompt-preview";
-import { validationRulesTemplate, guardrailsTemplate, sampleDataTemplate } from "@/lib/config-templates";
+import { validationRulesTemplate, guardrailsTemplate } from "@/lib/config-templates";
 import type { Agent, UpdateAgent, AgentStatus, DomainDocument, SampleDataset, PromptStyle, GeminiModel } from "@shared/schema";
 import { geminiModelDisplayNames, defaultGenerationModel } from "@shared/schema";
 
@@ -259,24 +259,6 @@ export default function SettingsPage() {
   const removeSampleDataset = (id: string) => {
     const currentDatasets = formData?.sampleDatasets || [];
     updateFormData({ sampleDatasets: currentDatasets.filter(d => d.id !== id) });
-  };
-
-  const handleUseSampleDataTemplate = () => {
-    const templateDataset: SampleDataset = {
-      id: crypto.randomUUID(),
-      name: "Sample Customer Data (JSON)",
-      description: "Template sample customer data",
-      content: sampleDataTemplate,
-      format: "json",
-      isGenerated: false,
-      createdAt: new Date().toISOString(),
-    };
-    const currentDatasets = formData?.sampleDatasets || [];
-    updateFormData({ sampleDatasets: [...currentDatasets, templateDataset] });
-    toast({
-      title: "Template added",
-      description: "Sample data template has been added.",
-    });
   };
 
   const handleGenerateSampleData = async (model: GeminiModel) => {
@@ -829,17 +811,6 @@ export default function SettingsPage() {
                         </Button>
                       </div>
                     </div>
-                    <div className="text-center text-sm text-muted-foreground">or</div>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={handleUseSampleDataTemplate}
-                      className="w-full"
-                      data-testid="settings-button-use-template-sample-data"
-                    >
-                      <FileText className="h-4 w-4 mr-2" />
-                      Use Template
-                    </Button>
                   </div>
 
                   <div className="space-y-4">
@@ -850,14 +821,14 @@ export default function SettingsPage() {
                       </p>
                     </div>
                     <div>
-                      <Label htmlFor="settings-dataType" className="text-xs">Data Type</Label>
-                      <Input
-                        id="settings-dataType"
+                      <Label htmlFor="settings-dataDescription" className="text-xs">Describe the data you need</Label>
+                      <Textarea
+                        id="settings-dataDescription"
                         value={sampleDataType}
                         onChange={(e) => setSampleDataType(e.target.value)}
-                        placeholder="e.g., customer records"
-                        className="mt-1"
-                        data-testid="settings-input-data-type"
+                        placeholder="Describe the sample data you need, e.g.: Generate 10 customer records with names, emails, order IDs, products, and order status. Include a mix of delivered, shipped, and processing orders."
+                        className="mt-1 min-h-[80px] resize-none"
+                        data-testid="settings-textarea-data-description"
                       />
                     </div>
                     <div className="grid grid-cols-2 gap-2">
