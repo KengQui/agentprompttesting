@@ -1,6 +1,6 @@
 # Agent Studio - Complete Documentation
 
-> Last Updated: January 27, 2026
+> Last Updated: January 28, 2026
 
 ## Table of Contents
 1. [Overview](#overview)
@@ -15,11 +15,17 @@
 
 ## Overview
 
-Agent Studio is a web application for creating, configuring, and managing AI agents. Users can define business use cases, system prompts, validation rules, and guardrails through an intuitive 5-step wizard interface.
+Agent Studio is a web application for creating, configuring, and managing AI agents. Users can define business use cases, domain knowledge, validation rules, guardrails, sample datasets, and system prompts through an intuitive 7-step wizard interface.
 
 ### Key Capabilities
 - Create custom AI agents with specific personas and behaviors
-- Configure validation rules and guardrails for each agent
+- Upload domain knowledge documents to inform agent responses
+- Configure validation rules and guardrails with AI assistance
+- Smart context evaluation with clarifying questions
+- Guardrail conflict detection with recovery manager
+- Upload or generate sample datasets for training context
+- Choose between multiple AI prompt styles (Anthropic, Gemini, OpenAI)
+- Select AI models for generation (Gemini 2.5/3 Flash and Pro variants)
 - Test agents through an interactive chat interface
 - Manage multiple agents from a central dashboard
 
@@ -31,12 +37,40 @@ Agent Studio is a web application for creating, configuring, and managing AI age
 
 | Feature | Description | Location |
 |---------|-------------|----------|
-| Agent Creation Wizard | 5-step guided process to create new agents (Business Use Case, Agent Name, Validation Rules, Guardrails, Review) | `/create-agent` |
+| Agent Creation Wizard | 7-step guided process (Business Use Case, Agent Name, Domain Knowledge, Validation Rules, Guardrails, Sample Data, Review & Prompt) | `/create-agent` |
 | Agent Dashboard | View and manage all created agents | `/` (home) |
 | Chat Interface | Interactive testing environment for agents | `/chat/:agentId` |
 | Agent Settings | Edit or delete existing agents | `/settings/:agentId` |
 
-### Chatbot Features (Intermediate)
+### AI Generation Features
+
+| Feature | What It Does | Technical Details |
+|---------|--------------|-------------------|
+| Smart Context Evaluation | AI evaluates if there's enough context before generating | Opens clarifying dialog when business use case is too minimal |
+| Clarifying Questions | Multi-turn Q&A to gather missing information | Collects insights about inputs, outputs, constraints, policies |
+| Model Selection | Choose which Gemini model to use for generation | Gemini 2.5 Flash, 2.5 Pro (default), 3 Flash, 3 Pro |
+| Validation Rules Generation | AI generates validation rules based on agent context | Uses business use case, domain knowledge, and gathered insights |
+| Guardrails Generation | AI generates guardrails based on agent context | Same context as validation rules |
+| System Prompt Generation | AI creates prompts in your chosen style | Anthropic (XML), Gemini (Markdown), OpenAI (Bold emphasis) |
+
+### Domain Knowledge & Sample Data
+
+| Feature | What It Does | Technical Details |
+|---------|--------------|-------------------|
+| Domain Knowledge Input | Text area for typing domain-specific information | Included in AI system prompt |
+| Document Upload | Upload .txt, .md, .csv, .json files (up to 5MB each) | Files stored per-agent and included in prompts |
+| Sample Data Upload | Upload CSV, JSON, or text datasets (up to 5MB) | Stored in agent configuration |
+| Sample Data Generation | AI generates sample datasets | Configure type, count (1-100), format |
+
+### Recovery Manager & Conflict Detection
+
+| Feature | What It Does | Technical Details |
+|---------|--------------|-------------------|
+| Guardrail Conflict Detection | Validates guardrails against recovery rules | Real-time warnings (debounced 1s) |
+| Conflict Types | Error, Warning, Info levels | Each includes actionable suggestions |
+| Escalation Detection | Detects when human support is needed | User request, out-of-scope, sensitive topics, low confidence |
+
+### Chatbot Features
 
 | Feature | What It Does | Technical Details |
 |---------|--------------|-------------------|
@@ -67,25 +101,36 @@ Agent Studio is a web application for creating, configuring, and managing AI age
 ```
 agent-studio/
 ├── personality-prompt.txt  # Platform-wide chatbot personality (edit this!)
-├── client/src/           # Frontend React application
-│   ├── pages/            # Page components
-│   │   ├── home.tsx      # Agent dashboard
-│   │   ├── create-agent.tsx  # 5-step wizard
-│   │   ├── chat.tsx      # Chat interface
-│   │   └── settings.tsx  # Agent settings
-│   ├── components/ui/    # Shadcn UI components
-│   ├── hooks/            # Custom React hooks
-│   └── lib/              # Utilities and query client
-├── server/               # Backend Express application
-│   ├── routes.ts         # API endpoints
-│   ├── storage.ts        # Data persistence layer
-│   └── gemini.ts         # AI integration
-├── shared/               # Shared types and schemas
-│   └── schema.ts         # Zod schemas and TypeScript types
-└── agents/               # Agent data storage
-    └── {agent-id}/       # Per-agent folder
-        ├── config.yaml   # Agent configuration
-        └── chat.json     # Chat history
+├── client/src/             # Frontend React application
+│   ├── pages/              # Page components
+│   │   ├── home.tsx        # Agent dashboard
+│   │   ├── create-agent.tsx  # 7-step wizard
+│   │   ├── chat.tsx        # Chat interface
+│   │   └── settings.tsx    # Agent settings
+│   ├── components/
+│   │   ├── ui/             # Shadcn UI components
+│   │   └── ClarifyingChatDialog.tsx  # Context gathering dialog
+│   ├── hooks/              # Custom React hooks
+│   └── lib/
+│       ├── queryClient.ts  # TanStack Query setup
+│       └── prompt-preview.ts  # Prompt style generation
+├── server/                 # Backend Express application
+│   ├── routes.ts           # API endpoints
+│   ├── storage.ts          # Data persistence layer
+│   ├── gemini.ts           # AI integration
+│   └── components/         # Server components
+│       └── recovery-manager.ts  # Error recovery & escalation
+├── shared/                 # Shared types and schemas
+│   └── schema.ts           # Zod schemas and TypeScript types
+└── agents/                 # Agent data storage
+    └── {agent-id}/         # Per-agent folder
+        ├── config.yaml     # Agent configuration
+        ├── chat.json       # Chat history
+        └── components/     # Per-agent turn management
+            ├── turn-manager.ts
+            ├── flow-controller.ts
+            ├── state-manager.ts
+            └── orchestrator.ts
 ```
 
 ### Technology Stack
@@ -127,9 +172,13 @@ Content-Type: application/json
 {
   "name": "Agent Name",
   "businessUseCase": "Description of what this agent does",
-  "description": "Personality and behavior instructions",
+  "domainKnowledge": "Domain-specific information",
   "validationRules": "Rules the agent must follow",
   "guardrails": "Restrictions and boundaries",
+  "promptStyle": "anthropic" | "gemini" | "openai" | "custom",
+  "customPrompt": "Custom system prompt (if promptStyle is custom)",
+  "sampleDatasets": [],
+  "clarifyingInsights": [],
   "status": "configured"
 }
 ```
@@ -179,14 +228,14 @@ Content-Type: application/json
     "agentId": "agent-uuid",
     "role": "user",
     "content": "Hello!",
-    "timestamp": "2026-01-27T12:00:00.000Z"
+    "timestamp": "2026-01-28T12:00:00.000Z"
   },
   {
     "id": "uuid-2", 
     "agentId": "agent-uuid",
     "role": "assistant",
     "content": "Hello! How can I help you today?",
-    "timestamp": "2026-01-27T12:00:02.000Z"
+    "timestamp": "2026-01-28T12:00:02.000Z"
   }
 ]
 ```
@@ -202,6 +251,163 @@ Content-Type: application/json
 DELETE /api/agents/:id/messages
 ```
 **Response:** 204 No Content
+
+### Document & Data Upload
+
+#### Upload Domain Knowledge Document
+```
+POST /api/upload-document
+Content-Type: multipart/form-data
+
+file: (binary file, .txt/.md/.csv/.json, max 5MB)
+```
+**Response:** `{ content: "file contents as string" }`
+
+#### Upload Sample Data
+```
+POST /api/upload-sample-data
+Content-Type: multipart/form-data
+
+file: (binary file, CSV/JSON/text, max 5MB)
+```
+**Response:** Sample dataset object
+
+### AI Generation
+
+#### Evaluate Context Sufficiency
+```
+POST /api/generate/evaluate-context
+Content-Type: application/json
+
+{
+  "businessUseCase": "Description of agent's purpose",
+  "domainKnowledge": "Domain information (optional)"
+}
+```
+**Response:** `{ sufficient: boolean, missingAreas: string[] }`
+
+#### Clarifying Chat (Multi-turn Q&A)
+```
+POST /api/generate/clarifying-chat
+Content-Type: application/json
+
+{
+  "businessUseCase": "Description",
+  "domainKnowledge": "Domain info",
+  "previousInsights": [],
+  "userMessage": "User's answer to clarifying question"
+}
+```
+**Response:** `{ response: "Next question or confirmation", complete: boolean }`
+
+#### Generate Validation Rules
+```
+POST /api/generate/validation-rules
+Content-Type: application/json
+
+{
+  "businessUseCase": "Description",
+  "domainKnowledge": "Domain info",
+  "model": "gemini-2.5-pro"  // Optional, defaults to gemini-2.5-pro
+}
+```
+**Response:** `{ validationRules: "Generated rules text" }`
+
+#### Generate Validation Rules with Insights
+```
+POST /api/generate/validation-rules-with-insights
+Content-Type: application/json
+
+{
+  "businessUseCase": "Description",
+  "domainKnowledge": "Domain info",
+  "clarifyingInsights": [{ question, answer, category }],
+  "model": "gemini-2.5-pro"
+}
+```
+**Response:** `{ validationRules: "Generated rules incorporating insights" }`
+
+#### Generate Guardrails
+```
+POST /api/generate/guardrails
+Content-Type: application/json
+
+{
+  "businessUseCase": "Description",
+  "domainKnowledge": "Domain info",
+  "validationRules": "Rules text",
+  "model": "gemini-2.5-pro"
+}
+```
+**Response:** `{ guardrails: "Generated guardrails text" }`
+
+#### Generate Guardrails with Insights
+```
+POST /api/generate/guardrails-with-insights
+Content-Type: application/json
+
+{
+  "businessUseCase": "Description",
+  "domainKnowledge": "Domain info",
+  "validationRules": "Rules text",
+  "clarifyingInsights": [{ question, answer, category }],
+  "model": "gemini-2.5-pro"
+}
+```
+**Response:** `{ guardrails: "Generated guardrails incorporating insights" }`
+
+#### Generate Sample Data
+```
+POST /api/generate/sample-data
+Content-Type: application/json
+
+{
+  "businessUseCase": "Description",
+  "dataType": "customer records",
+  "recordCount": 10,
+  "format": "json",
+  "model": "gemini-2.5-pro"
+}
+```
+**Response:** Sample dataset object with generated content
+
+#### Generate System Prompt
+```
+POST /api/generate/system-prompt
+Content-Type: application/json
+
+{
+  "name": "Agent Name",
+  "businessUseCase": "Description",
+  "domainKnowledge": "Domain info",
+  "validationRules": "Rules",
+  "guardrails": "Guardrails",
+  "promptStyle": "anthropic" | "gemini" | "openai"
+}
+```
+**Response:** `{ prompt: "Generated system prompt in chosen style" }`
+
+### Validation
+
+#### Check Guardrail Conflicts
+```
+POST /api/validate/guardrail-conflicts
+Content-Type: application/json
+
+{
+  "guardrails": "Guardrails text to validate"
+}
+```
+**Response:** Array of conflict objects
+```json
+[
+  {
+    "type": "error" | "warning" | "info",
+    "message": "Description of the conflict",
+    "suggestion": "How to resolve it"
+  }
+]
+```
 
 ---
 
@@ -253,15 +459,43 @@ DELETE /api/agents/:id/messages
 
 ```typescript
 {
-  id: string;              // UUID
-  name: string;            // Required, min 1 char
-  businessUseCase: string; // Required, min 1 char
-  description: string;     // Optional, personality/behavior
-  validationRules: string; // Optional, rules to follow
-  guardrails: string;      // Optional, restrictions
+  id: string;                    // UUID
+  name: string;                  // Required, min 1 char
+  businessUseCase: string;       // Required, min 1 char
+  domainKnowledge: string;       // Optional, domain-specific info
+  validationRules: string;       // Optional, rules to follow
+  guardrails: string;            // Optional, restrictions
+  promptStyle: "anthropic" | "gemini" | "openai" | "custom";
+  customPrompt: string;          // Optional, custom system prompt
+  sampleDatasets: SampleDataset[];  // Optional, uploaded/generated datasets
+  clarifyingInsights: ClarifyingInsight[];  // Optional, gathered Q&A insights
   status: "draft" | "configured" | "active";
-  createdAt: string;       // ISO timestamp
-  updatedAt: string;       // ISO timestamp
+  createdAt: string;             // ISO timestamp
+  updatedAt: string;             // ISO timestamp
+}
+```
+
+### Sample Dataset Schema
+
+```typescript
+{
+  id: string;           // UUID
+  name: string;         // Dataset name
+  description: string;  // Optional description
+  content: string;      // The actual data content
+  format: string;       // "json" | "csv" | "text"
+  isGenerated: boolean; // true if AI-generated, false if uploaded
+  createdAt: string;    // ISO timestamp
+}
+```
+
+### Clarifying Insight Schema
+
+```typescript
+{
+  question: string;    // The clarifying question asked
+  answer: string;      // User's answer
+  category: string;    // Category: inputs, outputs, constraints, policies, data_types
 }
 ```
 
@@ -274,6 +508,16 @@ DELETE /api/agents/:id/messages
   role: "user" | "assistant";
   content: string;
   timestamp: string;       // ISO timestamp
+}
+```
+
+### Guardrail Conflict Schema
+
+```typescript
+{
+  type: "error" | "warning" | "info";
+  message: string;      // Description of the conflict
+  suggestion: string;   // How to resolve it
 }
 ```
 
@@ -299,13 +543,22 @@ Always aim to provide clear, concise, and helpful responses.
 If you're unsure about something, be honest about your limitations.
 ```
 
-> **Note:** This personality applies to all agents. Individual agents can still have their own business use case, validation rules, and guardrails - but the core personality is shared.
+> **Note:** This personality applies to all agents. Individual agents can still have their own business use case, domain knowledge, validation rules, and guardrails - but the core personality is shared.
 
 ### Required Environment Variables
 
 | Variable | Description | Required |
 |----------|-------------|----------|
 | `GEMINI_API_KEY` | Google AI Studio API key for Gemini | Yes |
+
+### AI Models Available
+
+| Model ID | Display Name | Notes |
+|----------|--------------|-------|
+| `gemini-2.5-flash` | Gemini 2.5 Flash | Fast responses |
+| `gemini-2.5-pro` | Gemini 2.5 Pro | Default, balanced |
+| `gemini-3-flash-preview` | Gemini 3 Flash | Preview, fast |
+| `gemini-3-pro-preview` | Gemini 3 Pro | Preview, most capable |
 
 ### Design System
 
@@ -320,19 +573,72 @@ If you're unsure about something, be honest about your limitations.
 
 ## Version History
 
+### January 28, 2026 - Smart Generation with Clarifying Questions
+- AI evaluates context sufficiency before generating validation rules or guardrails
+- Opens conversational dialog when context is insufficient
+- Multi-turn Q&A to gather missing information (inputs, outputs, constraints, policies, data types)
+- Gathered insights stored in agent configuration
+- Split button design: main button generates with default model, dropdown for model selection
+- New API endpoints for context evaluation and clarifying chat
+- New ClarifyingChatDialog component
+
+### January 28, 2026 - Recovery Manager & Guardrail Conflict Detection
+- New RecoveryManager class for error recovery and escalation
+- Detects when escalation to human support is needed
+- Validates guardrails against recovery rules for conflicts
+- Real-time conflict warnings in Guardrails step (debounced 1s)
+- Conflict types: error, warning, info with actionable suggestions
+
+### January 28, 2026 - Sample Data Upload and Generation
+- New Sample Data step (Step 6) in the creation wizard
+- Upload sample datasets (CSV, JSON, text up to 5MB)
+- AI-powered sample data generation with customizable options
+- Model selection for generation
+- Wizard now has 7 steps
+
+### January 28, 2026 - Prompt Style Default Change
+- "Write Your Own" is now the default prompt style
+- Users start with a blank prompt textarea
+- Prompt generation only happens when selecting another style
+
+### January 27, 2026 - Model Selection for AI Generation
+- Dropdown menu for Generate buttons
+- Choose between Gemini 2.5 Flash, 2.5 Pro, 3 Flash, 3 Pro
+- Available in both wizard and settings page
+
+### January 27, 2026 - AI-Powered System Prompt Generation
+- Gemini generates custom system prompts based on selected style
+- Incorporates all agent configuration into the prompt
+- Loading state and regenerate functionality
+- Auto-regenerates when configuration changes
+
+### January 27, 2026 - Prompt Style Selector
+- Choose between Anthropic, Gemini, and OpenAI prompt styles
+- Each style follows provider's best practices
+- Preview and edit prompts before creating agent
+- "Learn more" popup with detailed explanations
+
+### January 27, 2026 - Domain Knowledge Feature
+- New Domain Knowledge step (Step 3) in wizard
+- Type domain knowledge or upload documents
+- Supported file types: .txt, .md, .csv, .json (up to 5MB)
+
+### January 27, 2026 - Per-Agent Turn Management
+- Modular component architecture for conversation flow
+- Keyword-based intent detection with LLM fallback
+- Supported intents: answer_question, go_back, change_previous_answer, request_clarification
+
 ### January 27, 2026 - Platform-Controlled Personality
 - Moved chatbot personality to `personality-prompt.txt` file
-- Platform owner can now edit personality without touching code
-- Removed System Prompt/Description field from agent creation wizard and settings
-- Wizard Step 2 now only asks for Agent Name (no personality/description field)
+- Platform owner can edit personality without touching code
 - Personality is shared across all agents
 
 ### January 27, 2026 - Intermediate Chatbot Features
-- Added cancel response functionality (server-side support)
-- Implemented 2000 character limit with visual counter
-- Added 2-second rate limiting between messages
-- Added context tracking with message count
-- Implemented automatic topic detection
+- Cancel response functionality (server-side support)
+- 2000 character limit with visual counter
+- 2-second rate limiting between messages
+- Context tracking with message count
+- Automatic topic detection
 - Improved error handling with specific messages
 
 ### January 27, 2026 - Initial MVP
