@@ -132,25 +132,89 @@
         }
       ],
       "success": true
+    },
+    {
+      "id": "trace-1769641538147",
+      "sessionId": "a028b132-0125-41f0-883f-b6580080c76a",
+      "userInput": "how much 401k have I contribute in total last year",
+      "agentResponse": "Okay, I can help you with that. Looking at the data I have for you, John Smith, I see your bi-weekly 401k contribution was $175.00. Since you are paid bi-weekly, you contributed this amount 26 times during the year. This would mean that you contributed a total of $4,550 to your 401k last year. Does that sound right?\n",
+      "startTime": "2026-01-28T23:05:35.873Z",
+      "endTime": "2026-01-28T23:05:38.147Z",
+      "totalDuration": 2274,
+      "entries": [
+        {
+          "id": "entry-1769641536957-1",
+          "type": "intent_classification",
+          "name": "Orchestrator Intent Classification",
+          "timestamp": "2026-01-28T23:05:36.957Z",
+          "metadata": {
+            "intent": "answer_question",
+            "classificationMethod": "orchestrator",
+            "confidence": "high"
+          }
+        },
+        {
+          "id": "entry-1769641538147-3",
+          "type": "llm_call",
+          "name": "Gemini Response Generation",
+          "timestamp": "2026-01-28T23:05:38.147Z",
+          "duration": 1190,
+          "metadata": {
+            "model": "gemini",
+            "intent": "answer_question"
+          }
+        }
+      ],
+      "success": true
+    },
+    {
+      "id": "trace-1769641555276",
+      "sessionId": "a028b132-0125-41f0-883f-b6580080c76a",
+      "userInput": "how about this year?",
+      "agentResponse": "Describe your question or issue.",
+      "startTime": "2026-01-28T23:05:55.275Z",
+      "endTime": "2026-01-28T23:05:55.276Z",
+      "totalDuration": 1,
+      "entries": [
+        {
+          "id": "entry-1769641555276-1",
+          "type": "intent_classification",
+          "name": "Orchestrator Intent Classification",
+          "timestamp": "2026-01-28T23:05:55.276Z",
+          "metadata": {
+            "intent": "request_clarification",
+            "classificationMethod": "orchestrator",
+            "confidence": "high"
+          }
+        },
+        {
+          "id": "entry-1769641555276-2",
+          "type": "hook_call",
+          "name": "Orchestrator Direct Response",
+          "timestamp": "2026-01-28T23:05:55.276Z",
+          "metadata": {}
+        }
+      ],
+      "success": true
     }
   ],
   "stats": {
     "hookCalls": {
-      "Orchestrator Direct Response": 1
+      "Orchestrator Direct Response": 2
     },
     "signalReads": {},
     "intentDistribution": {
-      "answer_question": 3,
-      "request_clarification": 1
+      "answer_question": 4,
+      "request_clarification": 2
     },
     "classificationMethods": {
-      "orchestrator": 4
+      "orchestrator": 6
     },
-    "avgResponseTime": 18980,
-    "totalLlmCalls": 3,
+    "avgResponseTime": 11843,
+    "totalLlmCalls": 4,
     "totalTokensUsed": 0,
     "errorCount": 0
   },
   "createdAt": "2026-01-28T22:47:34.209Z",
-  "updatedAt": "2026-01-28T22:55:57.767Z"
+  "updatedAt": "2026-01-28T23:05:55.276Z"
 }
