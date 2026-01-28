@@ -241,6 +241,7 @@ export async function generateSystemPrompt(context: SystemPromptContext): Promis
     anthropic: `Generate the system prompt using Anthropic Claude's recommended XML-based format. Use XML tags like <role>, <purpose>, <context>, <rules>, and <constraints> to clearly separate different sections. This structured approach helps Claude understand boundaries between different types of information.`,
     gemini: `Generate the system prompt using Google Gemini's recommended Markdown-based format. Use clear Markdown headers (##) to organize sections. Place constraints and restrictions at the end of the prompt. Use bullet points for lists and keep the structure clean and readable.`,
     openai: `Generate the system prompt using OpenAI's recommended conversational format. Write the prompt as a natural conversation establishing the AI's role and behavior. Use clear, direct language without heavy formatting. Focus on tone and personality while maintaining clarity.`,
+    custom: `Generate the system prompt in a clean, professional format. Use clear structure with sections for role, purpose, context, rules, and constraints. Adapt the format based on what works best for the specific use case.`,
   };
 
   const systemPrompt = `You are an expert prompt engineer specializing in creating high-quality system prompts for AI agents.
