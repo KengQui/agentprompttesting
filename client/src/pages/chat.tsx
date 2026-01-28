@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useParams, useLocation } from "wouter";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { ArrowLeft, Send, Bot, User, Settings, Loader2, X, AlertCircle, MessageSquare, Brush } from "lucide-react";
+import { ArrowLeft, Send, Bot, User, Settings, Loader2, X, AlertCircle, MessageSquare, Eraser } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Card } from "@/components/ui/card";
@@ -365,7 +365,7 @@ export default function Chat() {
                     disabled={messages.length === 0 || clearMutation.isPending}
                     data-testid="button-clear-chat"
                   >
-                    <Brush className="h-4 w-4" />
+                    <Eraser className="h-4 w-4" />
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent>
