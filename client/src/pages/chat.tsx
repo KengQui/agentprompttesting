@@ -337,14 +337,21 @@ export default function Chat() {
         <div className="container mx-auto px-4 py-3">
           <div className="flex items-center justify-between gap-4">
             <div className="flex items-center gap-3">
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => navigate("/")}
-                data-testid="button-back"
-              >
-                <ArrowLeft className="h-5 w-5" />
-              </Button>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => navigate("/")}
+                    data-testid="button-back"
+                  >
+                    <ArrowLeft className="h-5 w-5" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Back to home</p>
+                </TooltipContent>
+              </Tooltip>
               <div className="flex items-center gap-3">
                 <div className="flex h-9 w-9 items-center justify-center rounded-md bg-primary text-primary-foreground">
                   <Bot className="h-5 w-5" />
@@ -372,14 +379,21 @@ export default function Chat() {
                   <p>Clear chat history</p>
                 </TooltipContent>
               </Tooltip>
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={() => navigate(`/settings/${params.id}`)}
-                data-testid="button-settings"
-              >
-                <Settings className="h-4 w-4" />
-              </Button>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={() => navigate(`/settings/${params.id}`)}
+                    data-testid="button-settings"
+                  >
+                    <Settings className="h-4 w-4" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Agent settings</p>
+                </TooltipContent>
+              </Tooltip>
             </div>
           </div>
         </div>
