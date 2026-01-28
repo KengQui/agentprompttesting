@@ -1,0 +1,89 @@
+{
+  "agentId": "9e7e0b5c-1a27-4559-bb34-630baa1324ee",
+  "traces": [
+    {
+      "id": "trace-1769642355505",
+      "sessionId": "a5a84c31-c905-47b4-80a9-62b2ab9b1558",
+      "userInput": "how much 401k have I contribute in total last year",
+      "agentResponse": "In 2025, your total 401k contribution was $4550.",
+      "startTime": "2026-01-28T23:19:13.969Z",
+      "endTime": "2026-01-28T23:19:15.505Z",
+      "totalDuration": 1536,
+      "entries": [
+        {
+          "id": "entry-1769642354972-1",
+          "type": "intent_classification",
+          "name": "Orchestrator Intent Classification",
+          "timestamp": "2026-01-28T23:19:14.972Z",
+          "metadata": {
+            "intent": "answer_question",
+            "classificationMethod": "orchestrator",
+            "confidence": "high"
+          }
+        },
+        {
+          "id": "entry-1769642355505-3",
+          "type": "llm_call",
+          "name": "Gemini Response Generation",
+          "timestamp": "2026-01-28T23:19:15.505Z",
+          "duration": 533,
+          "metadata": {
+            "model": "gemini",
+            "intent": "answer_question"
+          }
+        }
+      ],
+      "success": true
+    },
+    {
+      "id": "trace-1769642383850",
+      "sessionId": "a5a84c31-c905-47b4-80a9-62b2ab9b1558",
+      "userInput": "how about this year?",
+      "agentResponse": "So far this year, your total 401k contribution is $360.50.\n",
+      "startTime": "2026-01-28T23:19:43.158Z",
+      "endTime": "2026-01-28T23:19:43.850Z",
+      "totalDuration": 692,
+      "entries": [
+        {
+          "id": "entry-1769642383158-1",
+          "type": "intent_classification",
+          "name": "Orchestrator Intent Classification",
+          "timestamp": "2026-01-28T23:19:43.158Z",
+          "metadata": {
+            "intent": "answer_question",
+            "classificationMethod": "orchestrator",
+            "confidence": "high"
+          }
+        },
+        {
+          "id": "entry-1769642383850-3",
+          "type": "llm_call",
+          "name": "Gemini Response Generation",
+          "timestamp": "2026-01-28T23:19:43.850Z",
+          "duration": 692,
+          "metadata": {
+            "model": "gemini",
+            "intent": "answer_question"
+          }
+        }
+      ],
+      "success": true
+    }
+  ],
+  "stats": {
+    "hookCalls": {},
+    "signalReads": {},
+    "intentDistribution": {
+      "answer_question": 2
+    },
+    "classificationMethods": {
+      "orchestrator": 2
+    },
+    "avgResponseTime": 1114,
+    "totalLlmCalls": 2,
+    "totalTokensUsed": 0,
+    "errorCount": 0
+  },
+  "createdAt": "2026-01-28T23:19:15.505Z",
+  "updatedAt": "2026-01-28T23:19:43.851Z"
+}

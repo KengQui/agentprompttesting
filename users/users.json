@@ -39,5 +39,17 @@
     "username": "testuser_OtHC4O",
     "password": "$2b$10$gJkaBPumTPzjLfaSv.xmReHgJcRImSW/AgyGjo/0/DqExKKBbHuiW",
     "createdAt": "2026-01-28T13:31:10.863Z"
+  },
+  {
+    "id": "664cebfa-586e-46b9-8f71-c151eb6b2a45",
+    "username": "testuser_kLhyEW",
+    "password": "$2b$10$9HnQZBZ//38ipoacT4W81uiaqbuGUpJ9xKJOeBAdS21u6sOAVSVMe",
+    "createdAt": "2026-01-28T23:13:13.261Z"
+  },
+  {
+    "id": "f6b917a9-e0ba-40f4-bcad-4702f69aff99",
+    "username": "e2e_user_lViF7P",
+    "password": "$2b$10$WIozU4TJu0h1EG6ykIQyPut6e5BQKpqr2hK12zZBxqQRsoDqZAAcu",
+    "createdAt": "2026-01-28T23:17:04.832Z"
   }
 ]

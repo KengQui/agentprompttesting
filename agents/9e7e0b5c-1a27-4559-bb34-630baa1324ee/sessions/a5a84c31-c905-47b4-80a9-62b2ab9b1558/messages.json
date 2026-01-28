@@ -1,0 +1,34 @@
+[
+  {
+    "id": "ac81b890-d898-4c76-aee4-7a14cec3c14c",
+    "agentId": "9e7e0b5c-1a27-4559-bb34-630baa1324ee",
+    "sessionId": "a5a84c31-c905-47b4-80a9-62b2ab9b1558",
+    "role": "user",
+    "content": "how much 401k have I contribute in total last year",
+    "timestamp": "2026-01-28T23:19:13.970Z"
+  },
+  {
+    "id": "b29a6ef1-cba3-4beb-8ee1-4b4be41ff52b",
+    "agentId": "9e7e0b5c-1a27-4559-bb34-630baa1324ee",
+    "sessionId": "a5a84c31-c905-47b4-80a9-62b2ab9b1558",
+    "role": "assistant",
+    "content": "In 2025, your total 401k contribution was $4550.",
+    "timestamp": "2026-01-28T23:19:15.505Z"
+  },
+  {
+    "id": "2feaec95-d46e-4d7f-abae-fc64fa4aac9e",
+    "agentId": "9e7e0b5c-1a27-4559-bb34-630baa1324ee",
+    "sessionId": "a5a84c31-c905-47b4-80a9-62b2ab9b1558",
+    "role": "user",
+    "content": "how about this year?",
+    "timestamp": "2026-01-28T23:19:43.158Z"
+  },
+  {
+    "id": "0b827339-a935-4203-9285-57addb9b8c45",
+    "agentId": "9e7e0b5c-1a27-4559-bb34-630baa1324ee",
+    "sessionId": "a5a84c31-c905-47b4-80a9-62b2ab9b1558",
+    "role": "assistant",
+    "content": "So far this year, your total 401k contribution is $360.50.\n",
+    "timestamp": "2026-01-28T23:19:43.851Z"
+  }
+]

@@ -157,7 +157,19 @@ export class TurnManager {
     }
 
     // Priority 5: Clarification request
-    if (this.hasKeywords(inputLower, this.clarificationKeywords) && inputLower.includes('?')) {
+    // BUT exclude short follow-up questions that reference previous context
+    // (e.g., "how about this year?", "what about next month?", "and this one?")
+    const followUpPatterns = [
+      /^(how|what|and)\s+(about|for|if)/i,
+      /^(this|that|next|last)\s+(year|month|week|one)/i,
+      /^and\s+(the|this|that)/i,
+      /^(how|what)\s+about\s+/i
+    ];
+    const isFollowUpQuestion = followUpPatterns.some(pattern => pattern.test(inputLower));
+    
+    if (this.hasKeywords(inputLower, this.clarificationKeywords) && 
+        inputLower.includes('?') && 
+        !isFollowUpQuestion) {
       return {
         intent: 'request_clarification',
         classificationMethod: 'keyword',

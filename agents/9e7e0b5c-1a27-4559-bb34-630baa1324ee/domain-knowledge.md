@@ -1,0 +1,1 @@
+Payroll data for employee John Smith (E12345): 2025 contributions: 26 bi-weekly pay periods, $175 per period, total $4550. 2026 so far: 2 pay periods (Jan), $180.25 per period, total $360.50.
