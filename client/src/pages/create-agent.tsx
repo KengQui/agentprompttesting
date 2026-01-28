@@ -81,7 +81,7 @@ function StepIndicator({ currentStep }: { currentStep: number }) {
                   {step.name}
                 </span>
               </div>
-              <span className="text-xs text-muted-foreground hidden lg:block ml-7">
+              <span className="text-xs text-muted-foreground hidden lg:block">
                 {step.description}
               </span>
               {index !== steps.length - 1 && (
@@ -127,7 +127,7 @@ function Step1BusinessUseCase({
               placeholder="e.g., This agent helps customer support teams quickly answer product-related questions by accessing our knowledge base and providing accurate, helpful responses..."
               value={data.businessUseCase}
               onChange={(e) => onUpdate({ businessUseCase: e.target.value })}
-              className="mt-2 min-h-[280px] resize-none"
+              className="mt-2 min-h-[840px] resize-none"
               data-testid="textarea-business-usecase"
             />
           </div>
@@ -260,7 +260,7 @@ function Step3DomainKnowledge({
 - Product returns are accepted within 30 days..."
               value={data.domainKnowledge}
               onChange={(e) => onUpdate({ domainKnowledge: e.target.value })}
-              className="mt-2 min-h-[220px] resize-none"
+              className="mt-2 min-h-[660px] resize-none"
               data-testid="textarea-domain-knowledge"
             />
           </div>
@@ -458,7 +458,7 @@ function Step4ValidationRules({
               placeholder="Add validation rules to ensure data quality (Markdown or YAML format)..."
               value={data.validationRules}
               onChange={(e) => onUpdate({ validationRules: e.target.value })}
-              className="min-h-[280px] resize-none font-mono text-sm"
+              className="min-h-[840px] resize-none font-mono text-sm"
               data-testid="textarea-validation-rules"
             />
             <p className="text-xs text-muted-foreground mt-1">
@@ -599,7 +599,7 @@ function Step5Guardrails({
               placeholder="Define what your agent should NOT do (Markdown or YAML format)..."
               value={data.guardrails}
               onChange={(e) => onUpdate({ guardrails: e.target.value })}
-              className="min-h-[280px] resize-none font-mono text-sm"
+              className="min-h-[840px] resize-none font-mono text-sm"
               data-testid="textarea-guardrails"
             />
             <p className="text-xs text-muted-foreground mt-1">
@@ -955,7 +955,7 @@ function Step6Review({
               <Textarea
                 value={editedPrompt}
                 onChange={(e) => setEditedPrompt(e.target.value)}
-                className="min-h-[380px] font-mono text-xs resize-none"
+                className="min-h-[1140px] font-mono text-xs resize-none"
                 data-testid="textarea-edit-prompt"
               />
             ) : (
