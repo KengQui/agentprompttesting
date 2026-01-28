@@ -11,49 +11,35 @@ import SettingsPage from "@/pages/settings";
 import LoginPage from "@/pages/login";
 import RegisterPage from "@/pages/register";
 import ForgotPasswordPage from "@/pages/forgot-password";
-import DesignSystemPage from "@/pages/design-system";
 import NotFound from "@/pages/not-found";
-
-function AuthenticatedRoutes() {
-  return (
-    <AuthProvider>
-      <Switch>
-        <Route path="/login" component={LoginPage} />
-        <Route path="/register" component={RegisterPage} />
-        <Route path="/forgot-password" component={ForgotPasswordPage} />
-        <Route path="/">
-          <ProtectedRoute>
-            <Home />
-          </ProtectedRoute>
-        </Route>
-        <Route path="/create">
-          <ProtectedRoute>
-            <CreateAgent />
-          </ProtectedRoute>
-        </Route>
-        <Route path="/chat/:id">
-          <ProtectedRoute>
-            <Chat />
-          </ProtectedRoute>
-        </Route>
-        <Route path="/settings/:id">
-          <ProtectedRoute>
-            <SettingsPage />
-          </ProtectedRoute>
-        </Route>
-        <Route component={NotFound} />
-      </Switch>
-    </AuthProvider>
-  );
-}
 
 function Router() {
   return (
     <Switch>
-      <Route path="/design-system" component={DesignSystemPage} />
-      <Route>
-        <AuthenticatedRoutes />
+      <Route path="/login" component={LoginPage} />
+      <Route path="/register" component={RegisterPage} />
+      <Route path="/forgot-password" component={ForgotPasswordPage} />
+      <Route path="/">
+        <ProtectedRoute>
+          <Home />
+        </ProtectedRoute>
       </Route>
+      <Route path="/create">
+        <ProtectedRoute>
+          <CreateAgent />
+        </ProtectedRoute>
+      </Route>
+      <Route path="/chat/:id">
+        <ProtectedRoute>
+          <Chat />
+        </ProtectedRoute>
+      </Route>
+      <Route path="/settings/:id">
+        <ProtectedRoute>
+          <SettingsPage />
+        </ProtectedRoute>
+      </Route>
+      <Route component={NotFound} />
     </Switch>
   );
 }
@@ -62,8 +48,10 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        <Toaster />
-        <Router />
+        <AuthProvider>
+          <Toaster />
+          <Router />
+        </AuthProvider>
       </TooltipProvider>
     </QueryClientProvider>
   );
