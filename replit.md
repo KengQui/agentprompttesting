@@ -4,6 +4,16 @@
 Agent Studio is a web application for creating, configuring, and managing AI agents. Users can define business use cases, domain knowledge, validation rules, guardrails, and sample datasets through an intuitive 7-step wizard interface.
 
 ## Recent Changes
+- **January 28, 2026**: Context Rot Warning in Chat
+  - New ContextRotWarning component displays token usage progress bar in each agent's chat view
+  - Based on Chroma Research showing LLM performance degrades as context grows
+  - 200K token threshold with color-coded severity levels (green/yellow/orange/red)
+  - Progress bar shows current usage vs threshold (e.g., "35 / 200.0K")
+  - "Clear Now" button always visible to reset conversation and start fresh
+  - Info tooltip explains the context rot concept to users
+  - Token estimation: ~4 characters per token
+  - New utility: `client/src/lib/tokenUtils.ts` for token counting and severity calculation
+
 - **January 28, 2026**: Multi-File Agent Storage Structure
   - Refactored from single config.yaml to separate files per wizard step
   - New file structure in `agents/{uuid}/`:
