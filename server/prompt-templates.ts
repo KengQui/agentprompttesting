@@ -154,8 +154,13 @@ export function generateGeminiStylePrompt(context: PromptContext): string {
   const personality = getPersonalityPrompt();
   const domainKnowledge = buildDomainKnowledgeSection(context);
   const sampleData = buildSampleDataSection(context);
+  const currentDate = new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
   
   let prompt = `You are "${context.name}", an AI assistant.
+
+## Current Date
+Today is: ${currentDate}
+Use this to understand relative time references like "last month", "last year", "this week", etc.
 
 ## Purpose
 ${context.businessUseCase}
@@ -214,10 +219,15 @@ export function generateOpenAIStylePrompt(context: PromptContext): string {
   const personality = getPersonalityPrompt();
   const domainKnowledge = buildDomainKnowledgeSection(context);
   const sampleData = buildSampleDataSection(context);
+  const currentDate = new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
   
   let prompt = `# System Instructions
 
 You are **${context.name}**, an AI assistant with the following configuration:
+
+## Current Date
+Today is: ${currentDate}
+Use this to understand relative time references like "last month", "last year", "this week", etc.
 
 ## Role Definition
 ${personality}
