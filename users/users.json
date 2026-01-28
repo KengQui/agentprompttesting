@@ -5,5 +5,12 @@
     "password": "$2b$10$fK1VUV3BcRlf/WzZEWP0Hezp3Vf2R/XmpNkcffBjELeqhdXJ2M9yq",
     "phone": "+355 33 33 333",
     "createdAt": "2026-01-28T11:08:56.419Z"
+  },
+  {
+    "id": "f612d58c-9fb6-48ac-a38f-842db67aa74f",
+    "username": "testuser_C2rfj_",
+    "password": "$2b$10$rLR509uNwMhoQ4GLoQVV.O1i0UUnkA/1l7vekxw956JdisXrh5/Hu",
+    "phone": "1234567890",
+    "createdAt": "2026-01-28T11:10:15.401Z"
   }
 ]

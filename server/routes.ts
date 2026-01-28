@@ -326,13 +326,34 @@ export async function registerRoutes(
     }
   });
 
+  // Helper to verify agent ownership for nested routes
+  async function verifyAgentOwnership(req: AuthenticatedRequest, res: any, agentId: string): Promise<Agent | null> {
+    const user = await getUserFromSession(req);
+    if (!user) {
+      res.status(401).json({ message: "Unauthorized" });
+      return null;
+    }
+    
+    const agent = await storage.getAgent(agentId);
+    if (!agent) {
+      res.status(404).json({ message: "Agent not found" });
+      return null;
+    }
+    
+    if (agent.userId && agent.userId !== user.id) {
+      res.status(403).json({ message: "Access denied" });
+      return null;
+    }
+    
+    return agent;
+  }
+
   // Get all sessions for an agent
-  app.get("/api/agents/:id/sessions", async (req, res) => {
+  app.get("/api/agents/:id/sessions", async (req: AuthenticatedRequest, res) => {
     try {
-      const agent = await storage.getAgent(req.params.id);
-      if (!agent) {
-        return res.status(404).json({ message: "Agent not found" });
-      }
+      const agent = await verifyAgentOwnership(req, res, req.params.id);
+      if (!agent) return;
+      
       const sessions = await storage.getSessions(req.params.id);
       res.json(sessions);
     } catch (error) {
@@ -342,12 +363,10 @@ export async function registerRoutes(
   });
 
   // Create a new session for an agent
-  app.post("/api/agents/:id/sessions", async (req, res) => {
+  app.post("/api/agents/:id/sessions", async (req: AuthenticatedRequest, res) => {
     try {
-      const agent = await storage.getAgent(req.params.id);
-      if (!agent) {
-        return res.status(404).json({ message: "Agent not found" });
-      }
+      const agent = await verifyAgentOwnership(req, res, req.params.id);
+      if (!agent) return;
       
       const session = await storage.createSession({
         agentId: req.params.id,
@@ -361,12 +380,10 @@ export async function registerRoutes(
   });
 
   // Get a specific session
-  app.get("/api/agents/:id/sessions/:sessionId", async (req, res) => {
+  app.get("/api/agents/:id/sessions/:sessionId", async (req: AuthenticatedRequest, res) => {
     try {
-      const agent = await storage.getAgent(req.params.id);
-      if (!agent) {
-        return res.status(404).json({ message: "Agent not found" });
-      }
+      const agent = await verifyAgentOwnership(req, res, req.params.id);
+      if (!agent) return;
       
       const session = await storage.getSession(req.params.id, req.params.sessionId);
       if (!session) {
@@ -380,12 +397,10 @@ export async function registerRoutes(
   });
 
   // Update session (rename)
-  app.patch("/api/agents/:id/sessions/:sessionId", async (req, res) => {
+  app.patch("/api/agents/:id/sessions/:sessionId", async (req: AuthenticatedRequest, res) => {
     try {
-      const agent = await storage.getAgent(req.params.id);
-      if (!agent) {
-        return res.status(404).json({ message: "Agent not found" });
-      }
+      const agent = await verifyAgentOwnership(req, res, req.params.id);
+      if (!agent) return;
 
       const parsed = updateChatSessionSchema.safeParse(req.body);
       if (!parsed.success) {
@@ -404,12 +419,10 @@ export async function registerRoutes(
   });
 
   // Delete session
-  app.delete("/api/agents/:id/sessions/:sessionId", async (req, res) => {
+  app.delete("/api/agents/:id/sessions/:sessionId", async (req: AuthenticatedRequest, res) => {
     try {
-      const agent = await storage.getAgent(req.params.id);
-      if (!agent) {
-        return res.status(404).json({ message: "Agent not found" });
-      }
+      const agent = await verifyAgentOwnership(req, res, req.params.id);
+      if (!agent) return;
 
       const deleted = await storage.deleteSession(req.params.id, req.params.sessionId);
       if (!deleted) {
@@ -423,12 +436,10 @@ export async function registerRoutes(
   });
 
   // Get messages for a specific session
-  app.get("/api/agents/:id/sessions/:sessionId/messages", async (req, res) => {
+  app.get("/api/agents/:id/sessions/:sessionId/messages", async (req: AuthenticatedRequest, res) => {
     try {
-      const agent = await storage.getAgent(req.params.id);
-      if (!agent) {
-        return res.status(404).json({ message: "Agent not found" });
-      }
+      const agent = await verifyAgentOwnership(req, res, req.params.id);
+      if (!agent) return;
       
       const session = await storage.getSession(req.params.id, req.params.sessionId);
       if (!session) {
@@ -444,12 +455,11 @@ export async function registerRoutes(
   });
 
   // Get messages for an agent (all messages, for backwards compatibility)
-  app.get("/api/agents/:id/messages", async (req, res) => {
+  app.get("/api/agents/:id/messages", async (req: AuthenticatedRequest, res) => {
     try {
-      const agent = await storage.getAgent(req.params.id);
-      if (!agent) {
-        return res.status(404).json({ message: "Agent not found" });
-      }
+      const agent = await verifyAgentOwnership(req, res, req.params.id);
+      if (!agent) return;
+      
       const messages = await storage.getMessages(req.params.id);
       res.json(messages);
     } catch (error) {
@@ -459,12 +469,10 @@ export async function registerRoutes(
   });
 
   // Send a message to a session with Turn Manager + Gemini AI response
-  app.post("/api/agents/:id/sessions/:sessionId/messages", async (req, res) => {
+  app.post("/api/agents/:id/sessions/:sessionId/messages", async (req: AuthenticatedRequest, res) => {
     try {
-      const agent = await storage.getAgent(req.params.id);
-      if (!agent) {
-        return res.status(404).json({ message: "Agent not found" });
-      }
+      const agent = await verifyAgentOwnership(req, res, req.params.id);
+      if (!agent) return;
 
       const session = await storage.getSession(req.params.id, req.params.sessionId);
       if (!session) {
@@ -652,12 +660,10 @@ export async function registerRoutes(
   });
 
   // Clear messages for a specific session
-  app.delete("/api/agents/:id/sessions/:sessionId/messages", async (req, res) => {
+  app.delete("/api/agents/:id/sessions/:sessionId/messages", async (req: AuthenticatedRequest, res) => {
     try {
-      const agent = await storage.getAgent(req.params.id);
-      if (!agent) {
-        return res.status(404).json({ message: "Agent not found" });
-      }
+      const agent = await verifyAgentOwnership(req, res, req.params.id);
+      if (!agent) return;
       
       const session = await storage.getSession(req.params.id, req.params.sessionId);
       if (!session) {
@@ -673,12 +679,10 @@ export async function registerRoutes(
   });
 
   // Legacy: Send a message to an agent (will use first session or create one)
-  app.post("/api/agents/:id/messages", async (req, res) => {
+  app.post("/api/agents/:id/messages", async (req: AuthenticatedRequest, res) => {
     try {
-      const agent = await storage.getAgent(req.params.id);
-      if (!agent) {
-        return res.status(404).json({ message: "Agent not found" });
-      }
+      const agent = await verifyAgentOwnership(req, res, req.params.id);
+      if (!agent) return;
 
       // Get or create a default session
       let sessions = await storage.getSessions(req.params.id);
@@ -857,12 +861,11 @@ export async function registerRoutes(
   });
 
   // Clear all chat history for an agent
-  app.delete("/api/agents/:id/messages", async (req, res) => {
+  app.delete("/api/agents/:id/messages", async (req: AuthenticatedRequest, res) => {
     try {
-      const agent = await storage.getAgent(req.params.id);
-      if (!agent) {
-        return res.status(404).json({ message: "Agent not found" });
-      }
+      const agent = await verifyAgentOwnership(req, res, req.params.id);
+      if (!agent) return;
+      
       await storage.clearMessages(req.params.id);
       res.status(204).send();
     } catch (error) {
@@ -872,12 +875,11 @@ export async function registerRoutes(
   });
 
   // Check if agent has custom components
-  app.get("/api/agents/:id/components", async (req, res) => {
+  app.get("/api/agents/:id/components", async (req: AuthenticatedRequest, res) => {
     try {
-      const agent = await storage.getAgent(req.params.id);
-      if (!agent) {
-        return res.status(404).json({ message: "Agent not found" });
-      }
+      const agent = await verifyAgentOwnership(req, res, req.params.id);
+      if (!agent) return;
+      
       res.json({ hasCustomComponents: hasCustomComponents(req.params.id) });
     } catch (error) {
       console.error("Error checking components:", error);
@@ -1216,12 +1218,10 @@ export async function registerRoutes(
   // === Agent Tracing API ===
   
   // Get traces for an agent (optionally filtered by session)
-  app.get("/api/agents/:id/traces", async (req, res) => {
+  app.get("/api/agents/:id/traces", async (req: AuthenticatedRequest, res) => {
     try {
-      const agent = await storage.getAgent(req.params.id);
-      if (!agent) {
-        return res.status(404).json({ message: "Agent not found" });
-      }
+      const agent = await verifyAgentOwnership(req, res, req.params.id);
+      if (!agent) return;
       
       const sessionId = req.query.sessionId as string | undefined;
       const traces = await storage.getAgentTraces(req.params.id, sessionId);
@@ -1249,12 +1249,10 @@ export async function registerRoutes(
   });
 
   // Clear traces for an agent (optionally filtered by session)
-  app.delete("/api/agents/:id/traces", async (req, res) => {
+  app.delete("/api/agents/:id/traces", async (req: AuthenticatedRequest, res) => {
     try {
-      const agent = await storage.getAgent(req.params.id);
-      if (!agent) {
-        return res.status(404).json({ message: "Agent not found" });
-      }
+      const agent = await verifyAgentOwnership(req, res, req.params.id);
+      if (!agent) return;
       
       const sessionId = req.query.sessionId as string | undefined;
       await storage.clearTraces(req.params.id, sessionId);
@@ -1268,12 +1266,10 @@ export async function registerRoutes(
   // === Config History API ===
   
   // Get config history for an agent
-  app.get("/api/agents/:id/config-history", async (req, res) => {
+  app.get("/api/agents/:id/config-history", async (req: AuthenticatedRequest, res) => {
     try {
-      const agent = await storage.getAgent(req.params.id);
-      if (!agent) {
-        return res.status(404).json({ message: "Agent not found" });
-      }
+      const agent = await verifyAgentOwnership(req, res, req.params.id);
+      if (!agent) return;
       
       const history = await storage.getConfigHistory(req.params.id);
       
@@ -1289,12 +1285,10 @@ export async function registerRoutes(
   });
 
   // Add a config snapshot
-  app.post("/api/agents/:id/config-history", async (req, res) => {
+  app.post("/api/agents/:id/config-history", async (req: AuthenticatedRequest, res) => {
     try {
-      const agent = await storage.getAgent(req.params.id);
-      if (!agent) {
-        return res.status(404).json({ message: "Agent not found" });
-      }
+      const agent = await verifyAgentOwnership(req, res, req.params.id);
+      if (!agent) return;
       
       const snapshotSchema = z.object({
         description: z.string().optional(),
@@ -1333,12 +1327,10 @@ export async function registerRoutes(
   });
 
   // Revert to a config snapshot
-  app.post("/api/agents/:id/config-history/:snapshotId/revert", async (req, res) => {
+  app.post("/api/agents/:id/config-history/:snapshotId/revert", async (req: AuthenticatedRequest, res) => {
     try {
-      const agent = await storage.getAgent(req.params.id);
-      if (!agent) {
-        return res.status(404).json({ message: "Agent not found" });
-      }
+      const agent = await verifyAgentOwnership(req, res, req.params.id);
+      if (!agent) return;
       
       const revertedAgent = await storage.revertToSnapshot(req.params.id, req.params.snapshotId);
       if (!revertedAgent) {
@@ -1354,12 +1346,10 @@ export async function registerRoutes(
   });
 
   // Simulate config changes
-  app.post("/api/agents/:id/simulate", async (req, res) => {
+  app.post("/api/agents/:id/simulate", async (req: AuthenticatedRequest, res) => {
     try {
-      const agent = await storage.getAgent(req.params.id);
-      if (!agent) {
-        return res.status(404).json({ message: "Agent not found" });
-      }
+      const agent = await verifyAgentOwnership(req, res, req.params.id);
+      if (!agent) return;
       
       const simulateSchema = z.object({
         testMessage: z.string().min(1),
