@@ -607,21 +607,14 @@ export default function SettingsPage() {
                   </div>
                 </div>
 
-                <div className="flex items-start gap-3 rounded-lg border bg-primary/5 p-3" data-testid="settings-validation-model-info">
-                  <Sparkles className="h-4 w-4 text-primary mt-0.5 shrink-0" />
-                  <div>
-                    <p className="text-sm">
-                      <span className="font-medium">AI Generation:</span>{" "}
-                      <span className="text-muted-foreground">
-                        Powered by Google Gemini. Default model: {geminiModelDisplayNames[defaultGenerationModel]}. Select a different model from the Generate dropdown if needed.
-                      </span>
-                    </p>
-                  </div>
-                </div>
-
                 <div>
                   <div className="flex items-center justify-between mb-2">
-                    <Label htmlFor="validationRules">Validation Configuration</Label>
+                    <div className="flex items-center gap-3">
+                      <Label htmlFor="validationRules">Validation Configuration</Label>
+                      <span className="text-xs text-muted-foreground" data-testid="settings-validation-model-info">
+                        AI model used: {geminiModelDisplayNames[defaultGenerationModel]}
+                      </span>
+                    </div>
                     <div className="flex items-center gap-2">
                       <button
                         type="button"
@@ -704,21 +697,14 @@ export default function SettingsPage() {
                   </div>
                 </div>
 
-                <div className="flex items-start gap-3 rounded-lg border bg-primary/5 p-3" data-testid="settings-guardrails-model-info">
-                  <Sparkles className="h-4 w-4 text-primary mt-0.5 shrink-0" />
-                  <div>
-                    <p className="text-sm">
-                      <span className="font-medium">AI Generation:</span>{" "}
-                      <span className="text-muted-foreground">
-                        Powered by Google Gemini. Default model: {geminiModelDisplayNames[defaultGenerationModel]}. Select a different model from the Generate dropdown if needed.
-                      </span>
-                    </p>
-                  </div>
-                </div>
-
                 <div>
                   <div className="flex items-center justify-between mb-2">
-                    <Label htmlFor="guardrails">Guardrails Configuration</Label>
+                    <div className="flex items-center gap-3">
+                      <Label htmlFor="guardrails">Guardrails Configuration</Label>
+                      <span className="text-xs text-muted-foreground" data-testid="settings-guardrails-model-info">
+                        AI model used: {geminiModelDisplayNames[defaultGenerationModel]}
+                      </span>
+                    </div>
                     <div className="flex items-center gap-2">
                       <button
                         type="button"

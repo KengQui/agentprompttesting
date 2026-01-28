@@ -405,21 +405,14 @@ function Step4ValidationRules({
             </div>
           </div>
 
-          <div className="flex items-start gap-3 rounded-lg border bg-primary/5 p-3" data-testid="validation-model-info">
-            <Sparkles className="h-4 w-4 text-primary mt-0.5 shrink-0" />
-            <div>
-              <p className="text-sm">
-                <span className="font-medium">AI Generation:</span>{" "}
-                <span className="text-muted-foreground">
-                  Powered by Google Gemini. Default model: {geminiModelDisplayNames[defaultGenerationModel]}. Select a different model from the Generate dropdown if needed.
-                </span>
-              </p>
-            </div>
-          </div>
-
           <div>
             <div className="flex items-center justify-between mb-2">
-              <Label htmlFor="validationRules">Validation Configuration</Label>
+              <div className="flex items-center gap-3">
+                <Label htmlFor="validationRules">Validation Configuration</Label>
+                <span className="text-xs text-muted-foreground" data-testid="validation-model-info">
+                  AI model used: {geminiModelDisplayNames[defaultGenerationModel]}
+                </span>
+              </div>
               <div className="flex items-center gap-2">
                 <button
                   type="button"
@@ -650,18 +643,6 @@ function Step5Guardrails({
             </div>
           </div>
 
-          <div className="flex items-start gap-3 rounded-lg border bg-primary/5 p-3" data-testid="guardrails-model-info">
-            <Sparkles className="h-4 w-4 text-primary mt-0.5 shrink-0" />
-            <div>
-              <p className="text-sm">
-                <span className="font-medium">AI Generation:</span>{" "}
-                <span className="text-muted-foreground">
-                  Powered by Google Gemini. Default model: {geminiModelDisplayNames[defaultGenerationModel]}. Select a different model from the Generate dropdown if needed.
-                </span>
-              </p>
-            </div>
-          </div>
-
           {conflicts.length > 0 && (
             <div className="rounded-lg border border-yellow-500/50 bg-yellow-50 dark:bg-yellow-950/20 p-4" data-testid="guardrail-conflicts-alert">
               <div className="flex items-center gap-2 mb-3">
@@ -719,11 +700,14 @@ function Step5Guardrails({
 
           <div>
             <div className="flex items-center justify-between mb-2">
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-3">
                 <Label htmlFor="guardrails">Guardrails Configuration</Label>
                 {isCheckingConflicts && (
                   <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" />
                 )}
+                <span className="text-xs text-muted-foreground" data-testid="guardrails-model-info">
+                  AI model used: {geminiModelDisplayNames[defaultGenerationModel]}
+                </span>
               </div>
               <div className="flex items-center gap-2">
                 <button
