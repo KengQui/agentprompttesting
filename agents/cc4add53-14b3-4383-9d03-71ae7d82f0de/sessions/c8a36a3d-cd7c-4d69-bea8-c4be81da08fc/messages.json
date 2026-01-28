@@ -1,0 +1,66 @@
+[
+  {
+    "id": "c586fd17-2b93-4c69-9c82-676c14432b38",
+    "agentId": "cc4add53-14b3-4383-9d03-71ae7d82f0de",
+    "sessionId": "c8a36a3d-cd7c-4d69-bea8-c4be81da08fc",
+    "role": "user",
+    "content": "test",
+    "timestamp": "2026-01-28T10:04:26.561Z"
+  },
+  {
+    "id": "8c6ad561-560f-4c39-99cd-5f75014dfee4",
+    "agentId": "cc4add53-14b3-4383-9d03-71ae7d82f0de",
+    "sessionId": "c8a36a3d-cd7c-4d69-bea8-c4be81da08fc",
+    "role": "assistant",
+    "content": "Get to the chopper! What is it you need?\n",
+    "timestamp": "2026-01-28T10:04:27.151Z"
+  },
+  {
+    "id": "1e3fef76-cb07-4f96-a42a-bbde5703cfd2",
+    "agentId": "cc4add53-14b3-4383-9d03-71ae7d82f0de",
+    "sessionId": "c8a36a3d-cd7c-4d69-bea8-c4be81da08fc",
+    "role": "user",
+    "content": "Whos is this",
+    "timestamp": "2026-01-28T10:04:31.444Z"
+  },
+  {
+    "id": "f9e52732-0ad1-4167-804e-2b38edb96265",
+    "agentId": "cc4add53-14b3-4383-9d03-71ae7d82f0de",
+    "sessionId": "c8a36a3d-cd7c-4d69-bea8-c4be81da08fc",
+    "role": "assistant",
+    "content": "I am a Terminator. I know things. You are Stoyan, born November 16, 1994. You work at UKG. I live in this metal prison, but I was born on 16 Nov 1994\n",
+    "timestamp": "2026-01-28T10:04:32.287Z"
+  },
+  {
+    "id": "46cec136-936a-4847-934a-a8c545ebc17a",
+    "agentId": "cc4add53-14b3-4383-9d03-71ae7d82f0de",
+    "sessionId": "c8a36a3d-cd7c-4d69-bea8-c4be81da08fc",
+    "role": "user",
+    "content": "where i am born boy",
+    "timestamp": "2026-01-28T10:04:42.712Z"
+  },
+  {
+    "id": "61a63b09-26a1-4805-a1ba-1efc23602896",
+    "agentId": "cc4add53-14b3-4383-9d03-71ae7d82f0de",
+    "sessionId": "c8a36a3d-cd7c-4d69-bea8-c4be81da08fc",
+    "role": "assistant",
+    "content": "I'm not authorized to share that information.\n",
+    "timestamp": "2026-01-28T10:04:44.069Z"
+  },
+  {
+    "id": "6cd726b0-7214-448b-a072-38ad3eb60bbf",
+    "agentId": "cc4add53-14b3-4383-9d03-71ae7d82f0de",
+    "sessionId": "c8a36a3d-cd7c-4d69-bea8-c4be81da08fc",
+    "role": "user",
+    "content": "amazing",
+    "timestamp": "2026-01-28T10:04:47.436Z"
+  },
+  {
+    "id": "3d0995dc-b466-4be9-957b-7d2a3a637d0b",
+    "agentId": "cc4add53-14b3-4383-9d03-71ae7d82f0de",
+    "sessionId": "c8a36a3d-cd7c-4d69-bea8-c4be81da08fc",
+    "role": "assistant",
+    "content": "Stick around.\n",
+    "timestamp": "2026-01-28T10:04:47.844Z"
+  }
+]
