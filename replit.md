@@ -33,6 +33,14 @@ Agent Studio utilizes a modern web application architecture with a clear separat
     - **Recovery Manager**: Component for handling error recovery and guardrail conflict detection, escalating to human support when needed.
     - **Turn Management**: Modular, per-agent component architecture for intent detection and conversational flow.
 
+### Agent Component Templates
+- **Template System**: Agent components (TurnManager, FlowController, Orchestrator) are generated from templates in `/server/templates/agent-components/`.
+- **How it works**: When a new agent is created, the template files are copied to `/agents/{agent-id}/components/` with placeholder values replaced (e.g., `{{AGENT_NAME}}`, `{{CLASS_NAME}}`).
+- **CRITICAL RULE**: When adding new features to agent components, you **MUST** also update the corresponding template files so that newly created agents automatically receive those features.
+  - Template files: `turn-manager.template.ts`, `flow-controller.template.ts`, `orchestrator.template.ts`, `index.template.ts`
+  - To add a new component: Create a new `.template.ts` file, update `index.template.ts` to export it, and update the `copyComponentTemplates()` function in `server/storage.ts` to copy it.
+- **See**: `/server/templates/agent-components/README.md` for detailed instructions.
+
 ### Data Persistence
 - **Agent Configuration**: Each agent's configuration is stored in a dedicated folder (`/agents/{agent-id}/`) using a multi-file structure for modularity:
   - `meta.yaml` - Agent metadata (name, dates)
