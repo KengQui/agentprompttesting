@@ -12,5 +12,19 @@
     "role": "assistant",
     "content": "Okay, I can help you with that. Looking at the data, your gross pay in December 2025 was $3,605.00.",
     "timestamp": "2026-01-28T01:11:31.853Z"
+  },
+  {
+    "id": "9e9be19d-cc0e-4f42-8acf-0d3dceb9613e",
+    "agentId": "7b2c2c01-3192-44d5-be33-f1f6de022578",
+    "role": "user",
+    "content": "how much 401k did I contributed last year",
+    "timestamp": "2026-01-28T01:12:55.026Z"
+  },
+  {
+    "id": "32328d9c-0a10-4cf8-9d3e-7e21ebcea9f3",
+    "agentId": "7b2c2c01-3192-44d5-be33-f1f6de022578",
+    "role": "assistant",
+    "content": "Can you clarify which year you're asking about? Once I know the year, I can look up your 401k contributions for that period.\n",
+    "timestamp": "2026-01-28T01:12:56.815Z"
   }
 ]

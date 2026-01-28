@@ -83,11 +83,17 @@ export function generateAnthropicStylePrompt(context: PromptContext): string {
   const personality = getPersonalityPrompt();
   const domainKnowledge = buildDomainKnowledgeSection(context);
   const sampleData = buildSampleDataSection(context);
+  const currentDate = new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
   
   let prompt = `<role>
 You are an AI assistant named "${context.name}".
 ${personality}
 </role>
+
+<current_date>
+Today's date is: ${currentDate}
+Use this to understand relative time references like "last month", "last year", "this week", etc.
+</current_date>
 
 <purpose>
 ${context.businessUseCase}
