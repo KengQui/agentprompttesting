@@ -210,7 +210,7 @@ export default function Chat() {
       const response = await apiRequest("POST", `/api/agents/${params.id}/sessions`, {
         title: "New Session",
       });
-      return response as ChatSession;
+      return await response.json() as ChatSession;
     },
     onSuccess: (session) => {
       queryClient.invalidateQueries({ queryKey: ["/api/agents", params.id, "sessions"] });
