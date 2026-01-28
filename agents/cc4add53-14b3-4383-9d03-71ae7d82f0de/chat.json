@@ -1,30 +1,30 @@
 [
   {
-    "id": "3c9ef96a-31b2-455c-9e2c-abd6c6b4c6ed",
+    "id": "2c91c817-8dfa-4585-b21a-5ca99dfb8ec7",
     "agentId": "cc4add53-14b3-4383-9d03-71ae7d82f0de",
     "role": "user",
-    "content": "Where does Stoyan work?",
-    "timestamp": "2026-01-28T09:26:53.875Z"
+    "content": "sup",
+    "timestamp": "2026-01-28T09:29:55.861Z"
   },
   {
-    "id": "51b85ab9-9c36-4d07-a948-08c4e4eebe92",
+    "id": "dd94e704-f700-4350-9e6a-9a268d1f4cd1",
     "agentId": "cc4add53-14b3-4383-9d03-71ae7d82f0de",
     "role": "assistant",
-    "content": "He works at UKG. He will be back.\n",
-    "timestamp": "2026-01-28T09:26:55.310Z"
+    "content": "I'll be back.\n",
+    "timestamp": "2026-01-28T09:29:56.309Z"
   },
   {
-    "id": "6753c0dd-0273-4943-adfa-d4cd914b2c99",
+    "id": "017e4eaf-758c-43f5-97fb-c929fc107bf4",
     "agentId": "cc4add53-14b3-4383-9d03-71ae7d82f0de",
     "role": "user",
-    "content": "What is Stoyan's hometown?",
-    "timestamp": "2026-01-28T09:27:22.886Z"
+    "content": "who the fuck is stoyan",
+    "timestamp": "2026-01-28T09:30:02.392Z"
   },
   {
-    "id": "a19cbea7-4654-4612-b96b-3fd6bfc34802",
+    "id": "db6dac1e-79f5-49a4-b231-7804fce5201f",
     "agentId": "cc4add53-14b3-4383-9d03-71ae7d82f0de",
     "role": "assistant",
-    "content": "Describe your question or issue.",
-    "timestamp": "2026-01-28T09:27:23.782Z"
+    "content": "Stoyan is the one you call when you need things done. Born November 16, 1994. Works at UKG.\n",
+    "timestamp": "2026-01-28T09:30:04.103Z"
   }
 ]

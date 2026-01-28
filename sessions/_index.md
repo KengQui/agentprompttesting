@@ -7,6 +7,7 @@ This file tracks active and completed development sessions.
 | Session | Status | Last Updated | Description |
 |---------|--------|--------------|-------------|
 | [context-management-todo.md](context-management-todo.md) | complete | 2026-01-28 | Buildforce-style context management discussion |
+| [custom-prompt-fix-2026-01-28.md](custom-prompt-fix-2026-01-28.md) | complete | 2026-01-28 | Fix custom prompts to include domain knowledge and guardrails |
 
 ## Completed Sessions
 
