@@ -33,8 +33,8 @@ function AgentCard({ agent }: { agent: Agent }) {
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between gap-3">
           <div className="flex flex-col gap-3 min-w-0">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-primary/10">
-              <Bot className="h-5 w-5 text-primary" />
+            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-primary/10">
+              <Bot className="h-4 w-4 text-primary" />
             </div>
             <div className="min-w-0">
               <h3 className="font-semibold truncate" data-testid={`text-agent-name-${agent.id}`}>
@@ -87,7 +87,7 @@ function AgentCardSkeleton() {
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between gap-3">
           <div className="flex flex-col gap-3">
-            <Skeleton className="h-10 w-10 rounded-md" />
+            <Skeleton className="h-8 w-8 rounded-md" />
             <div className="space-y-2">
               <Skeleton className="h-4 w-32" />
               <Skeleton className="h-3 w-24" />
