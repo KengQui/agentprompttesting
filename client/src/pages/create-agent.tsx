@@ -45,7 +45,7 @@ function StepIndicator({ currentStep }: { currentStep: number }) {
 
   return (
     <div className="flex flex-col h-full">
-      <div className="flex-1 flex flex-col gap-2">
+      <div className="flex-1 flex flex-col gap-4">
         {steps.map((step, index) => {
           const isCompleted = currentStep > step.id;
           const isCurrent = currentStep === step.id;
