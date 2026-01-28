@@ -11,6 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest } from "@/lib/queryClient";
+import { ContextRotWarning } from "@/components/context-rot-warning";
 import type { Agent, ChatMessage } from "@shared/schema";
 
 const MAX_MESSAGE_LENGTH = 2000;
@@ -400,6 +401,12 @@ export default function Chat() {
       </header>
 
       <ContextSummary messages={messages} topic={currentTopic} />
+      
+      <ContextRotWarning 
+        messages={messages} 
+        onClearChat={() => clearMutation.mutate()} 
+        isClearing={clearMutation.isPending}
+      />
       
       <ScrollArea className="flex-1" ref={scrollRef}>
         <div className="container mx-auto max-w-3xl px-4 py-6">
