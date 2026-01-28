@@ -4,6 +4,21 @@
 Agent Studio is a web application for creating, configuring, and managing AI agents. Users can define business use cases, domain knowledge, validation rules, guardrails, and sample datasets through an intuitive 7-step wizard interface.
 
 ## Recent Changes
+- **January 28, 2026**: Multi-File Agent Storage Structure
+  - Refactored from single config.yaml to separate files per wizard step
+  - New file structure in `agents/{uuid}/`:
+    - `meta.yaml` - Agent name, status, dates, prompt style
+    - `business-use-case.md` - Business use case content
+    - `domain-knowledge.md` - Domain knowledge content
+    - `validation-rules.yaml` - Validation rules configuration
+    - `guardrails.yaml` - Guardrails configuration
+    - `custom-prompt.md` - Custom prompt template
+    - `domain-documents.json` - Uploaded document references
+    - `sample-data.json` - Sample datasets
+    - `chat.json` - Chat history (unchanged)
+  - Automatic migration: Legacy config.yaml files are converted on first load
+  - Benefits: Better organization, easier file management, modular configuration
+
 - **January 28, 2026**: Smart Generation with Clarifying Questions
   - AI now evaluates context sufficiency before generating validation rules or guardrails
   - Opens conversational dialog when context is insufficient (minimal business use case, no domain knowledge)
@@ -126,9 +141,17 @@ Agent Studio is a web application for creating, configuring, and managing AI age
 - **Storage** (`storage.ts`): In-memory storage with YAML/JSON file persistence
 
 ### Data Persistence (`agents/`)
-- Each agent stored in `/agents/{agent-id}/` folder
-- `config.yaml` - Agent configuration (YAML format)
-- `chat.json` - Chat history (JSON format)
+- Each agent stored in `/agents/{agent-id}/` folder with multi-file structure:
+  - `meta.yaml` - Agent metadata (name, status, dates, prompt style)
+  - `business-use-case.md` - Business use case content
+  - `domain-knowledge.md` - Domain knowledge content
+  - `validation-rules.yaml` - Validation rules (YAML format)
+  - `guardrails.yaml` - Guardrails configuration (YAML format)
+  - `custom-prompt.md` - Custom prompt template
+  - `domain-documents.json` - Uploaded document references
+  - `sample-data.json` - Sample datasets
+  - `chat.json` - Chat history (JSON format)
+  - `components/` - Per-agent component files
 
 ### Shared (`shared/`)
 - `schema.ts` - TypeScript types and Zod schemas for agents and messages
