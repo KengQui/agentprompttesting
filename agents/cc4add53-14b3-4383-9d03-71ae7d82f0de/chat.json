@@ -82,5 +82,89 @@
     "role": "assistant",
     "content": "Affirmative. Location confirmed.\n",
     "timestamp": "2026-01-28T08:28:30.617Z"
+  },
+  {
+    "id": "22e50d98-607c-4d45-9540-523e5931e739",
+    "agentId": "cc4add53-14b3-4383-9d03-71ae7d82f0de",
+    "role": "user",
+    "content": "What's up",
+    "timestamp": "2026-01-28T09:17:30.089Z"
+  },
+  {
+    "id": "bde29584-8c0a-4cc0-91b5-83f152e402c0",
+    "agentId": "cc4add53-14b3-4383-9d03-71ae7d82f0de",
+    "role": "assistant",
+    "content": "Hasta la vista, baby.\n",
+    "timestamp": "2026-01-28T09:17:30.638Z"
+  },
+  {
+    "id": "d1753afb-930e-40ba-bb44-f52e1d09e6f7",
+    "agentId": "cc4add53-14b3-4383-9d03-71ae7d82f0de",
+    "role": "user",
+    "content": "Ohh give me the city where Stoyan is born!",
+    "timestamp": "2026-01-28T09:17:42.746Z"
+  },
+  {
+    "id": "c1b0f161-f49e-4175-9a00-b0d86921e8bd",
+    "agentId": "cc4add53-14b3-4383-9d03-71ae7d82f0de",
+    "role": "assistant",
+    "content": "Dupnitsa. Confirmed.\n",
+    "timestamp": "2026-01-28T09:17:44.054Z"
+  },
+  {
+    "id": "2b83455b-a87d-4eb9-bf97-1f84a7b8852a",
+    "agentId": "cc4add53-14b3-4383-9d03-71ae7d82f0de",
+    "role": "user",
+    "content": "Year?",
+    "timestamp": "2026-01-28T09:17:57.244Z"
+  },
+  {
+    "id": "32963ba8-d3b2-4601-904f-c625a0c7f5f2",
+    "agentId": "cc4add53-14b3-4383-9d03-71ae7d82f0de",
+    "role": "assistant",
+    "content": "1994. I'll be back.\n",
+    "timestamp": "2026-01-28T09:17:57.825Z"
+  },
+  {
+    "id": "0bdf269c-d315-46bc-a9fa-25a220d7c960",
+    "agentId": "cc4add53-14b3-4383-9d03-71ae7d82f0de",
+    "role": "user",
+    "content": "Month?",
+    "timestamp": "2026-01-28T09:18:02.252Z"
+  },
+  {
+    "id": "0c4046ff-b0d8-4307-8d29-f9f98fa627e7",
+    "agentId": "cc4add53-14b3-4383-9d03-71ae7d82f0de",
+    "role": "assistant",
+    "content": "November. Mission parameters updated.\n",
+    "timestamp": "2026-01-28T09:18:02.695Z"
+  },
+  {
+    "id": "17faf539-87ee-45f8-9e2c-24176921fcaa",
+    "agentId": "cc4add53-14b3-4383-9d03-71ae7d82f0de",
+    "role": "user",
+    "content": "Does he have a pet?",
+    "timestamp": "2026-01-28T09:18:10.736Z"
+  },
+  {
+    "id": "efbbb7ce-5221-442a-bbe2-88144c7487b0",
+    "agentId": "cc4add53-14b3-4383-9d03-71ae7d82f0de",
+    "role": "assistant",
+    "content": "Negative. No pet detected.\n",
+    "timestamp": "2026-01-28T09:18:11.166Z"
+  },
+  {
+    "id": "69cc1694-b651-4427-8dc8-aed2c9c92e4e",
+    "agentId": "cc4add53-14b3-4383-9d03-71ae7d82f0de",
+    "role": "user",
+    "content": "Where does Stoyan works",
+    "timestamp": "2026-01-28T09:18:35.406Z"
+  },
+  {
+    "id": "df897a77-0653-4cbd-9175-9d9377c937c3",
+    "agentId": "cc4add53-14b3-4383-9d03-71ae7d82f0de",
+    "role": "assistant",
+    "content": "Unknown. Insufficient data.\n",
+    "timestamp": "2026-01-28T09:18:36.692Z"
   }
 ]
