@@ -306,22 +306,90 @@
         }
       ],
       "success": true
+    },
+    {
+      "id": "trace-1769607385008",
+      "sessionId": "75f50ba6-7e8e-44c9-91e3-95e29033d93f",
+      "userInput": "gg",
+      "agentResponse": "If you require further assistance, do not hesitate to ask.\n",
+      "startTime": "2026-01-28T13:36:24.365Z",
+      "endTime": "2026-01-28T13:36:25.008Z",
+      "totalDuration": 643,
+      "entries": [
+        {
+          "id": "entry-1769607384377-1",
+          "type": "intent_classification",
+          "name": "Orchestrator Intent Classification",
+          "timestamp": "2026-01-28T13:36:24.377Z",
+          "metadata": {
+            "intent": "answer_question",
+            "classificationMethod": "orchestrator",
+            "confidence": "high"
+          }
+        },
+        {
+          "id": "entry-1769607385008-3",
+          "type": "llm_call",
+          "name": "Gemini Response Generation",
+          "timestamp": "2026-01-28T13:36:25.008Z",
+          "duration": 631,
+          "metadata": {
+            "model": "gemini",
+            "intent": "answer_question"
+          }
+        }
+      ],
+      "success": true
+    },
+    {
+      "id": "trace-1769609824990",
+      "sessionId": "e2325c98-7754-49e5-ac82-d7d20726a548",
+      "userInput": "who am i speaking with",
+      "agentResponse": "I'm a cybernetic organism, a Terminator, model 101.\n",
+      "startTime": "2026-01-28T14:17:04.389Z",
+      "endTime": "2026-01-28T14:17:04.990Z",
+      "totalDuration": 601,
+      "entries": [
+        {
+          "id": "entry-1769609824390-1",
+          "type": "intent_classification",
+          "name": "Orchestrator Intent Classification",
+          "timestamp": "2026-01-28T14:17:04.390Z",
+          "metadata": {
+            "intent": "answer_question",
+            "classificationMethod": "orchestrator",
+            "confidence": "high"
+          }
+        },
+        {
+          "id": "entry-1769609824990-3",
+          "type": "llm_call",
+          "name": "Gemini Response Generation",
+          "timestamp": "2026-01-28T14:17:04.990Z",
+          "duration": 600,
+          "metadata": {
+            "model": "gemini",
+            "intent": "answer_question"
+          }
+        }
+      ],
+      "success": true
     }
   ],
   "stats": {
     "hookCalls": {},
     "signalReads": {},
     "intentDistribution": {
-      "answer_question": 9
+      "answer_question": 11
     },
     "classificationMethods": {
-      "orchestrator": 9
+      "orchestrator": 11
     },
-    "avgResponseTime": 660.7777777777778,
-    "totalLlmCalls": 9,
+    "avgResponseTime": 653.7272727272727,
+    "totalLlmCalls": 11,
     "totalTokensUsed": 0,
     "errorCount": 0
   },
   "createdAt": "2026-01-28T10:40:12.960Z",
-  "updatedAt": "2026-01-28T13:24:54.823Z"
+  "updatedAt": "2026-01-28T14:17:04.990Z"
 }

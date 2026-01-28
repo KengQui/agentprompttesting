@@ -1,0 +1,18 @@
+[
+  {
+    "id": "3448e264-0e35-47dc-b08f-a00131c54731",
+    "agentId": "cc4add53-14b3-4383-9d03-71ae7d82f0de",
+    "sessionId": "e2325c98-7754-49e5-ac82-d7d20726a548",
+    "role": "user",
+    "content": "who am i speaking with",
+    "timestamp": "2026-01-28T14:17:04.389Z"
+  },
+  {
+    "id": "3ab2aa21-2c8d-4587-af3d-b936468521e0",
+    "agentId": "cc4add53-14b3-4383-9d03-71ae7d82f0de",
+    "sessionId": "e2325c98-7754-49e5-ac82-d7d20726a548",
+    "role": "assistant",
+    "content": "I'm a cybernetic organism, a Terminator, model 101.\n",
+    "timestamp": "2026-01-28T14:17:04.990Z"
+  }
+]
