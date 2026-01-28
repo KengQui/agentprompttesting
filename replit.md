@@ -4,6 +4,21 @@
 Agent Studio is a web application for creating, configuring, and managing AI agents. Users can define business use cases, domain knowledge, validation rules, guardrails, and sample datasets through an intuitive 7-step wizard interface.
 
 ## Recent Changes
+- **January 28, 2026**: Session Management & Context Window System
+  - Created sessions folder structure for per-agent session management
+  - Session schema with: meta, messages, summaries, todos
+  - Sliding window context management (keeps last N messages in context)
+  - Auto-summarization for older messages to prevent context overflow
+  - TODO tracking within sessions for task persistence
+  - Session file structure in `agents/{uuid}/sessions/{sessionId}/`:
+    - `meta.yaml` - Session metadata (name, status, topic, intent)
+    - `messages.json` - Session messages with token counts
+    - `summaries.json` - Summarized older conversations
+    - `todos.json` - Session-specific tasks
+  - New API endpoints: /sessions, /sessions/active, /sessions/:id/context, /sessions/:id/todos
+  - Inspired by buildforce-cli context repository pattern
+  - Global sessions folder for platform-level TODOs
+
 - **January 28, 2026**: Multi-File Agent Storage Structure
   - Refactored from single config.yaml to separate files per wizard step
   - New file structure in `agents/{uuid}/`:
@@ -154,7 +169,18 @@ Agent Studio is a web application for creating, configuring, and managing AI age
   - `components/` - Per-agent component files
 
 ### Shared (`shared/`)
-- `schema.ts` - TypeScript types and Zod schemas for agents and messages
+- `schema.ts` - TypeScript types and Zod schemas for agents, messages, and sessions
+  - Session types: SessionMeta, SessionMessage, ContextSummary, SessionTodo, SessionContext
+  - Session configuration for context window management
+
+### Session Management
+- Each agent has a `sessions/` folder with per-session subdirectories
+- Sessions track conversation context, TODOs, and message history
+- Context window management prevents LLM context overflow:
+  - `maxMessagesInContext`: 20 (configurable)
+  - `maxTokensInContext`: 8000 (configurable)
+  - `autoSummarize`: true (summarizes older messages)
+- Global `sessions/` folder at project root for platform-level TODOs
 
 ## Design System
 - **Primary Color**: Purple (#8B5CF6)

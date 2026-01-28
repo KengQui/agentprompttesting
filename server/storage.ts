@@ -1,7 +1,7 @@
 import { randomUUID } from "crypto";
 import * as fs from "fs";
 import * as path from "path";
-import type { Agent, InsertAgent, UpdateAgent, ChatMessage, InsertChatMessage } from "@shared/schema";
+import type { Agent, InsertAgent, UpdateAgent, ChatMessage, InsertChatMessage, DomainDocument, SampleDataset, AgentStatus, PromptStyle, ClarifyingInsight } from "@shared/schema";
 
 const AGENTS_DIR = "./agents";
 const COMPONENT_TEMPLATES_DIR = "./server/components";
@@ -318,7 +318,7 @@ export class MemStorage implements IStorage {
                 // Load complex data from legacy data.json
                 const legacyDataPath = getAgentFilePath(agentId, AGENT_FILES.LEGACY_DATA);
                 if (fs.existsSync(legacyDataPath)) {
-                  const complexData = readJsonFile<{ domainDocuments?: unknown[]; sampleDatasets?: unknown[] }>(legacyDataPath, {});
+                  const complexData = readJsonFile<{ domainDocuments?: DomainDocument[]; sampleDatasets?: SampleDataset[] }>(legacyDataPath, {});
                   agent.domainDocuments = complexData.domainDocuments || [];
                   agent.sampleDatasets = complexData.sampleDatasets || [];
                 }
@@ -373,16 +373,17 @@ export class MemStorage implements IStorage {
     const customPrompt = readTextFile(getAgentFilePath(agentId, AGENT_FILES.CUSTOM_PROMPT));
     
     // Read JSON files
-    const domainDocuments = readJsonFile<unknown[]>(getAgentFilePath(agentId, AGENT_FILES.DOMAIN_DOCUMENTS), []);
-    const sampleDatasets = readJsonFile<unknown[]>(getAgentFilePath(agentId, AGENT_FILES.SAMPLE_DATA), []);
+    const domainDocuments = readJsonFile<DomainDocument[]>(getAgentFilePath(agentId, AGENT_FILES.DOMAIN_DOCUMENTS), []);
+    const sampleDatasets = readJsonFile<SampleDataset[]>(getAgentFilePath(agentId, AGENT_FILES.SAMPLE_DATA), []);
+    const clarifyingInsights = readJsonFile<ClarifyingInsight[]>(getAgentFilePath(agentId, "clarifying-insights.json"), []);
     
     return {
       id: agentId,
       name: meta.name,
-      status: meta.status || "configured",
+      status: (meta.status || "configured") as AgentStatus,
       createdAt: meta.createdAt,
       updatedAt: meta.updatedAt || meta.createdAt,
-      promptStyle: meta.promptStyle || "anthropic",
+      promptStyle: (meta.promptStyle || "anthropic") as PromptStyle,
       description: meta.description || "",
       businessUseCase,
       domainKnowledge,
@@ -391,6 +392,7 @@ export class MemStorage implements IStorage {
       customPrompt,
       domainDocuments,
       sampleDatasets,
+      clarifyingInsights,
     };
   }
 
@@ -535,6 +537,7 @@ export class MemStorage implements IStorage {
       guardrails: insertAgent.guardrails || "",
       promptStyle: insertAgent.promptStyle || "anthropic",
       customPrompt: insertAgent.customPrompt || "",
+      clarifyingInsights: insertAgent.clarifyingInsights || [],
       status,
       createdAt: now,
       updatedAt: now,

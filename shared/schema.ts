@@ -146,3 +146,100 @@ export type User = {
 };
 
 export type InsertUser = Omit<User, "id">;
+
+// Session status enum
+export const sessionStatusEnum = z.enum(["active", "paused", "completed", "archived"]);
+export type SessionStatus = z.infer<typeof sessionStatusEnum>;
+
+// Session TODO item schema
+export const sessionTodoSchema = z.object({
+  id: z.string(),
+  content: z.string(),
+  status: z.enum(["pending", "in_progress", "completed", "cancelled"]),
+  priority: z.enum(["low", "medium", "high"]).default("medium"),
+  createdAt: z.string(),
+  completedAt: z.string().optional(),
+});
+
+export type SessionTodo = z.infer<typeof sessionTodoSchema>;
+
+// Session message (extended from chat message with token count)
+export const sessionMessageSchema = z.object({
+  id: z.string(),
+  role: z.enum(["user", "assistant"]),
+  content: z.string(),
+  timestamp: z.string(),
+  tokenCount: z.number().optional(),
+  summarized: z.boolean().default(false),
+});
+
+export type SessionMessage = z.infer<typeof sessionMessageSchema>;
+
+// Context summary for older messages
+export const contextSummarySchema = z.object({
+  id: z.string(),
+  content: z.string(),
+  messageRange: z.object({
+    startId: z.string(),
+    endId: z.string(),
+    messageCount: z.number(),
+  }),
+  topics: z.array(z.string()).default([]),
+  keyDecisions: z.array(z.string()).default([]),
+  createdAt: z.string(),
+  tokenCount: z.number().optional(),
+});
+
+export type ContextSummary = z.infer<typeof contextSummarySchema>;
+
+// Session metadata schema
+export const sessionMetaSchema = z.object({
+  id: z.string(),
+  agentId: z.string(),
+  name: z.string(),
+  status: sessionStatusEnum.default("active"),
+  topic: z.string().optional(),
+  intent: z.string().optional(),
+  messageCount: z.number().default(0),
+  totalTokens: z.number().default(0),
+  contextWindowSize: z.number().default(20),
+  createdAt: z.string(),
+  updatedAt: z.string(),
+  lastActivityAt: z.string(),
+});
+
+export type SessionMeta = z.infer<typeof sessionMetaSchema>;
+
+// Full session schema
+export const sessionSchema = z.object({
+  meta: sessionMetaSchema,
+  messages: z.array(sessionMessageSchema).default([]),
+  summaries: z.array(contextSummarySchema).default([]),
+  todos: z.array(sessionTodoSchema).default([]),
+});
+
+export type Session = z.infer<typeof sessionSchema>;
+
+// Session context for LLM (what gets sent to the AI)
+export const sessionContextSchema = z.object({
+  recentMessages: z.array(sessionMessageSchema),
+  summarizedContext: z.string().optional(),
+  activeTodos: z.array(sessionTodoSchema).default([]),
+  sessionMeta: z.object({
+    topic: z.string().optional(),
+    intent: z.string().optional(),
+    messageCount: z.number(),
+  }),
+});
+
+export type SessionContext = z.infer<typeof sessionContextSchema>;
+
+// Session config for context window management
+export const sessionConfigSchema = z.object({
+  maxMessagesInContext: z.number().default(20),
+  maxTokensInContext: z.number().default(8000),
+  summarizationThreshold: z.number().default(15),
+  autoSummarize: z.boolean().default(true),
+});
+
+export type SessionConfig = z.infer<typeof sessionConfigSchema>;
