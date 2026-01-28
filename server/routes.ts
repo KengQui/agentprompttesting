@@ -5,6 +5,7 @@ import { insertAgentSchema, updateAgentSchema } from "@shared/schema";
 import { z } from "zod";
 import { generateAgentResponse, generateValidationRules, generateGuardrails, generateSystemPrompt, generateSampleData, type GenerationContext, type SystemPromptContext, type SampleDataGenerationContext } from "./gemini";
 import { loadAgentComponents, clearAgentCache, hasCustomComponents } from "./agent-loader";
+import { createRecoveryManager } from "./components/recovery-manager";
 import multer from "multer";
 import { v4 as uuidv4 } from "uuid";
 
@@ -318,6 +319,43 @@ export async function registerRoutes(
     } catch (error: any) {
       console.error("Error generating guardrails:", error);
       res.status(500).json({ message: error?.message || "Failed to generate guardrails" });
+    }
+  });
+
+  // Check for conflicts between guardrails and recovery manager rules
+  app.post("/api/validate/guardrail-conflicts", async (req, res) => {
+    try {
+      const conflictCheckSchema = z.object({
+        guardrails: z.string().min(1, "Guardrails content is required"),
+        recoveryConfig: z.object({
+          escalationKeywords: z.array(z.string()).optional(),
+          outOfScopeKeywords: z.array(z.string()).optional(),
+          sensitiveTopicKeywords: z.array(z.string()).optional(),
+          maxRetryAttempts: z.number().optional(),
+        }).optional(),
+      });
+
+      const parsed = conflictCheckSchema.safeParse(req.body);
+      if (!parsed.success) {
+        return res.status(400).json({ message: parsed.error.errors[0]?.message || "Invalid request" });
+      }
+
+      const recoveryManager = createRecoveryManager(parsed.data.recoveryConfig);
+      const conflicts = recoveryManager.validateAgainstGuardrails(parsed.data.guardrails);
+
+      res.json({ 
+        conflicts,
+        hasErrors: conflicts.some(c => c.severity === 'error'),
+        hasWarnings: conflicts.some(c => c.severity === 'warning'),
+        summary: {
+          errors: conflicts.filter(c => c.severity === 'error').length,
+          warnings: conflicts.filter(c => c.severity === 'warning').length,
+          info: conflicts.filter(c => c.severity === 'info').length,
+        }
+      });
+    } catch (error: any) {
+      console.error("Error checking guardrail conflicts:", error);
+      res.status(500).json({ message: error?.message || "Failed to check guardrail conflicts" });
     }
   });
 

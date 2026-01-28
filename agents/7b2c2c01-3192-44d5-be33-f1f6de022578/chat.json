@@ -54,5 +54,61 @@
     "role": "assistant",
     "content": "I do not have access to your employer contribution records. I can only provide information about your own contributions. You can find details on employer contributions on your pay stub or by contacting HR.\n",
     "timestamp": "2026-01-28T01:14:47.445Z"
+  },
+  {
+    "id": "4ef178f5-113c-4e87-99e5-7438b027f657",
+    "agentId": "7b2c2c01-3192-44d5-be33-f1f6de022578",
+    "role": "user",
+    "content": "what are the state tax I am paying",
+    "timestamp": "2026-01-28T01:25:43.249Z"
+  },
+  {
+    "id": "411a59f9-b5ef-4862-9afc-12ad0933a2dd",
+    "agentId": "7b2c2c01-3192-44d5-be33-f1f6de022578",
+    "role": "assistant",
+    "content": "Certainly! According to the data I have, the state tax you are paying is reflected in your bi-weekly paychecks. For instance, on the 2023-01-20 paycheck, the state tax was $210.00. The state tax remained consistent at $210.00 throughout 2023. After your raise, starting from 2024-01-19, the bi-weekly state tax is $216.00.\n",
+    "timestamp": "2026-01-28T01:25:45.494Z"
+  },
+  {
+    "id": "ec793615-2d25-4943-8ed9-59dbf90e4604",
+    "agentId": "7b2c2c01-3192-44d5-be33-f1f6de022578",
+    "role": "user",
+    "content": "what are other deduction beside 401k",
+    "timestamp": "2026-01-28T01:26:08.634Z"
+  },
+  {
+    "id": "a4de583f-5e21-4f6c-9df7-3dd5326ab110",
+    "agentId": "7b2c2c01-3192-44d5-be33-f1f6de022578",
+    "role": "assistant",
+    "content": "Okay, I can help you with that. Besides your 401k contributions, you also have a health insurance deduction. For example, on the 2023-01-20 paystub, the health insurance deduction was $150.00. This amount remained consistent throughout 2023. After your raise, starting from 2024-01-19, your bi-weekly health insurance deduction is $154.50.\n",
+    "timestamp": "2026-01-28T01:26:09.863Z"
+  },
+  {
+    "id": "7437e956-765a-4c5f-ba06-9e0a0cd1a19a",
+    "agentId": "7b2c2c01-3192-44d5-be33-f1f6de022578",
+    "role": "user",
+    "content": "Is there a increase of health insurance deduction this year?",
+    "timestamp": "2026-01-28T01:26:51.178Z"
+  },
+  {
+    "id": "9bdcb820-df6e-4216-8f89-828e3ef5c0ff",
+    "agentId": "7b2c2c01-3192-44d5-be33-f1f6de022578",
+    "role": "assistant",
+    "content": "Yes, there was an increase in your health insurance deduction this year (2026). In 2025, your health insurance deduction was $154.50, and in 2026 it increased to $159.14.\n",
+    "timestamp": "2026-01-28T01:26:53.091Z"
+  },
+  {
+    "id": "9470a9a8-23fa-462d-9706-d0153a368dac",
+    "agentId": "7b2c2c01-3192-44d5-be33-f1f6de022578",
+    "role": "user",
+    "content": "that sucks",
+    "timestamp": "2026-01-28T01:27:04.263Z"
+  },
+  {
+    "id": "9b050369-d9da-452d-a6b8-c436fadecd49",
+    "agentId": "7b2c2c01-3192-44d5-be33-f1f6de022578",
+    "role": "assistant",
+    "content": "I understand that changes in deductions can be frustrating. Health insurance costs can fluctuate due to various factors, such as adjustments to plan premiums or changes in coverage levels. If you'd like to understand more about why your health insurance deduction increased, I recommend checking the open enrollment materials or reaching out to HR for a detailed explanation. They can provide specific information related to your plan and the reasons behind the change.\n",
+    "timestamp": "2026-01-28T01:27:05.481Z"
   }
 ]

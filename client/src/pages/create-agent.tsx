@@ -472,6 +472,26 @@ function Step4ValidationRules({
   );
 }
 
+interface GuardrailConflict {
+  type: string;
+  severity: 'error' | 'warning' | 'info';
+  guardrailRule: string;
+  recoveryRule: string;
+  suggestion: string;
+  topic?: string;
+}
+
+interface ConflictCheckResult {
+  conflicts: GuardrailConflict[];
+  hasErrors: boolean;
+  hasWarnings: boolean;
+  summary: {
+    errors: number;
+    warnings: number;
+    info: number;
+  };
+}
+
 function Step5Guardrails({
   data,
   onUpdate,
@@ -480,11 +500,60 @@ function Step5Guardrails({
   onUpdate: (data: Partial<WizardStepData>) => void;
 }) {
   const [isGenerating, setIsGenerating] = useState(false);
+  const [isCheckingConflicts, setIsCheckingConflicts] = useState(false);
+  const [conflicts, setConflicts] = useState<GuardrailConflict[]>([]);
+  const [conflictSummary, setConflictSummary] = useState<ConflictCheckResult['summary'] | null>(null);
   const [selectedModel, setSelectedModel] = useState<GeminiModel>(defaultGenerationModel);
   const { toast } = useToast();
+  const checkTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  const checkForConflicts = async (guardrailsContent: string) => {
+    if (!guardrailsContent || guardrailsContent.trim().length < 20) {
+      setConflicts([]);
+      setConflictSummary(null);
+      return;
+    }
+
+    setIsCheckingConflicts(true);
+    try {
+      const response = await apiRequest("POST", "/api/validate/guardrail-conflicts", {
+        guardrails: guardrailsContent,
+      });
+      const result: ConflictCheckResult = await response.json();
+      setConflicts(result.conflicts);
+      setConflictSummary(result.summary);
+    } catch (error) {
+      console.error("Failed to check conflicts:", error);
+    } finally {
+      setIsCheckingConflicts(false);
+    }
+  };
+
+  const handleGuardrailsChange = (value: string) => {
+    onUpdate({ guardrails: value });
+    
+    if (checkTimeoutRef.current) {
+      clearTimeout(checkTimeoutRef.current);
+    }
+    checkTimeoutRef.current = setTimeout(() => {
+      checkForConflicts(value);
+    }, 1000);
+  };
+
+  useEffect(() => {
+    if (data.guardrails && data.guardrails.trim().length >= 20) {
+      checkForConflicts(data.guardrails);
+    }
+    return () => {
+      if (checkTimeoutRef.current) {
+        clearTimeout(checkTimeoutRef.current);
+      }
+    };
+  }, []);
 
   const handleUseTemplate = () => {
     onUpdate({ guardrails: guardrailsTemplate });
+    setTimeout(() => checkForConflicts(guardrailsTemplate), 100);
   };
 
   const handleGenerate = async (model: GeminiModel) => {
@@ -511,6 +580,7 @@ function Step5Guardrails({
         title: "Guardrails generated",
         description: `Generated using ${geminiModelDisplayNames[model]}.`,
       });
+      setTimeout(() => checkForConflicts(result.guardrails), 100);
     } catch (error: any) {
       toast({
         title: "Generation failed",
@@ -519,6 +589,28 @@ function Step5Guardrails({
       });
     } finally {
       setIsGenerating(false);
+    }
+  };
+
+  const getSeverityIcon = (severity: string) => {
+    switch (severity) {
+      case 'error':
+        return <AlertTriangle className="h-4 w-4 text-destructive" />;
+      case 'warning':
+        return <AlertTriangle className="h-4 w-4 text-yellow-500" />;
+      default:
+        return <Info className="h-4 w-4 text-blue-500" />;
+    }
+  };
+
+  const getSeverityBadge = (severity: string) => {
+    switch (severity) {
+      case 'error':
+        return <Badge variant="destructive">Error</Badge>;
+      case 'warning':
+        return <Badge className="bg-yellow-500 hover:bg-yellow-600">Warning</Badge>;
+      default:
+        return <Badge variant="secondary">Info</Badge>;
     }
   };
 
@@ -546,9 +638,69 @@ function Step5Guardrails({
             </div>
           </div>
 
+          {conflicts.length > 0 && (
+            <div className="rounded-lg border border-yellow-500/50 bg-yellow-50 dark:bg-yellow-950/20 p-4" data-testid="guardrail-conflicts-alert">
+              <div className="flex items-center gap-2 mb-3">
+                <AlertTriangle className="h-5 w-5 text-yellow-600 dark:text-yellow-500" />
+                <span className="font-medium text-yellow-800 dark:text-yellow-400">
+                  Recovery Manager Conflicts Detected
+                </span>
+                {conflictSummary && (
+                  <div className="flex gap-2 ml-auto">
+                    {conflictSummary.errors > 0 && (
+                      <Badge variant="destructive">{conflictSummary.errors} errors</Badge>
+                    )}
+                    {conflictSummary.warnings > 0 && (
+                      <Badge className="bg-yellow-500 hover:bg-yellow-600">{conflictSummary.warnings} warnings</Badge>
+                    )}
+                    {conflictSummary.info > 0 && (
+                      <Badge variant="secondary">{conflictSummary.info} info</Badge>
+                    )}
+                  </div>
+                )}
+              </div>
+              <p className="text-sm text-yellow-700 dark:text-yellow-300 mb-3">
+                The following conflicts were found between your guardrails and the recovery manager's escalation rules:
+              </p>
+              <div className="space-y-2 max-h-48 overflow-y-auto">
+                {conflicts.map((conflict, index) => (
+                  <div 
+                    key={index} 
+                    className="flex items-start gap-2 text-sm bg-white dark:bg-background rounded p-2 border"
+                    data-testid={`conflict-item-${index}`}
+                  >
+                    {getSeverityIcon(conflict.severity)}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        {getSeverityBadge(conflict.severity)}
+                        {conflict.topic && (
+                          <Badge variant="outline" className="text-xs">{conflict.topic}</Badge>
+                        )}
+                      </div>
+                      <p className="text-muted-foreground mt-1 text-xs break-words">
+                        <strong>Guardrail:</strong> {conflict.guardrailRule}
+                      </p>
+                      <p className="text-muted-foreground text-xs">
+                        <strong>Issue:</strong> {conflict.recoveryRule}
+                      </p>
+                      <p className="text-primary text-xs mt-1">
+                        <strong>Suggestion:</strong> {conflict.suggestion}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           <div>
             <div className="flex items-center justify-between mb-2">
-              <Label htmlFor="guardrails">Guardrails Configuration</Label>
+              <div className="flex items-center gap-2">
+                <Label htmlFor="guardrails">Guardrails Configuration</Label>
+                {isCheckingConflicts && (
+                  <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" />
+                )}
+              </div>
               <div className="flex items-center gap-2">
                 <button
                   type="button"
@@ -599,7 +751,7 @@ function Step5Guardrails({
               id="guardrails"
               placeholder="Define what your agent should NOT do (Markdown or YAML format)..."
               value={data.guardrails}
-              onChange={(e) => onUpdate({ guardrails: e.target.value })}
+              onChange={(e) => handleGuardrailsChange(e.target.value)}
               className="min-h-[840px] resize-none font-mono text-sm"
               data-testid="textarea-guardrails"
             />

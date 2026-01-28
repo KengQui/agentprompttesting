@@ -74,3 +74,52 @@ export interface AgentConfig {
   validationRules?: string;
   guardrails?: string;
 }
+
+// Recovery Manager Types
+
+export type EscalationReason = 
+  | 'user_requested'
+  | 'out_of_scope'
+  | 'sensitive_topic'
+  | 'low_confidence'
+  | 'max_retries_exceeded'
+  | 'error';
+
+export interface RecoveryResult {
+  shouldEscalate: boolean;
+  reasons: EscalationReason[];
+  primaryReason?: EscalationReason;
+  recoveryMessage?: string;
+  escalationMessage?: string;
+  contextToCollect?: string[];
+}
+
+export interface EscalationContext {
+  conversationId: string;
+  reason: EscalationReason;
+  initiatedAt: string;
+  completedAt?: string;
+  status: 'pending' | 'in_progress' | 'completed' | 'cancelled';
+  originalQuery: string;
+  collectedContext: Record<string, string>;
+}
+
+export type ConflictSeverity = 'error' | 'warning' | 'info';
+
+export interface GuardrailConflict {
+  type: 'missing_escalation_trigger' | 'potential_response_conflict' | 'unconfigured_escalation_trigger';
+  severity: ConflictSeverity;
+  guardrailRule: string;
+  recoveryRule: string;
+  suggestion: string;
+  topic?: string;
+}
+
+export interface RecoveryConfig {
+  escalationKeywords?: string[];
+  outOfScopeKeywords?: string[];
+  sensitiveTopicKeywords?: string[];
+  maxRetryAttempts?: number;
+  defaultRecoveryMessage?: string;
+  defaultEscalationMessage?: string;
+}

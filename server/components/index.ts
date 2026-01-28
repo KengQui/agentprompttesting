@@ -16,3 +16,4 @@ export * from './turn-manager';
 export * from './state-manager';
 export * from './flow-controller';
 export * from './orchestrator';
+export * from './recovery-manager';
