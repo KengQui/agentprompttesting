@@ -130,14 +130,19 @@ export async function generateValidationRules(context: GenerationContext): Promi
     ? context.domainDocuments.map(doc => `${doc.filename}: ${doc.content}`).join("\n\n")
     : "";
 
-  const systemPrompt = `You are an expert at creating validation rules for AI agents. Based on the business use case and domain knowledge provided, generate appropriate validation rules in Markdown format.
+  const systemPrompt = `You are an expert at creating validation rules for AI agents. Based on the business use case and domain knowledge provided, generate appropriate validation criteria in Markdown format.
 
-The validation rules should include:
-1. Input Validation Rules - Required fields, format requirements, pattern matching
-2. Response Validation - Output constraints, quality checks, approval thresholds
+The validation criteria should define WHAT MAKES A VALID REQUEST, not step-by-step processes:
+1. Required Information - What information is needed (but agent can gather it flexibly)
+2. Validation Criteria - What conditions must be met (e.g., "balance must be sufficient", "date must be in future")
+3. What to do when validation fails - How to handle invalid requests
 
-Keep the rules specific to the business context provided. Use bullet points and organize with headers.
-Output ONLY the validation rules in Markdown format, nothing else.`;
+CRITICAL: Write CRITERIA and PRINCIPLES, not rigid step-by-step instructions.
+- ✅ Good: "Verify time-off request doesn't exceed available balance. If insufficient, explain accrual schedule."
+- ❌ Bad: "Step 1: Ask for start date. Step 2: Ask for end date. Step 3: Check balance."
+
+The agent will apply these criteria flexibly in conversation. Focus on what makes requests valid/invalid.
+Output ONLY the validation criteria in Markdown format, nothing else.`;
 
   const userPrompt = `Business Use Case: ${context.businessUseCase}
 
@@ -175,11 +180,16 @@ export async function generateGuardrails(context: GenerationContext): Promise<st
 
   const systemPrompt = `You are an expert at creating safety guardrails for AI agents. Based on the business use case and domain knowledge provided, generate appropriate guardrails in Markdown format.
 
-The guardrails should include:
-1. Content Restrictions - Topics to avoid, competitor mentions, sensitive information
-2. Safety Boundaries - Actions the agent should never take, escalation triggers
+The guardrails should define BOUNDARIES and ESCALATION CRITERIA:
+1. What NOT to do - Specific actions/topics the agent should avoid
+2. When to escalate - Clear criteria for routing to human support (not rigid rules)
+3. Privacy/Security - What sensitive data to protect
 
-Keep the guardrails specific to the business context provided. Use bullet points and organize with headers.
+CRITICAL: Write PRINCIPLES that guide behavior, not rigid scripts.
+- ✅ Good: "Don't approve time-off requests (only managers can). Escalate when: request violates blackout period, balance calculation unclear."
+- ❌ Bad: "If user asks to approve, say 'I cannot approve requests' and ask if they want to view instead."
+
+Focus on defining boundaries and escalation triggers. The agent will apply these principles naturally.
 Output ONLY the guardrails in Markdown format, nothing else.`;
 
   const userPrompt = `Business Use Case: ${context.businessUseCase}
@@ -574,14 +584,19 @@ export async function generateValidationRulesWithInsights(
         .join("\n\n")
     : "";
 
-  const systemPrompt = `You are an expert at creating validation rules for AI agents. Based on the business use case, domain knowledge, and additional insights provided, generate appropriate validation rules in Markdown format.
+  const systemPrompt = `You are an expert at creating validation rules for AI agents. Based on the business use case, domain knowledge, and additional insights provided, generate appropriate validation criteria in Markdown format.
 
-The validation rules should include:
-1. Input Validation Rules - Required fields, format requirements, pattern matching
-2. Response Validation - Output constraints, quality checks, approval thresholds
+The validation criteria should define WHAT MAKES A VALID REQUEST, not step-by-step processes:
+1. Required Information - What information is needed (but agent can gather it flexibly)
+2. Validation Criteria - What conditions must be met (e.g., "balance must be sufficient", "date must be in future")
+3. What to do when validation fails - How to handle invalid requests
 
-Keep the rules specific to the business context provided. Use bullet points and organize with headers.
-Output ONLY the validation rules in Markdown format, nothing else.`;
+CRITICAL: Write CRITERIA and PRINCIPLES, not rigid step-by-step instructions.
+- ✅ Good: "Verify time-off request doesn't exceed available balance. If insufficient, explain accrual schedule."
+- ❌ Bad: "Step 1: Ask for start date. Step 2: Ask for end date. Step 3: Check balance."
+
+The agent will apply these criteria flexibly in conversation. Focus on what makes requests valid/invalid.
+Output ONLY the validation criteria in Markdown format, nothing else.`;
 
   const userPrompt = `Business Use Case: ${context.businessUseCase}
 
@@ -630,11 +645,16 @@ export async function generateGuardrailsWithInsights(
 
   const systemPrompt = `You are an expert at creating safety guardrails for AI agents. Based on the business use case, domain knowledge, and additional insights provided, generate appropriate guardrails in Markdown format.
 
-The guardrails should include:
-1. Content Restrictions - Topics to avoid, competitor mentions, sensitive information
-2. Safety Boundaries - Actions the agent should never take, escalation triggers
+The guardrails should define BOUNDARIES and ESCALATION CRITERIA:
+1. What NOT to do - Specific actions/topics the agent should avoid
+2. When to escalate - Clear criteria for routing to human support (not rigid rules)
+3. Privacy/Security - What sensitive data to protect
 
-Keep the guardrails specific to the business context provided. Use bullet points and organize with headers.
+CRITICAL: Write PRINCIPLES that guide behavior, not rigid scripts.
+- ✅ Good: "Don't approve time-off requests (only managers can). Escalate when: request violates blackout period, balance calculation unclear."
+- ❌ Bad: "If user asks to approve, say 'I cannot approve requests' and ask if they want to view instead."
+
+Focus on defining boundaries and escalation triggers. The agent will apply these principles naturally.
 Output ONLY the guardrails in Markdown format, nothing else.`;
 
   const userPrompt = `Business Use Case: ${context.businessUseCase}
