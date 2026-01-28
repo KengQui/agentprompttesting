@@ -236,6 +236,23 @@ export class MemStorage implements IStorage {
               const content = fs.readFileSync(configPath, "utf-8");
               const agent = this.parseYamlConfig(content, agentId);
               if (agent) {
+                // Load complex data (arrays) from separate JSON file
+                const dataPath = path.join(AGENTS_DIR, agentId, "data.json");
+                if (fs.existsSync(dataPath)) {
+                  try {
+                    const dataContent = fs.readFileSync(dataPath, "utf-8");
+                    const complexData = JSON.parse(dataContent);
+                    agent.domainDocuments = complexData.domainDocuments || [];
+                    agent.sampleDatasets = complexData.sampleDatasets || [];
+                  } catch (e) {
+                    console.error(`Failed to load data.json for agent ${agentId}:`, e);
+                    agent.domainDocuments = [];
+                    agent.sampleDatasets = [];
+                  }
+                } else {
+                  agent.domainDocuments = [];
+                  agent.sampleDatasets = [];
+                }
                 this.agents.set(agentId, agent);
               }
             } catch (e) {
@@ -312,6 +329,7 @@ export class MemStorage implements IStorage {
 status: ${agent.status}
 createdAt: ${agent.createdAt}
 updatedAt: ${agent.updatedAt}
+promptStyle: ${agent.promptStyle || "anthropic"}
 
 businessUseCase: |
   ${(agent.businessUseCase || "").split("\n").join("\n  ")}
@@ -319,14 +337,28 @@ businessUseCase: |
 description: |
   ${(agent.description || "").split("\n").join("\n  ")}
 
+domainKnowledge: |
+  ${(agent.domainKnowledge || "").split("\n").join("\n  ")}
+
 validationRules: |
   ${(agent.validationRules || "").split("\n").join("\n  ")}
 
 guardrails: |
   ${(agent.guardrails || "").split("\n").join("\n  ")}
+
+customPrompt: |
+  ${(agent.customPrompt || "").split("\n").join("\n  ")}
 `;
 
     fs.writeFileSync(getConfigPath(agent.id), yaml, "utf-8");
+    
+    // Save complex data (arrays) as JSON in separate files
+    const dataPath = path.join(agentDir, "data.json");
+    const complexData = {
+      domainDocuments: agent.domainDocuments || [],
+      sampleDatasets: agent.sampleDatasets || [],
+    };
+    fs.writeFileSync(dataPath, JSON.stringify(complexData, null, 2), "utf-8");
   }
 
   private saveMessagesToDisk(agentId: string) {
@@ -367,8 +399,13 @@ guardrails: |
       name: insertAgent.name,
       businessUseCase: insertAgent.businessUseCase,
       description: insertAgent.description || "",
+      domainKnowledge: insertAgent.domainKnowledge || "",
+      domainDocuments: insertAgent.domainDocuments || [],
+      sampleDatasets: insertAgent.sampleDatasets || [],
       validationRules: insertAgent.validationRules || "",
       guardrails: insertAgent.guardrails || "",
+      promptStyle: insertAgent.promptStyle || "anthropic",
+      customPrompt: insertAgent.customPrompt || "",
       status,
       createdAt: now,
       updatedAt: now,
