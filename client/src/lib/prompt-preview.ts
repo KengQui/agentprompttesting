@@ -33,6 +33,12 @@ export const promptStyleInfo: Record<PromptStyle, {
     detailedDescription: "OpenAI's GPT models work well with Markdown formatting that uses bold text (**like this**) to emphasize key terms and explicit role definitions at the start. This style clearly states what the assistant 'is' and what it should do, with organized sections for different aspects of behavior. OpenAI models respond well to direct, assertive instructions.",
     link: "https://platform.openai.com/docs/guides/prompt-engineering",
   },
+  custom: {
+    name: "Write Your Own",
+    description: "Create your own custom prompt from scratch with full control.",
+    detailedDescription: "Write your own system prompt entirely from scratch. This gives you complete control over the exact instructions sent to the AI. Useful if you have specific requirements or prefer a particular prompting style not covered by the other options.",
+    link: "",
+  },
 };
 
 function buildDomainSection(context: PromptPreviewContext): string {
@@ -138,6 +144,9 @@ ${guardrails}` : ''}
 ## Output Format
 - Provide clear, well-structured responses
 - Stay within your defined scope and guardrails`;
+
+    case "custom":
+      return "";
 
     default:
       return "";

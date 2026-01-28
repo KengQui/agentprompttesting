@@ -5,7 +5,7 @@ export const agentStatusEnum = z.enum(["draft", "configured", "active"]);
 export type AgentStatus = z.infer<typeof agentStatusEnum>;
 
 // Prompt style enum
-export const promptStyleEnum = z.enum(["anthropic", "gemini", "openai"]);
+export const promptStyleEnum = z.enum(["anthropic", "gemini", "openai", "custom"]);
 export type PromptStyle = z.infer<typeof promptStyleEnum>;
 
 // Gemini model enum for generation

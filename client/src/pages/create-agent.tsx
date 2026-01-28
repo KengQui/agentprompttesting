@@ -1161,6 +1161,13 @@ function Step7Review({
   };
 
   useEffect(() => {
+    if (selectedStyle === "custom") {
+      if (data.customPrompt) {
+        setEditedPrompt(data.customPrompt);
+        setGeneratedPrompt(data.customPrompt);
+      }
+      return;
+    }
     if (data.customPrompt) {
       setEditedPrompt(data.customPrompt);
       setGeneratedPrompt(data.customPrompt);
@@ -1177,7 +1184,13 @@ function Step7Review({
     const newStyle = style as PromptStyle;
     onUpdate({ promptStyle: newStyle, customPrompt: "" });
     setIsEditing(false);
-    generatePrompt(newStyle);
+    if (newStyle === "custom") {
+      setGeneratedPrompt("");
+      setEditedPrompt("");
+      setIsEditing(true);
+    } else {
+      generatePrompt(newStyle);
+    }
   };
 
   const handleEditToggle = () => {
@@ -1306,20 +1319,22 @@ function Step7Review({
                     </DialogDescription>
                   </DialogHeader>
                   <div className="space-y-4 mt-4">
-                    {(["anthropic", "gemini", "openai"] as PromptStyle[]).map((style) => (
+                    {(["anthropic", "gemini", "openai", "custom"] as PromptStyle[]).map((style) => (
                       <div key={style} className="space-y-2">
                         <div className="flex items-center justify-between">
                           <h4 className="font-medium">{promptStyleInfo[style].name}</h4>
-                          <a
-                            href={promptStyleInfo[style].link}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-xs text-primary hover:underline flex items-center gap-1"
-                            data-testid={`link-${style}-docs`}
-                          >
-                            View docs
-                            <ExternalLink className="h-3 w-3" />
-                          </a>
+                          {promptStyleInfo[style].link && (
+                            <a
+                              href={promptStyleInfo[style].link}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-xs text-primary hover:underline flex items-center gap-1"
+                              data-testid={`link-${style}-docs`}
+                            >
+                              View docs
+                              <ExternalLink className="h-3 w-3" />
+                            </a>
+                          )}
                         </div>
                         <p className="text-sm text-muted-foreground">
                           {promptStyleInfo[style].detailedDescription}
@@ -1333,10 +1348,10 @@ function Step7Review({
             <RadioGroup
               value={selectedStyle}
               onValueChange={handleStyleChange}
-              className="grid grid-cols-3 gap-3"
+              className="grid grid-cols-2 sm:grid-cols-4 gap-3"
               data-testid="prompt-style-radio-group"
             >
-              {(["anthropic", "gemini", "openai"] as PromptStyle[]).map((style) => (
+              {(["anthropic", "gemini", "openai", "custom"] as PromptStyle[]).map((style) => (
                 <div key={style} className="flex items-center space-x-2">
                   <RadioGroupItem 
                     value={style} 
@@ -1359,84 +1374,90 @@ function Step7Review({
 
           <div className="space-y-2">
             <div className="flex items-center justify-between flex-wrap gap-2">
-              <Label>Prompt Preview</Label>
-              <div className="flex items-center gap-2">
-                <span className="text-sm text-muted-foreground">AI model used</span>
-                {!isGenerating && !isEditing && (
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        className="gap-1 h-7"
-                        data-testid="button-regenerate-prompt"
-                      >
-                        {geminiModelDisplayNames[selectedModel]}
-                        <ChevronDown className="h-3 w-3" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      {(Object.keys(geminiModelDisplayNames) as GeminiModel[]).map((model) => (
-                        <DropdownMenuItem
-                          key={model}
-                          onClick={() => {
-                            setSelectedModel(model);
-                            onUpdate({ customPrompt: "" });
-                            generatePrompt(selectedStyle, model);
-                          }}
-                          data-testid={`menu-item-prompt-model-${model}`}
+              <Label>{selectedStyle === "custom" ? "Your Custom Prompt" : "Prompt Preview"}</Label>
+              {selectedStyle !== "custom" && (
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-muted-foreground">AI model used</span>
+                  {!isGenerating && !isEditing && (
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          className="gap-1 h-7"
+                          data-testid="button-regenerate-prompt"
                         >
-                          {geminiModelDisplayNames[model]}
-                        </DropdownMenuItem>
-                      ))}
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                )}
-                {isGenerating && (
+                          {geminiModelDisplayNames[selectedModel]}
+                          <ChevronDown className="h-3 w-3" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        {(Object.keys(geminiModelDisplayNames) as GeminiModel[]).map((model) => (
+                          <DropdownMenuItem
+                            key={model}
+                            onClick={() => {
+                              setSelectedModel(model);
+                              onUpdate({ customPrompt: "" });
+                              generatePrompt(selectedStyle, model);
+                            }}
+                            data-testid={`menu-item-prompt-model-${model}`}
+                          >
+                            {geminiModelDisplayNames[model]}
+                          </DropdownMenuItem>
+                        ))}
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  )}
+                  {isGenerating && (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      className="gap-1 h-7"
+                      disabled
+                    >
+                      <Loader2 className="h-3 w-3 animate-spin" />
+                      Generating...
+                    </Button>
+                  )}
+                </div>
+              )}
+            </div>
+            {selectedStyle !== "custom" && (
+              <div className="flex items-center justify-end gap-2">
+                {data.customPrompt && !isGenerating && (
                   <Button
                     type="button"
-                    variant="outline"
+                    variant="ghost"
                     size="sm"
+                    onClick={handleResetPrompt}
                     className="gap-1 h-7"
-                    disabled
+                    data-testid="button-reset-prompt"
                   >
-                    <Loader2 className="h-3 w-3 animate-spin" />
-                    Generating...
+                    <RotateCcw className="h-3 w-3" />
+                    Reset
                   </Button>
                 )}
-              </div>
-            </div>
-            <div className="flex items-center justify-end gap-2">
-              {data.customPrompt && !isGenerating && (
                 <Button
                   type="button"
                   variant="ghost"
                   size="sm"
-                  onClick={handleResetPrompt}
+                  onClick={isEditing ? handleSaveEdit : handleEditToggle}
                   className="gap-1 h-7"
-                  data-testid="button-reset-prompt"
+                  disabled={isGenerating}
+                  data-testid="button-edit-prompt"
                 >
-                  <RotateCcw className="h-3 w-3" />
-                  Reset
+                  <Pencil className="h-3 w-3" />
+                  {isEditing ? "Save" : "Edit"}
                 </Button>
-              )}
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                onClick={isEditing ? handleSaveEdit : handleEditToggle}
-                className="gap-1 h-7"
-                disabled={isGenerating}
-                data-testid="button-edit-prompt"
-              >
-                <Pencil className="h-3 w-3" />
-                {isEditing ? "Save" : "Edit"}
-              </Button>
-            </div>
+              </div>
+            )}
             
             <p className="text-xs text-muted-foreground">
-              Gemini generates a custom prompt based on your configuration and selected style.
+              {selectedStyle === "custom" 
+                ? "Write your own system prompt with complete control over the instructions."
+                : "Gemini generates a custom prompt based on your configuration and selected style."}
             </p>
 
             {generationError && (
@@ -1446,7 +1467,18 @@ function Step7Review({
               </div>
             )}
             
-            {isGenerating ? (
+            {selectedStyle === "custom" ? (
+              <Textarea
+                value={editedPrompt}
+                onChange={(e) => {
+                  setEditedPrompt(e.target.value);
+                  onUpdate({ customPrompt: e.target.value });
+                }}
+                placeholder="Write your system prompt here. This is the instruction that will be sent to the AI to define its behavior, personality, and capabilities..."
+                className="min-h-[300px] font-mono text-xs"
+                data-testid="textarea-custom-prompt"
+              />
+            ) : isGenerating ? (
               <div 
                 className="rounded-md bg-muted/50 p-4 min-h-[300px] flex flex-col items-center justify-center gap-3"
                 data-testid="prompt-loading"
