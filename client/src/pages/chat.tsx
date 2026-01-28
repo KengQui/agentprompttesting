@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useParams, useLocation } from "wouter";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { ArrowLeft, Send, Bot, User, Settings, Loader2, X, AlertCircle, MessageSquare, Eraser } from "lucide-react";
+import { ArrowLeft, Send, Bot, User, Settings, Loader2, X, AlertCircle, MessageSquare, Eraser, Plus, PanelLeftClose, PanelLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Card } from "@/components/ui/card";
@@ -12,7 +12,8 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { ContextRotWarning } from "@/components/context-rot-warning";
-import type { Agent, ChatMessage } from "@shared/schema";
+import { SessionSidebar } from "@/components/session-sidebar";
+import type { Agent, ChatMessage, ChatSession, ChatSessionWithPreview } from "@shared/schema";
 
 const MAX_MESSAGE_LENGTH = 2000;
 const RATE_LIMIT_COOLDOWN = 2000;
@@ -86,7 +87,7 @@ function TypingIndicator({ onCancel }: { onCancel?: () => void }) {
   );
 }
 
-function ContextSummary({ messages, topic }: { messages: ChatMessage[]; topic: string | null }) {
+function ContextSummary({ messages, topic, sessionTitle }: { messages: ChatMessage[]; topic: string | null; sessionTitle?: string }) {
   if (messages.length === 0) return null;
   
   return (
@@ -94,6 +95,11 @@ function ContextSummary({ messages, topic }: { messages: ChatMessage[]; topic: s
       <MessageSquare className="h-4 w-4 text-muted-foreground" />
       <span className="text-sm text-muted-foreground">
         {messages.length} message{messages.length !== 1 ? 's' : ''} in conversation
+        {sessionTitle && (
+          <Badge variant="outline" className="ml-2 text-xs">
+            {sessionTitle}
+          </Badge>
+        )}
         {topic && (
           <Badge variant="secondary" className="ml-2 text-xs">
             {topic}
@@ -144,15 +150,20 @@ function detectTopic(messages: ChatMessage[]): string | null {
   return 'General';
 }
 
-function EmptyChat({ agentName }: { agentName: string }) {
+function EmptyChat({ agentName, hasSession }: { agentName: string; hasSession: boolean }) {
   return (
     <div className="flex flex-col items-center justify-center h-full py-12">
       <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 mb-4">
         <Bot className="h-8 w-8 text-primary" />
       </div>
-      <h3 className="text-lg font-semibold mb-2">Start a conversation</h3>
+      <h3 className="text-lg font-semibold mb-2">
+        {hasSession ? "Start a conversation" : "Create a session to begin"}
+      </h3>
       <p className="text-muted-foreground text-center max-w-sm">
-        Send a message to {agentName} to begin testing your agent configuration.
+        {hasSession 
+          ? `Send a message to ${agentName} to begin testing your agent configuration.`
+          : "Click 'New Session' in the sidebar to start a new conversation."
+        }
       </p>
     </div>
   );
@@ -166,6 +177,8 @@ export default function Chat() {
   const [lastMessageTime, setLastMessageTime] = useState<number>(0);
   const [cooldownRemaining, setCooldownRemaining] = useState<number>(0);
   const [isCancelled, setIsCancelled] = useState(false);
+  const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
   const scrollRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
@@ -174,18 +187,56 @@ export default function Chat() {
     queryKey: ["/api/agents", params.id],
   });
 
-  const { data: messages = [], isLoading: messagesLoading } = useQuery<ChatMessage[]>({
-    queryKey: ["/api/agents", params.id, "messages"],
+  const { data: sessions = [], isLoading: sessionsLoading } = useQuery<ChatSessionWithPreview[]>({
+    queryKey: ["/api/agents", params.id, "sessions"],
   });
 
+  const { data: messages = [], isLoading: messagesLoading } = useQuery<ChatMessage[]>({
+    queryKey: ["/api/agents", params.id, "sessions", activeSessionId, "messages"],
+    enabled: !!activeSessionId,
+  });
+
+  const activeSession = sessions.find(s => s.id === activeSessionId);
   const currentTopic = detectTopic(messages);
+
+  useEffect(() => {
+    if (sessions.length > 0 && !activeSessionId) {
+      setActiveSessionId(sessions[0].id);
+    }
+  }, [sessions, activeSessionId]);
+
+  const createSessionMutation = useMutation({
+    mutationFn: async () => {
+      const response = await apiRequest("POST", `/api/agents/${params.id}/sessions`, {
+        title: "New Session",
+      });
+      return response as ChatSession;
+    },
+    onSuccess: (session) => {
+      queryClient.invalidateQueries({ queryKey: ["/api/agents", params.id, "sessions"] });
+      setActiveSessionId(session.id);
+      toast({
+        title: "Session created",
+        description: "A new session has been created.",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to create session",
+        variant: "destructive",
+      });
+    },
+  });
 
   const sendMutation = useMutation({
     mutationFn: async (content: string) => {
+      if (!activeSessionId) throw new Error("No active session");
+      
       abortControllerRef.current = new AbortController();
       setIsCancelled(false);
       
-      const response = await fetch(`/api/agents/${params.id}/messages`, {
+      const response = await fetch(`/api/agents/${params.id}/sessions/${activeSessionId}/messages`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ content }),
@@ -200,7 +251,8 @@ export default function Chat() {
       return await response.json() as ChatMessage[];
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/agents", params.id, "messages"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/agents", params.id, "sessions", activeSessionId, "messages"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/agents", params.id, "sessions"] });
       setLastMessageTime(Date.now());
     },
     onError: (error: Error) => {
@@ -209,7 +261,7 @@ export default function Chat() {
           title: "Response cancelled",
           description: "The AI response was cancelled.",
         });
-        queryClient.invalidateQueries({ queryKey: ["/api/agents", params.id, "messages"] });
+        queryClient.invalidateQueries({ queryKey: ["/api/agents", params.id, "sessions", activeSessionId, "messages"] });
         return;
       }
       
@@ -237,13 +289,15 @@ export default function Chat() {
 
   const clearMutation = useMutation({
     mutationFn: async () => {
-      await apiRequest("DELETE", `/api/agents/${params.id}/messages`);
+      if (!activeSessionId) throw new Error("No active session");
+      await apiRequest("DELETE", `/api/agents/${params.id}/sessions/${activeSessionId}/messages`);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/agents", params.id, "messages"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/agents", params.id, "sessions", activeSessionId, "messages"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/agents", params.id, "sessions"] });
       toast({
         title: "Chat cleared",
-        description: "All messages have been deleted.",
+        description: "All messages in this session have been deleted.",
       });
     },
     onError: (error: Error) => {
@@ -289,7 +343,7 @@ export default function Chat() {
   const isOverLimit = message.length > MAX_MESSAGE_LENGTH;
 
   const handleSend = () => {
-    if (!message.trim() || sendMutation.isPending || isRateLimited || isOverLimit) return;
+    if (!message.trim() || sendMutation.isPending || isRateLimited || isOverLimit || !activeSessionId) return;
     sendMutation.mutate(message.trim());
     setMessage("");
   };
@@ -300,6 +354,25 @@ export default function Chat() {
       handleSend();
     }
   };
+
+  const handleSessionSelect = (sessionId: string) => {
+    setActiveSessionId(sessionId);
+  };
+
+  const handleNewSession = () => {
+    createSessionMutation.mutate();
+  };
+
+  const handleSessionDeleted = useCallback((deletedSessionId: string) => {
+    if (activeSessionId === deletedSessionId) {
+      const remainingSessions = sessions.filter(s => s.id !== deletedSessionId);
+      if (remainingSessions.length > 0) {
+        setActiveSessionId(remainingSessions[0].id);
+      } else {
+        setActiveSessionId(null);
+      }
+    }
+  }, [activeSessionId, sessions]);
 
   if (agentLoading) {
     return (
@@ -333,9 +406,9 @@ export default function Chat() {
   }
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    <div className="min-h-screen h-screen bg-background flex flex-col overflow-hidden">
       <header className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="container mx-auto px-4 py-3">
+        <div className="px-4 py-3">
           <div className="flex items-center justify-between gap-4">
             <div className="flex items-center gap-3">
               <Tooltip>
@@ -351,6 +424,21 @@ export default function Chat() {
                 </TooltipTrigger>
                 <TooltipContent>
                   <p>Back to home</p>
+                </TooltipContent>
+              </Tooltip>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => setSidebarOpen(!sidebarOpen)}
+                    data-testid="button-toggle-sidebar"
+                  >
+                    {sidebarOpen ? <PanelLeftClose className="h-5 w-5" /> : <PanelLeft className="h-5 w-5" />}
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>{sidebarOpen ? "Hide sessions" : "Show sessions"}</p>
                 </TooltipContent>
               </Tooltip>
               <div className="flex items-center gap-3">
@@ -369,15 +457,35 @@ export default function Chat() {
                   <Button
                     variant="outline"
                     size="icon"
+                    onClick={handleNewSession}
+                    disabled={createSessionMutation.isPending}
+                    data-testid="button-new-session-header"
+                  >
+                    {createSessionMutation.isPending ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Plus className="h-4 w-4" />
+                    )}
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>New session</p>
+                </TooltipContent>
+              </Tooltip>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="outline"
+                    size="icon"
                     onClick={() => clearMutation.mutate()}
-                    disabled={messages.length === 0 || clearMutation.isPending}
+                    disabled={messages.length === 0 || clearMutation.isPending || !activeSessionId}
                     data-testid="button-clear-chat"
                   >
                     <Eraser className="h-4 w-4" />
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent>
-                  <p>Clear chat history</p>
+                  <p>Clear session messages</p>
                 </TooltipContent>
               </Tooltip>
               <Tooltip>
@@ -400,87 +508,108 @@ export default function Chat() {
         </div>
       </header>
 
-      <ContextSummary messages={messages} topic={currentTopic} />
-      
-      <ContextRotWarning 
-        messages={messages} 
-        onClearChat={() => clearMutation.mutate()} 
-        isClearing={clearMutation.isPending}
-      />
-      
-      <ScrollArea className="flex-1" ref={scrollRef}>
-        <div className="container mx-auto max-w-3xl px-4 py-6">
-          {messagesLoading ? (
-            <div className="space-y-4">
-              {[1, 2, 3].map((i) => (
-                <div key={i} className="flex gap-3">
-                  <Skeleton className="h-8 w-8 rounded-full" />
-                  <Skeleton className="h-16 flex-1 max-w-[60%] rounded-lg" />
-                </div>
-              ))}
-            </div>
-          ) : messages.length === 0 ? (
-            <EmptyChat agentName={agent.name} />
-          ) : (
-            <div className="space-y-4">
-              {messages.map((msg) => (
-                <MessageBubble key={msg.id} message={msg} />
-              ))}
-              {sendMutation.isPending && <TypingIndicator onCancel={handleCancel} />}
-            </div>
-          )}
-        </div>
-      </ScrollArea>
+      <div className="flex-1 flex overflow-hidden">
+        {sidebarOpen && (
+          <SessionSidebar
+            agentId={params.id!}
+            activeSessionId={activeSessionId}
+            onSessionSelect={handleSessionSelect}
+            onNewSession={handleNewSession}
+            onSessionDeleted={handleSessionDeleted}
+          />
+        )}
 
-      <div className="border-t bg-background p-4">
-        <div className="container mx-auto max-w-3xl">
-          {isOverLimit && (
-            <div className="flex items-center gap-2 mb-2 text-destructive text-sm">
-              <AlertCircle className="h-4 w-4" />
-              <span>Message is too long. Please shorten it to {MAX_MESSAGE_LENGTH} characters.</span>
+        <div className="flex-1 flex flex-col overflow-hidden">
+          <ContextSummary messages={messages} topic={currentTopic} sessionTitle={activeSession?.title} />
+          
+          <ContextRotWarning 
+            messages={messages} 
+            onClearChat={() => clearMutation.mutate()} 
+            isClearing={clearMutation.isPending}
+          />
+          
+          <ScrollArea className="flex-1" ref={scrollRef}>
+            <div className="max-w-3xl mx-auto px-4 py-6">
+              {messagesLoading || sessionsLoading ? (
+                <div className="space-y-4">
+                  {[1, 2, 3].map((i) => (
+                    <div key={i} className="flex gap-3">
+                      <Skeleton className="h-8 w-8 rounded-full" />
+                      <Skeleton className="h-16 flex-1 max-w-[60%] rounded-lg" />
+                    </div>
+                  ))}
+                </div>
+              ) : !activeSessionId || messages.length === 0 ? (
+                <EmptyChat agentName={agent.name} hasSession={!!activeSessionId} />
+              ) : (
+                <div className="space-y-4">
+                  {messages.map((msg) => (
+                    <MessageBubble key={msg.id} message={msg} />
+                  ))}
+                  {sendMutation.isPending && <TypingIndicator onCancel={handleCancel} />}
+                </div>
+              )}
             </div>
-          )}
-          {isRateLimited && (
-            <div className="flex items-center gap-2 mb-2 text-muted-foreground text-sm">
-              <Loader2 className="h-4 w-4 animate-spin" />
-              <span>Please wait {Math.ceil(cooldownRemaining / 1000)}s before sending another message...</span>
-            </div>
-          )}
-          <Card className="p-2">
-            <div className="flex gap-2">
-              <Textarea
-                ref={textareaRef}
-                placeholder="Type your message..."
-                value={message}
-                onChange={(e) => setMessage(e.target.value)}
-                onKeyDown={handleKeyDown}
-                className={`min-h-[44px] max-h-[120px] resize-none border-0 focus-visible:ring-0 ${
-                  isOverLimit ? "text-destructive" : ""
-                }`}
-                rows={1}
-                maxLength={MAX_MESSAGE_LENGTH + 100}
-                data-testid="textarea-message"
-              />
-              <Button
-                onClick={handleSend}
-                disabled={!message.trim() || sendMutation.isPending || isRateLimited || isOverLimit}
-                size="icon"
-                className="shrink-0"
-                data-testid="button-send"
-              >
-                {sendMutation.isPending ? (
+          </ScrollArea>
+
+          <div className="border-t bg-background p-4">
+            <div className="max-w-3xl mx-auto">
+              {isOverLimit && (
+                <div className="flex items-center gap-2 mb-2 text-destructive text-sm">
+                  <AlertCircle className="h-4 w-4" />
+                  <span>Message is too long. Please shorten it to {MAX_MESSAGE_LENGTH} characters.</span>
+                </div>
+              )}
+              {isRateLimited && (
+                <div className="flex items-center gap-2 mb-2 text-muted-foreground text-sm">
                   <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  <Send className="h-4 w-4" />
-                )}
-              </Button>
+                  <span>Please wait {Math.ceil(cooldownRemaining / 1000)}s before sending another message...</span>
+                </div>
+              )}
+              {!activeSessionId && (
+                <div className="flex items-center gap-2 mb-2 text-muted-foreground text-sm">
+                  <MessageSquare className="h-4 w-4" />
+                  <span>Create a new session to start chatting</span>
+                </div>
+              )}
+              <Card className="p-2">
+                <div className="flex gap-2">
+                  <Textarea
+                    ref={textareaRef}
+                    placeholder={activeSessionId ? "Type your message..." : "Create a session first..."}
+                    value={message}
+                    onChange={(e) => setMessage(e.target.value)}
+                    onKeyDown={handleKeyDown}
+                    disabled={!activeSessionId}
+                    className={`min-h-[44px] max-h-[120px] resize-none border-0 focus-visible:ring-0 ${
+                      isOverLimit ? "text-destructive" : ""
+                    }`}
+                    rows={1}
+                    maxLength={MAX_MESSAGE_LENGTH + 100}
+                    data-testid="textarea-message"
+                  />
+                  <Button
+                    onClick={handleSend}
+                    disabled={!message.trim() || sendMutation.isPending || isRateLimited || isOverLimit || !activeSessionId}
+                    size="icon"
+                    className="shrink-0"
+                    data-testid="button-send"
+                  >
+                    {sendMutation.isPending ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Send className="h-4 w-4" />
+                    )}
+                  </Button>
+                </div>
+              </Card>
+              <div className="flex items-center justify-between mt-2 px-1">
+                <p className="text-xs text-muted-foreground">
+                  Press Enter to send, Shift+Enter for new line
+                </p>
+                <CharacterCounter current={message.length} max={MAX_MESSAGE_LENGTH} />
+              </div>
             </div>
-          </Card>
-          <div className="flex items-center justify-between mt-2 px-1">
-            <p className="text-xs text-muted-foreground">
-              Press Enter to send, Shift+Enter for new line
-            </p>
-            <CharacterCounter current={message.length} max={MAX_MESSAGE_LENGTH} />
           </div>
         </div>
       </div>

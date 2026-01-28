@@ -4,6 +4,23 @@
 Agent Studio is a web application for creating, configuring, and managing AI agents. Users can define business use cases, domain knowledge, validation rules, guardrails, and sample datasets through an intuitive 7-step wizard interface.
 
 ## Recent Changes
+- **January 28, 2026**: Chat Session Management
+  - Added session management to organize chat conversations per agent
+  - Each agent can have multiple sessions for testing different scenarios
+  - Session sidebar shows list of sessions with preview, message count, and last activity
+  - Sessions are renamable with inline editing for tracking test scenarios
+  - Sessions can be deleted with automatic fallback to next available session
+  - Collapsible sidebar to maximize chat space when needed
+  - Session data stored in `agents/{uuid}/sessions.json`
+  - Messages now include sessionId to group conversations
+  - Backwards compatible with legacy messages (auto-migrated to default session)
+  - New API endpoints:
+    - GET/POST /api/agents/:id/sessions - List/create sessions
+    - GET/PATCH/DELETE /api/agents/:id/sessions/:sessionId - Manage individual sessions
+    - GET/POST/DELETE /api/agents/:id/sessions/:sessionId/messages - Session messages
+  - New component: SessionSidebar with session cards and inline rename
+  - Schema additions: ChatSession, ChatSessionWithPreview, insertChatSessionSchema, updateChatSessionSchema
+
 - **January 28, 2026**: Custom Prompt Now Includes Domain Knowledge and Guardrails
   - Fixed bug where custom prompts completely replaced all agent configuration
   - Custom prompts now support dynamic placeholders: `{{name}}`, `{{businessUseCase}}`, `{{domainKnowledge}}`, `{{validationRules}}`, `{{guardrails}}`, `{{sampleDatasets}}`, `{{currentDate}}`

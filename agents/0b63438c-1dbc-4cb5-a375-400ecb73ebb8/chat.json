@@ -1,1 +1,18 @@
-[]
+[
+  {
+    "id": "6d9c0184-2494-413e-9510-a2fd33649b00",
+    "agentId": "0b63438c-1dbc-4cb5-a375-400ecb73ebb8",
+    "sessionId": "15d968d7-7f59-4eed-88e7-b59a55fad973",
+    "role": "user",
+    "content": "Hello, this is a test message",
+    "timestamp": "2026-01-28T09:43:21.000Z"
+  },
+  {
+    "id": "7d55b2cf-a7e8-4c60-b844-125f7491edab",
+    "agentId": "0b63438c-1dbc-4cb5-a375-400ecb73ebb8",
+    "sessionId": "15d968d7-7f59-4eed-88e7-b59a55fad973",
+    "role": "assistant",
+    "content": "Hello! How can I help you today? I'm here to help you manage tasks and track your productivity.\n",
+    "timestamp": "2026-01-28T09:43:21.556Z"
+  }
+]

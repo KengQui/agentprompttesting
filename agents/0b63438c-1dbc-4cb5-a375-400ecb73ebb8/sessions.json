@@ -1,0 +1,16 @@
+[
+  {
+    "id": "15d968d7-7f59-4eed-88e7-b59a55fad973",
+    "agentId": "0b63438c-1dbc-4cb5-a375-400ecb73ebb8",
+    "title": "Test Scenario 1",
+    "createdAt": "2026-01-28T09:43:06.636Z",
+    "updatedAt": "2026-01-28T09:44:04.683Z"
+  },
+  {
+    "id": "f120b21c-204b-47dd-bfa7-9a787268cd3d",
+    "agentId": "0b63438c-1dbc-4cb5-a375-400ecb73ebb8",
+    "title": "New Session",
+    "createdAt": "2026-01-28T09:44:15.028Z",
+    "updatedAt": "2026-01-28T09:44:15.028Z"
+  }
+]

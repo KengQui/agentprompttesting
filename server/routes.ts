@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertAgentSchema, updateAgentSchema } from "@shared/schema";
+import { insertAgentSchema, updateAgentSchema, insertChatSessionSchema, updateChatSessionSchema } from "@shared/schema";
 import { z } from "zod";
 import { generateAgentResponse, generateValidationRules, generateGuardrails, generateSystemPrompt, generateSampleData, evaluateContextSufficiency, processClarifyingChat, generateValidationRulesWithInsights, generateGuardrailsWithInsights, type GenerationContext, type SystemPromptContext, type SampleDataGenerationContext, type ClarifyingChatContext } from "./gemini";
 import { loadAgentComponents, clearAgentCache, hasCustomComponents } from "./agent-loader";
@@ -111,7 +111,124 @@ export async function registerRoutes(
     }
   });
 
-  // Get messages for an agent
+  // Get all sessions for an agent
+  app.get("/api/agents/:id/sessions", async (req, res) => {
+    try {
+      const agent = await storage.getAgent(req.params.id);
+      if (!agent) {
+        return res.status(404).json({ message: "Agent not found" });
+      }
+      const sessions = await storage.getSessions(req.params.id);
+      res.json(sessions);
+    } catch (error) {
+      console.error("Error fetching sessions:", error);
+      res.status(500).json({ message: "Failed to fetch sessions" });
+    }
+  });
+
+  // Create a new session for an agent
+  app.post("/api/agents/:id/sessions", async (req, res) => {
+    try {
+      const agent = await storage.getAgent(req.params.id);
+      if (!agent) {
+        return res.status(404).json({ message: "Agent not found" });
+      }
+      
+      const session = await storage.createSession({
+        agentId: req.params.id,
+        title: req.body.title || "New Session",
+      });
+      res.status(201).json(session);
+    } catch (error) {
+      console.error("Error creating session:", error);
+      res.status(500).json({ message: "Failed to create session" });
+    }
+  });
+
+  // Get a specific session
+  app.get("/api/agents/:id/sessions/:sessionId", async (req, res) => {
+    try {
+      const agent = await storage.getAgent(req.params.id);
+      if (!agent) {
+        return res.status(404).json({ message: "Agent not found" });
+      }
+      
+      const session = await storage.getSession(req.params.id, req.params.sessionId);
+      if (!session) {
+        return res.status(404).json({ message: "Session not found" });
+      }
+      res.json(session);
+    } catch (error) {
+      console.error("Error fetching session:", error);
+      res.status(500).json({ message: "Failed to fetch session" });
+    }
+  });
+
+  // Update session (rename)
+  app.patch("/api/agents/:id/sessions/:sessionId", async (req, res) => {
+    try {
+      const agent = await storage.getAgent(req.params.id);
+      if (!agent) {
+        return res.status(404).json({ message: "Agent not found" });
+      }
+
+      const parsed = updateChatSessionSchema.safeParse(req.body);
+      if (!parsed.success) {
+        return res.status(400).json({ message: parsed.error.message });
+      }
+
+      const session = await storage.updateSession(req.params.id, req.params.sessionId, parsed.data);
+      if (!session) {
+        return res.status(404).json({ message: "Session not found" });
+      }
+      res.json(session);
+    } catch (error) {
+      console.error("Error updating session:", error);
+      res.status(500).json({ message: "Failed to update session" });
+    }
+  });
+
+  // Delete session
+  app.delete("/api/agents/:id/sessions/:sessionId", async (req, res) => {
+    try {
+      const agent = await storage.getAgent(req.params.id);
+      if (!agent) {
+        return res.status(404).json({ message: "Agent not found" });
+      }
+
+      const deleted = await storage.deleteSession(req.params.id, req.params.sessionId);
+      if (!deleted) {
+        return res.status(404).json({ message: "Session not found" });
+      }
+      res.status(204).send();
+    } catch (error) {
+      console.error("Error deleting session:", error);
+      res.status(500).json({ message: "Failed to delete session" });
+    }
+  });
+
+  // Get messages for a specific session
+  app.get("/api/agents/:id/sessions/:sessionId/messages", async (req, res) => {
+    try {
+      const agent = await storage.getAgent(req.params.id);
+      if (!agent) {
+        return res.status(404).json({ message: "Agent not found" });
+      }
+      
+      const session = await storage.getSession(req.params.id, req.params.sessionId);
+      if (!session) {
+        return res.status(404).json({ message: "Session not found" });
+      }
+
+      const messages = await storage.getMessages(req.params.id, req.params.sessionId);
+      res.json(messages);
+    } catch (error) {
+      console.error("Error fetching messages:", error);
+      res.status(500).json({ message: "Failed to fetch messages" });
+    }
+  });
+
+  // Get messages for an agent (all messages, for backwards compatibility)
   app.get("/api/agents/:id/messages", async (req, res) => {
     try {
       const agent = await storage.getAgent(req.params.id);
@@ -126,12 +243,17 @@ export async function registerRoutes(
     }
   });
 
-  // Send a message to an agent with Turn Manager + Gemini AI response
-  app.post("/api/agents/:id/messages", async (req, res) => {
+  // Send a message to a session with Turn Manager + Gemini AI response
+  app.post("/api/agents/:id/sessions/:sessionId/messages", async (req, res) => {
     try {
       const agent = await storage.getAgent(req.params.id);
       if (!agent) {
         return res.status(404).json({ message: "Agent not found" });
+      }
+
+      const session = await storage.getSession(req.params.id, req.params.sessionId);
+      if (!session) {
+        return res.status(404).json({ message: "Session not found" });
       }
 
       const contentSchema = z.object({ 
@@ -147,12 +269,13 @@ export async function registerRoutes(
       // Add user message
       const userMessage = await storage.addMessage({
         agentId: req.params.id,
+        sessionId: req.params.sessionId,
         role: "user",
         content: userInput,
       });
 
-      // Get chat history for context
-      const allMessages = await storage.getMessages(req.params.id);
+      // Get chat history for context (only from this session)
+      const allMessages = await storage.getMessages(req.params.id, req.params.sessionId);
       const chatHistory = allMessages.slice(0, -1).map((msg) => ({
         role: msg.role as "user" | "assistant",
         content: msg.content,
@@ -210,6 +333,7 @@ export async function registerRoutes(
       // Add assistant message
       const assistantMessage = await storage.addMessage({
         agentId: req.params.id,
+        sessionId: req.params.sessionId,
         role: "assistant",
         content: responseContent,
       });
@@ -221,7 +345,139 @@ export async function registerRoutes(
     }
   });
 
-  // Clear chat history
+  // Clear messages for a specific session
+  app.delete("/api/agents/:id/sessions/:sessionId/messages", async (req, res) => {
+    try {
+      const agent = await storage.getAgent(req.params.id);
+      if (!agent) {
+        return res.status(404).json({ message: "Agent not found" });
+      }
+      
+      const session = await storage.getSession(req.params.id, req.params.sessionId);
+      if (!session) {
+        return res.status(404).json({ message: "Session not found" });
+      }
+
+      await storage.clearMessages(req.params.id, req.params.sessionId);
+      res.status(204).send();
+    } catch (error) {
+      console.error("Error clearing messages:", error);
+      res.status(500).json({ message: "Failed to clear messages" });
+    }
+  });
+
+  // Legacy: Send a message to an agent (will use first session or create one)
+  app.post("/api/agents/:id/messages", async (req, res) => {
+    try {
+      const agent = await storage.getAgent(req.params.id);
+      if (!agent) {
+        return res.status(404).json({ message: "Agent not found" });
+      }
+
+      // Get or create a default session
+      let sessions = await storage.getSessions(req.params.id);
+      let sessionId: string;
+      
+      if (sessions.length === 0) {
+        const session = await storage.createSession({
+          agentId: req.params.id,
+          title: "Default Session",
+        });
+        sessionId = session.id;
+      } else {
+        sessionId = sessions[0].id;
+      }
+
+      const contentSchema = z.object({ 
+        content: z.string().min(1).max(2000, "Message exceeds 2000 character limit") 
+      });
+      const parsed = contentSchema.safeParse(req.body);
+      if (!parsed.success) {
+        return res.status(400).json({ message: parsed.error.errors[0]?.message || "Content is required" });
+      }
+
+      const userInput = parsed.data.content;
+
+      // Add user message
+      const userMessage = await storage.addMessage({
+        agentId: req.params.id,
+        sessionId,
+        role: "user",
+        content: userInput,
+      });
+
+      // Get chat history for context
+      const allMessages = await storage.getMessages(req.params.id, sessionId);
+      const chatHistory = allMessages.slice(0, -1).map((msg) => ({
+        role: msg.role as "user" | "assistant",
+        content: msg.content,
+      }));
+
+      // Load agent components (orchestrator with turn manager)
+      const agentConfig = {
+        name: agent.name,
+        businessUseCase: agent.businessUseCase,
+        description: agent.description,
+        domainKnowledge: agent.domainKnowledge,
+        domainDocuments: agent.domainDocuments,
+        sampleDatasets: agent.sampleDatasets,
+        validationRules: agent.validationRules,
+        guardrails: agent.guardrails,
+        promptStyle: agent.promptStyle,
+        customPrompt: agent.customPrompt,
+      };
+
+      let responseContent: string;
+
+      try {
+        // Try to use orchestrator if agent has custom components
+        if (hasCustomComponents(req.params.id)) {
+          const { orchestrator } = await loadAgentComponents(req.params.id, agentConfig);
+          const turnResult = await orchestrator.processTurn(req.params.id, userInput);
+          
+          // If the orchestrator handled it completely (like go_back, change_previous_answer)
+          if (turnResult.nextAction !== 'generate_ai_response') {
+            responseContent = turnResult.response;
+          } else {
+            // Pass to Gemini with intent context for better response generation
+            const intentPrefix = turnResult.intent !== 'answer_question' 
+              ? `[The user's intent appears to be: ${turnResult.intent}. Please respond accordingly.]\n\n`
+              : '';
+            responseContent = await generateAgentResponse(
+              agentConfig,
+              intentPrefix + userInput,
+              chatHistory
+            );
+          }
+        } else {
+          // No custom components, use standard Gemini response
+          responseContent = await generateAgentResponse(
+            agentConfig,
+            userInput,
+            chatHistory
+          );
+        }
+      } catch (aiError: any) {
+        console.error("AI generation error:", aiError);
+        responseContent = `I apologize, but I'm having trouble generating a response. ${aiError.message?.includes("GEMINI_API_KEY") ? "The Gemini API key may not be configured correctly." : "Please try again."}`;
+      }
+
+      // Add assistant message
+      const assistantMessage = await storage.addMessage({
+        agentId: req.params.id,
+        sessionId,
+        role: "assistant",
+        content: responseContent,
+      });
+
+      res.json([userMessage, assistantMessage]);
+    } catch (error) {
+      console.error("Error sending message:", error);
+      res.status(500).json({ message: "Failed to send message" });
+    }
+  });
+
+  // Clear all chat history for an agent
   app.delete("/api/agents/:id/messages", async (req, res) => {
     try {
       const agent = await storage.getAgent(req.params.id);

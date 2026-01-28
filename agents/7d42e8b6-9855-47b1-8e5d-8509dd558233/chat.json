@@ -4,27 +4,31 @@
     "agentId": "7d42e8b6-9855-47b1-8e5d-8509dd558233",
     "role": "user",
     "content": "I am moving to a hotel temporarily, what are the tax implications?",
-    "timestamp": "2026-01-28T03:18:04.181Z"
+    "timestamp": "2026-01-28T03:18:04.181Z",
+    "sessionId": "c06fa6ab-6c04-4e0a-bc14-6c83d98527aa"
   },
   {
     "id": "52b6cd37-daf2-41df-9e85-651adb5b2109",
     "agentId": "7d42e8b6-9855-47b1-8e5d-8509dd558233",
     "role": "assistant",
     "content": "I can help you update your address, but I'm not authorized to give tax advice. I can only warn you that state/local withholding may change.\n\nSince you're moving to a hotel temporarily, are you wanting to update your home/residential address or your mailing address?",
-    "timestamp": "2026-01-28T03:18:05.774Z"
+    "timestamp": "2026-01-28T03:18:05.774Z",
+    "sessionId": "c06fa6ab-6c04-4e0a-bc14-6c83d98527aa"
   },
   {
     "id": "2c2e0e01-0089-40c9-b42e-da2f35bca346",
     "agentId": "7d42e8b6-9855-47b1-8e5d-8509dd558233",
     "role": "user",
     "content": "can you summarize what I have asked",
-    "timestamp": "2026-01-28T03:18:28.788Z"
+    "timestamp": "2026-01-28T03:18:28.788Z",
+    "sessionId": "c06fa6ab-6c04-4e0a-bc14-6c83d98527aa"
   },
   {
     "id": "0f9d16ee-1559-4480-b447-7eac9aeb699f",
     "agentId": "7d42e8b6-9855-47b1-8e5d-8509dd558233",
     "role": "assistant",
     "content": "You asked about the tax implications of moving to a hotel temporarily. I clarified that I can't offer tax advice, but I can help you update your address and warn you that state/local withholding may change. I also asked whether you want to update your home/residential address or your mailing address.\n",
-    "timestamp": "2026-01-28T03:18:30.518Z"
+    "timestamp": "2026-01-28T03:18:30.518Z",
+    "sessionId": "c06fa6ab-6c04-4e0a-bc14-6c83d98527aa"
   }
 ]

@@ -4,13 +4,15 @@
     "agentId": "7162eebc-d5ae-49c9-b46d-2c320c9da1e2",
     "role": "user",
     "content": "I got married on Jan 10. How do I add my spouse to my health plan?”",
-    "timestamp": "2026-01-28T02:00:13.130Z"
+    "timestamp": "2026-01-28T02:00:13.130Z",
+    "sessionId": "715ce301-c08c-447f-85fe-3fb4efa3b93c"
   },
   {
     "id": "46f87764-0b08-42df-bc9e-f437c7bf73b6",
     "agentId": "7162eebc-d5ae-49c9-b46d-2c320c9da1e2",
     "role": "assistant",
     "content": "Congratulations on your marriage!\n\nGetting married is a qualifying life event (QLE), so you can make changes to your benefits.\n\nTo confirm, the event date was January 10th.\n\nI see you've already reported this event on January 20th.\n\nTo finalize the process, please submit your marriage certificate in the HR/Benefits portal under Benefits → Life Events / Qualifying Events.\n\nYou have until February 9th to submit the required document.\n\nOnce that's done, your spouse, Jordan A, can be added to your medical, dental, and vision plans, and you can update your life insurance beneficiary.\n\nIs there anything else I can help you with?\n",
-    "timestamp": "2026-01-28T02:00:15.917Z"
+    "timestamp": "2026-01-28T02:00:15.917Z",
+    "sessionId": "715ce301-c08c-447f-85fe-3fb4efa3b93c"
   }
 ]

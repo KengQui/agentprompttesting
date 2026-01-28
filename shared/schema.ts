@@ -96,10 +96,47 @@ export type InsertAgent = z.infer<typeof insertAgentSchema>;
 export const updateAgentSchema = insertAgentSchema.partial();
 export type UpdateAgent = z.infer<typeof updateAgentSchema>;
 
+// Chat session schema (for grouping conversations)
+export const chatSessionSchema = z.object({
+  id: z.string(),
+  agentId: z.string(),
+  title: z.string().default("New Session"),
+  createdAt: z.string(),
+  updatedAt: z.string(),
+});
+
+export type ChatSession = z.infer<typeof chatSessionSchema>;
+
+// Insert chat session schema
+export const insertChatSessionSchema = chatSessionSchema.omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type InsertChatSession = z.infer<typeof insertChatSessionSchema>;
+
+// Update chat session schema (for renaming)
+export const updateChatSessionSchema = z.object({
+  title: z.string().min(1, "Title is required").max(100, "Title too long"),
+});
+
+export type UpdateChatSession = z.infer<typeof updateChatSessionSchema>;
+
+// Chat session with preview info (for listing)
+export const chatSessionWithPreviewSchema = chatSessionSchema.extend({
+  messageCount: z.number().default(0),
+  firstMessage: z.string().optional(),
+  lastMessageAt: z.string().optional(),
+});
+
+export type ChatSessionWithPreview = z.infer<typeof chatSessionWithPreviewSchema>;
+
 // Chat message schema
 export const chatMessageSchema = z.object({
   id: z.string(),
   agentId: z.string(),
+  sessionId: z.string(),
   role: z.enum(["user", "assistant"]),
   content: z.string(),
   timestamp: z.string(),

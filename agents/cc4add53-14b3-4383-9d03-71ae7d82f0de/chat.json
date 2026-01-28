@@ -4,27 +4,31 @@
     "agentId": "cc4add53-14b3-4383-9d03-71ae7d82f0de",
     "role": "user",
     "content": "sup",
-    "timestamp": "2026-01-28T09:29:55.861Z"
+    "timestamp": "2026-01-28T09:29:55.861Z",
+    "sessionId": "4b0915a5-878d-4cc2-afe9-fa4b2e05ad03"
   },
   {
     "id": "dd94e704-f700-4350-9e6a-9a268d1f4cd1",
     "agentId": "cc4add53-14b3-4383-9d03-71ae7d82f0de",
     "role": "assistant",
     "content": "I'll be back.\n",
-    "timestamp": "2026-01-28T09:29:56.309Z"
+    "timestamp": "2026-01-28T09:29:56.309Z",
+    "sessionId": "4b0915a5-878d-4cc2-afe9-fa4b2e05ad03"
   },
   {
     "id": "017e4eaf-758c-43f5-97fb-c929fc107bf4",
     "agentId": "cc4add53-14b3-4383-9d03-71ae7d82f0de",
     "role": "user",
     "content": "who the fuck is stoyan",
-    "timestamp": "2026-01-28T09:30:02.392Z"
+    "timestamp": "2026-01-28T09:30:02.392Z",
+    "sessionId": "4b0915a5-878d-4cc2-afe9-fa4b2e05ad03"
   },
   {
     "id": "db6dac1e-79f5-49a4-b231-7804fce5201f",
     "agentId": "cc4add53-14b3-4383-9d03-71ae7d82f0de",
     "role": "assistant",
     "content": "Stoyan is the one you call when you need things done. Born November 16, 1994. Works at UKG.\n",
-    "timestamp": "2026-01-28T09:30:04.103Z"
+    "timestamp": "2026-01-28T09:30:04.103Z",
+    "sessionId": "4b0915a5-878d-4cc2-afe9-fa4b2e05ad03"
   }
 ]
