@@ -1,9 +1,34 @@
-import type { Express } from "express";
+import type { Express, Request, Response, NextFunction } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertAgentSchema, updateAgentSchema, insertChatSessionSchema, updateChatSessionSchema, simulationRequestSchema } from "@shared/schema";
+import { insertAgentSchema, updateAgentSchema, insertChatSessionSchema, updateChatSessionSchema, simulationRequestSchema, insertUserSchema, loginSchema, passwordResetRequestSchema, passwordResetSchema, type PublicUser } from "@shared/schema";
 import { z } from "zod";
 import type { TurnTrace, TraceEntry, ConfigSnapshot } from "@shared/schema";
+
+// Session cookie name
+const SESSION_COOKIE = "auth_session";
+
+// Extended Request type with user
+interface AuthenticatedRequest extends Request {
+  user?: PublicUser;
+}
+
+// Helper to get user from session cookie
+async function getUserFromSession(req: Request): Promise<PublicUser | undefined> {
+  const sessionId = req.cookies?.[SESSION_COOKIE];
+  if (!sessionId) return undefined;
+  return storage.getUserBySessionId(sessionId);
+}
+
+// Middleware to require authentication
+async function requireAuth(req: AuthenticatedRequest, res: Response, next: NextFunction) {
+  const user = await getUserFromSession(req);
+  if (!user) {
+    return res.status(401).json({ message: "Unauthorized" });
+  }
+  req.user = user;
+  next();
+}
 import { generateAgentResponse, generateValidationRules, generateGuardrails, generateSystemPrompt, generateSampleData, evaluateContextSufficiency, processClarifyingChat, generateValidationRulesWithInsights, generateGuardrailsWithInsights, type GenerationContext, type SystemPromptContext, type SampleDataGenerationContext, type ClarifyingChatContext } from "./gemini";
 import { loadAgentComponents, clearAgentCache, hasCustomComponents } from "./agent-loader";
 import { createRecoveryManager } from "./components/recovery-manager";
@@ -38,10 +63,154 @@ export async function registerRoutes(
   httpServer: Server,
   app: Express
 ): Promise<Server> {
-  // Get all agents
-  app.get("/api/agents", async (req, res) => {
+  // ========== Authentication Routes ==========
+
+  // Register new user
+  app.post("/api/auth/register", async (req, res) => {
     try {
-      const agents = await storage.getAgents();
+      const parsed = insertUserSchema.safeParse(req.body);
+      if (!parsed.success) {
+        return res.status(400).json({ message: parsed.error.errors[0]?.message || "Invalid input" });
+      }
+
+      const user = await storage.createUser(parsed.data);
+      const session = await storage.createAuthSession(user.id);
+
+      // Set session cookie (7 days)
+      res.cookie(SESSION_COOKIE, session.id, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+        maxAge: 7 * 24 * 60 * 60 * 1000,
+      });
+
+      const { password, ...publicUser } = user;
+      res.status(201).json(publicUser);
+    } catch (error: any) {
+      console.error("Error registering user:", error);
+      if (error.message === "Username already exists") {
+        return res.status(400).json({ message: "Username already exists" });
+      }
+      res.status(500).json({ message: "Failed to register user" });
+    }
+  });
+
+  // Login
+  app.post("/api/auth/login", async (req, res) => {
+    try {
+      const parsed = loginSchema.safeParse(req.body);
+      if (!parsed.success) {
+        return res.status(400).json({ message: "Invalid credentials" });
+      }
+
+      const user = await storage.validatePassword(parsed.data.username, parsed.data.password);
+      if (!user) {
+        return res.status(401).json({ message: "Invalid username or password" });
+      }
+
+      const session = await storage.createAuthSession(user.id);
+
+      res.cookie(SESSION_COOKIE, session.id, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+        maxAge: 7 * 24 * 60 * 60 * 1000,
+      });
+
+      const { password, ...publicUser } = user;
+      res.json(publicUser);
+    } catch (error) {
+      console.error("Error logging in:", error);
+      res.status(500).json({ message: "Failed to login" });
+    }
+  });
+
+  // Logout
+  app.post("/api/auth/logout", async (req, res) => {
+    try {
+      const sessionId = req.cookies?.[SESSION_COOKIE];
+      if (sessionId) {
+        await storage.deleteAuthSession(sessionId);
+      }
+      res.clearCookie(SESSION_COOKIE);
+      res.json({ message: "Logged out successfully" });
+    } catch (error) {
+      console.error("Error logging out:", error);
+      res.status(500).json({ message: "Failed to logout" });
+    }
+  });
+
+  // Get current user
+  app.get("/api/auth/me", async (req, res) => {
+    try {
+      const user = await getUserFromSession(req);
+      if (!user) {
+        return res.status(401).json({ message: "Not authenticated" });
+      }
+      res.json(user);
+    } catch (error) {
+      console.error("Error getting current user:", error);
+      res.status(500).json({ message: "Failed to get current user" });
+    }
+  });
+
+  // Verify phone for password reset (step 1)
+  app.post("/api/auth/verify-phone", async (req, res) => {
+    try {
+      const parsed = passwordResetRequestSchema.safeParse(req.body);
+      if (!parsed.success) {
+        return res.status(400).json({ message: parsed.error.errors[0]?.message || "Invalid input" });
+      }
+
+      const isValid = await storage.verifyPhone(parsed.data.username, parsed.data.phone);
+      if (!isValid) {
+        return res.status(400).json({ message: "Username and phone number do not match" });
+      }
+
+      // Return success - frontend will show password reset form
+      res.json({ success: true, username: parsed.data.username });
+    } catch (error) {
+      console.error("Error verifying phone:", error);
+      res.status(500).json({ message: "Failed to verify phone" });
+    }
+  });
+
+  // Reset password (step 2)
+  app.post("/api/auth/reset-password", async (req, res) => {
+    try {
+      const parsed = passwordResetSchema.safeParse(req.body);
+      if (!parsed.success) {
+        return res.status(400).json({ message: parsed.error.errors[0]?.message || "Invalid input" });
+      }
+
+      const user = await storage.getUserByUsername(parsed.data.username);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      const success = await storage.updateUserPassword(user.id, parsed.data.newPassword);
+      if (!success) {
+        return res.status(500).json({ message: "Failed to update password" });
+      }
+
+      res.json({ message: "Password updated successfully" });
+    } catch (error) {
+      console.error("Error resetting password:", error);
+      res.status(500).json({ message: "Failed to reset password" });
+    }
+  });
+
+  // ========== Agent Routes ==========
+
+  // Get all agents (filtered by logged-in user)
+  app.get("/api/agents", async (req: AuthenticatedRequest, res) => {
+    try {
+      const user = await getUserFromSession(req);
+      if (!user) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      
+      const agents = await storage.getAgentsByUserId(user.id);
       res.json(agents);
     } catch (error) {
       console.error("Error fetching agents:", error);
@@ -49,13 +218,24 @@ export async function registerRoutes(
     }
   });
 
-  // Get single agent
-  app.get("/api/agents/:id", async (req, res) => {
+  // Get single agent (verify ownership)
+  app.get("/api/agents/:id", async (req: AuthenticatedRequest, res) => {
     try {
+      const user = await getUserFromSession(req);
+      if (!user) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      
       const agent = await storage.getAgent(req.params.id);
       if (!agent) {
         return res.status(404).json({ message: "Agent not found" });
       }
+      
+      // Check ownership (allow access to legacy agents without userId for migration)
+      if (agent.userId && agent.userId !== user.id) {
+        return res.status(403).json({ message: "Access denied" });
+      }
+      
       res.json(agent);
     } catch (error) {
       console.error("Error fetching agent:", error);
@@ -63,14 +243,20 @@ export async function registerRoutes(
     }
   });
 
-  // Create agent
-  app.post("/api/agents", async (req, res) => {
+  // Create agent (set userId from session)
+  app.post("/api/agents", async (req: AuthenticatedRequest, res) => {
     try {
+      const user = await getUserFromSession(req);
+      if (!user) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      
       const parsed = insertAgentSchema.safeParse(req.body);
       if (!parsed.success) {
         return res.status(400).json({ message: parsed.error.message });
       }
-      const agent = await storage.createAgent(parsed.data);
+      
+      const agent = await storage.createAgent(parsed.data, user.id);
       res.status(201).json(agent);
     } catch (error) {
       console.error("Error creating agent:", error);
@@ -78,9 +264,23 @@ export async function registerRoutes(
     }
   });
 
-  // Update agent
-  app.patch("/api/agents/:id", async (req, res) => {
+  // Update agent (verify ownership)
+  app.patch("/api/agents/:id", async (req: AuthenticatedRequest, res) => {
     try {
+      const user = await getUserFromSession(req);
+      if (!user) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      
+      const existingAgent = await storage.getAgent(req.params.id);
+      if (!existingAgent) {
+        return res.status(404).json({ message: "Agent not found" });
+      }
+      
+      if (existingAgent.userId && existingAgent.userId !== user.id) {
+        return res.status(403).json({ message: "Access denied" });
+      }
+      
       const parsed = updateAgentSchema.safeParse(req.body);
       if (!parsed.success) {
         return res.status(400).json({ message: parsed.error.message });
@@ -97,9 +297,23 @@ export async function registerRoutes(
     }
   });
 
-  // Delete agent
-  app.delete("/api/agents/:id", async (req, res) => {
+  // Delete agent (verify ownership)
+  app.delete("/api/agents/:id", async (req: AuthenticatedRequest, res) => {
     try {
+      const user = await getUserFromSession(req);
+      if (!user) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      
+      const existingAgent = await storage.getAgent(req.params.id);
+      if (!existingAgent) {
+        return res.status(404).json({ message: "Agent not found" });
+      }
+      
+      if (existingAgent.userId && existingAgent.userId !== user.id) {
+        return res.status(403).json({ message: "Access denied" });
+      }
+      
       const deleted = await storage.deleteAgent(req.params.id);
       if (!deleted) {
         return res.status(404).json({ message: "Agent not found" });

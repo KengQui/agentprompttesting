@@ -1,9 +1,11 @@
 import { randomUUID } from "crypto";
 import * as fs from "fs";
 import * as path from "path";
-import type { Agent, InsertAgent, UpdateAgent, ChatMessage, InsertChatMessage, DomainDocument, SampleDataset, AgentStatus, PromptStyle, ClarifyingInsight, ChatSession, InsertChatSession, UpdateChatSession, ChatSessionWithPreview, AgentTrace, TurnTrace, ConfigSnapshot, ConfigHistory, UsageStats } from "@shared/schema";
+import bcrypt from "bcryptjs";
+import type { Agent, InsertAgent, UpdateAgent, ChatMessage, InsertChatMessage, DomainDocument, SampleDataset, AgentStatus, PromptStyle, ClarifyingInsight, ChatSession, InsertChatSession, UpdateChatSession, ChatSessionWithPreview, AgentTrace, TurnTrace, ConfigSnapshot, ConfigHistory, UsageStats, User, InsertUser, AuthSession, PublicUser } from "@shared/schema";
 
 const AGENTS_DIR = "./agents";
+const USERS_DIR = "./users";
 const COMPONENT_TEMPLATES_DIR = "./server/components";
 
 // File names for the multi-file agent structure
@@ -149,7 +151,7 @@ export interface IStorage {
   // Agent operations
   getAgents(): Promise<Agent[]>;
   getAgent(id: string): Promise<Agent | undefined>;
-  createAgent(agent: InsertAgent): Promise<Agent>;
+  createAgent(agent: InsertAgent, userId?: string): Promise<Agent>;
   updateAgent(id: string, updates: UpdateAgent): Promise<Agent | undefined>;
   deleteAgent(id: string): Promise<boolean>;
   
@@ -174,6 +176,23 @@ export interface IStorage {
   getConfigHistory(agentId: string): Promise<ConfigHistory | undefined>;
   addConfigSnapshot(agentId: string, snapshot: Omit<ConfigSnapshot, "id" | "timestamp">): Promise<ConfigSnapshot>;
   revertToSnapshot(agentId: string, snapshotId: string): Promise<Agent | undefined>;
+
+  // User operations
+  createUser(user: InsertUser): Promise<User>;
+  getUserById(id: string): Promise<User | undefined>;
+  getUserByUsername(username: string): Promise<User | undefined>;
+  validatePassword(username: string, password: string): Promise<User | undefined>;
+  updateUserPassword(userId: string, newPassword: string): Promise<boolean>;
+  verifyPhone(username: string, phone: string): Promise<boolean>;
+
+  // Auth session operations
+  createAuthSession(userId: string): Promise<AuthSession>;
+  getAuthSession(sessionId: string): Promise<AuthSession | undefined>;
+  deleteAuthSession(sessionId: string): Promise<void>;
+  getUserBySessionId(sessionId: string): Promise<PublicUser | undefined>;
+
+  // Agent operations with user filtering
+  getAgentsByUserId(userId: string): Promise<Agent[]>;
 }
 
 export class MemStorage implements IStorage {
@@ -183,6 +202,8 @@ export class MemStorage implements IStorage {
   private sessions: Map<string, ChatSession[]>;
   private traces: Map<string, AgentTrace>;
   private configHistory: Map<string, ConfigHistory>;
+  private users: Map<string, User>;
+  private authSessions: Map<string, AuthSession>;
 
   constructor() {
     this.agents = new Map();
@@ -190,7 +211,10 @@ export class MemStorage implements IStorage {
     this.sessions = new Map();
     this.traces = new Map();
     this.configHistory = new Map();
+    this.users = new Map();
+    this.authSessions = new Map();
     this.loadFromDisk();
+    this.loadUsersFromDisk();
   }
 
   private loadFromDisk() {
@@ -410,6 +434,7 @@ export class MemStorage implements IStorage {
     
     return {
       id: agentId,
+      userId: meta.userId || "", // Legacy agents may not have userId
       name: meta.name,
       status: (meta.status || "configured") as AgentStatus,
       createdAt: meta.createdAt,
@@ -481,6 +506,7 @@ export class MemStorage implements IStorage {
     // 1. Save meta.yaml - basic agent info
     const metaYaml = generateSimpleYaml({
       name: agent.name,
+      userId: agent.userId || "",
       status: agent.status,
       createdAt: agent.createdAt,
       updatedAt: agent.updatedAt,
@@ -566,7 +592,7 @@ export class MemStorage implements IStorage {
     return this.agents.get(id);
   }
 
-  async createAgent(insertAgent: InsertAgent): Promise<Agent> {
+  async createAgent(insertAgent: InsertAgent, userId?: string): Promise<Agent> {
     const id = randomUUID();
     const now = new Date().toISOString();
     
@@ -577,6 +603,7 @@ export class MemStorage implements IStorage {
     
     const agent: Agent = {
       id,
+      userId: userId || "", // Will be empty for legacy agents
       name: insertAgent.name,
       businessUseCase: insertAgent.businessUseCase,
       description: insertAgent.description || "",
@@ -1080,6 +1107,161 @@ export class MemStorage implements IStorage {
     if (snapshot.config.customPrompt !== undefined) updates.customPrompt = snapshot.config.customPrompt;
 
     return this.updateAgent(agentId, updates);
+  }
+
+  // ========== User Storage Methods ==========
+
+  private loadUsersFromDisk() {
+    ensureDir(USERS_DIR);
+    
+    try {
+      const usersFile = path.join(USERS_DIR, "users.json");
+      if (fs.existsSync(usersFile)) {
+        const content = fs.readFileSync(usersFile, "utf-8");
+        const users = JSON.parse(content) as User[];
+        for (const user of users) {
+          this.users.set(user.id, user);
+        }
+        console.log(`[storage] Loaded ${users.length} users from disk`);
+      }
+    } catch (e) {
+      console.error("Failed to load users from disk:", e);
+    }
+  }
+
+  private saveUsersToDisk() {
+    ensureDir(USERS_DIR);
+    const usersFile = path.join(USERS_DIR, "users.json");
+    const users = Array.from(this.users.values());
+    fs.writeFileSync(usersFile, JSON.stringify(users, null, 2), "utf-8");
+  }
+
+  async createUser(insertUser: InsertUser): Promise<User> {
+    // Check if username already exists
+    const existing = await this.getUserByUsername(insertUser.username);
+    if (existing) {
+      throw new Error("Username already exists");
+    }
+
+    const id = randomUUID();
+    const now = new Date().toISOString();
+    const hashedPassword = await bcrypt.hash(insertUser.password, 10);
+
+    const user: User = {
+      id,
+      username: insertUser.username,
+      password: hashedPassword,
+      phone: insertUser.phone,
+      createdAt: now,
+    };
+
+    this.users.set(id, user);
+    this.saveUsersToDisk();
+    console.log(`[storage] Created user ${user.username} (${id})`);
+
+    return user;
+  }
+
+  async getUserById(id: string): Promise<User | undefined> {
+    return this.users.get(id);
+  }
+
+  async getUserByUsername(username: string): Promise<User | undefined> {
+    for (const user of this.users.values()) {
+      if (user.username.toLowerCase() === username.toLowerCase()) {
+        return user;
+      }
+    }
+    return undefined;
+  }
+
+  async validatePassword(username: string, password: string): Promise<User | undefined> {
+    const user = await this.getUserByUsername(username);
+    if (!user) return undefined;
+
+    const isValid = await bcrypt.compare(password, user.password);
+    return isValid ? user : undefined;
+  }
+
+  async updateUserPassword(userId: string, newPassword: string): Promise<boolean> {
+    const user = this.users.get(userId);
+    if (!user) return false;
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    user.password = hashedPassword;
+    this.users.set(userId, user);
+    this.saveUsersToDisk();
+    console.log(`[storage] Updated password for user ${userId}`);
+
+    return true;
+  }
+
+  async verifyPhone(username: string, phone: string): Promise<boolean> {
+    const user = await this.getUserByUsername(username);
+    if (!user) return false;
+
+    // Normalize phone for comparison (remove non-digits)
+    const normalizedUserPhone = user.phone.replace(/\D/g, "");
+    const normalizedInputPhone = phone.replace(/\D/g, "");
+
+    return normalizedUserPhone === normalizedInputPhone;
+  }
+
+  // ========== Auth Session Methods ==========
+
+  async createAuthSession(userId: string): Promise<AuthSession> {
+    const id = randomUUID();
+    // Session expires in 7 days
+    const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
+
+    const session: AuthSession = {
+      id,
+      userId,
+      expiresAt,
+    };
+
+    this.authSessions.set(id, session);
+    console.log(`[storage] Created auth session for user ${userId}`);
+
+    return session;
+  }
+
+  async getAuthSession(sessionId: string): Promise<AuthSession | undefined> {
+    const session = this.authSessions.get(sessionId);
+    if (!session) return undefined;
+
+    // Check if session is expired
+    if (new Date(session.expiresAt) < new Date()) {
+      this.authSessions.delete(sessionId);
+      return undefined;
+    }
+
+    return session;
+  }
+
+  async deleteAuthSession(sessionId: string): Promise<void> {
+    this.authSessions.delete(sessionId);
+    console.log(`[storage] Deleted auth session ${sessionId}`);
+  }
+
+  async getUserBySessionId(sessionId: string): Promise<PublicUser | undefined> {
+    const session = await this.getAuthSession(sessionId);
+    if (!session) return undefined;
+
+    const user = await this.getUserById(session.userId);
+    if (!user) return undefined;
+
+    // Return user without password
+    const { password, ...publicUser } = user;
+    return publicUser;
+  }
+
+  // ========== Agent Operations with User Filtering ==========
+
+  async getAgentsByUserId(userId: string): Promise<Agent[]> {
+    return Array.from(this.agents.values())
+      .filter(agent => agent.userId === userId)
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
   }
 }
 

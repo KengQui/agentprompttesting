@@ -1,10 +1,11 @@
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "wouter";
-import { Plus, MessageSquare, Settings, Bot, Sparkles } from "lucide-react";
+import { Plus, MessageSquare, Settings, Bot, Sparkles, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useAuth } from "@/hooks/use-auth";
 import type { Agent } from "@shared/schema";
 
 function getStatusColor(status: string) {
@@ -128,6 +129,7 @@ export default function Home() {
   const { data: agents, isLoading } = useQuery<Agent[]>({
     queryKey: ["/api/agents"],
   });
+  const { user, logout } = useAuth();
 
   return (
     <div className="min-h-screen bg-background">
@@ -140,12 +142,27 @@ export default function Home() {
               </div>
               <h1 className="text-xl font-bold">Agent Studio</h1>
             </div>
-            <Link href="/create">
-              <Button className="gap-2" data-testid="button-create-agent">
-                <Plus className="h-4 w-4" />
-                Create Agent
+            <div className="flex items-center gap-3">
+              {user && (
+                <span className="text-sm text-muted-foreground" data-testid="text-username">
+                  {user.username}
+                </span>
+              )}
+              <Link href="/create">
+                <Button className="gap-2" data-testid="button-create-agent">
+                  <Plus className="h-4 w-4" />
+                  Create Agent
+                </Button>
+              </Link>
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={logout}
+                data-testid="button-logout"
+              >
+                <LogOut className="h-4 w-4" />
               </Button>
-            </Link>
+            </div>
           </div>
         </div>
       </header>

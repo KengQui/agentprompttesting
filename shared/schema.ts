@@ -65,6 +65,7 @@ export type ClarifyingInsight = z.infer<typeof clarifyingInsightSchema>;
 // Agent schema
 export const agentSchema = z.object({
   id: z.string(),
+  userId: z.string(), // Owner of this agent
   name: z.string().min(1, "Name is required"),
   businessUseCase: z.string().min(1, "Business use case is required"),
   description: z.string().default(""),
@@ -83,9 +84,10 @@ export const agentSchema = z.object({
 
 export type Agent = z.infer<typeof agentSchema>;
 
-// Insert schema for creating agents
+// Insert schema for creating agents (userId is set server-side from session)
 export const insertAgentSchema = agentSchema.omit({
   id: true,
+  userId: true,
   createdAt: true,
   updatedAt: true,
 });
@@ -169,20 +171,64 @@ export const wizardStepSchema = z.object({
 
 export type WizardStepData = z.infer<typeof wizardStepSchema>;
 
-// Legacy user schema (keeping for compatibility)
-export const users = {
-  id: "",
-  username: "",
-  password: "",
-};
+// User schema for authentication
+export const userSchema = z.object({
+  id: z.string(),
+  username: z.string().min(3, "Username must be at least 3 characters"),
+  password: z.string().min(6, "Password must be at least 6 characters"),
+  phone: z.string().min(10, "Phone number must be at least 10 digits"),
+  createdAt: z.string(),
+});
 
-export type User = {
-  id: string;
-  username: string;
-  password: string;
-};
+export type User = z.infer<typeof userSchema>;
 
-export type InsertUser = Omit<User, "id">;
+// Insert schema for creating users (excludes auto-generated fields)
+export const insertUserSchema = userSchema.omit({
+  id: true,
+  createdAt: true,
+});
+
+export type InsertUser = z.infer<typeof insertUserSchema>;
+
+// Login schema
+export const loginSchema = z.object({
+  username: z.string().min(1, "Username is required"),
+  password: z.string().min(1, "Password is required"),
+});
+
+export type LoginInput = z.infer<typeof loginSchema>;
+
+// Password reset request schema (verify phone)
+export const passwordResetRequestSchema = z.object({
+  username: z.string().min(1, "Username is required"),
+  phone: z.string().min(10, "Phone number is required"),
+});
+
+export type PasswordResetRequest = z.infer<typeof passwordResetRequestSchema>;
+
+// Password reset schema (set new password)
+export const passwordResetSchema = z.object({
+  username: z.string(),
+  newPassword: z.string().min(6, "Password must be at least 6 characters"),
+  confirmPassword: z.string().min(6, "Password must be at least 6 characters"),
+}).refine((data) => data.newPassword === data.confirmPassword, {
+  message: "Passwords do not match",
+  path: ["confirmPassword"],
+});
+
+export type PasswordResetInput = z.infer<typeof passwordResetSchema>;
+
+// Session schema for auth sessions
+export const authSessionSchema = z.object({
+  id: z.string(),
+  userId: z.string(),
+  expiresAt: z.string(),
+});
+
+export type AuthSession = z.infer<typeof authSessionSchema>;
+
+// Public user type (without password)
+export type PublicUser = Omit<User, "password">;
 
 // Session status enum
 export const sessionStatusEnum = z.enum(["active", "paused", "completed", "archived"]);
