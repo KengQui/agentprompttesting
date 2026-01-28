@@ -779,6 +779,7 @@ function Step6SampleData({
   const [recordCount, setRecordCount] = useState(10);
   const [format, setFormat] = useState<"json" | "csv" | "text">("json");
   const [selectedModel, setSelectedModel] = useState<GeminiModel>(defaultGenerationModel);
+  const [viewingDataset, setViewingDataset] = useState<SampleDataset | null>(null);
   const { toast } = useToast();
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -1038,21 +1039,70 @@ function Step6SampleData({
                         {dataset.description || `Added ${new Date(dataset.createdAt).toLocaleDateString()}`}
                       </p>
                     </div>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => handleRemoveDataset(dataset.id)}
-                      className="shrink-0 h-8 w-8"
-                      data-testid={`button-remove-dataset-${dataset.id}`}
-                    >
-                      <X className="h-4 w-4" />
-                    </Button>
+                    <div className="flex items-center gap-1 shrink-0">
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => setViewingDataset(dataset)}
+                        data-testid={`button-view-dataset-${dataset.id}`}
+                      >
+                        <Eye className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => handleRemoveDataset(dataset.id)}
+                        data-testid={`button-remove-dataset-${dataset.id}`}
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
                   </div>
                 ))}
               </div>
             </div>
           )}
+
+          <Dialog open={viewingDataset !== null} onOpenChange={(open) => !open && setViewingDataset(null)}>
+            <DialogContent className="max-w-4xl max-h-[80vh] flex flex-col" data-testid="dialog-dataset-viewer">
+              <DialogHeader>
+                <DialogTitle className="flex items-center gap-2" data-testid="text-dataset-name">
+                  <FileText className="h-5 w-5" />
+                  {viewingDataset?.name}
+                  <Badge variant="outline" className="ml-2">
+                    {viewingDataset?.format.toUpperCase()}
+                  </Badge>
+                  {viewingDataset?.isGenerated && (
+                    <Badge variant="secondary">
+                      <Sparkles className="h-3 w-3 mr-1" />
+                      AI Generated
+                    </Badge>
+                  )}
+                </DialogTitle>
+                <DialogDescription data-testid="text-dataset-description">
+                  {viewingDataset?.description || `Created ${viewingDataset?.createdAt ? new Date(viewingDataset.createdAt).toLocaleDateString() : ''}`}
+                </DialogDescription>
+              </DialogHeader>
+              <div className="flex-1 overflow-auto min-h-0">
+                <pre 
+                  className="p-4 bg-muted rounded-lg text-sm font-mono whitespace-pre-wrap break-words overflow-x-auto"
+                  data-testid={`text-dataset-content-${viewingDataset?.id}`}
+                >
+                  {viewingDataset?.format === 'json' 
+                    ? (() => {
+                        try {
+                          return JSON.stringify(JSON.parse(viewingDataset.content), null, 2);
+                        } catch {
+                          return viewingDataset.content;
+                        }
+                      })()
+                    : viewingDataset?.content}
+                </pre>
+              </div>
+            </DialogContent>
+          </Dialog>
         </div>
       </CardContent>
     </Card>
