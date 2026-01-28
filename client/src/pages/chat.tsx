@@ -11,7 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest } from "@/lib/queryClient";
-import { ContextRotWarning } from "@/components/context-rot-warning";
+import { ContextProgressBar } from "@/components/context-progress-bar";
 import { SessionSidebar } from "@/components/session-sidebar";
 import type { Agent, ChatMessage, ChatSession, ChatSessionWithPreview } from "@shared/schema";
 
@@ -451,58 +451,67 @@ export default function Chat() {
                 </div>
               </div>
             </div>
-            <div className="flex items-center gap-2">
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    onClick={handleNewSession}
-                    disabled={createSessionMutation.isPending}
-                    data-testid="button-new-session-header"
-                  >
-                    {createSessionMutation.isPending ? (
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                    ) : (
-                      <Plus className="h-4 w-4" />
-                    )}
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>New session</p>
-                </TooltipContent>
-              </Tooltip>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    onClick={() => clearMutation.mutate()}
-                    disabled={messages.length === 0 || clearMutation.isPending || !activeSessionId}
-                    data-testid="button-clear-chat"
-                  >
-                    <Eraser className="h-4 w-4" />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Clear session messages</p>
-                </TooltipContent>
-              </Tooltip>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    onClick={() => navigate(`/settings/${params.id}`)}
-                    data-testid="button-settings"
-                  >
-                    <Settings className="h-4 w-4" />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Agent settings</p>
-                </TooltipContent>
-              </Tooltip>
+            <div className="flex items-center gap-3">
+              {messages.length > 0 && (
+                <ContextProgressBar messages={messages} />
+              )}
+              <div className="flex items-center gap-2">
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      onClick={handleNewSession}
+                      disabled={createSessionMutation.isPending}
+                      data-testid="button-new-session-header"
+                    >
+                      {createSessionMutation.isPending ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <Plus className="h-4 w-4" />
+                      )}
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>New session</p>
+                  </TooltipContent>
+                </Tooltip>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      onClick={() => clearMutation.mutate()}
+                      disabled={messages.length === 0 || clearMutation.isPending || !activeSessionId}
+                      data-testid="button-clear-chat"
+                    >
+                      {clearMutation.isPending ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <Eraser className="h-4 w-4" />
+                      )}
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Clear session messages</p>
+                  </TooltipContent>
+                </Tooltip>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      onClick={() => navigate(`/settings/${params.id}`)}
+                      data-testid="button-settings"
+                    >
+                      <Settings className="h-4 w-4" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Agent settings</p>
+                  </TooltipContent>
+                </Tooltip>
+              </div>
             </div>
           </div>
         </div>
@@ -521,12 +530,6 @@ export default function Chat() {
 
         <div className="flex-1 flex flex-col overflow-hidden">
           <ContextSummary messages={messages} topic={currentTopic} sessionTitle={activeSession?.title} />
-          
-          <ContextRotWarning 
-            messages={messages} 
-            onClearChat={() => clearMutation.mutate()} 
-            isClearing={clearMutation.isPending}
-          />
           
           <ScrollArea className="flex-1" ref={scrollRef}>
             <div className="max-w-3xl mx-auto px-4 py-6">
