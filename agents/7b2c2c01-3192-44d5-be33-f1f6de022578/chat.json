@@ -40,5 +40,19 @@
     "role": "assistant",
     "content": "Okay, I can help you with that. In 2025, the following 401k contributions were made:\n\n*   **2025-01-03:** $180.25\n*   **2025-01-17:** $180.25\n*   **2025-01-31:** $180.25\n*   **2025-02-14:** $180.25\n*   **2025-02-28:** $180.25\n*   **2025-03-14:** $180.25\n*   **2025-03-28:** $180.25\n*   **2025-04-11:** $180.25\n*   **2025-04-25:** $180.25\n*   **2025-05-09:** $180.25\n*   **2025-05-23:** $180.25\n*   **2025-06-06:** $180.25\n*   **2025-06-20:** $180.25\n*   **2025-07-04:** $180.25\n*   **2025-07-18:** $180.25\n*   **2025-08-01:** $180.25\n*   **2025-08-15:** $180.25\n*   **2025-08-29:** $180.25\n*   **2025-09-12:** $180.25\n*   **2025-09-26:** $180.25\n*   **2025-10-10:** $180.25\n*   **2025-10-24:** $180.25\n*   **2025-11-07:** $180.25\n*   **2025-11-21:** $180.25\n*   **2025-12-05:** $180.25\n*   **2025-12-19:** $180.25\n\nThe total 401k contribution for 2025 was $4,686.50.\n",
     "timestamp": "2026-01-28T01:13:51.284Z"
+  },
+  {
+    "id": "e1326d79-3ab3-4273-bc0e-36f287c549a9",
+    "agentId": "7b2c2c01-3192-44d5-be33-f1f6de022578",
+    "role": "user",
+    "content": "how much does my employer contributed",
+    "timestamp": "2026-01-28T01:14:45.610Z"
+  },
+  {
+    "id": "e2eee68f-9192-48a0-9ff5-d6e6dc8616b9",
+    "agentId": "7b2c2c01-3192-44d5-be33-f1f6de022578",
+    "role": "assistant",
+    "content": "I do not have access to your employer contribution records. I can only provide information about your own contributions. You can find details on employer contributions on your pay stub or by contacting HR.\n",
+    "timestamp": "2026-01-28T01:14:47.445Z"
   }
 ]
