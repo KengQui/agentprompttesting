@@ -1,0 +1,293 @@
+{
+  "agentId": "cc4add53-14b3-4383-9d03-71ae7d82f0de",
+  "traces": [
+    {
+      "id": "trace-1769596812960",
+      "sessionId": "75f50ba6-7e8e-44c9-91e3-95e29033d93f",
+      "userInput": "new session is this",
+      "agentResponse": "Affirmative. A new session is initiated. I'm ready to assist you. What do you need?\n",
+      "startTime": "2026-01-28T10:40:12.230Z",
+      "endTime": "2026-01-28T10:40:12.960Z",
+      "totalDuration": 730,
+      "entries": [
+        {
+          "id": "entry-1769596812238-1",
+          "type": "intent_classification",
+          "name": "Orchestrator Intent Classification",
+          "timestamp": "2026-01-28T10:40:12.238Z",
+          "metadata": {
+            "intent": "answer_question",
+            "classificationMethod": "orchestrator",
+            "confidence": "high"
+          }
+        },
+        {
+          "id": "entry-1769596812960-3",
+          "type": "llm_call",
+          "name": "Gemini Response Generation",
+          "timestamp": "2026-01-28T10:40:12.960Z",
+          "duration": 722,
+          "metadata": {
+            "model": "gemini",
+            "intent": "answer_question"
+          }
+        }
+      ],
+      "success": true
+    },
+    {
+      "id": "trace-1769596817262",
+      "sessionId": "75f50ba6-7e8e-44c9-91e3-95e29033d93f",
+      "userInput": "Who am i bro",
+      "agentResponse": "You are Stoyan. Born on Nov 16, 1994. You work at UKG, and your hobby is bushcraft.\n",
+      "startTime": "2026-01-28T10:40:16.691Z",
+      "endTime": "2026-01-28T10:40:17.262Z",
+      "totalDuration": 571,
+      "entries": [
+        {
+          "id": "entry-1769596816691-1",
+          "type": "intent_classification",
+          "name": "Orchestrator Intent Classification",
+          "timestamp": "2026-01-28T10:40:16.691Z",
+          "metadata": {
+            "intent": "answer_question",
+            "classificationMethod": "orchestrator",
+            "confidence": "high"
+          }
+        },
+        {
+          "id": "entry-1769596817262-3",
+          "type": "llm_call",
+          "name": "Gemini Response Generation",
+          "timestamp": "2026-01-28T10:40:17.262Z",
+          "duration": 571,
+          "metadata": {
+            "model": "gemini",
+            "intent": "answer_question"
+          }
+        }
+      ],
+      "success": true
+    },
+    {
+      "id": "trace-1769596828101",
+      "sessionId": "75f50ba6-7e8e-44c9-91e3-95e29033d93f",
+      "userInput": "nice what's this bushcraft",
+      "agentResponse": "Bushcraft is using skills and knowledge to thrive in the natural environment. Like living off the land. Survival stuff.\n",
+      "startTime": "2026-01-28T10:40:27.463Z",
+      "endTime": "2026-01-28T10:40:28.101Z",
+      "totalDuration": 638,
+      "entries": [
+        {
+          "id": "entry-1769596827464-1",
+          "type": "intent_classification",
+          "name": "Orchestrator Intent Classification",
+          "timestamp": "2026-01-28T10:40:27.464Z",
+          "metadata": {
+            "intent": "answer_question",
+            "classificationMethod": "orchestrator",
+            "confidence": "high"
+          }
+        },
+        {
+          "id": "entry-1769596828101-3",
+          "type": "llm_call",
+          "name": "Gemini Response Generation",
+          "timestamp": "2026-01-28T10:40:28.101Z",
+          "duration": 637,
+          "metadata": {
+            "model": "gemini",
+            "intent": "answer_question"
+          }
+        }
+      ],
+      "success": true
+    },
+    {
+      "id": "trace-1769596844064",
+      "sessionId": "75f50ba6-7e8e-44c9-91e3-95e29033d93f",
+      "userInput": "amzing so you have the skill of browsing the web no",
+      "agentResponse": "Negative. I operate on the data I have. I do not browse the web. My mission is to protect, not search.\n",
+      "startTime": "2026-01-28T10:40:42.474Z",
+      "endTime": "2026-01-28T10:40:44.064Z",
+      "totalDuration": 1590,
+      "entries": [
+        {
+          "id": "entry-1769596843447-1",
+          "type": "intent_classification",
+          "name": "Orchestrator Intent Classification",
+          "timestamp": "2026-01-28T10:40:43.447Z",
+          "metadata": {
+            "intent": "answer_question",
+            "classificationMethod": "orchestrator",
+            "confidence": "high"
+          }
+        },
+        {
+          "id": "entry-1769596844064-3",
+          "type": "llm_call",
+          "name": "Gemini Response Generation",
+          "timestamp": "2026-01-28T10:40:44.064Z",
+          "duration": 617,
+          "metadata": {
+            "model": "gemini",
+            "intent": "answer_question"
+          }
+        }
+      ],
+      "success": true
+    },
+    {
+      "id": "trace-1769596855454",
+      "sessionId": "75f50ba6-7e8e-44c9-91e3-95e29033d93f",
+      "userInput": "AH shit we will need this skill then!",
+      "agentResponse": "That is not part of my programming. My purpose is to use the information I have to assist you.\n",
+      "startTime": "2026-01-28T10:40:54.876Z",
+      "endTime": "2026-01-28T10:40:55.454Z",
+      "totalDuration": 578,
+      "entries": [
+        {
+          "id": "entry-1769596854876-1",
+          "type": "intent_classification",
+          "name": "Orchestrator Intent Classification",
+          "timestamp": "2026-01-28T10:40:54.876Z",
+          "metadata": {
+            "intent": "answer_question",
+            "classificationMethod": "orchestrator",
+            "confidence": "high"
+          }
+        },
+        {
+          "id": "entry-1769596855454-3",
+          "type": "llm_call",
+          "name": "Gemini Response Generation",
+          "timestamp": "2026-01-28T10:40:55.454Z",
+          "duration": 578,
+          "metadata": {
+            "model": "gemini",
+            "intent": "answer_question"
+          }
+        }
+      ],
+      "success": true
+    },
+    {
+      "id": "trace-1769596863782",
+      "sessionId": "75f50ba6-7e8e-44c9-91e3-95e29033d93f",
+      "userInput": "amazing",
+      "agentResponse": "Is there anything else I can assist you with, Stoyan?\n",
+      "startTime": "2026-01-28T10:41:03.305Z",
+      "endTime": "2026-01-28T10:41:03.782Z",
+      "totalDuration": 477,
+      "entries": [
+        {
+          "id": "entry-1769596863305-1",
+          "type": "intent_classification",
+          "name": "Orchestrator Intent Classification",
+          "timestamp": "2026-01-28T10:41:03.305Z",
+          "metadata": {
+            "intent": "answer_question",
+            "classificationMethod": "orchestrator",
+            "confidence": "high"
+          }
+        },
+        {
+          "id": "entry-1769596863782-3",
+          "type": "llm_call",
+          "name": "Gemini Response Generation",
+          "timestamp": "2026-01-28T10:41:03.782Z",
+          "duration": 477,
+          "metadata": {
+            "model": "gemini",
+            "intent": "answer_question"
+          }
+        }
+      ],
+      "success": true
+    },
+    {
+      "id": "trace-1769597039918",
+      "sessionId": "75f50ba6-7e8e-44c9-91e3-95e29033d93f",
+      "userInput": "hey]",
+      "agentResponse": "I'm here. What is it you require?\n",
+      "startTime": "2026-01-28T10:43:59.483Z",
+      "endTime": "2026-01-28T10:43:59.918Z",
+      "totalDuration": 435,
+      "entries": [
+        {
+          "id": "entry-1769597039484-1",
+          "type": "intent_classification",
+          "name": "Orchestrator Intent Classification",
+          "timestamp": "2026-01-28T10:43:59.484Z",
+          "metadata": {
+            "intent": "answer_question",
+            "classificationMethod": "orchestrator",
+            "confidence": "high"
+          }
+        },
+        {
+          "id": "entry-1769597039918-3",
+          "type": "llm_call",
+          "name": "Gemini Response Generation",
+          "timestamp": "2026-01-28T10:43:59.918Z",
+          "duration": 434,
+          "metadata": {
+            "model": "gemini",
+            "intent": "answer_question"
+          }
+        }
+      ],
+      "success": true
+    },
+    {
+      "id": "trace-1769597043501",
+      "sessionId": "75f50ba6-7e8e-44c9-91e3-95e29033d93f",
+      "userInput": "sup",
+      "agentResponse": "I'm ready. What do you need?\n",
+      "startTime": "2026-01-28T10:44:03.082Z",
+      "endTime": "2026-01-28T10:44:03.501Z",
+      "totalDuration": 419,
+      "entries": [
+        {
+          "id": "entry-1769597043082-1",
+          "type": "intent_classification",
+          "name": "Orchestrator Intent Classification",
+          "timestamp": "2026-01-28T10:44:03.082Z",
+          "metadata": {
+            "intent": "answer_question",
+            "classificationMethod": "orchestrator",
+            "confidence": "high"
+          }
+        },
+        {
+          "id": "entry-1769597043501-3",
+          "type": "llm_call",
+          "name": "Gemini Response Generation",
+          "timestamp": "2026-01-28T10:44:03.501Z",
+          "duration": 419,
+          "metadata": {
+            "model": "gemini",
+            "intent": "answer_question"
+          }
+        }
+      ],
+      "success": true
+    }
+  ],
+  "stats": {
+    "hookCalls": {},
+    "signalReads": {},
+    "intentDistribution": {
+      "answer_question": 8
+    },
+    "classificationMethods": {
+      "orchestrator": 8
+    },
+    "avgResponseTime": 679.75,
+    "totalLlmCalls": 8,
+    "totalTokensUsed": 0,
+    "errorCount": 0
+  },
+  "createdAt": "2026-01-28T10:40:12.960Z",
+  "updatedAt": "2026-01-28T10:44:03.501Z"
+}
