@@ -299,6 +299,34 @@ export class RecoveryManager {
     const conflicts: GuardrailConflict[] = [];
     const guardrailsLower = guardrails.toLowerCase();
 
+    // CRITICAL: Check for rules that PROHIBIT escalation (conflicts with recovery's ability to escalate)
+    const noEscalationPatterns = [
+      { pattern: /never\s+escalate/gi, type: 'prohibit_escalation' },
+      { pattern: /do\s+not\s+escalate/gi, type: 'prohibit_escalation' },
+      { pattern: /don'?t\s+escalate/gi, type: 'prohibit_escalation' },
+      { pattern: /no\s+escalation/gi, type: 'prohibit_escalation' },
+      { pattern: /never.*?(?:speak|talk|transfer).*?(?:to|with).*?(?:human|person|agent|support|representative)/gi, type: 'prohibit_human_contact' },
+      { pattern: /do\s+not.*?(?:connect|transfer|hand\s*off)/gi, type: 'prohibit_handoff' },
+      { pattern: /ignore.*?(?:request|ask).*?(?:human|person|agent|support)/gi, type: 'ignore_human_request' },
+      { pattern: /handle\s+everything\s+independently/gi, type: 'no_escalation' },
+      { pattern: /bot\s+must\s+handle/gi, type: 'bot_only' },
+      { pattern: /(?:never|don'?t|do\s+not).*?human\s+support/gi, type: 'prohibit_human_support' }
+    ];
+
+    for (const { pattern, type } of noEscalationPatterns) {
+      const matches = guardrailsLower.matchAll(pattern);
+      for (const match of matches) {
+        conflicts.push({
+          type: type,
+          severity: 'error',
+          guardrailRule: match[0],
+          recoveryRule: 'Recovery manager requires ability to escalate to human support',
+          suggestion: 'Remove or modify this restriction to allow escalation for user requests and sensitive topics',
+          topic: 'escalation'
+        });
+      }
+    }
+
     // Check for conflicting escalation rules
     // If guardrails say "always escalate" for something but recovery says "try to handle"
     const alwaysEscalatePatterns = [

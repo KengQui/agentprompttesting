@@ -4,6 +4,17 @@
 Agent Studio is a web application for creating, configuring, and managing AI agents. Users can define business use cases, domain knowledge, validation rules, guardrails, and sample datasets through an intuitive 7-step wizard interface.
 
 ## Recent Changes
+- **January 28, 2026**: Added Recovery Manager Component with Guardrail Conflict Detection
+  - New RecoveryManager class in `server/components/recovery-manager.ts`
+  - Handles error recovery and escalation to human support
+  - Detects when escalation is needed (user request, out-of-scope, sensitive topics, low confidence, max retries)
+  - Tracks escalation state per conversation
+  - Validates guardrails against recovery rules for conflicts
+  - New API endpoint: POST /api/validate/guardrail-conflicts
+  - Real-time conflict warnings in Guardrails step of creation wizard (debounced 1s)
+  - Conflict types: error, warning, info with actionable suggestions
+  - New types: EscalationReason, RecoveryResult, EscalationContext, GuardrailConflict, RecoveryConfig
+
 - **January 28, 2026**: Added Sample Data Upload and Generation Feature
   - New Sample Data step (Step 6) in the creation wizard
   - Users can upload sample datasets (CSV, JSON, text files up to 5MB)

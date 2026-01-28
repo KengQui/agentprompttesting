@@ -110,5 +110,19 @@
     "role": "assistant",
     "content": "I understand that changes in deductions can be frustrating. Health insurance costs can fluctuate due to various factors, such as adjustments to plan premiums or changes in coverage levels. If you'd like to understand more about why your health insurance deduction increased, I recommend checking the open enrollment materials or reaching out to HR for a detailed explanation. They can provide specific information related to your plan and the reasons behind the change.\n",
     "timestamp": "2026-01-28T01:27:05.481Z"
+  },
+  {
+    "id": "b4bff151-a49c-4d10-b930-556b41b8532d",
+    "agentId": "7b2c2c01-3192-44d5-be33-f1f6de022578",
+    "role": "user",
+    "content": "can you breakdown my latest pay check",
+    "timestamp": "2026-01-28T01:32:39.901Z"
+  },
+  {
+    "id": "69a97bc1-10f9-492c-8fcc-c209e8f3fd73",
+    "agentId": "7b2c2c01-3192-44d5-be33-f1f6de022578",
+    "role": "assistant",
+    "content": "Certainly! Let's break down your latest paycheck. The most recent paystub in the data is from January 10, 2026.\n\n*   **Gross Pay:** $3,605.00\n*   **Federal Tax:** $612.85\n*   **State Tax:** $216.30\n*   **Social Security Tax:** $223.51\n*   **Medicare Tax:** $52.27\n*   **401k Contribution:** $180.25\n*   **Health Insurance Deduction:** $159.14\n*   **Net Pay:** $2,160.68\n\nIn summary, your gross pay was $3,605.00, and after all the deductions and taxes, your net pay was $2,160.68.\n",
+    "timestamp": "2026-01-28T01:32:42.682Z"
   }
 ]
