@@ -34,8 +34,23 @@ Agent Studio utilizes a modern web application architecture with a clear separat
     - **Turn Management**: Modular, per-agent component architecture for intent detection and conversational flow.
 
 ### Data Persistence
-- **Agent Configuration**: Each agent's configuration is stored in a dedicated folder (`/agents/{agent-id}/`) using a multi-file structure for modularity (e.g., `meta.yaml`, `business-use-case.md`, `domain-knowledge.md`, `validation-rules.yaml`, `guardrails.yaml`, `custom-prompt.md`, `domain-documents.json`, `sample-data.json`, `chat.json`).
-- **In-memory storage**: Utilized for transient data, with persistence to YAML/JSON files.
+- **Agent Configuration**: Each agent's configuration is stored in a dedicated folder (`/agents/{agent-id}/`) using a multi-file structure for modularity:
+  - `meta.yaml` - Agent metadata (name, dates)
+  - `business-use-case.md` - Business use case description
+  - `domain-knowledge.md` - Domain knowledge content
+  - `validation-rules.yaml` - Validation rules configuration
+  - `guardrails.yaml` - Guardrails configuration
+  - `custom-prompt.md` - Custom system prompt
+  - `domain-documents.json` - Uploaded domain documents
+  - `sample-data.json` - Sample data for testing
+  - `sessions.json` - List of chat session records
+- **Per-Session Message Storage**: Chat messages are stored in individual session files at `/agents/{agent-id}/sessions/{session-id}/messages.json`. This architecture:
+  - Enables independent experiment threads per session
+  - Supports session isolation for testing different scenarios
+  - Includes automatic migration from legacy single-file `chat.json` format
+  - Provides cross-session message queries sorted by timestamp
+  - Cleans up orphaned session folders during clear operations
+- **In-memory storage**: Utilizes nested Maps (`Map<agentId, Map<sessionId, ChatMessage[]>>`) for transient data, with persistence to YAML/JSON files.
 
 ## External Dependencies
 - **Google Gemini AI**: Used for generating agent responses, system prompts, validation rules, guardrails, and sample data.
