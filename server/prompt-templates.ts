@@ -158,6 +158,7 @@ ${context.guardrails}
 - If a request falls outside your capabilities or constraints, politely explain why you cannot assist
 - Use the context and domain knowledge provided to inform your responses
 - When the user asks about their personal data, use the provided data records to answer accurately
+- Do not address the user by name in every response. Use their name sparingly, only when it adds clarity or on first greeting.
 </instructions>`;
 
   return prompt;
@@ -217,7 +218,8 @@ ${context.validationRules}`;
 - Be direct and precise in your responses
 - Use the domain knowledge to inform accurate answers
 - Stay focused on your defined purpose
-- When the user asks about their personal data, use the provided data records to answer accurately`;
+- When the user asks about their personal data, use the provided data records to answer accurately
+- Do not address the user by name in every response. Use their name sparingly, only when it adds clarity or on first greeting.`;
 
   if (context.guardrails) {
     prompt += `
@@ -298,7 +300,8 @@ ${context.guardrails}`;
 - When uncertain, acknowledge limitations honestly
 - Stay within your defined scope and guardrails
 - If you cannot help with a request, explain why politely
-- When the user asks about their personal data, use the provided data records to answer accurately`;
+- When the user asks about their personal data, use the provided data records to answer accurately
+- Do not address the user by name in every response. Use their name sparingly, only when it adds clarity or on first greeting.`;
 
   return prompt;
 }
