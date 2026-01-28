@@ -4,6 +4,13 @@
 Agent Studio is a web application for creating, configuring, and managing AI agents. Users can define business use cases, domain knowledge, validation rules, guardrails, and sample datasets through an intuitive 7-step wizard interface.
 
 ## Recent Changes
+- **January 28, 2026**: Custom Prompt Now Includes Domain Knowledge and Guardrails
+  - Fixed bug where custom prompts completely replaced all agent configuration
+  - Custom prompts now support dynamic placeholders: `{{name}}`, `{{businessUseCase}}`, `{{domainKnowledge}}`, `{{validationRules}}`, `{{guardrails}}`, `{{sampleDatasets}}`, `{{currentDate}}`
+  - If no placeholders used, domain knowledge and guardrails are automatically appended
+  - New UI in settings page shows available placeholders with click-to-insert functionality
+  - Ensures agents always have access to their configured knowledge and follow their guardrails
+
 - **January 28, 2026**: Context Rot Warning in Chat
   - New ContextRotWarning component displays token usage progress bar in each agent's chat view
   - Based on Chroma Research showing LLM performance degrades as context grows
