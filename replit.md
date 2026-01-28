@@ -7,6 +7,15 @@ Agent Studio is a web application designed for the end-to-end creation, configur
 - Using Google Gemini AI (via Google AI Studio) for agent responses
 - Requires GEMINI_API_KEY secret to be configured
 
+## Authentication System
+- **User Authentication**: Username/password registration with bcrypt password hashing
+- **Session Management**: Cookie-based sessions with 7-day expiration, httpOnly and sameSite=lax flags
+- **Password Reset**: Phone-based identity verification (no SMS - just matches phone number on file) before allowing password reset
+- **Agent Isolation**: Each user can only see and manage their own agents; agents are associated with userId
+- **Backward Compatibility**: Legacy agents without userId are accessible for migration purposes
+- **Protected Routes**: All agent-related routes (sessions, messages, traces, config-history) enforce ownership verification
+- **Storage**: Users stored in `/data/users.json` with file-based persistence
+
 ## System Architecture
 Agent Studio utilizes a modern web application architecture with a clear separation between frontend and backend.
 
