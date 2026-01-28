@@ -1430,43 +1430,123 @@ export default function SettingsPage() {
                 Current Configuration
               </CardTitle>
               <CardDescription>
-                Active settings for this agent
+                All settings that affect agent behavior
               </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label className="text-xs text-muted-foreground">Validation Rules</Label>
-                  <div className="p-3 rounded-lg bg-muted text-xs font-mono max-h-32 overflow-auto" data-testid="text-validation-rules">
-                    {agent.validationRules ? (
-                      <pre className="whitespace-pre-wrap">{agent.validationRules.substring(0, 500)}{agent.validationRules.length > 500 ? '...' : ''}</pre>
-                    ) : (
-                      <span className="text-muted-foreground italic">No validation rules configured</span>
-                    )}
+            <CardContent className="space-y-6">
+              <div>
+                <h4 className="text-sm font-medium mb-3 flex items-center gap-2">
+                  <Briefcase className="h-4 w-4 text-muted-foreground" />
+                  Identity & Knowledge
+                </h4>
+                {agent.description && (
+                  <div className="mb-3">
+                    <Label className="text-xs text-muted-foreground">Description</Label>
+                    <div className="p-3 rounded-lg bg-muted text-xs max-h-16 overflow-auto mt-1" data-testid="text-description">
+                      <p className="whitespace-pre-wrap">{agent.description.substring(0, 200)}{agent.description.length > 200 ? '...' : ''}</p>
+                    </div>
+                  </div>
+                )}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label className="text-xs text-muted-foreground">Business Use Case</Label>
+                    <div className="p-3 rounded-lg bg-muted text-xs max-h-24 overflow-auto" data-testid="text-business-use-case">
+                      {agent.businessUseCase ? (
+                        <p className="whitespace-pre-wrap">{agent.businessUseCase.substring(0, 300)}{agent.businessUseCase.length > 300 ? '...' : ''}</p>
+                      ) : (
+                        <span className="text-muted-foreground italic">No business use case defined</span>
+                      )}
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-xs text-muted-foreground">Domain Knowledge</Label>
+                    <div className="p-3 rounded-lg bg-muted text-xs max-h-24 overflow-auto" data-testid="text-domain-knowledge">
+                      {agent.domainKnowledge ? (
+                        <p className="whitespace-pre-wrap">{agent.domainKnowledge.substring(0, 300)}{agent.domainKnowledge.length > 300 ? '...' : ''}</p>
+                      ) : (
+                        <span className="text-muted-foreground italic">No domain knowledge configured</span>
+                      )}
+                    </div>
                   </div>
                 </div>
-                <div className="space-y-2">
-                  <Label className="text-xs text-muted-foreground">Guardrails</Label>
-                  <div className="p-3 rounded-lg bg-muted text-xs font-mono max-h-32 overflow-auto" data-testid="text-guardrails">
-                    {agent.guardrails ? (
-                      <pre className="whitespace-pre-wrap">{agent.guardrails.substring(0, 500)}{agent.guardrails.length > 500 ? '...' : ''}</pre>
-                    ) : (
-                      <span className="text-muted-foreground italic">No guardrails configured</span>
-                    )}
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-3">
+                  <div className="p-2 rounded-lg bg-muted/50 text-center">
+                    <p className="text-lg font-semibold" data-testid="count-domain-documents">{agent.domainDocuments?.length || 0}</p>
+                    <p className="text-xs text-muted-foreground">Domain Documents</p>
+                  </div>
+                  <div className="p-2 rounded-lg bg-muted/50 text-center">
+                    <p className="text-lg font-semibold" data-testid="count-sample-datasets">{agent.sampleDatasets?.length || 0}</p>
+                    <p className="text-xs text-muted-foreground">Sample Datasets</p>
+                  </div>
+                  <div className="p-2 rounded-lg bg-muted/50 text-center">
+                    <p className="text-lg font-semibold" data-testid="text-prompt-style">{promptStyleInfo[agent.promptStyle || 'anthropic']?.name || agent.promptStyle}</p>
+                    <p className="text-xs text-muted-foreground">Prompt Style</p>
+                  </div>
+                  <div className="p-2 rounded-lg bg-muted/50 text-center">
+                    <p className="text-lg font-semibold" data-testid="text-agent-status">
+                      <Badge variant={agent.status === 'active' ? 'default' : agent.status === 'configured' ? 'secondary' : 'outline'}>
+                        {agent.status}
+                      </Badge>
+                    </p>
+                    <p className="text-xs text-muted-foreground">Status</p>
                   </div>
                 </div>
               </div>
-              <div className="space-y-2">
-                <Label className="text-xs text-muted-foreground">System Prompt Preview</Label>
-                <div className="p-3 rounded-lg bg-muted text-xs font-mono max-h-40 overflow-auto" data-testid="text-system-prompt">
-                  {(() => {
-                    const promptPreview = generatePromptPreview(agent.promptStyle || 'professional', agent);
-                    return promptPreview ? (
-                      <pre className="whitespace-pre-wrap">{promptPreview.substring(0, 800)}{promptPreview.length > 800 ? '...' : ''}</pre>
-                    ) : (
-                      <span className="text-muted-foreground italic">No system prompt configured</span>
-                    );
-                  })()}
+
+              <div>
+                <h4 className="text-sm font-medium mb-3 flex items-center gap-2">
+                  <Shield className="h-4 w-4 text-muted-foreground" />
+                  Rules & Guardrails
+                </h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label className="text-xs text-muted-foreground">Validation Rules</Label>
+                    <div className="p-3 rounded-lg bg-muted text-xs font-mono max-h-32 overflow-auto" data-testid="text-validation-rules">
+                      {agent.validationRules ? (
+                        <pre className="whitespace-pre-wrap">{agent.validationRules.substring(0, 500)}{agent.validationRules.length > 500 ? '...' : ''}</pre>
+                      ) : (
+                        <span className="text-muted-foreground italic">No validation rules configured</span>
+                      )}
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-xs text-muted-foreground">Guardrails</Label>
+                    <div className="p-3 rounded-lg bg-muted text-xs font-mono max-h-32 overflow-auto" data-testid="text-guardrails">
+                      {agent.guardrails ? (
+                        <pre className="whitespace-pre-wrap">{agent.guardrails.substring(0, 500)}{agent.guardrails.length > 500 ? '...' : ''}</pre>
+                      ) : (
+                        <span className="text-muted-foreground italic">No guardrails configured</span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <h4 className="text-sm font-medium mb-3 flex items-center gap-2">
+                  <Code className="h-4 w-4 text-muted-foreground" />
+                  System Prompt
+                </h4>
+                {agent.promptStyle === 'custom' && agent.customPrompt && (
+                  <div className="space-y-2 mb-3">
+                    <Label className="text-xs text-muted-foreground">Custom Prompt</Label>
+                    <div className="p-3 rounded-lg bg-primary/5 border border-primary/20 text-xs font-mono max-h-24 overflow-auto" data-testid="text-custom-prompt">
+                      <pre className="whitespace-pre-wrap">{agent.customPrompt.substring(0, 400)}{agent.customPrompt.length > 400 ? '...' : ''}</pre>
+                    </div>
+                  </div>
+                )}
+                <div className="space-y-2">
+                  <Label className="text-xs text-muted-foreground">Generated System Prompt</Label>
+                  <div className="p-3 rounded-lg bg-muted text-xs font-mono max-h-40 overflow-auto" data-testid="text-system-prompt">
+                    {(() => {
+                      const promptPreview = generatePromptPreview(agent.promptStyle || 'anthropic', agent);
+                      return promptPreview ? (
+                        <pre className="whitespace-pre-wrap">{promptPreview.substring(0, 800)}{promptPreview.length > 800 ? '...' : ''}</pre>
+                      ) : (
+                        <span className="text-muted-foreground italic">No system prompt configured</span>
+                      );
+                    })()}
+                  </div>
                 </div>
               </div>
             </CardContent>
