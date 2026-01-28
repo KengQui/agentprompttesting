@@ -54,25 +54,25 @@ function StepIndicator({ currentStep }: { currentStep: number }) {
           return (
             <div
               key={step.id}
-              className="flex items-center gap-3"
+              className="flex flex-col gap-0.5"
             >
-              <div
-                className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full border-2 transition-colors ${
-                  isCompleted
-                    ? "border-primary bg-primary text-primary-foreground"
-                    : isCurrent
-                    ? "border-primary bg-primary/10 text-primary"
-                    : "border-muted bg-muted text-muted-foreground"
-                }`}
-                data-testid={`step-indicator-${step.id}`}
-              >
-                {isCompleted ? (
-                  <Check className="h-4 w-4" />
-                ) : (
-                  <Icon className="h-4 w-4" />
-                )}
-              </div>
-              <div className="flex flex-col">
+              <div className="flex items-center gap-2">
+                <div
+                  className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 transition-colors ${
+                    isCompleted
+                      ? "border-primary bg-primary text-primary-foreground"
+                      : isCurrent
+                      ? "border-primary bg-primary/10 text-primary"
+                      : "border-muted bg-muted text-muted-foreground"
+                  }`}
+                  data-testid={`step-indicator-${step.id}`}
+                >
+                  {isCompleted ? (
+                    <Check className="h-3 w-3" />
+                  ) : (
+                    <Icon className="h-3 w-3" />
+                  )}
+                </div>
                 <span
                   className={`text-sm font-medium ${
                     isCurrent ? "text-primary" : isCompleted ? "text-foreground" : "text-muted-foreground"
@@ -80,10 +80,10 @@ function StepIndicator({ currentStep }: { currentStep: number }) {
                 >
                   {step.name}
                 </span>
-                <span className="text-xs text-muted-foreground hidden lg:block">
-                  {step.description}
-                </span>
               </div>
+              <span className="text-xs text-muted-foreground hidden lg:block ml-7">
+                {step.description}
+              </span>
               {index !== steps.length - 1 && (
                 <div className="absolute left-5 mt-12 h-4 w-0.5 bg-muted" style={{ display: 'none' }} />
               )}
