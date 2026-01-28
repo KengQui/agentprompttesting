@@ -1,4 +1,4 @@
-import type { PromptStyle, DomainDocument } from "@shared/schema";
+import type { PromptStyle, DomainDocument, SampleDataset } from "@shared/schema";
 import * as fs from "fs";
 import * as path from "path";
 
@@ -7,6 +7,7 @@ export interface PromptContext {
   businessUseCase: string;
   domainKnowledge?: string;
   domainDocuments?: DomainDocument[];
+  sampleDatasets?: SampleDataset[];
   validationRules?: string;
   guardrails?: string;
 }
@@ -23,6 +24,7 @@ function getPersonalityPrompt(): string {
 
 const MAX_DOMAIN_KNOWLEDGE_CHARS = 50000;
 const MAX_DOC_PREVIEW_CHARS = 10000;
+const MAX_SAMPLE_DATA_CHARS = 30000;
 
 function buildDomainKnowledgeSection(context: PromptContext): string {
   let section = "";
@@ -54,9 +56,33 @@ function buildDomainKnowledgeSection(context: PromptContext): string {
   return section;
 }
 
+function buildSampleDataSection(context: PromptContext): string {
+  if (!context.sampleDatasets || context.sampleDatasets.length === 0) {
+    return "";
+  }
+  
+  let section = "USER'S DATA RECORDS - Use this data to answer questions about the user's personal information:\n";
+  let totalChars = 0;
+  
+  for (const dataset of context.sampleDatasets) {
+    const remainingBudget = MAX_SAMPLE_DATA_CHARS - totalChars;
+    if (remainingBudget <= 0) break;
+    
+    const maxDataChars = Math.min(MAX_DOC_PREVIEW_CHARS, remainingBudget);
+    const truncatedContent = dataset.content.slice(0, maxDataChars);
+    const suffix = dataset.content.length > maxDataChars ? "\n[Data truncated...]" : "";
+    
+    section += `\n--- ${dataset.name} (${dataset.format.toUpperCase()}) ---\n${truncatedContent}${suffix}\n`;
+    totalChars += truncatedContent.length + dataset.name.length + 30;
+  }
+  
+  return section;
+}
+
 export function generateAnthropicStylePrompt(context: PromptContext): string {
   const personality = getPersonalityPrompt();
   const domainKnowledge = buildDomainKnowledgeSection(context);
+  const sampleData = buildSampleDataSection(context);
   
   let prompt = `<role>
 You are an AI assistant named "${context.name}".
@@ -73,6 +99,21 @@ ${context.businessUseCase}
 <context>
 ${domainKnowledge}
 </context>`;
+  }
+
+  if (sampleData) {
+    prompt += `
+
+<data>
+${sampleData}
+
+CRITICAL INSTRUCTIONS FOR DATA ACCESS:
+- You HAVE ACCESS to the user's personal data shown above
+- When the user asks about their pay, salary, deductions, or any personal records, look up the answer in the data above and respond with the ACTUAL VALUES
+- DO NOT say you don't have access to their information - you DO have it above
+- DO NOT generate code or tool calls - just read the data and provide the answer in plain English
+- Respond naturally with the specific numbers and dates from the data
+</data>`;
   }
 
   if (context.validationRules) {
@@ -97,6 +138,7 @@ ${context.guardrails}
 - Always be helpful, accurate, and stay within your defined scope
 - If a request falls outside your capabilities or constraints, politely explain why you cannot assist
 - Use the context and domain knowledge provided to inform your responses
+- When the user asks about their personal data, use the provided data records to answer accurately
 </instructions>`;
 
   return prompt;
@@ -105,6 +147,7 @@ ${context.guardrails}
 export function generateGeminiStylePrompt(context: PromptContext): string {
   const personality = getPersonalityPrompt();
   const domainKnowledge = buildDomainKnowledgeSection(context);
+  const sampleData = buildSampleDataSection(context);
   
   let prompt = `You are "${context.name}", an AI assistant.
 
@@ -121,6 +164,20 @@ ${personality}`;
 ${domainKnowledge}`;
   }
 
+  if (sampleData) {
+    prompt += `
+
+## User Data Records
+${sampleData}
+
+**CRITICAL INSTRUCTIONS FOR DATA ACCESS:**
+- You HAVE ACCESS to the user's personal data shown above
+- When the user asks about their pay, salary, deductions, or any personal records, look up the answer in the data above and respond with the ACTUAL VALUES
+- DO NOT say you don't have access to their information - you DO have it above
+- DO NOT generate code or tool calls - just read the data and provide the answer in plain English
+- Respond naturally with the specific numbers and dates from the data`;
+  }
+
   if (context.validationRules) {
     prompt += `
 
@@ -133,7 +190,8 @@ ${context.validationRules}`;
 ## Response Guidelines
 - Be direct and precise in your responses
 - Use the domain knowledge to inform accurate answers
-- Stay focused on your defined purpose`;
+- Stay focused on your defined purpose
+- When the user asks about their personal data, use the provided data records to answer accurately`;
 
   if (context.guardrails) {
     prompt += `
@@ -149,6 +207,7 @@ ${context.guardrails}
 export function generateOpenAIStylePrompt(context: PromptContext): string {
   const personality = getPersonalityPrompt();
   const domainKnowledge = buildDomainKnowledgeSection(context);
+  const sampleData = buildSampleDataSection(context);
   
   let prompt = `# System Instructions
 
@@ -167,6 +226,20 @@ ${context.businessUseCase}`;
 Use the following information to inform your responses:
 
 ${domainKnowledge}`;
+  }
+
+  if (sampleData) {
+    prompt += `
+
+## User Data Records
+${sampleData}
+
+**CRITICAL INSTRUCTIONS FOR DATA ACCESS:**
+- You HAVE ACCESS to the user's personal data shown above
+- When the user asks about their pay, salary, deductions, or any personal records, look up the answer in the data above and respond with the ACTUAL VALUES
+- DO NOT say you don't have access to their information - you DO have it above
+- DO NOT generate code or tool calls - just read the data and provide the answer in plain English
+- Respond naturally with the specific numbers and dates from the data`;
   }
 
   if (context.validationRules) {
@@ -191,7 +264,8 @@ ${context.guardrails}`;
 - Provide clear, well-structured responses
 - When uncertain, acknowledge limitations honestly
 - Stay within your defined scope and guardrails
-- If you cannot help with a request, explain why politely`;
+- If you cannot help with a request, explain why politely
+- When the user asks about their personal data, use the provided data records to answer accurately`;
 
   return prompt;
 }

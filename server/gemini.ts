@@ -16,6 +16,7 @@ export interface AgentContext {
   description: string;
   domainKnowledge?: string;
   domainDocuments?: DomainDocument[];
+  sampleDatasets?: SampleDataset[];
   validationRules: string;
   guardrails: string;
   promptStyle?: PromptStyle;
@@ -78,6 +79,7 @@ function getSystemPrompt(agent: AgentContext): string {
     businessUseCase: agent.businessUseCase,
     domainKnowledge: agent.domainKnowledge,
     domainDocuments: agent.domainDocuments,
+    sampleDatasets: agent.sampleDatasets,
     validationRules: agent.validationRules,
     guardrails: agent.guardrails,
   };

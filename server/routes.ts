@@ -164,8 +164,11 @@ export async function registerRoutes(
         description: agent.description,
         domainKnowledge: agent.domainKnowledge,
         domainDocuments: agent.domainDocuments,
+        sampleDatasets: agent.sampleDatasets,
         validationRules: agent.validationRules,
         guardrails: agent.guardrails,
+        promptStyle: agent.promptStyle,
+        customPrompt: agent.customPrompt,
       };
 
       let responseContent: string;

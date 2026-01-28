@@ -1,44 +1,16 @@
 [
   {
-    "id": "7a777b7d-2985-4b3c-b9ec-b5e7f0916d6c",
+    "id": "a197a1ac-8bdf-4b8c-96bb-c90bf0cf4c35",
     "agentId": "7b2c2c01-3192-44d5-be33-f1f6de022578",
     "role": "user",
-    "content": "i want to know what is my last month pay",
-    "timestamp": "2026-01-28T00:24:10.526Z"
+    "content": "What was my gross pay in December 2025?",
+    "timestamp": "2026-01-28T01:11:30.114Z"
   },
   {
-    "id": "a98bd00a-fc40-4217-8eea-6017640fabcf",
+    "id": "05b2bc63-d981-49ad-b09c-766bb053f7ec",
     "agentId": "7b2c2c01-3192-44d5-be33-f1f6de022578",
     "role": "assistant",
-    "content": "I do not have access to your payroll information, so I cannot provide your pay information. Please log into the payroll system to view your pay stubs.\n",
-    "timestamp": "2026-01-28T00:24:12.135Z"
-  },
-  {
-    "id": "3d69f200-ea13-466f-8b7e-02c56adf5264",
-    "agentId": "7b2c2c01-3192-44d5-be33-f1f6de022578",
-    "role": "user",
-    "content": "what is my last month pay",
-    "timestamp": "2026-01-28T00:57:58.366Z"
-  },
-  {
-    "id": "aa5908f4-a662-446c-85b8-c96c6387ccf5",
-    "agentId": "7b2c2c01-3192-44d5-be33-f1f6de022578",
-    "role": "assistant",
-    "content": "I do not have access to your payroll information, so I cannot provide your pay information. Please log into the payroll system to view your pay stubs.\n",
-    "timestamp": "2026-01-28T00:57:59.858Z"
-  },
-  {
-    "id": "bd6e7a6c-e5cb-434d-85fd-18019b09a586",
-    "agentId": "7b2c2c01-3192-44d5-be33-f1f6de022578",
-    "role": "user",
-    "content": "what is my last month pay",
-    "timestamp": "2026-01-28T01:03:32.359Z"
-  },
-  {
-    "id": "0f931f50-4a98-4a91-850e-478f1c52109e",
-    "agentId": "7b2c2c01-3192-44d5-be33-f1f6de022578",
-    "role": "assistant",
-    "content": "I do not have access to your payroll information, so I cannot provide your pay information. Please log into the payroll system to view your pay stubs.\n",
-    "timestamp": "2026-01-28T01:03:33.736Z"
+    "content": "Okay, I can help you with that. Looking at the data, your gross pay in December 2025 was $3,605.00.",
+    "timestamp": "2026-01-28T01:11:31.853Z"
   }
 ]
