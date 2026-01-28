@@ -1,15 +1,15 @@
 import { useState, useEffect, useRef } from "react";
 import { useParams, useLocation } from "wouter";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { ArrowLeft, Save, Trash2, Bot, Briefcase, Shield, AlertTriangle, Loader2, BookOpen, Upload, X, FileText, Code, Pencil, RotateCcw, HelpCircle, ExternalLink, Info, Sparkles, ChevronDown, Database } from "lucide-react";
+import { ArrowLeft, Save, Trash2, Bot, Briefcase, Shield, AlertTriangle, Loader2, BookOpen, Upload, X, FileText, Code, Pencil, RotateCcw, HelpCircle, ExternalLink, Info, Sparkles, ChevronDown, Database, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import {
@@ -44,11 +44,89 @@ import { validationRulesTemplate, guardrailsTemplate } from "@/lib/config-templa
 import type { Agent, UpdateAgent, AgentStatus, DomainDocument, SampleDataset, PromptStyle, GeminiModel } from "@shared/schema";
 import { geminiModelDisplayNames, defaultGenerationModel } from "@shared/schema";
 
+const settingsSteps = [
+  { id: 1, name: "General", icon: Bot, description: "Name and status" },
+  { id: 2, name: "Business Use Case", icon: Briefcase, description: "Define the problem this agent solves" },
+  { id: 3, name: "Domain Knowledge", icon: BookOpen, description: "Add knowledge and documents" },
+  { id: 4, name: "Validation Rules", icon: Shield, description: "Set input/output validation rules" },
+  { id: 5, name: "Guardrails", icon: AlertTriangle, description: "Define safety boundaries" },
+  { id: 6, name: "Sample Data", icon: Database, description: "Upload or generate sample data" },
+  { id: 7, name: "Prompt Configuration", icon: Code, description: "Customize the system prompt" },
+];
+
+function SettingsStepIndicator({ 
+  currentStep, 
+  onStepClick,
+  completedSteps 
+}: { 
+  currentStep: number; 
+  onStepClick: (step: number) => void;
+  completedSteps: Set<number>;
+}) {
+  const progress = (completedSteps.size / settingsSteps.length) * 100;
+
+  return (
+    <div className="flex flex-col h-full">
+      <div className="flex-1 flex flex-col gap-4">
+        {settingsSteps.map((step) => {
+          const isCompleted = completedSteps.has(step.id);
+          const isCurrent = currentStep === step.id;
+          const Icon = step.icon;
+
+          return (
+            <button
+              key={step.id}
+              onClick={() => onStepClick(step.id)}
+              className="flex flex-col gap-0.5 text-left hover:opacity-80 transition-opacity"
+              data-testid={`settings-step-indicator-${step.id}`}
+            >
+              <div className="flex items-center gap-2">
+                <div
+                  className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 transition-colors ${
+                    isCompleted
+                      ? "border-primary bg-primary text-primary-foreground"
+                      : isCurrent
+                      ? "border-primary bg-primary/10 text-primary"
+                      : "border-muted bg-muted text-muted-foreground"
+                  }`}
+                >
+                  {isCompleted ? (
+                    <Check className="h-3 w-3" />
+                  ) : (
+                    <Icon className="h-3 w-3" />
+                  )}
+                </div>
+                <span
+                  className={`text-sm font-medium ${
+                    isCurrent ? "text-primary" : isCompleted ? "text-foreground" : "text-muted-foreground"
+                  }`}
+                >
+                  {step.name}
+                </span>
+              </div>
+              <span className="text-xs text-muted-foreground hidden lg:block ml-7">
+                {step.description}
+              </span>
+            </button>
+          );
+        })}
+      </div>
+      <div className="mt-6 pt-4 border-t">
+        <div className="text-xs text-muted-foreground mb-2">Completion</div>
+        <Progress value={progress} className="h-2" />
+        <div className="text-xs text-muted-foreground mt-1">{Math.round(progress)}% complete</div>
+      </div>
+    </div>
+  );
+}
+
 export default function SettingsPage() {
   const params = useParams<{ id: string }>();
   const [, navigate] = useLocation();
   const { toast } = useToast();
   const [formData, setFormData] = useState<UpdateAgent | null>(null);
+  const [currentStep, setCurrentStep] = useState(1);
+  const [completedSteps, setCompletedSteps] = useState<Set<number>>(new Set());
 
   const { data: agent, isLoading } = useQuery<Agent>({
     queryKey: ["/api/agents", params.id],
@@ -69,7 +147,18 @@ export default function SettingsPage() {
   const [sampleRecordCount, setSampleRecordCount] = useState(10);
   const [sampleFormat, setSampleFormat] = useState<"json" | "csv" | "text">("json");
 
-  // Initialize form data when agent loads
+  const computeCompletedSteps = (data: Partial<UpdateAgent>): Set<number> => {
+    const completed = new Set<number>();
+    if (data.name) completed.add(1);
+    if (data.businessUseCase) completed.add(2);
+    if (data.domainKnowledge || (data.domainDocuments && data.domainDocuments.length > 0)) completed.add(3);
+    if (data.validationRules) completed.add(4);
+    if (data.guardrails) completed.add(5);
+    if (data.sampleDatasets && data.sampleDatasets.length > 0) completed.add(6);
+    if (data.promptStyle || data.customPrompt) completed.add(7);
+    return completed;
+  };
+
   useEffect(() => {
     if (agent && !formData) {
       setFormData({
@@ -86,8 +175,31 @@ export default function SettingsPage() {
         status: agent.status,
       });
       setEditedPrompt(agent.customPrompt || "");
+      
+      setCompletedSteps(computeCompletedSteps({
+        name: agent.name,
+        businessUseCase: agent.businessUseCase,
+        domainKnowledge: agent.domainKnowledge,
+        domainDocuments: agent.domainDocuments,
+        sampleDatasets: agent.sampleDatasets || [],
+        validationRules: agent.validationRules,
+        guardrails: agent.guardrails,
+        promptStyle: agent.promptStyle,
+        customPrompt: agent.customPrompt,
+      }));
     }
   }, [agent, formData]);
+
+  const updateFormDataAndTrackCompletion = (updates: Partial<UpdateAgent>) => {
+    setFormData((prev) => {
+      if (!prev) return null;
+      const updated = { ...prev, ...updates };
+      
+      setCompletedSteps(computeCompletedSteps(updated));
+      
+      return updated;
+    });
+  };
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
@@ -111,7 +223,7 @@ export default function SettingsPage() {
 
         const document: DomainDocument = await response.json();
         const currentDocs = formData?.domainDocuments || [];
-        updateFormData({ domainDocuments: [...currentDocs, document] });
+        updateFormDataAndTrackCompletion({ domainDocuments: [...currentDocs, document] });
 
         toast({
           title: "Document uploaded",
@@ -134,15 +246,15 @@ export default function SettingsPage() {
 
   const removeDocument = (id: string) => {
     const currentDocs = formData?.domainDocuments || [];
-    updateFormData({ domainDocuments: currentDocs.filter(doc => doc.id !== id) });
+    updateFormDataAndTrackCompletion({ domainDocuments: currentDocs.filter(doc => doc.id !== id) });
   };
 
   const handleUseValidationTemplate = () => {
-    updateFormData({ validationRules: validationRulesTemplate });
+    updateFormDataAndTrackCompletion({ validationRules: validationRulesTemplate });
   };
 
   const handleUseGuardrailsTemplate = () => {
-    updateFormData({ guardrails: guardrailsTemplate });
+    updateFormDataAndTrackCompletion({ guardrails: guardrailsTemplate });
   };
 
   const handleGenerateValidationRules = async (model: GeminiModel) => {
@@ -164,7 +276,7 @@ export default function SettingsPage() {
         model,
       });
       const result = await response.json();
-      updateFormData({ validationRules: result.validationRules });
+      updateFormDataAndTrackCompletion({ validationRules: result.validationRules });
       toast({
         title: "Validation rules generated",
         description: `Generated using ${geminiModelDisplayNames[model]}.`,
@@ -199,7 +311,7 @@ export default function SettingsPage() {
         model,
       });
       const result = await response.json();
-      updateFormData({ guardrails: result.guardrails });
+      updateFormDataAndTrackCompletion({ guardrails: result.guardrails });
       toast({
         title: "Guardrails generated",
         description: `Generated using ${geminiModelDisplayNames[model]}.`,
@@ -237,7 +349,7 @@ export default function SettingsPage() {
 
         const dataset: SampleDataset = await response.json();
         const currentDatasets = formData?.sampleDatasets || [];
-        updateFormData({ sampleDatasets: [...currentDatasets, dataset] });
+        updateFormDataAndTrackCompletion({ sampleDatasets: [...currentDatasets, dataset] });
         toast({
           title: "File uploaded",
           description: `${file.name} has been added to sample datasets.`,
@@ -259,7 +371,7 @@ export default function SettingsPage() {
 
   const removeSampleDataset = (id: string) => {
     const currentDatasets = formData?.sampleDatasets || [];
-    updateFormData({ sampleDatasets: currentDatasets.filter(d => d.id !== id) });
+    updateFormDataAndTrackCompletion({ sampleDatasets: currentDatasets.filter(d => d.id !== id) });
   };
 
   const handleGenerateSampleData = async (model: GeminiModel) => {
@@ -285,7 +397,7 @@ export default function SettingsPage() {
       });
       const dataset: SampleDataset = await response.json();
       const currentDatasets = formData?.sampleDatasets || [];
-      updateFormData({ sampleDatasets: [...currentDatasets, dataset] });
+      updateFormDataAndTrackCompletion({ sampleDatasets: [...currentDatasets, dataset] });
       toast({
         title: "Sample data generated",
         description: `Generated ${sampleRecordCount} ${sampleDataType} records using ${geminiModelDisplayNames[model]}.`,
@@ -344,13 +456,21 @@ export default function SettingsPage() {
     },
   });
 
-  const updateFormData = (updates: Partial<UpdateAgent>) => {
-    setFormData((prev) => (prev ? { ...prev, ...updates } : null));
-  };
-
   const handleSave = () => {
     if (formData) {
       updateMutation.mutate(formData);
+    }
+  };
+
+  const handleNextStep = () => {
+    if (currentStep < settingsSteps.length) {
+      setCurrentStep(currentStep + 1);
+    }
+  };
+
+  const handlePrevStep = () => {
+    if (currentStep > 1) {
+      setCurrentStep(currentStep - 1);
     }
   };
 
@@ -366,19 +486,22 @@ export default function SettingsPage() {
             </div>
           </div>
         </header>
-        <main className="container mx-auto max-w-2xl px-4 py-8">
-          <div className="space-y-6">
-            {[1, 2, 3, 4].map((i) => (
-              <Card key={i}>
+        <main className="container mx-auto px-4 py-8">
+          <div className="flex gap-8">
+            <div className="w-64 shrink-0">
+              <Skeleton className="h-80 w-full" />
+            </div>
+            <div className="flex-1">
+              <Card>
                 <CardHeader>
                   <Skeleton className="h-6 w-40" />
                   <Skeleton className="h-4 w-60" />
                 </CardHeader>
                 <CardContent>
-                  <Skeleton className="h-24 w-full" />
+                  <Skeleton className="h-48 w-full" />
                 </CardContent>
               </Card>
-            ))}
+            </div>
           </div>
         </main>
       </div>
@@ -397,49 +520,10 @@ export default function SettingsPage() {
     );
   }
 
-  return (
-    <div className="min-h-screen bg-background">
-      <header className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="container mx-auto px-4 py-3">
-          <div className="flex items-center justify-between gap-4">
-            <div className="flex items-center gap-3">
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => navigate("/")}
-                data-testid="button-back"
-              >
-                <ArrowLeft className="h-5 w-5" />
-              </Button>
-              <div className="flex items-center gap-3">
-                <div className="flex h-9 w-9 items-center justify-center rounded-md bg-primary text-primary-foreground">
-                  <Bot className="h-5 w-5" />
-                </div>
-                <div>
-                  <h1 className="font-semibold">Settings</h1>
-                  <p className="text-xs text-muted-foreground">{agent.name}</p>
-                </div>
-              </div>
-            </div>
-            <Button
-              onClick={handleSave}
-              disabled={updateMutation.isPending}
-              className="gap-2"
-              data-testid="button-save"
-            >
-              {updateMutation.isPending ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                <Save className="h-4 w-4" />
-              )}
-              Save Changes
-            </Button>
-          </div>
-        </div>
-      </header>
-
-      <main className="container mx-auto max-w-2xl px-4 py-8">
-        <div className="space-y-6">
+  const renderCurrentStep = () => {
+    switch (currentStep) {
+      case 1:
+        return (
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -456,7 +540,7 @@ export default function SettingsPage() {
                 <Input
                   id="name"
                   value={formData.name || ""}
-                  onChange={(e) => updateFormData({ name: e.target.value })}
+                  onChange={(e) => updateFormDataAndTrackCompletion({ name: e.target.value })}
                   className="mt-2"
                   data-testid="input-name"
                 />
@@ -465,7 +549,7 @@ export default function SettingsPage() {
                 <Label htmlFor="status">Status</Label>
                 <Select
                   value={formData.status}
-                  onValueChange={(value) => updateFormData({ status: value as AgentStatus })}
+                  onValueChange={(value) => updateFormDataAndTrackCompletion({ status: value as AgentStatus })}
                 >
                   <SelectTrigger className="mt-2" data-testid="select-status">
                     <SelectValue placeholder="Select status" />
@@ -479,7 +563,10 @@ export default function SettingsPage() {
               </div>
             </CardContent>
           </Card>
+        );
 
+      case 2:
+        return (
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -487,19 +574,23 @@ export default function SettingsPage() {
                 Business Use Case
               </CardTitle>
               <CardDescription>
-                Define the problem this agent solves
+                Define the problem this agent solves. Be specific about the use case and target users.
               </CardDescription>
             </CardHeader>
             <CardContent>
               <Textarea
                 value={formData.businessUseCase || ""}
-                onChange={(e) => updateFormData({ businessUseCase: e.target.value })}
+                onChange={(e) => updateFormDataAndTrackCompletion({ businessUseCase: e.target.value })}
                 className="min-h-[270px] resize-y"
+                placeholder="e.g., This agent helps customer support teams quickly answer product-related questions by accessing our knowledge base and providing accurate, helpful responses..."
                 data-testid="textarea-business-usecase"
               />
             </CardContent>
           </Card>
+        );
 
+      case 3:
+        return (
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -517,7 +608,7 @@ export default function SettingsPage() {
                 <Textarea
                   id="domainKnowledge"
                   value={formData.domainKnowledge || ""}
-                  onChange={(e) => updateFormData({ domainKnowledge: e.target.value })}
+                  onChange={(e) => updateFormDataAndTrackCompletion({ domainKnowledge: e.target.value })}
                   className="mt-2 min-h-[270px] resize-y"
                   placeholder="Add domain knowledge..."
                   data-testid="textarea-domain-knowledge"
@@ -584,7 +675,10 @@ export default function SettingsPage() {
               </div>
             </CardContent>
           </Card>
+        );
 
+      case 4:
+        return (
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -662,7 +756,7 @@ export default function SettingsPage() {
                   <Textarea
                     id="validationRules"
                     value={formData.validationRules || ""}
-                    onChange={(e) => updateFormData({ validationRules: e.target.value })}
+                    onChange={(e) => updateFormDataAndTrackCompletion({ validationRules: e.target.value })}
                     className="min-h-[270px] resize-y font-mono text-sm"
                     placeholder="Add validation rules to ensure data quality (Markdown or YAML format)..."
                     data-testid="textarea-validation-rules"
@@ -674,7 +768,10 @@ export default function SettingsPage() {
               </div>
             </CardContent>
           </Card>
+        );
 
+      case 5:
+        return (
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -752,7 +849,7 @@ export default function SettingsPage() {
                   <Textarea
                     id="guardrails"
                     value={formData.guardrails || ""}
-                    onChange={(e) => updateFormData({ guardrails: e.target.value })}
+                    onChange={(e) => updateFormDataAndTrackCompletion({ guardrails: e.target.value })}
                     className="min-h-[270px] resize-y font-mono text-sm"
                     placeholder="Define what your agent should NOT do (Markdown or YAML format)..."
                     data-testid="textarea-guardrails"
@@ -764,7 +861,10 @@ export default function SettingsPage() {
               </div>
             </CardContent>
           </Card>
+        );
 
+      case 6:
+        return (
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -838,7 +938,7 @@ export default function SettingsPage() {
                         value={sampleDataType}
                         onChange={(e) => setSampleDataType(e.target.value)}
                         placeholder="Describe the sample data you need, e.g.: Generate 10 customer records with names, emails, order IDs, products, and order status. Include a mix of delivered, shipped, and processing orders."
-                        className="mt-1 min-h-[270px] resize-y"
+                        className="mt-1 min-h-[120px] resize-y"
                         data-testid="settings-textarea-data-description"
                       />
                     </div>
@@ -950,7 +1050,10 @@ export default function SettingsPage() {
               </div>
             </CardContent>
           </Card>
+        );
 
+      case 7:
+        return (
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -1016,7 +1119,7 @@ export default function SettingsPage() {
                 <RadioGroup
                   value={formData.promptStyle || "anthropic"}
                   onValueChange={(value) => {
-                    updateFormData({ promptStyle: value as PromptStyle, customPrompt: "" });
+                    updateFormDataAndTrackCompletion({ promptStyle: value as PromptStyle, customPrompt: "" });
                     setEditedPrompt("");
                     setIsEditingPrompt(false);
                   }}
@@ -1054,7 +1157,7 @@ export default function SettingsPage() {
                         variant="ghost"
                         size="sm"
                         onClick={() => {
-                          updateFormData({ customPrompt: "" });
+                          updateFormDataAndTrackCompletion({ customPrompt: "" });
                           setEditedPrompt("");
                           setIsEditingPrompt(false);
                         }}
@@ -1071,7 +1174,7 @@ export default function SettingsPage() {
                       size="sm"
                       onClick={() => {
                         if (isEditingPrompt) {
-                          updateFormData({ customPrompt: editedPrompt });
+                          updateFormDataAndTrackCompletion({ customPrompt: editedPrompt });
                         } else {
                           setEditedPrompt(formData.customPrompt || "");
                         }
@@ -1138,50 +1241,152 @@ export default function SettingsPage() {
               </div>
             </CardContent>
           </Card>
+        );
 
-          <Separator />
+      default:
+        return null;
+    }
+  };
 
-          <Card className="border-destructive/50">
-            <CardHeader>
-              <CardTitle className="text-destructive">Danger Zone</CardTitle>
-              <CardDescription>
-                Irreversible actions for this agent
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <AlertDialog>
-                <AlertDialogTrigger asChild>
-                  <Button
-                    variant="destructive"
-                    className="gap-2"
-                    data-testid="button-delete"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                    Delete Agent
-                  </Button>
-                </AlertDialogTrigger>
-                <AlertDialogContent>
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>Delete {agent.name}?</AlertDialogTitle>
-                    <AlertDialogDescription>
-                      This action cannot be undone. This will permanently delete the agent
-                      and all associated chat history.
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel data-testid="button-cancel-delete">Cancel</AlertDialogCancel>
-                    <AlertDialogAction
-                      onClick={() => deleteMutation.mutate()}
-                      className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                      data-testid="button-confirm-delete"
+  return (
+    <div className="min-h-screen bg-background">
+      <header className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+        <div className="container mx-auto px-4 py-3">
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => navigate("/")}
+                data-testid="button-back"
+              >
+                <ArrowLeft className="h-5 w-5" />
+              </Button>
+              <div className="flex items-center gap-3">
+                <div className="flex h-9 w-9 items-center justify-center rounded-md bg-primary text-primary-foreground">
+                  <Bot className="h-5 w-5" />
+                </div>
+                <div>
+                  <h1 className="font-semibold">Settings</h1>
+                  <p className="text-xs text-muted-foreground">{agent.name}</p>
+                </div>
+              </div>
+            </div>
+            <Button
+              onClick={handleSave}
+              disabled={updateMutation.isPending}
+              className="gap-2"
+              data-testid="button-save"
+            >
+              {updateMutation.isPending ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Save className="h-4 w-4" />
+              )}
+              Save Changes
+            </Button>
+          </div>
+        </div>
+      </header>
+
+      <main className="container mx-auto px-4 py-8">
+        <div className="flex gap-8">
+          <aside className="w-64 shrink-0 hidden md:block">
+            <div className="sticky top-24">
+              <SettingsStepIndicator 
+                currentStep={currentStep} 
+                onStepClick={setCurrentStep}
+                completedSteps={completedSteps}
+              />
+            </div>
+          </aside>
+
+          <div className="flex-1 max-w-2xl space-y-6">
+            {renderCurrentStep()}
+
+            <div className="flex items-center justify-between pt-4 border-t">
+              <Button
+                variant="outline"
+                onClick={handlePrevStep}
+                disabled={currentStep === 1}
+                data-testid="button-prev-step"
+              >
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Previous
+              </Button>
+              
+              <div className="flex items-center gap-2 md:hidden">
+                <span className="text-sm text-muted-foreground">
+                  Step {currentStep} of {settingsSteps.length}
+                </span>
+              </div>
+
+              {currentStep < settingsSteps.length ? (
+                <Button
+                  onClick={handleNextStep}
+                  data-testid="button-next-step"
+                >
+                  Next
+                  <ArrowLeft className="h-4 w-4 ml-2 rotate-180" />
+                </Button>
+              ) : (
+                <Button
+                  onClick={handleSave}
+                  disabled={updateMutation.isPending}
+                  data-testid="button-save-final"
+                >
+                  {updateMutation.isPending ? (
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  ) : (
+                    <Save className="h-4 w-4 mr-2" />
+                  )}
+                  Save Changes
+                </Button>
+              )}
+            </div>
+
+            <Card className="border-destructive/50 mt-8">
+              <CardHeader>
+                <CardTitle className="text-destructive">Danger Zone</CardTitle>
+                <CardDescription>
+                  Irreversible actions for this agent
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button
+                      variant="destructive"
+                      className="gap-2"
+                      data-testid="button-delete"
                     >
-                      {deleteMutation.isPending ? "Deleting..." : "Delete"}
-                    </AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
-            </CardContent>
-          </Card>
+                      <Trash2 className="h-4 w-4" />
+                      Delete Agent
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Delete {agent.name}?</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        This action cannot be undone. This will permanently delete the agent
+                        and all associated chat history.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel data-testid="button-cancel-delete">Cancel</AlertDialogCancel>
+                      <AlertDialogAction
+                        onClick={() => deleteMutation.mutate()}
+                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                        data-testid="button-confirm-delete"
+                      >
+                        {deleteMutation.isPending ? "Deleting..." : "Delete"}
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              </CardContent>
+            </Card>
+          </div>
         </div>
       </main>
     </div>
