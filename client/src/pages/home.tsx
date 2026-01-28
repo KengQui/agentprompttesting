@@ -55,12 +55,6 @@ function AgentCard({ agent }: { agent: Agent }) {
         </div>
       </CardHeader>
       <CardContent className="flex-1 pb-3">
-        <p
-          className="text-sm text-muted-foreground line-clamp-3"
-          data-testid={`text-usecase-${agent.id}`}
-        >
-          {agent.businessUseCase || "No business use case defined"}
-        </p>
       </CardContent>
       <CardFooter className="gap-2 pt-3 border-t">
         <Link href={`/chat/${agent.id}`} className="flex-1">
