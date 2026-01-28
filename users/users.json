@@ -12,5 +12,12 @@
     "password": "$2b$10$rLR509uNwMhoQ4GLoQVV.O1i0UUnkA/1l7vekxw956JdisXrh5/Hu",
     "phone": "1234567890",
     "createdAt": "2026-01-28T11:10:15.401Z"
+  },
+  {
+    "id": "dd739ba6-d6e0-4f79-b448-2fc45a427635",
+    "username": "svstoyanov",
+    "password": "$2b$10$niXGWpr0JPXuBIg7vlZf4eR/DDxBXXeMNYK0EvgJv.Ekz9EswuIk2",
+    "phone": "0897923839",
+    "createdAt": "2026-01-28T11:17:17.123Z"
   }
 ]
