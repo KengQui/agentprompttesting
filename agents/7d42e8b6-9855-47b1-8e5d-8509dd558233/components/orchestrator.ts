@@ -2,7 +2,10 @@
  * Orchestrator - Change address
  * 
  * Coordinates all components for this agent.
- * Override handlers to customize behavior.
+ * Uses hybrid approach: keyword-based navigation + LLM for all responses.
+ * 
+ * Navigation commands (go back, change answer, confirm/reject) use keywords.
+ * All other inputs (questions, answers, off-topic) go to the LLM.
  */
 
 import { 
@@ -41,6 +44,34 @@ export class ChangeaddressOrchestrator extends BaseOrchestrator {
   ): Promise<TurnResult> {
     return {
       intent: 'answer_question',
+      response: userInput,
+      nextAction: 'generate_ai_response'
+    };
+  }
+
+  /**
+   * Override: Send unclear inputs to LLM instead of showing fallback message.
+   * This handles off-topic questions, general inquiries, and edge cases.
+   */
+  protected async handleUnclear(conversationId: string, userInput: string): Promise<TurnResult> {
+    return {
+      intent: 'unclear',
+      response: userInput,
+      nextAction: 'generate_ai_response'
+    };
+  }
+
+  /**
+   * Override: Always use LLM for clarification requests.
+   * This handles questions like "what are the tax implications?" or "can you summarize?"
+   */
+  protected async handleRequestClarification(
+    conversationId: string, 
+    classification: ClassificationResult,
+    userInput: string
+  ): Promise<TurnResult> {
+    return {
+      intent: 'request_clarification',
       response: userInput,
       nextAction: 'generate_ai_response'
     };
