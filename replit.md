@@ -1,9 +1,21 @@
 # Agent Studio - AI Agent Configuration Platform
 
 ## Overview
-Agent Studio is a web application for creating, configuring, and managing AI agents. Users can define business use cases, domain knowledge, validation rules, and guardrails through an intuitive 6-step wizard interface.
+Agent Studio is a web application for creating, configuring, and managing AI agents. Users can define business use cases, domain knowledge, validation rules, guardrails, and sample datasets through an intuitive 7-step wizard interface.
 
 ## Recent Changes
+- **January 28, 2026**: Added Sample Data Upload and Generation Feature
+  - New Sample Data step (Step 6) in the creation wizard
+  - Users can upload sample datasets (CSV, JSON, text files up to 5MB)
+  - AI-powered sample data generation using Gemini
+  - Customize data type, record count (1-100), and output format
+  - Model selection for generation (Gemini 2.5 Flash, 2.5 Pro, 3 Flash, 3 Pro)
+  - Sample data template with example customer records
+  - Backend endpoints: POST /api/generate/sample-data, POST /api/upload-sample-data
+  - Settings page updated with Sample Data section
+  - Wizard now has 7 steps (Sample Data is Step 6, Review is Step 7)
+  - SampleDataset schema includes: id, name, description, content, format, isGenerated, createdAt
+
 - **January 27, 2026**: Model Selection for AI Generation
   - Added dropdown menu to Generate buttons for validation rules and guardrails
   - Users can choose between Gemini 2.5 Flash, 2.5 Pro (default), 3 Flash, and 3 Pro
