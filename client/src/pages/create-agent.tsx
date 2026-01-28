@@ -128,7 +128,7 @@ function Step1BusinessUseCase({
               placeholder="e.g., This agent helps customer support teams quickly answer product-related questions by accessing our knowledge base and providing accurate, helpful responses..."
               value={data.businessUseCase}
               onChange={(e) => onUpdate({ businessUseCase: e.target.value })}
-              className="mt-2 min-h-[300px] resize-y"
+              className="mt-2 min-h-[250px] resize-y"
               data-testid="textarea-business-usecase"
             />
           </div>
@@ -261,7 +261,7 @@ function Step3DomainKnowledge({
 - Product returns are accepted within 30 days..."
               value={data.domainKnowledge}
               onChange={(e) => onUpdate({ domainKnowledge: e.target.value })}
-              className="mt-2 min-h-[300px] resize-y"
+              className="mt-2 min-h-[250px] resize-y"
               data-testid="textarea-domain-knowledge"
             />
           </div>
@@ -459,7 +459,7 @@ function Step4ValidationRules({
               placeholder="Add validation rules to ensure data quality (Markdown or YAML format)..."
               value={data.validationRules}
               onChange={(e) => onUpdate({ validationRules: e.target.value })}
-              className="min-h-[300px] resize-y font-mono text-sm"
+              className="min-h-[250px] resize-y font-mono text-sm"
               data-testid="textarea-validation-rules"
             />
             <p className="text-xs text-muted-foreground mt-1">
@@ -752,7 +752,7 @@ function Step5Guardrails({
               placeholder="Define what your agent should NOT do (Markdown or YAML format)..."
               value={data.guardrails}
               onChange={(e) => handleGuardrailsChange(e.target.value)}
-              className="min-h-[300px] resize-y font-mono text-sm"
+              className="min-h-[250px] resize-y font-mono text-sm"
               data-testid="textarea-guardrails"
             />
             <p className="text-xs text-muted-foreground mt-1">
@@ -942,7 +942,7 @@ function Step6SampleData({
                   value={dataType}
                   onChange={(e) => setDataType(e.target.value)}
                   placeholder="Describe the sample data you need, e.g.: Generate 10 customer records with names, emails, order IDs, products, and order status. Include a mix of delivered, shipped, and processing orders."
-                  className="mt-1 min-h-[300px] resize-y"
+                  className="mt-1 min-h-[250px] resize-y"
                   data-testid="textarea-data-description"
                 />
               </div>
@@ -1475,7 +1475,7 @@ function Step7Review({
                   onUpdate({ customPrompt: e.target.value });
                 }}
                 placeholder="Write your system prompt here. This is the instruction that will be sent to the AI to define its behavior, personality, and capabilities..."
-                className="min-h-[300px] resize-y font-mono text-xs"
+                className="min-h-[250px] resize-y font-mono text-xs"
                 data-testid="textarea-custom-prompt"
               />
             ) : isGenerating ? (
@@ -1490,7 +1490,7 @@ function Step7Review({
               <Textarea
                 value={editedPrompt}
                 onChange={(e) => setEditedPrompt(e.target.value)}
-                className="min-h-[300px] resize-y font-mono text-xs"
+                className="min-h-[250px] resize-y font-mono text-xs"
                 data-testid="textarea-edit-prompt"
               />
             ) : (

@@ -493,7 +493,7 @@ export default function SettingsPage() {
               <Textarea
                 value={formData.businessUseCase || ""}
                 onChange={(e) => updateFormData({ businessUseCase: e.target.value })}
-                className="min-h-[300px] resize-y"
+                className="min-h-[250px] resize-y"
                 data-testid="textarea-business-usecase"
               />
             </CardContent>
@@ -517,7 +517,7 @@ export default function SettingsPage() {
                   id="domainKnowledge"
                   value={formData.domainKnowledge || ""}
                   onChange={(e) => updateFormData({ domainKnowledge: e.target.value })}
-                  className="mt-2 min-h-[300px] resize-y"
+                  className="mt-2 min-h-[250px] resize-y"
                   placeholder="Add domain knowledge..."
                   data-testid="textarea-domain-knowledge"
                 />
@@ -657,7 +657,7 @@ export default function SettingsPage() {
                     id="validationRules"
                     value={formData.validationRules || ""}
                     onChange={(e) => updateFormData({ validationRules: e.target.value })}
-                    className="min-h-[300px] resize-y font-mono text-sm"
+                    className="min-h-[250px] resize-y font-mono text-sm"
                     placeholder="Add validation rules to ensure data quality (Markdown or YAML format)..."
                     data-testid="textarea-validation-rules"
                   />
@@ -742,7 +742,7 @@ export default function SettingsPage() {
                     id="guardrails"
                     value={formData.guardrails || ""}
                     onChange={(e) => updateFormData({ guardrails: e.target.value })}
-                    className="min-h-[300px] resize-y font-mono text-sm"
+                    className="min-h-[250px] resize-y font-mono text-sm"
                     placeholder="Define what your agent should NOT do (Markdown or YAML format)..."
                     data-testid="textarea-guardrails"
                   />
@@ -827,7 +827,7 @@ export default function SettingsPage() {
                         value={sampleDataType}
                         onChange={(e) => setSampleDataType(e.target.value)}
                         placeholder="Describe the sample data you need, e.g.: Generate 10 customer records with names, emails, order IDs, products, and order status. Include a mix of delivered, shipped, and processing orders."
-                        className="mt-1 min-h-[300px] resize-y"
+                        className="mt-1 min-h-[250px] resize-y"
                         data-testid="settings-textarea-data-description"
                       />
                     </div>
@@ -1083,7 +1083,7 @@ export default function SettingsPage() {
                   <Textarea
                     value={editedPrompt}
                     onChange={(e) => setEditedPrompt(e.target.value)}
-                    className="min-h-[300px] resize-y font-mono text-xs"
+                    className="min-h-[250px] resize-y font-mono text-xs"
                     placeholder="Enter a custom system prompt..."
                     data-testid="settings-textarea-edit-prompt"
                   />
