@@ -12,5 +12,19 @@
     "role": "assistant",
     "content": "I do not have access to your payroll information, so I cannot provide your pay information. Please log into the payroll system to view your pay stubs.\n",
     "timestamp": "2026-01-28T00:24:12.135Z"
+  },
+  {
+    "id": "3d69f200-ea13-466f-8b7e-02c56adf5264",
+    "agentId": "7b2c2c01-3192-44d5-be33-f1f6de022578",
+    "role": "user",
+    "content": "what is my last month pay",
+    "timestamp": "2026-01-28T00:57:58.366Z"
+  },
+  {
+    "id": "aa5908f4-a662-446c-85b8-c96c6387ccf5",
+    "agentId": "7b2c2c01-3192-44d5-be33-f1f6de022578",
+    "role": "assistant",
+    "content": "I do not have access to your payroll information, so I cannot provide your pay information. Please log into the payroll system to view your pay stubs.\n",
+    "timestamp": "2026-01-28T00:57:59.858Z"
   }
 ]
