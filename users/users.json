@@ -33,5 +33,11 @@
     "password": "$2b$10$LIhh/mlEyNoOf52BRsAgl.9Jsg1vyHcwWy.x13QiPF3cMKyqMd9ty",
     "phone": "4447776111",
     "createdAt": "2026-01-28T13:21:05.208Z"
+  },
+  {
+    "id": "51533772-4d36-4dc0-8bee-4dfbff799d9d",
+    "username": "testuser_OtHC4O",
+    "password": "$2b$10$gJkaBPumTPzjLfaSv.xmReHgJcRImSW/AgyGjo/0/DqExKKBbHuiW",
+    "createdAt": "2026-01-28T13:31:10.863Z"
   }
 ]

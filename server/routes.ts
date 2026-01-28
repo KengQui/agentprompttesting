@@ -154,24 +154,24 @@ export async function registerRoutes(
     }
   });
 
-  // Verify phone for password reset (step 1)
-  app.post("/api/auth/verify-phone", async (req, res) => {
+  // Verify username exists for password reset (step 1)
+  app.post("/api/auth/verify-username", async (req, res) => {
     try {
       const parsed = passwordResetRequestSchema.safeParse(req.body);
       if (!parsed.success) {
         return res.status(400).json({ message: parsed.error.errors[0]?.message || "Invalid input" });
       }
 
-      const isValid = await storage.verifyPhone(parsed.data.username, parsed.data.phone);
-      if (!isValid) {
-        return res.status(400).json({ message: "Username and phone number do not match" });
+      const exists = await storage.verifyUsernameExists(parsed.data.username);
+      if (!exists) {
+        return res.status(400).json({ message: "Username not found" });
       }
 
       // Return success - frontend will show password reset form
       res.json({ success: true, username: parsed.data.username });
     } catch (error) {
-      console.error("Error verifying phone:", error);
-      res.status(500).json({ message: "Failed to verify phone" });
+      console.error("Error verifying username:", error);
+      res.status(500).json({ message: "Failed to verify username" });
     }
   });
 

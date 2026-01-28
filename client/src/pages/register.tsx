@@ -22,14 +22,13 @@ export default function RegisterPage() {
     defaultValues: {
       username: "",
       password: "",
-      phone: "",
     },
   });
 
   const onSubmit = async (data: InsertUser) => {
     setIsLoading(true);
     try {
-      await register(data.username, data.password, data.phone);
+      await register(data.username, data.password);
       toast({
         title: "Account created!",
         description: "Welcome! You can now create your agents.",
@@ -65,24 +64,6 @@ export default function RegisterPage() {
                       <Input
                         data-testid="input-username"
                         placeholder="Choose a username"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="phone"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Phone Number</FormLabel>
-                    <FormControl>
-                      <Input
-                        data-testid="input-phone"
-                        type="tel"
-                        placeholder="Enter your phone number"
                         {...field}
                       />
                     </FormControl>

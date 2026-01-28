@@ -2,14 +2,13 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Link, useLocation } from "wouter";
-import { z } from "zod";
 import { passwordResetRequestSchema, passwordResetSchema, type PasswordResetRequest, type PasswordResetInput } from "@shared/schema";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { Phone, KeyRound, Eye, EyeOff, ArrowLeft, Check } from "lucide-react";
+import { User, KeyRound, Eye, EyeOff, ArrowLeft, Check } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 
 type Step = "verify" | "reset" | "success";
@@ -27,7 +26,6 @@ export default function ForgotPasswordPage() {
     resolver: zodResolver(passwordResetRequestSchema),
     defaultValues: {
       username: "",
-      phone: "",
     },
   });
 
@@ -41,20 +39,20 @@ export default function ForgotPasswordPage() {
   const onVerifySubmit = async (data: PasswordResetRequest) => {
     setIsLoading(true);
     try {
-      const res = await apiRequest("POST", "/api/auth/verify-phone", data);
+      const res = await apiRequest("POST", "/api/auth/verify-username", data);
       const result = await res.json();
       if (result.success) {
         setVerifiedUsername(data.username);
         setStep("reset");
         toast({
-          title: "Phone verified",
+          title: "Username verified",
           description: "You can now set a new password.",
         });
       }
     } catch (error: any) {
       toast({
         title: "Verification failed",
-        description: error?.message || "Username and phone number do not match",
+        description: error?.message || "Username not found",
         variant: "destructive",
       });
     } finally {
@@ -127,7 +125,7 @@ export default function ForgotPasswordPage() {
               </CardTitle>
               <CardDescription>
                 {step === "verify"
-                  ? "Enter your username and phone to verify your identity"
+                  ? "Enter your username to reset your password"
                   : "Create a new password for your account"}
               </CardDescription>
             </div>
@@ -155,24 +153,6 @@ export default function ForgotPasswordPage() {
                     </FormItem>
                   )}
                 />
-                <FormField
-                  control={verifyForm.control}
-                  name="phone"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Phone Number</FormLabel>
-                      <FormControl>
-                        <Input
-                          data-testid="input-phone"
-                          type="tel"
-                          placeholder="Enter the phone number on your account"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
               </CardContent>
               <CardFooter>
                 <Button
@@ -185,8 +165,8 @@ export default function ForgotPasswordPage() {
                     <div className="animate-spin w-4 h-4 border-2 border-current border-t-transparent rounded-full" />
                   ) : (
                     <>
-                      <Phone className="mr-2 h-4 w-4" />
-                      Verify Phone
+                      <User className="mr-2 h-4 w-4" />
+                      Continue
                     </>
                   )}
                 </Button>

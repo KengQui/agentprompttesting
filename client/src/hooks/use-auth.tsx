@@ -8,7 +8,7 @@ interface AuthContextType {
   user: PublicUser | null;
   isLoading: boolean;
   login: (username: string, password: string) => Promise<void>;
-  register: (username: string, password: string, phone: string) => Promise<void>;
+  register: (username: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
 }
 
@@ -35,8 +35,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   });
 
   const registerMutation = useMutation({
-    mutationFn: async ({ username, password, phone }: { username: string; password: string; phone: string }) => {
-      const res = await apiRequest("POST", "/api/auth/register", { username, password, phone });
+    mutationFn: async ({ username, password }: { username: string; password: string }) => {
+      const res = await apiRequest("POST", "/api/auth/register", { username, password });
       return res.json();
     },
     onSuccess: () => {
@@ -60,8 +60,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await loginMutation.mutateAsync({ username, password });
   };
 
-  const register = async (username: string, password: string, phone: string) => {
-    await registerMutation.mutateAsync({ username, password, phone });
+  const register = async (username: string, password: string) => {
+    await registerMutation.mutateAsync({ username, password });
   };
 
   const logout = async () => {

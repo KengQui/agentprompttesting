@@ -183,7 +183,7 @@ export interface IStorage {
   getUserByUsername(username: string): Promise<User | undefined>;
   validatePassword(username: string, password: string): Promise<User | undefined>;
   updateUserPassword(userId: string, newPassword: string): Promise<boolean>;
-  verifyPhone(username: string, phone: string): Promise<boolean>;
+  verifyUsernameExists(username: string): Promise<boolean>;
 
   // Auth session operations
   createAuthSession(userId: string): Promise<AuthSession>;
@@ -1152,7 +1152,6 @@ export class MemStorage implements IStorage {
       id,
       username: insertUser.username,
       password: hashedPassword,
-      phone: insertUser.phone,
       createdAt: now,
     };
 
@@ -1197,15 +1196,9 @@ export class MemStorage implements IStorage {
     return true;
   }
 
-  async verifyPhone(username: string, phone: string): Promise<boolean> {
+  async verifyUsernameExists(username: string): Promise<boolean> {
     const user = await this.getUserByUsername(username);
-    if (!user) return false;
-
-    // Normalize phone for comparison (remove non-digits)
-    const normalizedUserPhone = user.phone.replace(/\D/g, "");
-    const normalizedInputPhone = phone.replace(/\D/g, "");
-
-    return normalizedUserPhone === normalizedInputPhone;
+    return !!user;
   }
 
   // ========== Auth Session Methods ==========

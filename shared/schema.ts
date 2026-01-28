@@ -176,7 +176,6 @@ export const userSchema = z.object({
   id: z.string(),
   username: z.string().min(3, "Username must be at least 3 characters"),
   password: z.string().min(6, "Password must be at least 6 characters"),
-  phone: z.string().min(10, "Phone number must be at least 10 digits"),
   createdAt: z.string(),
 });
 
@@ -198,10 +197,9 @@ export const loginSchema = z.object({
 
 export type LoginInput = z.infer<typeof loginSchema>;
 
-// Password reset request schema (verify phone)
+// Password reset request schema (verify username exists)
 export const passwordResetRequestSchema = z.object({
   username: z.string().min(1, "Username is required"),
-  phone: z.string().min(10, "Phone number is required"),
 });
 
 export type PasswordResetRequest = z.infer<typeof passwordResetRequestSchema>;
