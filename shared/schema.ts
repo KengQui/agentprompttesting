@@ -51,6 +51,17 @@ export const sampleDatasetSchema = z.object({
 
 export type SampleDataset = z.infer<typeof sampleDatasetSchema>;
 
+// Clarifying insight from AI Q&A
+export const clarifyingInsightSchema = z.object({
+  id: z.string(),
+  question: z.string(),
+  answer: z.string(),
+  category: z.enum(["validation", "guardrails", "general"]),
+  createdAt: z.string(),
+});
+
+export type ClarifyingInsight = z.infer<typeof clarifyingInsightSchema>;
+
 // Agent schema
 export const agentSchema = z.object({
   id: z.string(),
@@ -64,6 +75,7 @@ export const agentSchema = z.object({
   guardrails: z.string().default(""),
   promptStyle: promptStyleEnum.default("anthropic"),
   customPrompt: z.string().default(""),
+  clarifyingInsights: z.array(clarifyingInsightSchema).default([]),
   status: agentStatusEnum.default("draft"),
   createdAt: z.string(),
   updatedAt: z.string(),
@@ -115,6 +127,7 @@ export const wizardStepSchema = z.object({
   guardrails: z.string().default(""),
   promptStyle: promptStyleEnum.default("anthropic"),
   customPrompt: z.string().default(""),
+  clarifyingInsights: z.array(clarifyingInsightSchema).default([]),
 });
 
 export type WizardStepData = z.infer<typeof wizardStepSchema>;

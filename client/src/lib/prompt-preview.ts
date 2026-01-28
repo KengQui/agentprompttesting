@@ -1,10 +1,11 @@
-import type { PromptStyle, DomainDocument } from "@shared/schema";
+import type { PromptStyle, DomainDocument, ClarifyingInsight } from "@shared/schema";
 
 export interface PromptPreviewContext {
   name?: string;
   businessUseCase?: string;
   domainKnowledge?: string;
   domainDocuments?: DomainDocument[];
+  clarifyingInsights?: ClarifyingInsight[];
   validationRules?: string;
   guardrails?: string;
 }
@@ -56,6 +57,14 @@ function buildDomainSection(context: PromptPreviewContext): string {
       const preview = doc.content.slice(0, 200);
       const suffix = doc.content.length > 200 ? "..." : "";
       domainSection += `\n\n--- ${doc.filename} ---\n${preview}${suffix}`;
+    }
+  }
+
+  if (context.clarifyingInsights && context.clarifyingInsights.length > 0) {
+    if (domainSection) domainSection += "\n\n";
+    domainSection += "Additional Context:";
+    for (const insight of context.clarifyingInsights) {
+      domainSection += `\n- ${insight.answer}`;
     }
   }
   

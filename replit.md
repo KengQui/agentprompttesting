@@ -4,6 +4,16 @@
 Agent Studio is a web application for creating, configuring, and managing AI agents. Users can define business use cases, domain knowledge, validation rules, guardrails, and sample datasets through an intuitive 7-step wizard interface.
 
 ## Recent Changes
+- **January 28, 2026**: Smart Generation with Clarifying Questions
+  - AI now evaluates context sufficiency before generating validation rules or guardrails
+  - Opens conversational dialog when context is insufficient (minimal business use case, no domain knowledge)
+  - Multi-turn Q&A to gather missing information (input/output details, constraints, policies, data types)
+  - Gathered insights are stored in agent configuration and included in future prompts
+  - Split button design: main button generates with default model, dropdown allows model selection
+  - New API endpoints: POST /api/generate/evaluate-context, /api/generate/clarifying-chat, /api/generate/validation-rules-with-insights, /api/generate/guardrails-with-insights
+  - New component: ClarifyingChatDialog for conversational context gathering
+  - Schema: clarifyingInsightSchema with question, answer, and category fields
+
 - **January 28, 2026**: Changed Prompt Style Default in Step 7
   - "Write Your Own" is now the default prompt style instead of Anthropic
   - Users start with a blank prompt textarea to write their own custom prompt

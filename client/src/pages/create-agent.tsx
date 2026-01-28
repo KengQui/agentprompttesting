@@ -28,8 +28,9 @@ import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { generatePromptPreview, promptStyleInfo } from "@/lib/prompt-preview";
 import { validationRulesTemplate, guardrailsTemplate } from "@/lib/config-templates";
-import type { WizardStepData, Agent, DomainDocument, SampleDataset, PromptStyle, GeminiModel } from "@shared/schema";
+import type { WizardStepData, Agent, DomainDocument, SampleDataset, PromptStyle, GeminiModel, ClarifyingInsight } from "@shared/schema";
 import { geminiModelDisplayNames, defaultGenerationModel } from "@shared/schema";
+import { ClarifyingChatDialog } from "@/components/clarifying-chat-dialog";
 
 const steps = [
   { id: 1, name: "Business Use Case", icon: Briefcase, description: "Define the problem this agent solves" },
@@ -339,7 +340,10 @@ function Step4ValidationRules({
   onUpdate: (data: Partial<WizardStepData>) => void;
 }) {
   const [isGenerating, setIsGenerating] = useState(false);
+  const [isEvaluating, setIsEvaluating] = useState(false);
   const [selectedModel, setSelectedModel] = useState<GeminiModel>(defaultGenerationModel);
+  const [showChatDialog, setShowChatDialog] = useState(false);
+  const [initialQuestion, setInitialQuestion] = useState("");
   const { toast } = useToast();
 
   const handleUseTemplate = () => {
@@ -356,8 +360,28 @@ function Step4ValidationRules({
       return;
     }
 
-    setIsGenerating(true);
+    setIsEvaluating(true);
+    setSelectedModel(model);
+    
     try {
+      const evalResponse = await apiRequest("POST", "/api/generate/evaluate-context", {
+        businessUseCase: data.businessUseCase,
+        domainKnowledge: data.domainKnowledge,
+        domainDocuments: data.domainDocuments,
+        generationType: "validation",
+      });
+      const evalResult = await evalResponse.json();
+
+      if (!evalResult.hasEnoughContext && evalResult.initialQuestion) {
+        setInitialQuestion(evalResult.initialQuestion);
+        setShowChatDialog(true);
+        setIsEvaluating(false);
+        return;
+      }
+
+      setIsEvaluating(false);
+      setIsGenerating(true);
+      
       const response = await apiRequest("POST", "/api/generate/validation-rules", {
         businessUseCase: data.businessUseCase,
         domainKnowledge: data.domainKnowledge,
@@ -378,7 +402,23 @@ function Step4ValidationRules({
       });
     } finally {
       setIsGenerating(false);
+      setIsEvaluating(false);
     }
+  };
+
+  const handleChatComplete = (insights: ClarifyingInsight[], generatedContent: string) => {
+    const updatedInsights = [
+      ...(data.clarifyingInsights || []),
+      ...insights,
+    ];
+    onUpdate({ 
+      validationRules: generatedContent,
+      clarifyingInsights: updatedInsights,
+    });
+    toast({
+      title: "Validation rules generated",
+      description: "Generated with your additional context.",
+    });
   };
 
   return (
@@ -429,15 +469,15 @@ function Step4ValidationRules({
                         type="button"
                         variant="outline"
                         size="sm"
-                        disabled={isGenerating}
+                        disabled={isGenerating || isEvaluating}
                         data-testid="button-generate-validation"
                       >
-                        {isGenerating ? (
+                        {isGenerating || isEvaluating ? (
                           <Loader2 className="h-4 w-4 mr-1 animate-spin" />
                         ) : (
                           <Sparkles className="h-4 w-4 mr-1" />
                         )}
-                        Generate
+                        {isEvaluating ? "Checking..." : "Generate"}
                         <ChevronDown className="h-3 w-3 ml-1" />
                       </Button>
                     </DropdownMenuTrigger>
@@ -473,6 +513,18 @@ function Step4ValidationRules({
           </div>
         </div>
       </CardContent>
+
+      <ClarifyingChatDialog
+        open={showChatDialog}
+        onOpenChange={setShowChatDialog}
+        generationType="validation"
+        businessUseCase={data.businessUseCase}
+        domainKnowledge={data.domainKnowledge}
+        domainDocuments={data.domainDocuments}
+        existingInsights={data.clarifyingInsights || []}
+        initialQuestion={initialQuestion}
+        onComplete={handleChatComplete}
+      />
     </Card>
   );
 }
@@ -505,10 +557,13 @@ function Step5Guardrails({
   onUpdate: (data: Partial<WizardStepData>) => void;
 }) {
   const [isGenerating, setIsGenerating] = useState(false);
+  const [isEvaluating, setIsEvaluating] = useState(false);
   const [isCheckingConflicts, setIsCheckingConflicts] = useState(false);
   const [conflicts, setConflicts] = useState<GuardrailConflict[]>([]);
   const [conflictSummary, setConflictSummary] = useState<ConflictCheckResult['summary'] | null>(null);
   const [selectedModel, setSelectedModel] = useState<GeminiModel>(defaultGenerationModel);
+  const [showChatDialog, setShowChatDialog] = useState(false);
+  const [initialQuestion, setInitialQuestion] = useState("");
   const { toast } = useToast();
   const checkTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -571,8 +626,28 @@ function Step5Guardrails({
       return;
     }
 
-    setIsGenerating(true);
+    setIsEvaluating(true);
+    setSelectedModel(model);
+
     try {
+      const evalResponse = await apiRequest("POST", "/api/generate/evaluate-context", {
+        businessUseCase: data.businessUseCase,
+        domainKnowledge: data.domainKnowledge,
+        domainDocuments: data.domainDocuments,
+        generationType: "guardrails",
+      });
+      const evalResult = await evalResponse.json();
+
+      if (!evalResult.hasEnoughContext && evalResult.initialQuestion) {
+        setInitialQuestion(evalResult.initialQuestion);
+        setShowChatDialog(true);
+        setIsEvaluating(false);
+        return;
+      }
+
+      setIsEvaluating(false);
+      setIsGenerating(true);
+
       const response = await apiRequest("POST", "/api/generate/guardrails", {
         businessUseCase: data.businessUseCase,
         domainKnowledge: data.domainKnowledge,
@@ -594,7 +669,24 @@ function Step5Guardrails({
       });
     } finally {
       setIsGenerating(false);
+      setIsEvaluating(false);
     }
+  };
+
+  const handleChatComplete = (insights: ClarifyingInsight[], generatedContent: string) => {
+    const updatedInsights = [
+      ...(data.clarifyingInsights || []),
+      ...insights,
+    ];
+    onUpdate({ 
+      guardrails: generatedContent,
+      clarifyingInsights: updatedInsights,
+    });
+    toast({
+      title: "Guardrails generated",
+      description: "Generated with your additional context.",
+    });
+    setTimeout(() => checkForConflicts(generatedContent), 100);
   };
 
   const getSeverityIcon = (severity: string) => {
@@ -725,15 +817,15 @@ function Step5Guardrails({
                         type="button"
                         variant="outline"
                         size="sm"
-                        disabled={isGenerating}
+                        disabled={isGenerating || isEvaluating}
                         data-testid="button-generate-guardrails"
                       >
-                        {isGenerating ? (
+                        {isGenerating || isEvaluating ? (
                           <Loader2 className="h-4 w-4 mr-1 animate-spin" />
                         ) : (
                           <Sparkles className="h-4 w-4 mr-1" />
                         )}
-                        Generate
+                        {isEvaluating ? "Checking..." : "Generate"}
                         <ChevronDown className="h-3 w-3 ml-1" />
                       </Button>
                     </DropdownMenuTrigger>
@@ -769,6 +861,18 @@ function Step5Guardrails({
           </div>
         </div>
       </CardContent>
+
+      <ClarifyingChatDialog
+        open={showChatDialog}
+        onOpenChange={setShowChatDialog}
+        generationType="guardrails"
+        businessUseCase={data.businessUseCase}
+        domainKnowledge={data.domainKnowledge}
+        domainDocuments={data.domainDocuments}
+        existingInsights={data.clarifyingInsights || []}
+        initialQuestion={initialQuestion}
+        onComplete={handleChatComplete}
+      />
     </Card>
   );
 }

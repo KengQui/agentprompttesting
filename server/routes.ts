@@ -3,7 +3,7 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { insertAgentSchema, updateAgentSchema } from "@shared/schema";
 import { z } from "zod";
-import { generateAgentResponse, generateValidationRules, generateGuardrails, generateSystemPrompt, generateSampleData, type GenerationContext, type SystemPromptContext, type SampleDataGenerationContext } from "./gemini";
+import { generateAgentResponse, generateValidationRules, generateGuardrails, generateSystemPrompt, generateSampleData, evaluateContextSufficiency, processClarifyingChat, generateValidationRulesWithInsights, generateGuardrailsWithInsights, type GenerationContext, type SystemPromptContext, type SampleDataGenerationContext, type ClarifyingChatContext } from "./gemini";
 import { loadAgentComponents, clearAgentCache, hasCustomComponents } from "./agent-loader";
 import { createRecoveryManager } from "./components/recovery-manager";
 import multer from "multer";
@@ -318,6 +318,109 @@ export async function registerRoutes(
       res.json({ guardrails });
     } catch (error: any) {
       console.error("Error generating guardrails:", error);
+      res.status(500).json({ message: error?.message || "Failed to generate guardrails" });
+    }
+  });
+
+  // Evaluate if there's enough context to generate rules/guardrails
+  app.post("/api/generate/evaluate-context", async (req, res) => {
+    try {
+      const { businessUseCase, domainKnowledge, domainDocuments, generationType } = req.body;
+      
+      if (!generationType || !["validation", "guardrails"].includes(generationType)) {
+        return res.status(400).json({ message: "Valid generationType (validation or guardrails) is required" });
+      }
+
+      const context: GenerationContext = {
+        businessUseCase: businessUseCase || "",
+        domainKnowledge,
+        domainDocuments,
+      };
+
+      const result = await evaluateContextSufficiency(context, generationType);
+      res.json(result);
+    } catch (error: any) {
+      console.error("Error evaluating context:", error);
+      res.status(500).json({ message: error?.message || "Failed to evaluate context" });
+    }
+  });
+
+  // Process clarifying chat for gathering more context
+  app.post("/api/generate/clarifying-chat", async (req, res) => {
+    try {
+      const { businessUseCase, domainKnowledge, domainDocuments, clarifyingInsights, generationType, chatHistory, userMessage } = req.body;
+      
+      if (!generationType || !["validation", "guardrails"].includes(generationType)) {
+        return res.status(400).json({ message: "Valid generationType is required" });
+      }
+
+      if (!userMessage) {
+        return res.status(400).json({ message: "User message is required" });
+      }
+
+      const context: ClarifyingChatContext = {
+        businessUseCase: businessUseCase || "",
+        domainKnowledge,
+        domainDocuments,
+        clarifyingInsights,
+        generationType,
+        chatHistory: chatHistory || [],
+      };
+
+      const result = await processClarifyingChat(context, userMessage);
+      res.json(result);
+    } catch (error: any) {
+      console.error("Error in clarifying chat:", error);
+      res.status(500).json({ message: error?.message || "Failed to process chat" });
+    }
+  });
+
+  // Generate validation rules with clarifying insights
+  app.post("/api/generate/validation-rules-with-insights", async (req, res) => {
+    try {
+      const { businessUseCase, domainKnowledge, domainDocuments, clarifyingInsights, model } = req.body;
+      
+      if (!businessUseCase) {
+        return res.status(400).json({ message: "Business use case is required" });
+      }
+
+      const context = {
+        businessUseCase,
+        domainKnowledge,
+        domainDocuments,
+        clarifyingInsights,
+        model,
+      };
+
+      const validationRules = await generateValidationRulesWithInsights(context);
+      res.json({ validationRules });
+    } catch (error: any) {
+      console.error("Error generating validation rules with insights:", error);
+      res.status(500).json({ message: error?.message || "Failed to generate validation rules" });
+    }
+  });
+
+  // Generate guardrails with clarifying insights
+  app.post("/api/generate/guardrails-with-insights", async (req, res) => {
+    try {
+      const { businessUseCase, domainKnowledge, domainDocuments, clarifyingInsights, model } = req.body;
+      
+      if (!businessUseCase) {
+        return res.status(400).json({ message: "Business use case is required" });
+      }
+
+      const context = {
+        businessUseCase,
+        domainKnowledge,
+        domainDocuments,
+        clarifyingInsights,
+        model,
+      };
+
+      const guardrails = await generateGuardrailsWithInsights(context);
+      res.json({ guardrails });
+    } catch (error: any) {
+      console.error("Error generating guardrails with insights:", error);
       res.status(500).json({ message: error?.message || "Failed to generate guardrails" });
     }
   });
