@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useParams, useLocation } from "wouter";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { ArrowLeft, Save, Trash2, Bot, Briefcase, Shield, AlertTriangle, Loader2, BookOpen, Upload, X, FileText, Code, Pencil, RotateCcw, HelpCircle, ExternalLink, Info, Sparkles, ChevronDown } from "lucide-react";
+import { ArrowLeft, Save, Trash2, Bot, Briefcase, Shield, AlertTriangle, Loader2, BookOpen, Upload, X, FileText, Code, Pencil, RotateCcw, HelpCircle, ExternalLink, Info, Sparkles, ChevronDown, Database } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -40,8 +40,8 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { generatePromptPreview, promptStyleInfo } from "@/lib/prompt-preview";
-import { validationRulesTemplate, guardrailsTemplate } from "@/lib/config-templates";
-import type { Agent, UpdateAgent, AgentStatus, DomainDocument, PromptStyle, GeminiModel } from "@shared/schema";
+import { validationRulesTemplate, guardrailsTemplate, sampleDataTemplate } from "@/lib/config-templates";
+import type { Agent, UpdateAgent, AgentStatus, DomainDocument, SampleDataset, PromptStyle, GeminiModel } from "@shared/schema";
 import { geminiModelDisplayNames, defaultGenerationModel } from "@shared/schema";
 
 export default function SettingsPage() {
@@ -55,13 +55,19 @@ export default function SettingsPage() {
   });
 
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const sampleDataInputRef = useRef<HTMLInputElement>(null);
   const [isUploading, setIsUploading] = useState(false);
+  const [isUploadingSampleData, setIsUploadingSampleData] = useState(false);
 
   const [isEditingPrompt, setIsEditingPrompt] = useState(false);
   const [editedPrompt, setEditedPrompt] = useState("");
 
   const [isGeneratingValidation, setIsGeneratingValidation] = useState(false);
   const [isGeneratingGuardrails, setIsGeneratingGuardrails] = useState(false);
+  const [isGeneratingSampleData, setIsGeneratingSampleData] = useState(false);
+  const [sampleDataType, setSampleDataType] = useState("customer records");
+  const [sampleRecordCount, setSampleRecordCount] = useState(10);
+  const [sampleFormat, setSampleFormat] = useState<"json" | "csv" | "text">("json");
 
   // Initialize form data when agent loads
   useEffect(() => {
@@ -71,6 +77,7 @@ export default function SettingsPage() {
         businessUseCase: agent.businessUseCase,
         domainKnowledge: agent.domainKnowledge,
         domainDocuments: agent.domainDocuments,
+        sampleDatasets: agent.sampleDatasets || [],
         validationRules: agent.validationRules,
         guardrails: agent.guardrails,
         promptStyle: agent.promptStyle,
@@ -204,6 +211,110 @@ export default function SettingsPage() {
       });
     } finally {
       setIsGeneratingGuardrails(false);
+    }
+  };
+
+  const handleSampleDataUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    setIsUploadingSampleData(true);
+    try {
+      for (const file of Array.from(files)) {
+        const uploadFormData = new FormData();
+        uploadFormData.append('file', file);
+
+        const response = await fetch('/api/upload-sample-data', {
+          method: 'POST',
+          body: uploadFormData,
+        });
+
+        if (!response.ok) {
+          const error = await response.json();
+          throw new Error(error.message || 'Failed to upload file');
+        }
+
+        const dataset: SampleDataset = await response.json();
+        const currentDatasets = formData?.sampleDatasets || [];
+        updateFormData({ sampleDatasets: [...currentDatasets, dataset] });
+        toast({
+          title: "File uploaded",
+          description: `${file.name} has been added to sample datasets.`,
+        });
+      }
+    } catch (error: any) {
+      toast({
+        title: "Upload failed",
+        description: error.message || "Failed to upload file",
+        variant: "destructive",
+      });
+    } finally {
+      setIsUploadingSampleData(false);
+      if (sampleDataInputRef.current) {
+        sampleDataInputRef.current.value = '';
+      }
+    }
+  };
+
+  const removeSampleDataset = (id: string) => {
+    const currentDatasets = formData?.sampleDatasets || [];
+    updateFormData({ sampleDatasets: currentDatasets.filter(d => d.id !== id) });
+  };
+
+  const handleUseSampleDataTemplate = () => {
+    const templateDataset: SampleDataset = {
+      id: crypto.randomUUID(),
+      name: "Sample Customer Data (JSON)",
+      description: "Template sample customer data",
+      content: sampleDataTemplate,
+      format: "json",
+      isGenerated: false,
+      createdAt: new Date().toISOString(),
+    };
+    const currentDatasets = formData?.sampleDatasets || [];
+    updateFormData({ sampleDatasets: [...currentDatasets, templateDataset] });
+    toast({
+      title: "Template added",
+      description: "Sample data template has been added.",
+    });
+  };
+
+  const handleGenerateSampleData = async (model: GeminiModel) => {
+    if (!formData?.businessUseCase) {
+      toast({
+        title: "Business use case required",
+        description: "Please add a business use case before generating.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsGeneratingSampleData(true);
+    try {
+      const response = await apiRequest("POST", "/api/generate/sample-data", {
+        businessUseCase: formData.businessUseCase,
+        domainKnowledge: formData.domainKnowledge,
+        domainDocuments: formData.domainDocuments,
+        dataType: sampleDataType,
+        recordCount: sampleRecordCount,
+        format: sampleFormat,
+        model,
+      });
+      const dataset: SampleDataset = await response.json();
+      const currentDatasets = formData?.sampleDatasets || [];
+      updateFormData({ sampleDatasets: [...currentDatasets, dataset] });
+      toast({
+        title: "Sample data generated",
+        description: `Generated ${sampleRecordCount} ${sampleDataType} records using ${geminiModelDisplayNames[model]}.`,
+      });
+    } catch (error: any) {
+      toast({
+        title: "Generation failed",
+        description: error?.message || "Failed to generate sample data.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsGeneratingSampleData(false);
     }
   };
 
@@ -657,6 +768,203 @@ export default function SettingsPage() {
                     Optional: Define what your agent should NOT do (Markdown or YAML format)
                   </p>
                 </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Database className="h-5 w-5 text-primary" />
+                Sample Data
+                <Badge variant="secondary">Optional</Badge>
+              </CardTitle>
+              <CardDescription>
+                Upload or generate sample data for your chatbot to reference
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-6">
+                <div className="flex items-start gap-3 rounded-lg border bg-muted/50 p-4">
+                  <Info className="h-5 w-5 text-muted-foreground mt-0.5 shrink-0" />
+                  <div>
+                    <p className="font-medium text-sm">What is sample data?</p>
+                    <p className="text-sm text-muted-foreground">
+                      Sample data helps your chatbot understand the structure and format of data it might encounter.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="grid md:grid-cols-2 gap-6">
+                  <div className="space-y-4">
+                    <div>
+                      <Label className="text-sm font-medium">Upload Sample Data</Label>
+                      <p className="text-xs text-muted-foreground mb-2">
+                        Upload CSV, JSON, or text files
+                      </p>
+                      <div className="flex items-center gap-2">
+                        <input
+                          ref={sampleDataInputRef}
+                          type="file"
+                          accept=".csv,.json,.txt"
+                          onChange={handleSampleDataUpload}
+                          className="hidden"
+                          multiple
+                          data-testid="settings-input-upload-sample-data"
+                        />
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={() => sampleDataInputRef.current?.click()}
+                          disabled={isUploadingSampleData}
+                          className="w-full"
+                          data-testid="settings-button-upload-sample-data"
+                        >
+                          {isUploadingSampleData ? (
+                            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                          ) : (
+                            <Upload className="h-4 w-4 mr-2" />
+                          )}
+                          {isUploadingSampleData ? "Uploading..." : "Upload File"}
+                        </Button>
+                      </div>
+                    </div>
+                    <div className="text-center text-sm text-muted-foreground">or</div>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={handleUseSampleDataTemplate}
+                      className="w-full"
+                      data-testid="settings-button-use-template-sample-data"
+                    >
+                      <FileText className="h-4 w-4 mr-2" />
+                      Use Template
+                    </Button>
+                  </div>
+
+                  <div className="space-y-4">
+                    <div>
+                      <Label className="text-sm font-medium">Generate with AI</Label>
+                      <p className="text-xs text-muted-foreground mb-2">
+                        Let Gemini create sample data based on your use case
+                      </p>
+                    </div>
+                    <div>
+                      <Label htmlFor="settings-dataType" className="text-xs">Data Type</Label>
+                      <Input
+                        id="settings-dataType"
+                        value={sampleDataType}
+                        onChange={(e) => setSampleDataType(e.target.value)}
+                        placeholder="e.g., customer records"
+                        className="mt-1"
+                        data-testid="settings-input-data-type"
+                      />
+                    </div>
+                    <div className="grid grid-cols-2 gap-2">
+                      <div>
+                        <Label htmlFor="settings-recordCount" className="text-xs">Records</Label>
+                        <Input
+                          id="settings-recordCount"
+                          type="number"
+                          min={1}
+                          max={100}
+                          value={sampleRecordCount}
+                          onChange={(e) => setSampleRecordCount(Math.min(100, Math.max(1, parseInt(e.target.value) || 10)))}
+                          className="mt-1"
+                          data-testid="settings-input-record-count"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="settings-format" className="text-xs">Format</Label>
+                        <select
+                          id="settings-format"
+                          value={sampleFormat}
+                          onChange={(e) => setSampleFormat(e.target.value as "json" | "csv" | "text")}
+                          className="mt-1 w-full h-9 rounded-md border border-input bg-background px-3 py-1 text-sm"
+                          data-testid="settings-select-format"
+                        >
+                          <option value="json">JSON</option>
+                          <option value="csv">CSV</option>
+                          <option value="text">Text</option>
+                        </select>
+                      </div>
+                    </div>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button
+                          type="button"
+                          variant="default"
+                          disabled={isGeneratingSampleData}
+                          className="w-full"
+                          data-testid="settings-button-generate-sample-data"
+                        >
+                          {isGeneratingSampleData ? (
+                            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                          ) : (
+                            <Sparkles className="h-4 w-4 mr-2" />
+                          )}
+                          {isGeneratingSampleData ? "Generating..." : "Generate Sample Data"}
+                          <ChevronDown className="h-3 w-3 ml-2" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end" className="w-56">
+                        {(Object.keys(geminiModelDisplayNames) as GeminiModel[]).map((model) => (
+                          <DropdownMenuItem
+                            key={model}
+                            onClick={() => handleGenerateSampleData(model)}
+                            data-testid={`settings-menu-item-sample-data-model-${model}`}
+                          >
+                            {geminiModelDisplayNames[model]}
+                          </DropdownMenuItem>
+                        ))}
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
+                </div>
+
+                {(formData.sampleDatasets?.length || 0) > 0 && (
+                  <div className="space-y-2">
+                    <Label className="text-sm font-medium">Uploaded Datasets ({formData.sampleDatasets?.length})</Label>
+                    <div className="space-y-2 max-h-[200px] overflow-y-auto">
+                      {formData.sampleDatasets?.map((dataset) => (
+                        <div
+                          key={dataset.id}
+                          className="flex items-start gap-3 p-3 rounded-lg border bg-card"
+                          data-testid={`settings-sample-dataset-${dataset.id}`}
+                        >
+                          <FileText className="h-4 w-4 mt-1 text-muted-foreground shrink-0" />
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2">
+                              <p className="text-sm font-medium truncate">{dataset.name}</p>
+                              <Badge variant="outline" className="text-xs">
+                                {dataset.format.toUpperCase()}
+                              </Badge>
+                              {dataset.isGenerated && (
+                                <Badge variant="secondary" className="text-xs">
+                                  <Sparkles className="h-3 w-3 mr-1" />
+                                  AI
+                                </Badge>
+                              )}
+                            </div>
+                            <p className="text-xs text-muted-foreground truncate">
+                              {dataset.description || `Added ${new Date(dataset.createdAt).toLocaleDateString()}`}
+                            </p>
+                          </div>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => removeSampleDataset(dataset.id)}
+                            className="shrink-0 h-8 w-8"
+                            data-testid={`settings-button-remove-dataset-${dataset.id}`}
+                          >
+                            <X className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>

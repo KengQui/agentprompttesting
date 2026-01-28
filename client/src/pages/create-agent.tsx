@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { useLocation } from "wouter";
 import { useMutation } from "@tanstack/react-query";
-import { ArrowLeft, ArrowRight, Check, Briefcase, Shield, AlertTriangle, Eye, Bot, BookOpen, Upload, X, FileText, Code, Pencil, RotateCcw, HelpCircle, ExternalLink, Info, Sparkles, Loader2, ChevronDown } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check, Briefcase, Shield, AlertTriangle, Eye, Bot, BookOpen, Upload, X, FileText, Code, Pencil, RotateCcw, HelpCircle, ExternalLink, Info, Sparkles, Loader2, ChevronDown, Database } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -27,8 +27,8 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { generatePromptPreview, promptStyleInfo } from "@/lib/prompt-preview";
-import { validationRulesTemplate, guardrailsTemplate } from "@/lib/config-templates";
-import type { WizardStepData, Agent, DomainDocument, PromptStyle, GeminiModel } from "@shared/schema";
+import { validationRulesTemplate, guardrailsTemplate, sampleDataTemplate } from "@/lib/config-templates";
+import type { WizardStepData, Agent, DomainDocument, SampleDataset, PromptStyle, GeminiModel } from "@shared/schema";
 import { geminiModelDisplayNames, defaultGenerationModel } from "@shared/schema";
 
 const steps = [
@@ -37,7 +37,8 @@ const steps = [
   { id: 3, name: "Domain Knowledge", icon: BookOpen, description: "Add knowledge and documents" },
   { id: 4, name: "Validation Rules", icon: Shield, description: "Set input/output validation rules" },
   { id: 5, name: "Guardrails", icon: AlertTriangle, description: "Define safety boundaries" },
-  { id: 6, name: "Review", icon: Eye, description: "Preview and create your agent" },
+  { id: 6, name: "Sample Data", icon: Database, description: "Upload or generate sample data" },
+  { id: 7, name: "Review", icon: Eye, description: "Preview and create your agent" },
 ];
 
 function StepIndicator({ currentStep }: { currentStep: number }) {
@@ -612,7 +613,330 @@ function Step5Guardrails({
   );
 }
 
-function Step6Review({
+function Step6SampleData({
+  data,
+  onUpdate,
+}: {
+  data: WizardStepData;
+  onUpdate: (data: Partial<WizardStepData>) => void;
+}) {
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [dataType, setDataType] = useState("customer records");
+  const [recordCount, setRecordCount] = useState(10);
+  const [format, setFormat] = useState<"json" | "csv" | "text">("json");
+  const [selectedModel, setSelectedModel] = useState<GeminiModel>(defaultGenerationModel);
+  const { toast } = useToast();
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    setIsUploading(true);
+    try {
+      for (const file of Array.from(files)) {
+        const formData = new FormData();
+        formData.append('file', file);
+
+        const response = await fetch('/api/upload-sample-data', {
+          method: 'POST',
+          body: formData,
+        });
+
+        if (!response.ok) {
+          const error = await response.json();
+          throw new Error(error.message || 'Failed to upload file');
+        }
+
+        const dataset: SampleDataset = await response.json();
+        const currentDatasets = data.sampleDatasets || [];
+        onUpdate({ sampleDatasets: [...currentDatasets, dataset] });
+        toast({
+          title: "File uploaded",
+          description: `${file.name} has been added to sample datasets.`,
+        });
+      }
+    } catch (error: any) {
+      toast({
+        title: "Upload failed",
+        description: error.message || "Failed to upload file",
+        variant: "destructive",
+      });
+    } finally {
+      setIsUploading(false);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    }
+  };
+
+  const handleRemoveDataset = (id: string) => {
+    const currentDatasets = data.sampleDatasets || [];
+    onUpdate({ sampleDatasets: currentDatasets.filter(d => d.id !== id) });
+  };
+
+  const handleUseTemplate = () => {
+    const templateDataset: SampleDataset = {
+      id: crypto.randomUUID(),
+      name: "Sample Customer Data (JSON)",
+      description: "Template sample customer data",
+      content: sampleDataTemplate,
+      format: "json",
+      isGenerated: false,
+      createdAt: new Date().toISOString(),
+    };
+    const currentDatasets = data.sampleDatasets || [];
+    onUpdate({ sampleDatasets: [...currentDatasets, templateDataset] });
+    toast({
+      title: "Template added",
+      description: "Sample data template has been added.",
+    });
+  };
+
+  const handleGenerate = async (model: GeminiModel) => {
+    if (!data.businessUseCase) {
+      toast({
+        title: "Missing information",
+        description: "Please complete the Business Use Case step first.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsGenerating(true);
+    try {
+      const response = await apiRequest("POST", "/api/generate/sample-data", {
+        businessUseCase: data.businessUseCase,
+        domainKnowledge: data.domainKnowledge,
+        domainDocuments: data.domainDocuments,
+        dataType,
+        recordCount,
+        format,
+        model,
+      });
+      const dataset: SampleDataset = await response.json();
+      const currentDatasets = data.sampleDatasets || [];
+      onUpdate({ sampleDatasets: [...currentDatasets, dataset] });
+      toast({
+        title: "Sample data generated",
+        description: `Generated ${recordCount} ${dataType} records using ${geminiModelDisplayNames[model]}.`,
+      });
+    } catch (error: any) {
+      toast({
+        title: "Generation failed",
+        description: error?.message || "Failed to generate sample data. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <Database className="h-5 w-5 text-primary" />
+          Sample Data
+          <Badge variant="secondary">Optional</Badge>
+        </CardTitle>
+        <CardDescription>
+          Upload or generate sample data for your chatbot to reference
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-6">
+          <div className="flex items-start gap-3 rounded-lg border bg-muted/50 p-4">
+            <Info className="h-5 w-5 text-muted-foreground mt-0.5 shrink-0" />
+            <div>
+              <p className="font-medium text-sm">What is sample data?</p>
+              <p className="text-sm text-muted-foreground">
+                Sample data helps your chatbot understand the structure and format of data it might encounter. This can include customer records, product catalogs, order details, or any other relevant data.
+              </p>
+            </div>
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-6">
+            <div className="space-y-4">
+              <div>
+                <Label className="text-sm font-medium">Upload Sample Data</Label>
+                <p className="text-xs text-muted-foreground mb-2">
+                  Upload CSV, JSON, or text files containing sample data
+                </p>
+                <div className="flex items-center gap-2">
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept=".csv,.json,.txt"
+                    onChange={handleFileUpload}
+                    className="hidden"
+                    multiple
+                    data-testid="input-upload-sample-data"
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={isUploading}
+                    className="w-full"
+                    data-testid="button-upload-sample-data"
+                  >
+                    {isUploading ? (
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    ) : (
+                      <Upload className="h-4 w-4 mr-2" />
+                    )}
+                    {isUploading ? "Uploading..." : "Upload File"}
+                  </Button>
+                </div>
+              </div>
+              <div className="text-center text-sm text-muted-foreground">or</div>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handleUseTemplate}
+                className="w-full"
+                data-testid="button-use-template-sample-data"
+              >
+                <FileText className="h-4 w-4 mr-2" />
+                Use Template
+              </Button>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <Label className="text-sm font-medium">Generate with AI</Label>
+                <p className="text-xs text-muted-foreground mb-2">
+                  Let Gemini create sample data based on your use case
+                </p>
+              </div>
+              <div>
+                <Label htmlFor="dataType" className="text-xs">Data Type</Label>
+                <Input
+                  id="dataType"
+                  value={dataType}
+                  onChange={(e) => setDataType(e.target.value)}
+                  placeholder="e.g., customer records, product catalog"
+                  className="mt-1"
+                  data-testid="input-data-type"
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <Label htmlFor="recordCount" className="text-xs">Records</Label>
+                  <Input
+                    id="recordCount"
+                    type="number"
+                    min={1}
+                    max={100}
+                    value={recordCount}
+                    onChange={(e) => setRecordCount(Math.min(100, Math.max(1, parseInt(e.target.value) || 10)))}
+                    className="mt-1"
+                    data-testid="input-record-count"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="format" className="text-xs">Format</Label>
+                  <select
+                    id="format"
+                    value={format}
+                    onChange={(e) => setFormat(e.target.value as "json" | "csv" | "text")}
+                    className="mt-1 w-full h-9 rounded-md border border-input bg-background px-3 py-1 text-sm"
+                    data-testid="select-format"
+                  >
+                    <option value="json">JSON</option>
+                    <option value="csv">CSV</option>
+                    <option value="text">Text</option>
+                  </select>
+                </div>
+              </div>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    type="button"
+                    variant="default"
+                    disabled={isGenerating}
+                    className="w-full"
+                    data-testid="button-generate-sample-data"
+                  >
+                    {isGenerating ? (
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    ) : (
+                      <Sparkles className="h-4 w-4 mr-2" />
+                    )}
+                    {isGenerating ? "Generating..." : "Generate Sample Data"}
+                    <ChevronDown className="h-3 w-3 ml-2" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56">
+                  {(Object.keys(geminiModelDisplayNames) as GeminiModel[]).map((model) => (
+                    <DropdownMenuItem
+                      key={model}
+                      onClick={() => {
+                        setSelectedModel(model);
+                        handleGenerate(model);
+                      }}
+                      data-testid={`menu-item-sample-data-model-${model}`}
+                    >
+                      {geminiModelDisplayNames[model]}
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          </div>
+
+          {(data.sampleDatasets?.length || 0) > 0 && (
+            <div className="space-y-2">
+              <Label className="text-sm font-medium">Uploaded Datasets ({data.sampleDatasets?.length})</Label>
+              <div className="space-y-2 max-h-[300px] overflow-y-auto">
+                {data.sampleDatasets?.map((dataset) => (
+                  <div
+                    key={dataset.id}
+                    className="flex items-start gap-3 p-3 rounded-lg border bg-card"
+                    data-testid={`sample-dataset-${dataset.id}`}
+                  >
+                    <FileText className="h-4 w-4 mt-1 text-muted-foreground shrink-0" />
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <p className="text-sm font-medium truncate">{dataset.name}</p>
+                        <Badge variant="outline" className="text-xs">
+                          {dataset.format.toUpperCase()}
+                        </Badge>
+                        {dataset.isGenerated && (
+                          <Badge variant="secondary" className="text-xs">
+                            <Sparkles className="h-3 w-3 mr-1" />
+                            AI Generated
+                          </Badge>
+                        )}
+                      </div>
+                      <p className="text-xs text-muted-foreground truncate">
+                        {dataset.description || `Added ${new Date(dataset.createdAt).toLocaleDateString()}`}
+                      </p>
+                    </div>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => handleRemoveDataset(dataset.id)}
+                      className="shrink-0 h-8 w-8"
+                      data-testid={`button-remove-dataset-${dataset.id}`}
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+function Step7Review({
   data,
   onUpdate,
 }: {
@@ -713,12 +1037,18 @@ function Step6Review({
     ? data.domainKnowledge 
     : (domainDocsCount > 0 ? `${domainDocsCount} document(s) uploaded` : "");
 
+  const sampleDatasetsCount = data.sampleDatasets?.length || 0;
+  const sampleDatasetsValue = sampleDatasetsCount > 0 
+    ? `${sampleDatasetsCount} dataset(s) configured` 
+    : "";
+
   const sections = [
     { label: "Business Use Case", value: data.businessUseCase, icon: Briefcase },
     { label: "Agent Name", value: data.name, icon: Bot },
     { label: "Domain Knowledge", value: domainKnowledgeValue, icon: BookOpen, optional: true },
     { label: "Validation Rules", value: data.validationRules, icon: Shield, optional: true },
     { label: "Guardrails", value: data.guardrails, icon: AlertTriangle, optional: true },
+    { label: "Sample Data", value: sampleDatasetsValue, icon: Database, optional: true },
   ];
 
   return (
@@ -983,6 +1313,7 @@ export default function CreateAgent() {
     description: "",
     domainKnowledge: "",
     domainDocuments: [],
+    sampleDatasets: [],
     validationRules: "",
     guardrails: "",
     promptStyle: "anthropic",
@@ -1024,8 +1355,9 @@ export default function CreateAgent() {
       case 3:
       case 4:
       case 5:
-        return true; // Optional steps
       case 6:
+        return true; // Optional steps
+      case 7:
         return true;
       default:
         return false;
@@ -1033,7 +1365,7 @@ export default function CreateAgent() {
   };
 
   const handleNext = () => {
-    if (currentStep < 6) {
+    if (currentStep < 7) {
       setCurrentStep(currentStep + 1);
     } else {
       createMutation.mutate(formData);
@@ -1061,7 +1393,9 @@ export default function CreateAgent() {
       case 5:
         return <Step5Guardrails data={formData} onUpdate={updateFormData} />;
       case 6:
-        return <Step6Review data={formData} onUpdate={updateFormData} />;
+        return <Step6SampleData data={formData} onUpdate={updateFormData} />;
+      case 7:
+        return <Step7Review data={formData} onUpdate={updateFormData} />;
       default:
         return null;
     }
@@ -1122,7 +1456,7 @@ export default function CreateAgent() {
             className="gap-2"
             data-testid="button-next"
           >
-            {currentStep === 6 ? (
+            {currentStep === 7 ? (
               createMutation.isPending ? (
                 "Creating..."
               ) : (
