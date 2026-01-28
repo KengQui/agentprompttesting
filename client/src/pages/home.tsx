@@ -54,8 +54,6 @@ function AgentCard({ agent }: { agent: Agent }) {
           </Badge>
         </div>
       </CardHeader>
-      <CardContent className="flex-1 pb-3">
-      </CardContent>
       <CardFooter className="gap-2 pt-3 border-t">
         <Link href={`/chat/${agent.id}`} className="flex-1">
           <Button
@@ -98,10 +96,6 @@ function AgentCardSkeleton() {
           <Skeleton className="h-5 w-16 rounded-full" />
         </div>
       </CardHeader>
-      <CardContent className="flex-1 pb-3">
-        <Skeleton className="h-4 w-full mb-2" />
-        <Skeleton className="h-4 w-3/4" />
-      </CardContent>
       <CardFooter className="gap-2 pt-3 border-t">
         <Skeleton className="h-8 flex-1" />
         <Skeleton className="h-8 w-8" />
