@@ -15,7 +15,11 @@ Agent Studio utilizes a modern web application architecture with a clear separat
 - **UI/UX**: Features a professional tech theme with dark mode support. Uses Inter for sans-serif fonts and JetBrains Mono for code. The primary color scheme is purple (#8B5CF6).
 - **Core Features**:
     - **Agent Creation Wizard**: A 7-step process guiding users through defining agent parameters.
-    - **Chat Interface**: For testing and interacting with configured agents, including session management, context rot warnings, and a cancel response feature.
+    - **Chat Interface**: For testing and interacting with configured agents, with the following features:
+        - **Session Management**: Multiple renamable sessions per agent for organizing test scenarios
+        - **Session Sidebar**: Collapsible sidebar showing all sessions with previews, message counts, and inline renaming
+        - **Context Progress Bar**: Compact header indicator showing context window fill level with color-coded status
+        - **Cancel Response**: Ability to cancel AI responses mid-generation
     - **Agent Management**: Pages for listing, editing, and deleting agents.
     - **Multi-provider Prompt Styling**: Users can select and preview system prompt styles tailored for Anthropic, Gemini, or OpenAI, with custom prompt editing capabilities.
     - **Smart Generation**: AI evaluates context and engages in clarifying questions when necessary to gather sufficient information for generating validation rules or guardrails.
