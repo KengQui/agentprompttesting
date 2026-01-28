@@ -41,6 +41,18 @@ function getChatPath(agentId: string) {
   return getAgentFilePath(agentId, AGENT_FILES.CHAT);
 }
 
+function getSessionsDir(agentId: string) {
+  return path.join(getAgentDir(agentId), "sessions");
+}
+
+function getSessionDir(agentId: string, sessionId: string) {
+  return path.join(getSessionsDir(agentId), sessionId);
+}
+
+function getSessionMessagesPath(agentId: string, sessionId: string) {
+  return path.join(getSessionDir(agentId, sessionId), "messages.json");
+}
+
 function getComponentsDir(agentId: string) {
   return path.join(getAgentDir(agentId), "components");
 }
@@ -288,7 +300,8 @@ export interface IStorage {
 
 export class MemStorage implements IStorage {
   private agents: Map<string, Agent>;
-  private messages: Map<string, ChatMessage[]>;
+  // Changed: messages are now stored per session: Map<agentId, Map<sessionId, ChatMessage[]>>
+  private messages: Map<string, Map<string, ChatMessage[]>>;
   private sessions: Map<string, ChatSession[]>;
 
   constructor() {
@@ -358,23 +371,49 @@ export class MemStorage implements IStorage {
             }
           }
 
-          // Load chat history
+          // Initialize per-session message map for this agent
+          if (!this.messages.has(agentId)) {
+            this.messages.set(agentId, new Map());
+          }
+
+          // Check for legacy chat.json and migrate to per-session files
           if (fs.existsSync(chatPath)) {
             try {
               const content = fs.readFileSync(chatPath, "utf-8");
-              const messages = JSON.parse(content) as ChatMessage[];
+              const legacyMessages = JSON.parse(content) as ChatMessage[];
               
-              // Migrate messages without sessionId to a default session
-              const migratedMessages = this.migrateMessagesToSession(agentId, messages);
-              this.messages.set(agentId, migratedMessages);
-              
-              // Save if migration happened
-              if (messages.length > 0 && messages.some(m => !(m as any).sessionId)) {
-                this.saveMessagesToDisk(agentId);
-                this.saveSessionsToDisk(agentId);
+              if (legacyMessages.length > 0) {
+                // Migrate legacy messages to per-session storage
+                this.migrateLegacyChatToSessions(agentId, legacyMessages);
+                
+                // Delete the old chat.json file after successful migration
+                fs.unlinkSync(chatPath);
+                console.log(`[storage] Migrated chat.json to per-session files for agent ${agentId}`);
               }
             } catch (e) {
-              console.error(`Failed to load chat for agent ${agentId}:`, e);
+              console.error(`Failed to migrate chat.json for agent ${agentId}:`, e);
+            }
+          }
+
+          // Load messages from per-session files
+          const sessionsDir = getSessionsDir(agentId);
+          if (fs.existsSync(sessionsDir)) {
+            const sessionDirs = fs.readdirSync(sessionsDir, { withFileTypes: true });
+            for (const sessionDir of sessionDirs) {
+              if (sessionDir.isDirectory()) {
+                const sessionId = sessionDir.name;
+                const messagesPath = getSessionMessagesPath(agentId, sessionId);
+                if (fs.existsSync(messagesPath)) {
+                  try {
+                    const content = fs.readFileSync(messagesPath, "utf-8");
+                    const messages = JSON.parse(content) as ChatMessage[];
+                    const agentMessages = this.messages.get(agentId)!;
+                    agentMessages.set(sessionId, messages);
+                  } catch (e) {
+                    console.error(`Failed to load messages for session ${sessionId}:`, e);
+                  }
+                }
+              }
             }
           }
         }
@@ -384,33 +423,83 @@ export class MemStorage implements IStorage {
     }
   }
 
-  private migrateMessagesToSession(agentId: string, messages: ChatMessage[]): ChatMessage[] {
-    // Check if any messages lack sessionId
-    const needsMigration = messages.some(m => !(m as any).sessionId);
-    if (!needsMigration || messages.length === 0) {
-      return messages;
+  private migrateLegacyChatToSessions(agentId: string, messages: ChatMessage[]): void {
+    // First, ensure messages have sessionIds (handle old format without sessionId)
+    const needsSessionMigration = messages.some(m => !(m as any).sessionId);
+    
+    let migratedMessages = messages;
+    
+    if (needsSessionMigration) {
+      // Create a default session for messages without sessionId
+      const now = new Date().toISOString();
+      const defaultSession: ChatSession = {
+        id: randomUUID(),
+        agentId,
+        title: "Previous Conversation",
+        createdAt: messages[0]?.timestamp || now,
+        updatedAt: messages[messages.length - 1]?.timestamp || now,
+      };
+
+      // Add session to sessions list
+      const sessions = this.sessions.get(agentId) || [];
+      sessions.push(defaultSession);
+      this.sessions.set(agentId, sessions);
+      this.saveSessionsToDisk(agentId);
+
+      // Add sessionId to all messages that don't have one
+      migratedMessages = messages.map(m => ({
+        ...m,
+        sessionId: (m as any).sessionId || defaultSession.id,
+      }));
     }
 
-    // Create a default session for existing messages
-    const now = new Date().toISOString();
-    const defaultSession: ChatSession = {
-      id: randomUUID(),
-      agentId,
-      title: "Previous Conversation",
-      createdAt: messages[0]?.timestamp || now,
-      updatedAt: messages[messages.length - 1]?.timestamp || now,
-    };
+    // Group messages by sessionId
+    const messagesBySession = new Map<string, ChatMessage[]>();
+    for (const msg of migratedMessages) {
+      const sessionId = msg.sessionId;
+      if (!messagesBySession.has(sessionId)) {
+        messagesBySession.set(sessionId, []);
+      }
+      messagesBySession.get(sessionId)!.push(msg);
+    }
 
-    // Add session to sessions list
+    // Ensure all sessionIds have corresponding session records
     const sessions = this.sessions.get(agentId) || [];
-    sessions.push(defaultSession);
+    const existingSessionIds = new Set(sessions.map(s => s.id));
+    
+    for (const [sessionId, sessionMessages] of messagesBySession) {
+      if (!existingSessionIds.has(sessionId)) {
+        // Create a session record for orphaned messages
+        const firstMsg = sessionMessages[0];
+        const lastMsg = sessionMessages[sessionMessages.length - 1];
+        const now = new Date().toISOString();
+        
+        const newSession: ChatSession = {
+          id: sessionId,
+          agentId,
+          title: "Migrated Conversation",
+          createdAt: firstMsg?.timestamp || now,
+          updatedAt: lastMsg?.timestamp || now,
+        };
+        sessions.push(newSession);
+        console.log(`[storage] Created missing session record for ${sessionId} during migration`);
+      }
+    }
+    
     this.sessions.set(agentId, sessions);
+    this.saveSessionsToDisk(agentId);
 
-    // Add sessionId to all messages
-    return messages.map(m => ({
-      ...m,
-      sessionId: (m as any).sessionId || defaultSession.id,
-    }));
+    // Initialize agent messages map if needed
+    if (!this.messages.has(agentId)) {
+      this.messages.set(agentId, new Map());
+    }
+    const agentMessages = this.messages.get(agentId)!;
+
+    // Save each session's messages to its own file
+    for (const [sessionId, sessionMessages] of messagesBySession) {
+      agentMessages.set(sessionId, sessionMessages);
+      this.saveSessionMessagesToDisk(agentId, sessionId);
+    }
   }
 
   private loadAgentFromMultipleFiles(agentId: string): Agent | null {
@@ -555,11 +644,20 @@ export class MemStorage implements IStorage {
     }
   }
 
-  private saveMessagesToDisk(agentId: string) {
-    const messages = this.messages.get(agentId) || [];
-    const chatPath = getChatPath(agentId);
-    ensureDir(getAgentDir(agentId));
-    fs.writeFileSync(chatPath, JSON.stringify(messages, null, 2), "utf-8");
+  private saveSessionMessagesToDisk(agentId: string, sessionId: string) {
+    const agentMessages = this.messages.get(agentId);
+    const sessionMessages = agentMessages?.get(sessionId) || [];
+    const sessionDir = getSessionDir(agentId, sessionId);
+    ensureDir(sessionDir);
+    const messagesPath = getSessionMessagesPath(agentId, sessionId);
+    fs.writeFileSync(messagesPath, JSON.stringify(sessionMessages, null, 2), "utf-8");
+  }
+
+  private deleteSessionFromDisk(agentId: string, sessionId: string) {
+    const sessionDir = getSessionDir(agentId, sessionId);
+    if (fs.existsSync(sessionDir)) {
+      fs.rmSync(sessionDir, { recursive: true, force: true });
+    }
   }
 
   private saveSessionsToDisk(agentId: string) {
@@ -655,10 +753,10 @@ export class MemStorage implements IStorage {
   // Session operations
   async getSessions(agentId: string): Promise<ChatSessionWithPreview[]> {
     const sessions = this.sessions.get(agentId) || [];
-    const messages = this.messages.get(agentId) || [];
+    const agentMessages = this.messages.get(agentId) || new Map();
     
     return sessions.map(session => {
-      const sessionMessages = messages.filter(m => m.sessionId === session.id);
+      const sessionMessages = agentMessages.get(session.id) || [];
       const firstUserMessage = sessionMessages.find(m => m.role === "user");
       const lastMessage = sessionMessages[sessionMessages.length - 1];
       
@@ -724,21 +822,31 @@ export class MemStorage implements IStorage {
     this.sessions.set(agentId, sessions);
     this.saveSessionsToDisk(agentId);
 
-    // Remove all messages for this session
-    const messages = this.messages.get(agentId) || [];
-    const filteredMessages = messages.filter(m => m.sessionId !== sessionId);
-    this.messages.set(agentId, filteredMessages);
-    this.saveMessagesToDisk(agentId);
+    // Remove messages from memory and disk
+    const agentMessages = this.messages.get(agentId);
+    if (agentMessages) {
+      agentMessages.delete(sessionId);
+    }
+    this.deleteSessionFromDisk(agentId, sessionId);
 
     return true;
   }
 
   async getMessages(agentId: string, sessionId?: string): Promise<ChatMessage[]> {
-    const messages = this.messages.get(agentId) || [];
+    const agentMessages = this.messages.get(agentId) || new Map();
+    
     if (sessionId) {
-      return messages.filter(m => m.sessionId === sessionId);
+      return agentMessages.get(sessionId) || [];
     }
-    return messages;
+    
+    // Return all messages across all sessions for this agent, sorted by timestamp
+    const allMessages: ChatMessage[] = [];
+    for (const sessionMessages of agentMessages.values()) {
+      allMessages.push(...sessionMessages);
+    }
+    return allMessages.sort((a, b) => 
+      new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
+    );
   }
 
   async addMessage(insertMessage: InsertChatMessage): Promise<ChatMessage> {
@@ -754,10 +862,20 @@ export class MemStorage implements IStorage {
       timestamp: now,
     };
 
-    const messages = this.messages.get(insertMessage.agentId) || [];
-    messages.push(message);
-    this.messages.set(insertMessage.agentId, messages);
-    this.saveMessagesToDisk(insertMessage.agentId);
+    // Initialize agent messages map if needed
+    if (!this.messages.has(insertMessage.agentId)) {
+      this.messages.set(insertMessage.agentId, new Map());
+    }
+    const agentMessages = this.messages.get(insertMessage.agentId)!;
+
+    // Initialize session messages array if needed
+    if (!agentMessages.has(insertMessage.sessionId)) {
+      agentMessages.set(insertMessage.sessionId, []);
+    }
+    const sessionMessages = agentMessages.get(insertMessage.sessionId)!;
+    
+    sessionMessages.push(message);
+    this.saveSessionMessagesToDisk(insertMessage.agentId, insertMessage.sessionId);
 
     // Update session's updatedAt timestamp
     const sessions = this.sessions.get(insertMessage.agentId) || [];
@@ -775,14 +893,41 @@ export class MemStorage implements IStorage {
   }
 
   async clearMessages(agentId: string, sessionId?: string): Promise<void> {
+    const agentMessages = this.messages.get(agentId);
+    
     if (sessionId) {
-      const messages = this.messages.get(agentId) || [];
-      const filteredMessages = messages.filter(m => m.sessionId !== sessionId);
-      this.messages.set(agentId, filteredMessages);
+      // Clear messages for a specific session
+      if (agentMessages) {
+        agentMessages.set(sessionId, []);
+        this.saveSessionMessagesToDisk(agentId, sessionId);
+      }
     } else {
-      this.messages.set(agentId, []);
+      // Clear all messages for this agent (all sessions)
+      // First, clear known sessions
+      if (agentMessages) {
+        const sessions = this.sessions.get(agentId) || [];
+        for (const session of sessions) {
+          agentMessages.set(session.id, []);
+          this.saveSessionMessagesToDisk(agentId, session.id);
+        }
+        
+        // Also clear any orphaned session folders on disk
+        const sessionsDir = getSessionsDir(agentId);
+        if (fs.existsSync(sessionsDir)) {
+          const sessionDirs = fs.readdirSync(sessionsDir, { withFileTypes: true });
+          const knownSessionIds = new Set(sessions.map(s => s.id));
+          
+          for (const sessionDir of sessionDirs) {
+            if (sessionDir.isDirectory() && !knownSessionIds.has(sessionDir.name)) {
+              // This is an orphaned session folder, remove it
+              const orphanedDir = path.join(sessionsDir, sessionDir.name);
+              fs.rmSync(orphanedDir, { recursive: true, force: true });
+              console.log(`[storage] Removed orphaned session folder ${sessionDir.name}`);
+            }
+          }
+        }
+      }
     }
-    this.saveMessagesToDisk(agentId);
   }
 }
 

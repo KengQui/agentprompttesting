@@ -30,21 +30,5 @@
     "content": "Stoyan is the one you call when you need things done. Born November 16, 1994. Works at UKG.\n",
     "timestamp": "2026-01-28T09:30:04.103Z",
     "sessionId": "4b0915a5-878d-4cc2-afe9-fa4b2e05ad03"
-  },
-  {
-    "id": "f909a510-24c6-488c-82b0-9008803ebfd5",
-    "agentId": "cc4add53-14b3-4383-9d03-71ae7d82f0de",
-    "sessionId": "0021d468-0586-418e-92af-d0a438dbfb34",
-    "role": "user",
-    "content": "gg",
-    "timestamp": "2026-01-28T09:53:04.463Z"
-  },
-  {
-    "id": "44873e4a-c8a5-4e31-acbc-a52ab39df921",
-    "agentId": "cc4add53-14b3-4383-9d03-71ae7d82f0de",
-    "sessionId": "0021d468-0586-418e-92af-d0a438dbfb34",
-    "role": "assistant",
-    "content": "I'm a cybernetic organism, not a conversationalist. I need your question, do it now.\n",
-    "timestamp": "2026-01-28T09:53:05.265Z"
   }
 ]
