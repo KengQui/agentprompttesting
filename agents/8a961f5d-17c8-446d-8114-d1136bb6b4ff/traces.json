@@ -34,22 +34,90 @@
         }
       ],
       "success": true
+    },
+    {
+      "id": "trace-1769640776075",
+      "sessionId": "84102dd0-fdd6-4719-b28a-ad6e4a75d99e",
+      "userInput": "did i get a pay increase?",
+      "agentResponse": "Yes, John Smith, you did receive a pay increase.\n\nIn 2022 your gross pay was $3,500.00 biweekly.\nIn 2023 your gross pay increased by 3% to $3,605.00 biweekly.\n",
+      "startTime": "2026-01-28T22:52:53.906Z",
+      "endTime": "2026-01-28T22:52:56.075Z",
+      "totalDuration": 2169,
+      "entries": [
+        {
+          "id": "entry-1769640775069-1",
+          "type": "intent_classification",
+          "name": "Orchestrator Intent Classification",
+          "timestamp": "2026-01-28T22:52:55.069Z",
+          "metadata": {
+            "intent": "answer_question",
+            "classificationMethod": "orchestrator",
+            "confidence": "high"
+          }
+        },
+        {
+          "id": "entry-1769640776075-3",
+          "type": "llm_call",
+          "name": "Gemini Response Generation",
+          "timestamp": "2026-01-28T22:52:56.075Z",
+          "duration": 1006,
+          "metadata": {
+            "model": "gemini",
+            "intent": "answer_question"
+          }
+        }
+      ],
+      "success": true
+    },
+    {
+      "id": "trace-1769640798928",
+      "sessionId": "84102dd0-fdd6-4719-b28a-ad6e4a75d99e",
+      "userInput": "how much did I contribute to 401k last year",
+      "agentResponse": "Okay, John Smith. Let's calculate your 401k contributions for last year, 2025.\n\nHere's a breakdown:\n\n*   **Contribution per pay period:** $180.25\n*   **Number of pay periods in 2025:** 26\n\n**Total 401k Contribution for 2025:** $4,686.50\n\nSo, in 2025, you contributed a total of $4,686.50 to your 401k.\n",
+      "startTime": "2026-01-28T22:53:16.702Z",
+      "endTime": "2026-01-28T22:53:18.928Z",
+      "totalDuration": 2226,
+      "entries": [
+        {
+          "id": "entry-1769640797616-1",
+          "type": "intent_classification",
+          "name": "Orchestrator Intent Classification",
+          "timestamp": "2026-01-28T22:53:17.616Z",
+          "metadata": {
+            "intent": "answer_question",
+            "classificationMethod": "orchestrator",
+            "confidence": "high"
+          }
+        },
+        {
+          "id": "entry-1769640798928-3",
+          "type": "llm_call",
+          "name": "Gemini Response Generation",
+          "timestamp": "2026-01-28T22:53:18.928Z",
+          "duration": 1312,
+          "metadata": {
+            "model": "gemini",
+            "intent": "answer_question"
+          }
+        }
+      ],
+      "success": true
     }
   ],
   "stats": {
     "hookCalls": {},
     "signalReads": {},
     "intentDistribution": {
-      "answer_question": 1
+      "answer_question": 3
     },
     "classificationMethods": {
-      "orchestrator": 1
+      "orchestrator": 3
     },
-    "avgResponseTime": 52545,
-    "totalLlmCalls": 1,
+    "avgResponseTime": 18980,
+    "totalLlmCalls": 3,
     "totalTokensUsed": 0,
     "errorCount": 0
   },
   "createdAt": "2026-01-28T22:47:34.209Z",
-  "updatedAt": "2026-01-28T22:47:34.209Z"
+  "updatedAt": "2026-01-28T22:53:18.928Z"
 }

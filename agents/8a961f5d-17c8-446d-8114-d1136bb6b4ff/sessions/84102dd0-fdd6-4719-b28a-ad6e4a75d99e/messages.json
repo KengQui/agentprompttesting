@@ -1,0 +1,34 @@
+[
+  {
+    "id": "2ef34cfa-bee4-4936-9149-7918087fbe5d",
+    "agentId": "8a961f5d-17c8-446d-8114-d1136bb6b4ff",
+    "sessionId": "84102dd0-fdd6-4719-b28a-ad6e4a75d99e",
+    "role": "user",
+    "content": "did i get a pay increase?",
+    "timestamp": "2026-01-28T22:52:53.906Z"
+  },
+  {
+    "id": "65ea0718-47d7-43cc-9002-bfce6b4710b4",
+    "agentId": "8a961f5d-17c8-446d-8114-d1136bb6b4ff",
+    "sessionId": "84102dd0-fdd6-4719-b28a-ad6e4a75d99e",
+    "role": "assistant",
+    "content": "Yes, John Smith, you did receive a pay increase.\n\nIn 2022 your gross pay was $3,500.00 biweekly.\nIn 2023 your gross pay increased by 3% to $3,605.00 biweekly.\n",
+    "timestamp": "2026-01-28T22:52:56.076Z"
+  },
+  {
+    "id": "ba46cf4f-0d11-4217-a6e0-442351f1433c",
+    "agentId": "8a961f5d-17c8-446d-8114-d1136bb6b4ff",
+    "sessionId": "84102dd0-fdd6-4719-b28a-ad6e4a75d99e",
+    "role": "user",
+    "content": "how much did I contribute to 401k last year",
+    "timestamp": "2026-01-28T22:53:16.702Z"
+  },
+  {
+    "id": "c08a2a69-0f71-41f8-a524-4bf1b3f3e146",
+    "agentId": "8a961f5d-17c8-446d-8114-d1136bb6b4ff",
+    "sessionId": "84102dd0-fdd6-4719-b28a-ad6e4a75d99e",
+    "role": "assistant",
+    "content": "Okay, John Smith. Let's calculate your 401k contributions for last year, 2025.\n\nHere's a breakdown:\n\n*   **Contribution per pay period:** $180.25\n*   **Number of pay periods in 2025:** 26\n\n**Total 401k Contribution for 2025:** $4,686.50\n\nSo, in 2025, you contributed a total of $4,686.50 to your 401k.\n",
+    "timestamp": "2026-01-28T22:53:18.928Z"
+  }
+]
