@@ -1,7 +1,8 @@
 import { GoogleGenAI } from "@google/genai";
 import { generatePrompt, type PromptContext } from "./prompt-templates";
-import type { PromptStyle, DomainDocument, GeminiModel } from "@shared/schema";
+import type { PromptStyle, DomainDocument, GeminiModel, SampleDataset } from "@shared/schema";
 import { defaultGenerationModel } from "@shared/schema";
+import { v4 as uuidv4 } from "uuid";
 
 // Google AI Studio SDK integration for Gemini
 // Requires GEMINI_API_KEY secret to be set
@@ -251,5 +252,95 @@ Generate a complete system prompt following the ${context.promptStyle} prompt en
   } catch (error: any) {
     console.error("Gemini API error:", error?.message || error);
     throw new Error(`Failed to generate system prompt: ${error?.message || error}`);
+  }
+}
+
+export interface SampleDataGenerationContext {
+  businessUseCase: string;
+  domainKnowledge?: string;
+  domainDocuments?: DomainDocument[];
+  dataType?: string;
+  recordCount?: number;
+  format?: "json" | "csv" | "text";
+  model?: GeminiModel;
+}
+
+export async function generateSampleData(context: SampleDataGenerationContext): Promise<SampleDataset> {
+  const modelToUse = context.model || defaultGenerationModel;
+  if (!process.env.GEMINI_API_KEY) {
+    throw new Error("GEMINI_API_KEY is not configured");
+  }
+
+  const format = context.format || "json";
+  const recordCount = context.recordCount || 10;
+  const dataType = context.dataType || "sample records";
+
+  const domainDocsText = context.domainDocuments?.length 
+    ? context.domainDocuments.map(doc => `${doc.filename}: ${doc.content}`).join("\n\n")
+    : "";
+
+  const formatInstructions: Record<string, string> = {
+    json: `Output the data as a valid JSON array. Each record should be a JSON object with relevant fields. Example format:
+[
+  { "field1": "value1", "field2": "value2" },
+  { "field1": "value3", "field2": "value4" }
+]`,
+    csv: `Output the data as CSV format with a header row. Use comma as delimiter. Example format:
+field1,field2,field3
+value1,value2,value3
+value4,value5,value6`,
+    text: `Output the data as plain text with each record on a new line. Use a clear, consistent format that's easy to parse.`
+  };
+
+  const systemPrompt = `You are an expert at creating realistic sample datasets for AI chatbot testing. Based on the business use case and domain knowledge provided, generate sample data that would be useful for testing and training the chatbot.
+
+The sample data should:
+1. Be realistic and relevant to the business context
+2. Include a variety of scenarios and edge cases
+3. Contain accurate, plausible data (names, dates, numbers, etc.)
+4. Be formatted consistently and ready to use
+
+${formatInstructions[format]}
+
+Generate exactly ${recordCount} records.
+Output ONLY the data in the specified format, nothing else. No explanations, no code blocks, no markdown wrapping.`;
+
+  const userPrompt = `Business Use Case: ${context.businessUseCase}
+
+${context.domainKnowledge ? `Domain Knowledge: ${context.domainKnowledge}` : ""}
+
+${domainDocsText ? `Domain Documents:\n${domainDocsText}` : ""}
+
+Data Type Requested: ${dataType}
+Number of Records: ${recordCount}
+Output Format: ${format.toUpperCase()}
+
+Generate sample ${dataType} data for testing this AI chatbot.`;
+
+  try {
+    const response = await ai.models.generateContent({
+      model: modelToUse,
+      config: {
+        systemInstruction: systemPrompt,
+      },
+      contents: [{ role: "user", parts: [{ text: userPrompt }] }],
+    });
+
+    const content = response.text || "";
+    
+    const dataset: SampleDataset = {
+      id: uuidv4(),
+      name: `Generated ${dataType} (${format.toUpperCase()})`,
+      description: `AI-generated sample ${dataType} with ${recordCount} records`,
+      content: content,
+      format: format,
+      isGenerated: true,
+      createdAt: new Date().toISOString(),
+    };
+
+    return dataset;
+  } catch (error: any) {
+    console.error("Gemini API error:", error?.message || error);
+    throw new Error(`Failed to generate sample data: ${error?.message || error}`);
   }
 }

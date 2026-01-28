@@ -3,7 +3,7 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { insertAgentSchema, updateAgentSchema } from "@shared/schema";
 import { z } from "zod";
-import { generateAgentResponse, generateValidationRules, generateGuardrails, generateSystemPrompt, type GenerationContext, type SystemPromptContext } from "./gemini";
+import { generateAgentResponse, generateValidationRules, generateGuardrails, generateSystemPrompt, generateSampleData, type GenerationContext, type SystemPromptContext, type SampleDataGenerationContext } from "./gemini";
 import { loadAgentComponents, clearAgentCache, hasCustomComponents } from "./agent-loader";
 import multer from "multer";
 import { v4 as uuidv4 } from "uuid";
@@ -358,6 +358,79 @@ export async function registerRoutes(
     } catch (error: any) {
       console.error("Error generating system prompt:", error);
       res.status(500).json({ message: error?.message || "Failed to generate system prompt" });
+    }
+  });
+
+  // Generate sample data using AI
+  app.post("/api/generate/sample-data", async (req, res) => {
+    try {
+      const sampleDataRequestSchema = z.object({
+        businessUseCase: z.string().min(1, "Business use case is required"),
+        domainKnowledge: z.string().optional(),
+        domainDocuments: z.array(z.object({
+          id: z.string(),
+          filename: z.string(),
+          content: z.string(),
+          uploadedAt: z.string(),
+        })).optional(),
+        dataType: z.string().optional(),
+        recordCount: z.number().min(1).max(100).optional(),
+        format: z.enum(["json", "csv", "text"]).optional(),
+        model: z.enum(["gemini-2.5-flash", "gemini-2.5-pro", "gemini-3-flash-preview", "gemini-3-pro-preview"]).optional(),
+      });
+
+      const parsed = sampleDataRequestSchema.safeParse(req.body);
+      if (!parsed.success) {
+        return res.status(400).json({ message: parsed.error.errors[0]?.message || "Invalid request" });
+      }
+
+      const context: SampleDataGenerationContext = {
+        businessUseCase: parsed.data.businessUseCase,
+        domainKnowledge: parsed.data.domainKnowledge,
+        domainDocuments: parsed.data.domainDocuments,
+        dataType: parsed.data.dataType,
+        recordCount: parsed.data.recordCount,
+        format: parsed.data.format,
+        model: parsed.data.model,
+      };
+
+      const sampleData = await generateSampleData(context);
+      res.json(sampleData);
+    } catch (error: any) {
+      console.error("Error generating sample data:", error);
+      res.status(500).json({ message: error?.message || "Failed to generate sample data" });
+    }
+  });
+
+  // Upload sample data file
+  app.post("/api/upload-sample-data", upload.single('file'), async (req, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ message: "No file uploaded" });
+      }
+
+      const content = req.file.buffer.toString('utf-8');
+      const filename = req.file.originalname;
+      const ext = filename.toLowerCase().slice(filename.lastIndexOf('.'));
+      
+      let format: "json" | "csv" | "text" = "text";
+      if (ext === '.json') format = "json";
+      else if (ext === '.csv') format = "csv";
+
+      const dataset = {
+        id: uuidv4(),
+        name: filename,
+        description: `Uploaded file: ${filename}`,
+        content: content.substring(0, 100000),
+        format: format,
+        isGenerated: false,
+        createdAt: new Date().toISOString(),
+      };
+
+      res.json(dataset);
+    } catch (error) {
+      console.error("Error uploading sample data:", error);
+      res.status(500).json({ message: "Failed to upload sample data" });
     }
   });
 

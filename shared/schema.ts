@@ -38,6 +38,19 @@ export const domainDocumentSchema = z.object({
 
 export type DomainDocument = z.infer<typeof domainDocumentSchema>;
 
+// Sample dataset schema
+export const sampleDatasetSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  description: z.string().default(""),
+  content: z.string(),
+  format: z.enum(["json", "csv", "text"]).default("json"),
+  isGenerated: z.boolean().default(false),
+  createdAt: z.string(),
+});
+
+export type SampleDataset = z.infer<typeof sampleDatasetSchema>;
+
 // Agent schema
 export const agentSchema = z.object({
   id: z.string(),
@@ -46,6 +59,7 @@ export const agentSchema = z.object({
   description: z.string().default(""),
   domainKnowledge: z.string().default(""),
   domainDocuments: z.array(domainDocumentSchema).default([]),
+  sampleDatasets: z.array(sampleDatasetSchema).default([]),
   validationRules: z.string().default(""),
   guardrails: z.string().default(""),
   promptStyle: promptStyleEnum.default("anthropic"),
@@ -96,6 +110,7 @@ export const wizardStepSchema = z.object({
   description: z.string().default(""),
   domainKnowledge: z.string().default(""),
   domainDocuments: z.array(domainDocumentSchema).default([]),
+  sampleDatasets: z.array(sampleDatasetSchema).default([]),
   validationRules: z.string().default(""),
   guardrails: z.string().default(""),
   promptStyle: promptStyleEnum.default("anthropic"),
