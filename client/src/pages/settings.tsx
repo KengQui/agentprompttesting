@@ -1090,6 +1090,35 @@ export default function SettingsPage() {
                   The actual prompt uses your platform's personality from personality-prompt.txt
                 </p>
                 
+                {isEditingPrompt && (
+                  <div className="mb-3 p-3 bg-blue-50 dark:bg-blue-950 rounded-md border border-blue-200 dark:border-blue-800">
+                    <p className="text-xs font-medium text-blue-800 dark:text-blue-200 mb-1">
+                      Available Placeholders
+                    </p>
+                    <p className="text-xs text-blue-700 dark:text-blue-300 mb-2">
+                      Use these placeholders and they will be replaced with your agent's configuration:
+                    </p>
+                    <div className="flex flex-wrap gap-1">
+                      {["{{name}}", "{{businessUseCase}}", "{{domainKnowledge}}", "{{validationRules}}", "{{guardrails}}", "{{sampleDatasets}}", "{{currentDate}}"].map((placeholder) => (
+                        <code 
+                          key={placeholder}
+                          className="px-1.5 py-0.5 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 rounded text-xs cursor-pointer hover:bg-blue-200 dark:hover:bg-blue-800"
+                          onClick={() => {
+                            setEditedPrompt((prev) => prev + placeholder);
+                          }}
+                          title="Click to insert"
+                          data-testid={`placeholder-${placeholder.replace(/[{}]/g, '')}`}
+                        >
+                          {placeholder}
+                        </code>
+                      ))}
+                    </div>
+                    <p className="text-xs text-blue-600 dark:text-blue-400 mt-2 italic">
+                      If no placeholders are used, domain knowledge and guardrails will be automatically appended to your custom prompt.
+                    </p>
+                  </div>
+                )}
+                
                 {isEditingPrompt ? (
                   <Textarea
                     value={editedPrompt}

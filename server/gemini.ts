@@ -92,10 +92,126 @@ export async function generateAgentResponse(
   }
 }
 
+// Available placeholders for custom prompts
+const PROMPT_PLACEHOLDERS = {
+  name: "{{name}}",
+  businessUseCase: "{{businessUseCase}}",
+  domainKnowledge: "{{domainKnowledge}}",
+  validationRules: "{{validationRules}}",
+  guardrails: "{{guardrails}}",
+  sampleDatasets: "{{sampleDatasets}}",
+  currentDate: "{{currentDate}}",
+};
+
+// Build domain knowledge section including documents
+function buildDomainKnowledgeText(agent: AgentContext): string {
+  let section = "";
+  
+  if (agent.domainKnowledge) {
+    section += agent.domainKnowledge;
+  }
+  
+  if (agent.domainDocuments && agent.domainDocuments.length > 0) {
+    if (section) section += "\n\n";
+    section += "Reference Documents:";
+    for (const doc of agent.domainDocuments) {
+      section += `\n\n--- ${doc.filename} ---\n${doc.content}`;
+    }
+  }
+  
+  return section;
+}
+
+// Build sample datasets section
+function buildSampleDatasetsText(agent: AgentContext): string {
+  if (!agent.sampleDatasets || agent.sampleDatasets.length === 0) {
+    return "";
+  }
+  
+  let section = "User Data Records:\n";
+  for (const dataset of agent.sampleDatasets) {
+    section += `\n--- ${dataset.name} (${dataset.format.toUpperCase()}) ---\n${dataset.content}\n`;
+  }
+  return section;
+}
+
+// Replace placeholders in custom prompt with actual values
+function processCustomPrompt(customPrompt: string, agent: AgentContext): string {
+  const currentDate = new Date().toLocaleDateString('en-US', { 
+    weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' 
+  });
+  
+  const domainKnowledgeText = buildDomainKnowledgeText(agent);
+  const sampleDatasetsText = buildSampleDatasetsText(agent);
+  
+  // Replace all placeholders with actual values
+  let processedPrompt = customPrompt
+    .replace(/\{\{name\}\}/gi, agent.name || "")
+    .replace(/\{\{businessUseCase\}\}/gi, agent.businessUseCase || "")
+    .replace(/\{\{domainKnowledge\}\}/gi, domainKnowledgeText)
+    .replace(/\{\{validationRules\}\}/gi, agent.validationRules || "")
+    .replace(/\{\{guardrails\}\}/gi, agent.guardrails || "")
+    .replace(/\{\{sampleDatasets\}\}/gi, sampleDatasetsText)
+    .replace(/\{\{currentDate\}\}/gi, currentDate);
+  
+  return processedPrompt;
+}
+
+// Check if custom prompt uses any placeholders
+function hasPlaceholders(customPrompt: string): boolean {
+  const placeholderPattern = /\{\{(name|businessUseCase|domainKnowledge|validationRules|guardrails|sampleDatasets|currentDate)\}\}/gi;
+  return placeholderPattern.test(customPrompt);
+}
+
 function getSystemPrompt(agent: AgentContext): string {
   // Use custom prompt if the user has edited it
   if (agent.customPrompt && agent.customPrompt.trim()) {
-    return agent.customPrompt;
+    const customPrompt = agent.customPrompt.trim();
+    
+    // If custom prompt uses placeholders, process them
+    if (hasPlaceholders(customPrompt)) {
+      return processCustomPrompt(customPrompt, agent);
+    }
+    
+    // If no placeholders used, append domain knowledge and guardrails automatically
+    // This ensures the agent still has access to important context
+    const domainKnowledgeText = buildDomainKnowledgeText(agent);
+    const sampleDatasetsText = buildSampleDatasetsText(agent);
+    const currentDate = new Date().toLocaleDateString('en-US', { 
+      weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' 
+    });
+    
+    let fullPrompt = customPrompt;
+    
+    // Add current date
+    fullPrompt += `\n\n## Current Date\nToday is: ${currentDate}`;
+    
+    // Add business use case if available
+    if (agent.businessUseCase) {
+      fullPrompt += `\n\n## Purpose\n${agent.businessUseCase}`;
+    }
+    
+    // Add domain knowledge if available
+    if (domainKnowledgeText) {
+      fullPrompt += `\n\n## Domain Knowledge\n${domainKnowledgeText}`;
+    }
+    
+    // Add sample datasets if available
+    if (sampleDatasetsText) {
+      fullPrompt += `\n\n## User Data\n${sampleDatasetsText}`;
+    }
+    
+    // Add validation rules if available
+    if (agent.validationRules) {
+      fullPrompt += `\n\n## Validation Rules\n${agent.validationRules}`;
+    }
+    
+    // Add guardrails if available - these are critical for safety
+    if (agent.guardrails) {
+      fullPrompt += `\n\n## Guardrails (CRITICAL - Must Follow)\n${agent.guardrails}`;
+    }
+    
+    return fullPrompt;
   }
   
   // Otherwise generate using the selected style
@@ -112,6 +228,9 @@ function getSystemPrompt(agent: AgentContext): string {
   
   return generatePrompt(style, context);
 }
+
+// Export for use in UI hints
+export const AVAILABLE_PLACEHOLDERS = Object.values(PROMPT_PLACEHOLDERS);
 
 export interface GenerationContext {
   businessUseCase: string;
