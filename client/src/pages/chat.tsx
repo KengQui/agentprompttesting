@@ -1,13 +1,14 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useParams, useLocation } from "wouter";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { ArrowLeft, Send, Trash2, Bot, User, Settings, Loader2, X, AlertCircle, MessageSquare } from "lucide-react";
+import { ArrowLeft, Send, Bot, User, Settings, Loader2, X, AlertCircle, MessageSquare, Brush } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Card } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import type { Agent, ChatMessage } from "@shared/schema";
@@ -355,15 +356,22 @@ export default function Chat() {
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={() => clearMutation.mutate()}
-                disabled={messages.length === 0 || clearMutation.isPending}
-                data-testid="button-clear-chat"
-              >
-                <Trash2 className="h-4 w-4" />
-              </Button>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={() => clearMutation.mutate()}
+                    disabled={messages.length === 0 || clearMutation.isPending}
+                    data-testid="button-clear-chat"
+                  >
+                    <Brush className="h-4 w-4" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Clear chat history</p>
+                </TooltipContent>
+              </Tooltip>
               <Button
                 variant="outline"
                 size="icon"
