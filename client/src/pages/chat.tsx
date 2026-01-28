@@ -218,6 +218,7 @@ export default function Chat() {
       toast({
         title: "Session created",
         description: "A new session has been created.",
+        duration: 3000,
       });
     },
     onError: (error: Error) => {
@@ -260,6 +261,7 @@ export default function Chat() {
         toast({
           title: "Response cancelled",
           description: "The AI response was cancelled.",
+          duration: 3000,
         });
         queryClient.invalidateQueries({ queryKey: ["/api/agents", params.id, "sessions", activeSessionId, "messages"] });
         return;
@@ -298,6 +300,7 @@ export default function Chat() {
       toast({
         title: "Chat cleared",
         description: "All messages in this session have been deleted.",
+        duration: 3000,
       });
     },
     onError: (error: Error) => {
