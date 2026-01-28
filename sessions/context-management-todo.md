@@ -1,47 +1,58 @@
-# Context Management Discussion
+# Context Management Session
 
-**Created**: January 28, 2026  
-**Topic**: Replit Agent Development Context & TODO Tracking
+**Created**: 2026-01-28
+**Updated**: 2026-01-28
+**Status**: complete
 
-## Purpose of This Folder
+## Objective
 
-The `sessions/` folder at the project root is for **Replit Agent's development context** - tracking discussions, decisions, and TODOs during platform development. This is NOT related to the user-created agents in Agent Studio.
+Implement buildforce-style context management for Replit Agent to maintain continuity across sessions.
 
-## Discussion Summary
+## Context
 
-During our conversation, we analyzed context window management approaches:
+- Reference: buildforce-cli (https://github.com/berserkdisruptors/buildforce-cli)
+- Problem: Context window resets cause loss of decisions and progress
+- Solution: File-based session and context persistence
 
-### Buildforce-CLI Pattern Analysis
-We examined the buildforce-cli repository (https://github.com/berserkdisruptors/buildforce-cli) for their session/context management approach:
+## Decisions Made
 
-1. **Sessions folder** (`.buildforce/sessions/`):
-   - Named session folders like `{feature-name}-{timestamp}`
-   - Each session has: `spec.yaml`, `plan.yaml`, `research.yaml`
-   - Tracks workflow: research → plan → build → complete
+1. **Decision**: Use buildforce-inspired folder structure
+   - **Rationale**: Proven pattern for AI agent context persistence
+   - **Alternatives**: Database-backed sessions, in-memory caching
+   - **Date**: 2026-01-28
 
-2. **Context folder** (`.buildforce/context/`):
-   - Persistent knowledge repository
-   - Organized by category: `architecture/`, `conventions/`, `verification/`
-   - Has `_index.yaml` to track all context entries
+2. **Decision**: Sessions are for Replit Agent, not user agents
+   - **Rationale**: User agents have their own chat.json; this is for development context
+   - **Date**: 2026-01-28
 
-3. **Key Concepts**:
-   - Context persists across sessions in version-controlled files
-   - Sessions are temporary working areas for specific tasks
-   - Accumulated knowledge prevents "amnesic" behavior
+3. **Decision**: Create separate context/ folder for persistent knowledge
+   - **Rationale**: Architectural decisions should outlive individual sessions
+   - **Date**: 2026-01-28
 
-## Future Considerations for User-Created Agents
+## Progress
 
-If we want to add context window management for user-created agents in the future:
+### Completed
+- [x] Created sessions/ folder structure
+- [x] Created context/ folder with architecture, conventions, verification
+- [x] Updated replit.md with buildforce workflow rules
+- [x] Created documentation.md with comprehensive guide
+- [x] Created sessions/_index.md for session tracking
+- [x] Documented ADRs in context/architecture/decisions.md
+- [x] Added code patterns to context/conventions/patterns.md
+- [x] Created verification checklist
 
-1. Add sliding window to `chat.json` loading (keep last N messages)
-2. Implement message summarization before context overflow
-3. Store summarized context in agent folder
-4. Track token counts per message
+## Notes
 
-This would be implemented in `server/storage.ts` and `server/routes.ts`, not as a separate session system.
+The buildforce workflow can be extended by adding initialization in `.replit` config:
 
-## TODOs for Replit Agent Development
+```toml
+[agent.context]
+sessions_dir = "sessions"
+context_dir = "context"
+auto_load_sessions = true
+```
 
-- [ ] Consider adding context window management to agent chat API
-- [ ] Evaluate whether agents need persistent knowledge beyond chat history
-- [ ] Document any architectural decisions in this folder
+This is a foundation - can be enhanced with:
+- Automatic session archival
+- Session search/indexing
+- Cross-session knowledge graphs

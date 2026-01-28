@@ -156,11 +156,60 @@ Agent Studio is a web application for creating, configuring, and managing AI age
 ### Shared (`shared/`)
 - `schema.ts` - TypeScript types and Zod schemas for agents and messages
 
-### Development Context (sessions/ folder)
-- The `sessions/` folder at project root is for Replit Agent's development context
-- Contains markdown files with discussion summaries, TODOs, and decisions made during development
-- NOT related to user-created agents - this is for platform development tracking
-- Example: `sessions/context-management-todo.md` documents our discussion about context window management
+### Development Context (Buildforce-Style Session Management)
+
+This project uses a buildforce-inspired pattern for Replit Agent context persistence. This ensures the AI agent maintains context across sessions and doesn't lose important decisions or TODOs.
+
+#### Folder Structure
+```
+sessions/                          # Replit Agent development context
+├── {feature-name}-{date}.md       # Feature-specific sessions
+├── context-management-todo.md     # Example: context window discussion
+└── _index.md                      # Session index (optional)
+
+context/                           # Persistent knowledge repository
+├── architecture/                  # Architectural decisions
+├── conventions/                   # Code conventions and patterns
+└── verification/                  # Testing and validation rules
+```
+
+#### Session Workflow
+1. **Research Phase**: Gather information, analyze requirements
+2. **Plan Phase**: Define approach, break down tasks
+3. **Build Phase**: Implement features, track progress
+4. **Complete Phase**: Review, document, archive session
+
+#### Rules for Replit Agent
+1. **Always check `sessions/` folder** at start of conversation for active TODOs
+2. **Create new session file** for major features: `sessions/{feature}-{YYYY-MM-DD}.md`
+3. **Update session file** with decisions, blockers, and progress
+4. **Archive completed sessions** by moving to `sessions/archive/` or marking as complete
+5. **Persist important context** to `context/` folder for long-term reference
+6. **Reference `replit.md`** for project state and user preferences
+
+#### Session File Template
+```markdown
+# {Feature Name} Session
+**Date**: {date}
+**Status**: research | planning | building | complete
+
+## Objective
+{What we're trying to accomplish}
+
+## Decisions Made
+- {Decision 1}
+- {Decision 2}
+
+## TODOs
+- [ ] {Pending task}
+- [x] {Completed task}
+
+## Notes
+{Important context, blockers, references}
+```
+
+#### Integration with .replit
+The buildforce workflow can be initialized in `.replit` config under `[agent]` section for automatic context loading.
 
 ## Design System
 - **Primary Color**: Purple (#8B5CF6)
