@@ -56,6 +56,15 @@ function buildDomainKnowledgeSection(context: PromptContext): string {
   return section;
 }
 
+// Helper to strip markdown code block markers from content
+function stripCodeBlocks(content: string): string {
+  // Remove opening code blocks like ```json, ```csv, ``` etc.
+  let cleaned = content.replace(/^```(?:json|csv|text|)?\s*\n?/gi, '');
+  // Remove closing code blocks
+  cleaned = cleaned.replace(/\n?```\s*$/gi, '');
+  return cleaned.trim();
+}
+
 function buildSampleDataSection(context: PromptContext): string {
   if (!context.sampleDatasets || context.sampleDatasets.length === 0) {
     return "";
@@ -68,9 +77,11 @@ function buildSampleDataSection(context: PromptContext): string {
     const remainingBudget = MAX_SAMPLE_DATA_CHARS - totalChars;
     if (remainingBudget <= 0) break;
     
+    // Strip code block markers from the content
+    const cleanedContent = stripCodeBlocks(dataset.content);
     const maxDataChars = Math.min(MAX_DOC_PREVIEW_CHARS, remainingBudget);
-    const truncatedContent = dataset.content.slice(0, maxDataChars);
-    const suffix = dataset.content.length > maxDataChars ? "\n[Data truncated...]" : "";
+    const truncatedContent = cleanedContent.slice(0, maxDataChars);
+    const suffix = cleanedContent.length > maxDataChars ? "\n[Data truncated...]" : "";
     
     section += `\n--- ${dataset.name} (${dataset.format.toUpperCase()}) ---\n${truncatedContent}${suffix}\n`;
     totalChars += truncatedContent.length + dataset.name.length + 30;
@@ -115,10 +126,12 @@ ${sampleData}
 
 CRITICAL INSTRUCTIONS FOR DATA ACCESS:
 - You HAVE ACCESS to the user's personal data shown above
-- When the user asks about their pay, salary, deductions, or any personal records, look up the answer in the data above and respond with the ACTUAL VALUES
+- When the user asks about their pay, salary, deductions, or any personal records, ANALYZE the data above and respond with a clear, helpful answer
 - DO NOT say you don't have access to their information - you DO have it above
 - DO NOT generate code or tool calls - just read the data and provide the answer in plain English
-- Respond naturally with the specific numbers and dates from the data
+- NEVER output raw JSON or data dumps - always provide human-readable explanations and summaries
+- Respond naturally with specific numbers, dates, and insights from the data
+- If the user asks about changes over time (like pay increases), compare the relevant records and explain what changed
 </data>`;
   }
 
@@ -183,10 +196,12 @@ ${sampleData}
 
 **CRITICAL INSTRUCTIONS FOR DATA ACCESS:**
 - You HAVE ACCESS to the user's personal data shown above
-- When the user asks about their pay, salary, deductions, or any personal records, look up the answer in the data above and respond with the ACTUAL VALUES
+- When the user asks about their pay, salary, deductions, or any personal records, ANALYZE the data above and respond with a clear, helpful answer
 - DO NOT say you don't have access to their information - you DO have it above
 - DO NOT generate code or tool calls - just read the data and provide the answer in plain English
-- Respond naturally with the specific numbers and dates from the data`;
+- **NEVER output raw JSON, code blocks, or data dumps** - always provide human-readable explanations and summaries
+- Respond naturally with specific numbers, dates, and insights from the data
+- If the user asks about changes over time (like pay increases), compare the relevant records and explain what changed`;
   }
 
   if (context.validationRules) {
@@ -252,10 +267,12 @@ ${sampleData}
 
 **CRITICAL INSTRUCTIONS FOR DATA ACCESS:**
 - You HAVE ACCESS to the user's personal data shown above
-- When the user asks about their pay, salary, deductions, or any personal records, look up the answer in the data above and respond with the ACTUAL VALUES
+- When the user asks about their pay, salary, deductions, or any personal records, ANALYZE the data above and respond with a clear, helpful answer
 - DO NOT say you don't have access to their information - you DO have it above
 - DO NOT generate code or tool calls - just read the data and provide the answer in plain English
-- Respond naturally with the specific numbers and dates from the data`;
+- **NEVER output raw JSON, code blocks, or data dumps** - always provide human-readable explanations and summaries
+- Respond naturally with specific numbers, dates, and insights from the data
+- If the user asks about changes over time (like pay increases), compare the relevant records and explain what changed`;
   }
 
   if (context.validationRules) {

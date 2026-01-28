@@ -1483,11 +1483,11 @@ export default function SettingsPage() {
                     <p className="text-xs text-muted-foreground">Prompt Style</p>
                   </div>
                   <div className="p-2 rounded-lg bg-muted/50 text-center">
-                    <p className="text-lg font-semibold" data-testid="text-agent-status">
+                    <div className="text-lg font-semibold" data-testid="text-agent-status">
                       <Badge variant={agent.status === 'active' ? 'default' : agent.status === 'configured' ? 'secondary' : 'outline'}>
                         {agent.status}
                       </Badge>
-                    </p>
+                    </div>
                     <p className="text-xs text-muted-foreground">Status</p>
                   </div>
                 </div>

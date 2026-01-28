@@ -122,6 +122,15 @@ function buildDomainKnowledgeText(agent: AgentContext): string {
   return section;
 }
 
+// Helper to strip markdown code block markers from content
+function stripCodeBlocks(content: string): string {
+  // Remove opening code blocks like ```json, ```csv, ``` etc.
+  let cleaned = content.replace(/^```(?:json|csv|text|)?\s*\n?/gi, '');
+  // Remove closing code blocks
+  cleaned = cleaned.replace(/\n?```\s*$/gi, '');
+  return cleaned.trim();
+}
+
 // Build sample datasets section
 function buildSampleDatasetsText(agent: AgentContext): string {
   if (!agent.sampleDatasets || agent.sampleDatasets.length === 0) {
@@ -130,7 +139,9 @@ function buildSampleDatasetsText(agent: AgentContext): string {
   
   let section = "User Data Records:\n";
   for (const dataset of agent.sampleDatasets) {
-    section += `\n--- ${dataset.name} (${dataset.format.toUpperCase()}) ---\n${dataset.content}\n`;
+    // Strip code block markers from the content
+    const cleanedContent = stripCodeBlocks(dataset.content);
+    section += `\n--- ${dataset.name} (${dataset.format.toUpperCase()}) ---\n${cleanedContent}\n`;
   }
   return section;
 }
