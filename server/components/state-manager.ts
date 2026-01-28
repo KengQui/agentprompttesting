@@ -35,10 +35,34 @@ export class StateManager {
       completedSteps: [],
       answers: {},
       awaitingConfirmation: false,
+      flowComplete: false,
       ...initialState
     };
     this.states.set(conversationId, state);
     return state;
+  }
+
+  setOriginalIntent(conversationId: string, intent: string): ConversationState | undefined {
+    const state = this.states.get(conversationId);
+    if (!state) return undefined;
+    if (!state.originalIntent) {
+      const updated = { ...state, originalIntent: intent };
+      this.states.set(conversationId, updated);
+      return updated;
+    }
+    return state;
+  }
+
+  getOriginalIntent(conversationId: string): string | undefined {
+    return this.states.get(conversationId)?.originalIntent;
+  }
+
+  markFlowComplete(conversationId: string): ConversationState | undefined {
+    return this.updateState(conversationId, { flowComplete: true });
+  }
+
+  isFlowComplete(conversationId: string): boolean {
+    return this.states.get(conversationId)?.flowComplete ?? false;
   }
 
   getState(conversationId: string): ConversationState | undefined {

@@ -8,30 +8,23 @@
 import { 
   Orchestrator as BaseOrchestrator
 } from '../../../server/components/orchestrator';
-import { 1Payrollemployeetest1TurnManager } from './turn-manager';
-import { 1Payrollemployeetest1FlowController } from './flow-controller';
+import { PayrollEmployeeTest1TurnManager } from './turn-manager';
+import { PayrollEmployeeTest1FlowController } from './flow-controller';
 import type { ClassificationResult, TurnResult, AgentConfig } from '../../../server/components/types';
 
-export class 1Payrollemployeetest1Orchestrator extends BaseOrchestrator {
+export class PayrollEmployeeTest1Orchestrator extends BaseOrchestrator {
   constructor(agentConfig: AgentConfig) {
     super({
       agentConfig,
       flowController: {
-        steps: [
-          {
-            id: 'greeting',
-            question: "What can I help you with today?",
-            field: 'initial_request',
-            type: 'text'
-          }
-        ],
-        welcomeMessage: `Hello! I'm ${agentConfig.name}. ${agentConfig.businessUseCase}`,
+        steps: [],
+        welcomeMessage: `Hello! I'm ${agentConfig.name}. How can I help you today?`,
         completionMessage: "Thanks for chatting! Let me know if you need anything else."
       }
     });
 
-    this.turnManager = new 1Payrollemployeetest1TurnManager();
-    this.flowController = new 1Payrollemployeetest1FlowController();
+    this.turnManager = new PayrollEmployeeTest1TurnManager();
+    this.flowController = new PayrollEmployeeTest1FlowController();
   }
 
   protected async handleAnswerQuestion(
@@ -47,6 +40,6 @@ export class 1Payrollemployeetest1Orchestrator extends BaseOrchestrator {
   }
 }
 
-export function createOrchestrator(agentConfig: AgentConfig): 1Payrollemployeetest1Orchestrator {
-  return new 1Payrollemployeetest1Orchestrator(agentConfig);
+export function createOrchestrator(agentConfig: AgentConfig): PayrollEmployeeTest1Orchestrator {
+  return new PayrollEmployeeTest1Orchestrator(agentConfig);
 }

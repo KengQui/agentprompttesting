@@ -4,6 +4,6 @@
  * Custom components for this agent.
  */
 
-export { 1Payrollemployeetest1TurnManager, createTurnManager } from './turn-manager';
-export { 1Payrollemployeetest1FlowController, createFlowController } from './flow-controller';
-export { 1Payrollemployeetest1Orchestrator, createOrchestrator } from './orchestrator';
+export { PayrollEmployeeTest1TurnManager, createTurnManager } from './turn-manager';
+export { PayrollEmployeeTest1FlowController, createFlowController } from './flow-controller';
+export { PayrollEmployeeTest1Orchestrator, createOrchestrator } from './orchestrator';

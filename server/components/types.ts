@@ -56,6 +56,8 @@ export interface ConversationState {
   pendingSuggestion?: string;
   lastQuestion?: string;
   lastAnswer?: string;
+  originalIntent?: string;
+  flowComplete?: boolean;
 }
 
 export interface TurnResult {

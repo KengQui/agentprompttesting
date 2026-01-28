@@ -11,28 +11,20 @@ import {
   FlowStep 
 } from '../../../server/components/flow-controller';
 
-const STEPS: FlowStep[] = [
-  {
-    id: 'greeting',
-    question: "What can I help you with today?",
-    field: 'initial_request',
-    type: 'text',
-    helpText: 'Describe your question or issue.'
-  }
-];
+const STEPS: FlowStep[] = [];
 
 const CONFIG: FlowControllerConfig = {
   steps: STEPS,
-  welcomeMessage: "Hello! I'm here to help. What can I do for you?",
+  welcomeMessage: "Hello! I'm here to help with your payroll questions. What can I do for you?",
   completionMessage: "Thanks for chatting! Let me know if you need anything else."
 };
 
-export class 1Payrollemployeetest1FlowController extends BaseFlowController {
+export class PayrollEmployeeTest1FlowController extends BaseFlowController {
   constructor() {
     super(CONFIG);
   }
 }
 
-export function createFlowController(): 1Payrollemployeetest1FlowController {
-  return new 1Payrollemployeetest1FlowController();
+export function createFlowController(): PayrollEmployeeTest1FlowController {
+  return new PayrollEmployeeTest1FlowController();
 }

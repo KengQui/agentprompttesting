@@ -1,44 +1,16 @@
 [
   {
-    "id": "e09006da-0f6a-4a17-98bf-2f9f7026fa80",
-    "agentId": "7b2c2c01-3192-44d5-be33-f1f6de022578",
-    "role": "user",
-    "content": "hi",
-    "timestamp": "2026-01-28T00:15:24.479Z"
-  },
-  {
-    "id": "de6263c0-cc34-410f-bd5b-c7e63b6b357d",
-    "agentId": "7b2c2c01-3192-44d5-be33-f1f6de022578",
-    "role": "assistant",
-    "content": "Great! We've collected all the information needed. Thank you!",
-    "timestamp": "2026-01-28T00:15:24.496Z"
-  },
-  {
-    "id": "fda1e02d-7b62-4bd1-9f53-b4954488f2f7",
-    "agentId": "7b2c2c01-3192-44d5-be33-f1f6de022578",
-    "role": "user",
-    "content": "what?",
-    "timestamp": "2026-01-28T00:15:31.247Z"
-  },
-  {
-    "id": "5289c9ff-315f-48f6-96ee-64435266a61c",
-    "agentId": "7b2c2c01-3192-44d5-be33-f1f6de022578",
-    "role": "assistant",
-    "content": "I'm here to help! Could you tell me more about what you'd like to know?",
-    "timestamp": "2026-01-28T00:15:31.247Z"
-  },
-  {
-    "id": "69ec4cd2-4ede-4b4a-8121-06a294037a06",
+    "id": "7a777b7d-2985-4b3c-b9ec-b5e7f0916d6c",
     "agentId": "7b2c2c01-3192-44d5-be33-f1f6de022578",
     "role": "user",
     "content": "i want to know what is my last month pay",
-    "timestamp": "2026-01-28T00:15:41.919Z"
+    "timestamp": "2026-01-28T00:24:10.526Z"
   },
   {
-    "id": "0ea9918e-0170-4d97-b858-0f5b4b4c71b0",
+    "id": "a98bd00a-fc40-4217-8eea-6017640fabcf",
     "agentId": "7b2c2c01-3192-44d5-be33-f1f6de022578",
     "role": "assistant",
-    "content": "Great! We've collected all the information needed. Thank you!",
-    "timestamp": "2026-01-28T00:15:42.808Z"
+    "content": "I do not have access to your payroll information, so I cannot provide your pay information. Please log into the payroll system to view your pay stubs.\n",
+    "timestamp": "2026-01-28T00:24:12.135Z"
   }
 ]

@@ -35,12 +35,12 @@ const CONFIG: TurnManagerConfig = {
   ]
 };
 
-export class 1Payrollemployeetest1TurnManager extends BaseTurnManager {
+export class PayrollEmployeeTest1TurnManager extends BaseTurnManager {
   constructor() {
     super(CONFIG);
   }
 }
 
-export function createTurnManager(): 1Payrollemployeetest1TurnManager {
-  return new 1Payrollemployeetest1TurnManager();
+export function createTurnManager(): PayrollEmployeeTest1TurnManager {
+  return new PayrollEmployeeTest1TurnManager();
 }

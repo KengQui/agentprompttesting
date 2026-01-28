@@ -30,17 +30,20 @@ export interface FlowControllerConfig {
   steps?: FlowStep[];
   welcomeMessage?: string;
   completionMessage?: string;
+  fulfillmentMessage?: string;
 }
 
 export class FlowController {
   private steps: FlowStep[];
   private welcomeMessage: string;
   private completionMessage: string;
+  private fulfillmentMessage: string;
 
   constructor(config: FlowControllerConfig = {}) {
     this.steps = config.steps ?? [];
     this.welcomeMessage = config.welcomeMessage ?? "Hello! I'm here to help you. Let's get started.";
     this.completionMessage = config.completionMessage ?? "Great! We've collected all the information needed. Thank you!";
+    this.fulfillmentMessage = config.fulfillmentMessage ?? "";
   }
 
   getSteps(): FlowStep[] {
@@ -118,6 +121,32 @@ export class FlowController {
 
   getCompletionMessage(): string {
     return this.completionMessage;
+  }
+
+  getFulfillmentMessage(): string {
+    return this.fulfillmentMessage;
+  }
+
+  hasFulfillment(): boolean {
+    return this.fulfillmentMessage.length > 0;
+  }
+
+  generateFulfillmentResponse(state: ConversationState, originalIntent?: string): string {
+    if (!this.fulfillmentMessage) {
+      return this.completionMessage + '\n\n' + this.getSummary(state);
+    }
+
+    let response = this.fulfillmentMessage;
+    
+    for (const [field, value] of Object.entries(state.answers)) {
+      response = response.replace(new RegExp(`\\{${field}\\}`, 'g'), String(value));
+    }
+    
+    if (originalIntent) {
+      response = response.replace(/\{originalIntent\}/g, originalIntent);
+    }
+    
+    return response;
   }
 
   validateAnswer(step: FlowStep, value: any): boolean {

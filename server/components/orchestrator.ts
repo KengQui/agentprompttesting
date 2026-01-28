@@ -77,6 +77,9 @@ export class Orchestrator {
     const currentStep = this.flowController.getStep(state.currentStep);
 
     if (!currentStep) {
+      if (this.stateManager.isFlowComplete(conversationId)) {
+        return this.handleFulfillment(conversationId, userInput);
+      }
       return {
         intent: 'answer_question',
         response: this.flowController.getCompletionMessage()
@@ -107,9 +110,46 @@ export class Orchestrator {
       };
     }
 
+    this.stateManager.markFlowComplete(conversationId);
+    
+    const originalIntent = this.stateManager.getOriginalIntent(conversationId);
+    
+    if (this.flowController.hasFulfillment()) {
+      const fulfillmentResponse = this.flowController.generateFulfillmentResponse(updatedState, originalIntent);
+      return {
+        intent: 'answer_question',
+        response: fulfillmentResponse
+      };
+    }
+    
     return {
       intent: 'answer_question',
-      response: this.flowController.getCompletionMessage() + '\n\n' + this.flowController.getSummary(updatedState)
+      response: originalIntent || userInput,
+      nextAction: 'generate_ai_response'
+    };
+  }
+
+  protected async handleFulfillment(conversationId: string, userInput: string): Promise<TurnResult> {
+    const state = this.stateManager.getState(conversationId);
+    if (!state) {
+      return {
+        intent: 'answer_question',
+        response: "I'm sorry, I couldn't find your conversation. Please start again."
+      };
+    }
+
+    if (this.flowController.hasFulfillment()) {
+      const fulfillmentResponse = this.flowController.generateFulfillmentResponse(state, state.originalIntent);
+      return {
+        intent: 'answer_question',
+        response: fulfillmentResponse
+      };
+    }
+    
+    return {
+      intent: 'answer_question',
+      response: userInput,
+      nextAction: 'generate_ai_response'
     };
   }
 
@@ -179,7 +219,8 @@ export class Orchestrator {
 
   protected async handleRequestClarification(
     conversationId: string, 
-    classification: ClassificationResult
+    classification: ClassificationResult,
+    userInput: string
   ): Promise<TurnResult> {
     const state = this.stateManager.getOrCreateState(conversationId);
     const currentStep = this.flowController.getStep(state.currentStep);
@@ -195,9 +236,18 @@ export class Orchestrator {
       };
     }
 
+    if (this.stateManager.isFlowComplete(conversationId)) {
+      return {
+        intent: 'request_clarification',
+        response: userInput,
+        nextAction: 'generate_ai_response'
+      };
+    }
+
     return {
       intent: 'request_clarification',
-      response: "I'm here to help! Could you tell me more about what you'd like to know?"
+      response: userInput,
+      nextAction: 'generate_ai_response'
     };
   }
 
@@ -221,9 +271,17 @@ export class Orchestrator {
     };
   }
 
-  protected async handleUnclear(conversationId: string): Promise<TurnResult> {
+  protected async handleUnclear(conversationId: string, userInput: string): Promise<TurnResult> {
     const state = this.stateManager.getOrCreateState(conversationId);
     const currentStep = this.flowController.getStep(state.currentStep);
+
+    if (this.stateManager.isFlowComplete(conversationId)) {
+      return {
+        intent: 'unclear',
+        response: userInput,
+        nextAction: 'generate_ai_response'
+      };
+    }
 
     let response = "I'm not sure I understood that. ";
     
@@ -243,6 +301,12 @@ export class Orchestrator {
 
   async processTurn(conversationId: string, userInput: string): Promise<TurnResult> {
     try {
+      const state = this.stateManager.getOrCreateState(conversationId);
+      
+      if (!state.originalIntent && userInput.trim()) {
+        this.stateManager.setOriginalIntent(conversationId, userInput.trim());
+      }
+      
       const context = this.buildContext(conversationId);
       const classification = await this.turnManager.classifyIntent(userInput, context);
 
@@ -257,7 +321,7 @@ export class Orchestrator {
           return this.handleChangePreviousAnswer(conversationId, classification, userInput);
         
         case 'request_clarification':
-          return this.handleRequestClarification(conversationId, classification);
+          return this.handleRequestClarification(conversationId, classification, userInput);
         
         case 'confirm':
           return this.handleConfirm(conversationId, classification);
@@ -268,7 +332,7 @@ export class Orchestrator {
         case 'unclear':
         case 'error':
         default:
-          return this.handleUnclear(conversationId);
+          return this.handleUnclear(conversationId, userInput);
       }
     } catch (error: any) {
       console.error('Orchestrator error:', error);
