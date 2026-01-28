@@ -26,5 +26,12 @@
     "password": "$2b$10$1N1Qfh7CAjBFgpF8YO67B./mwM2Rvdlyn0bayvUsf1TzWTSVmQm/.",
     "phone": "555-123-4567",
     "createdAt": "2026-01-28T12:41:51.179Z"
+  },
+  {
+    "id": "22e95869-718c-428a-a9ae-a4694723ac19",
+    "username": "kengqui.chia@ukg.com",
+    "password": "$2b$10$LIhh/mlEyNoOf52BRsAgl.9Jsg1vyHcwWy.x13QiPF3cMKyqMd9ty",
+    "phone": "4447776111",
+    "createdAt": "2026-01-28T13:21:05.208Z"
   }
 ]

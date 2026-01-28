@@ -126,5 +126,21 @@
     "role": "assistant",
     "content": "I'm ready. What do you need?\n",
     "timestamp": "2026-01-28T10:44:03.502Z"
+  },
+  {
+    "id": "76738a12-134b-4247-af9d-488412fe97ce",
+    "agentId": "cc4add53-14b3-4383-9d03-71ae7d82f0de",
+    "sessionId": "75f50ba6-7e8e-44c9-91e3-95e29033d93f",
+    "role": "user",
+    "content": "test",
+    "timestamp": "2026-01-28T13:24:54.314Z"
+  },
+  {
+    "id": "89f08f6d-d0b1-4606-8275-8dd288c6de80",
+    "agentId": "cc4add53-14b3-4383-9d03-71ae7d82f0de",
+    "sessionId": "75f50ba6-7e8e-44c9-91e3-95e29033d93f",
+    "role": "assistant",
+    "content": "Acknowledged. Test complete. Anything else?\n",
+    "timestamp": "2026-01-28T13:24:54.823Z"
   }
 ]
