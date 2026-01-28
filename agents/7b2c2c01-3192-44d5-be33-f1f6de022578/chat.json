@@ -166,5 +166,19 @@
     "role": "assistant",
     "content": "Hi John, I can help you with any questions you have about your paycheck, including explaining specific line items, guiding you on how to take certain actions related to your pay (like updating your W-4), and answering general questions related to your pay.\n",
     "timestamp": "2026-01-28T08:52:02.596Z"
+  },
+  {
+    "id": "c20b9982-7dac-4cb2-8922-d95a402ab1dd",
+    "agentId": "7b2c2c01-3192-44d5-be33-f1f6de022578",
+    "role": "user",
+    "content": "Hello!",
+    "timestamp": "2026-01-28T09:00:13.281Z"
+  },
+  {
+    "id": "c7143c50-5a69-44b4-823e-006d9e00e4a8",
+    "agentId": "7b2c2c01-3192-44d5-be33-f1f6de022578",
+    "role": "assistant",
+    "content": "Hi there! How can I help you with your paycheck questions today?\n",
+    "timestamp": "2026-01-28T09:00:13.905Z"
   }
 ]

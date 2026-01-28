@@ -127,7 +127,6 @@ export async function registerRoutes(
   });
 
   // Send a message to an agent with Turn Manager + Gemini AI response
-  // Now uses session-based context window management
   app.post("/api/agents/:id/messages", async (req, res) => {
     try {
       const agent = await storage.getAgent(req.params.id);
@@ -145,39 +144,19 @@ export async function registerRoutes(
 
       const userInput = parsed.data.content;
 
-      // Get or create active session for context management
-      const { createSessionManager } = await import("./components/session-manager");
-      const sessionManager = createSessionManager(req.params.id);
-      const session = await sessionManager.getOrCreateActiveSession();
-
-      // Add user message to session (with token counting)
-      await sessionManager.addMessage(session.meta.id, "user", userInput);
-
-      // Also add to legacy storage for backward compatibility
+      // Add user message
       const userMessage = await storage.addMessage({
         agentId: req.params.id,
         role: "user",
         content: userInput,
       });
 
-      // Get session context (sliding window + summaries) instead of full history
-      const sessionContext = await sessionManager.getContextForLLM(session.meta.id);
-      
-      // Build chat history from session context (recent messages only)
-      const chatHistory = sessionContext.recentMessages.map((msg) => ({
+      // Get chat history for context
+      const allMessages = await storage.getMessages(req.params.id);
+      const chatHistory = allMessages.slice(0, -1).map((msg) => ({
         role: msg.role as "user" | "assistant",
         content: msg.content,
       }));
-
-      // Prepend summarized context if available
-      let contextPrefix = "";
-      if (sessionContext.summarizedContext) {
-        contextPrefix = `[Previous conversation summary: ${sessionContext.summarizedContext}]\n\n`;
-      }
-      if (sessionContext.activeTodos.length > 0) {
-        const todosText = sessionContext.activeTodos.map(t => `- ${t.content} (${t.priority})`).join("\n");
-        contextPrefix += `[Active tasks:\n${todosText}]\n\n`;
-      }
 
       // Load agent components (orchestrator with turn manager)
       const agentConfig = {
@@ -205,21 +184,21 @@ export async function registerRoutes(
           if (turnResult.nextAction !== 'generate_ai_response') {
             responseContent = turnResult.response;
           } else {
-            // Pass to Gemini with intent context and session context for better response generation
+            // Pass to Gemini with intent context for better response generation
             const intentPrefix = turnResult.intent !== 'answer_question' 
               ? `[The user's intent appears to be: ${turnResult.intent}. Please respond accordingly.]\n\n`
               : '';
             responseContent = await generateAgentResponse(
               agentConfig,
-              contextPrefix + intentPrefix + userInput,
+              intentPrefix + userInput,
               chatHistory
             );
           }
         } else {
-          // No custom components, use standard Gemini response with session context
+          // No custom components, use standard Gemini response
           responseContent = await generateAgentResponse(
             agentConfig,
-            contextPrefix + userInput,
+            userInput,
             chatHistory
           );
         }
@@ -228,10 +207,7 @@ export async function registerRoutes(
         responseContent = `I apologize, but I'm having trouble generating a response. ${aiError.message?.includes("GEMINI_API_KEY") ? "The Gemini API key may not be configured correctly." : "Please try again."}`;
       }
 
-      // Add assistant message to session
-      await sessionManager.addMessage(session.meta.id, "assistant", responseContent);
-
-      // Also add to legacy storage for backward compatibility
+      // Add assistant message
       const assistantMessage = await storage.addMessage({
         agentId: req.params.id,
         role: "assistant",
@@ -273,224 +249,6 @@ export async function registerRoutes(
       res.status(500).json({ message: "Failed to check components" });
     }
   });
-
-  // ============ SESSION MANAGEMENT ROUTES ============
-
-  // Get all sessions for an agent
-  app.get("/api/agents/:id/sessions", async (req, res) => {
-    try {
-      const agent = await storage.getAgent(req.params.id);
-      if (!agent) {
-        return res.status(404).json({ message: "Agent not found" });
-      }
-      const { createSessionManager } = await import("./components/session-manager");
-      const sessionManager = createSessionManager(req.params.id);
-      const sessions = await sessionManager.listSessions();
-      res.json(sessions);
-    } catch (error) {
-      console.error("Error fetching sessions:", error);
-      res.status(500).json({ message: "Failed to fetch sessions" });
-    }
-  });
-
-  // Get or create active session for an agent
-  app.get("/api/agents/:id/sessions/active", async (req, res) => {
-    try {
-      const agent = await storage.getAgent(req.params.id);
-      if (!agent) {
-        return res.status(404).json({ message: "Agent not found" });
-      }
-      const { createSessionManager } = await import("./components/session-manager");
-      const sessionManager = createSessionManager(req.params.id);
-      const session = await sessionManager.getOrCreateActiveSession();
-      res.json(session);
-    } catch (error) {
-      console.error("Error getting active session:", error);
-      res.status(500).json({ message: "Failed to get active session" });
-    }
-  });
-
-  // Create a new session
-  app.post("/api/agents/:id/sessions", async (req, res) => {
-    try {
-      const agent = await storage.getAgent(req.params.id);
-      if (!agent) {
-        return res.status(404).json({ message: "Agent not found" });
-      }
-      const { createSessionManager } = await import("./components/session-manager");
-      const sessionManager = createSessionManager(req.params.id);
-      const name = req.body.name;
-      const session = await sessionManager.createSession(name);
-      res.json(session);
-    } catch (error) {
-      console.error("Error creating session:", error);
-      res.status(500).json({ message: "Failed to create session" });
-    }
-  });
-
-  // Get a specific session
-  app.get("/api/agents/:agentId/sessions/:sessionId", async (req, res) => {
-    try {
-      const agent = await storage.getAgent(req.params.agentId);
-      if (!agent) {
-        return res.status(404).json({ message: "Agent not found" });
-      }
-      const { createSessionManager } = await import("./components/session-manager");
-      const sessionManager = createSessionManager(req.params.agentId);
-      const session = await sessionManager.loadSession(req.params.sessionId);
-      if (!session) {
-        return res.status(404).json({ message: "Session not found" });
-      }
-      res.json(session);
-    } catch (error) {
-      console.error("Error fetching session:", error);
-      res.status(500).json({ message: "Failed to fetch session" });
-    }
-  });
-
-  // Get context for LLM (sliding window + summaries)
-  app.get("/api/agents/:agentId/sessions/:sessionId/context", async (req, res) => {
-    try {
-      const agent = await storage.getAgent(req.params.agentId);
-      if (!agent) {
-        return res.status(404).json({ message: "Agent not found" });
-      }
-      const { createSessionManager } = await import("./components/session-manager");
-      const sessionManager = createSessionManager(req.params.agentId);
-      const context = await sessionManager.getContextForLLM(req.params.sessionId);
-      res.json(context);
-    } catch (error) {
-      console.error("Error fetching session context:", error);
-      res.status(500).json({ message: "Failed to fetch session context" });
-    }
-  });
-
-  // Add a message to a session
-  app.post("/api/agents/:agentId/sessions/:sessionId/messages", async (req, res) => {
-    try {
-      const agent = await storage.getAgent(req.params.agentId);
-      if (!agent) {
-        return res.status(404).json({ message: "Agent not found" });
-      }
-      const contentSchema = z.object({ 
-        role: z.enum(["user", "assistant"]),
-        content: z.string().min(1).max(2000, "Message exceeds 2000 character limit") 
-      });
-      const parsed = contentSchema.safeParse(req.body);
-      if (!parsed.success) {
-        return res.status(400).json({ message: parsed.error.errors[0]?.message || "Invalid message" });
-      }
-      const { createSessionManager } = await import("./components/session-manager");
-      const sessionManager = createSessionManager(req.params.agentId);
-      const message = await sessionManager.addMessage(
-        req.params.sessionId,
-        parsed.data.role,
-        parsed.data.content
-      );
-      res.json(message);
-    } catch (error) {
-      console.error("Error adding message:", error);
-      res.status(500).json({ message: "Failed to add message" });
-    }
-  });
-
-  // Get TODOs for a session
-  app.get("/api/agents/:agentId/sessions/:sessionId/todos", async (req, res) => {
-    try {
-      const agent = await storage.getAgent(req.params.agentId);
-      if (!agent) {
-        return res.status(404).json({ message: "Agent not found" });
-      }
-      const { createSessionManager } = await import("./components/session-manager");
-      const sessionManager = createSessionManager(req.params.agentId);
-      const todos = await sessionManager.getTodos(req.params.sessionId);
-      res.json(todos);
-    } catch (error) {
-      console.error("Error fetching todos:", error);
-      res.status(500).json({ message: "Failed to fetch todos" });
-    }
-  });
-
-  // Add a TODO to a session
-  app.post("/api/agents/:agentId/sessions/:sessionId/todos", async (req, res) => {
-    try {
-      const agent = await storage.getAgent(req.params.agentId);
-      if (!agent) {
-        return res.status(404).json({ message: "Agent not found" });
-      }
-      const todoSchema = z.object({ 
-        content: z.string().min(1),
-        priority: z.enum(["low", "medium", "high"]).optional()
-      });
-      const parsed = todoSchema.safeParse(req.body);
-      if (!parsed.success) {
-        return res.status(400).json({ message: parsed.error.errors[0]?.message || "Invalid todo" });
-      }
-      const { createSessionManager } = await import("./components/session-manager");
-      const sessionManager = createSessionManager(req.params.agentId);
-      const todo = await sessionManager.addTodo(
-        req.params.sessionId,
-        parsed.data.content,
-        parsed.data.priority
-      );
-      res.json(todo);
-    } catch (error) {
-      console.error("Error adding todo:", error);
-      res.status(500).json({ message: "Failed to add todo" });
-    }
-  });
-
-  // Update a TODO
-  app.patch("/api/agents/:agentId/sessions/:sessionId/todos/:todoId", async (req, res) => {
-    try {
-      const agent = await storage.getAgent(req.params.agentId);
-      if (!agent) {
-        return res.status(404).json({ message: "Agent not found" });
-      }
-      const todoUpdateSchema = z.object({ 
-        content: z.string().min(1).optional(),
-        status: z.enum(["pending", "in_progress", "completed", "cancelled"]).optional(),
-        priority: z.enum(["low", "medium", "high"]).optional()
-      });
-      const parsed = todoUpdateSchema.safeParse(req.body);
-      if (!parsed.success) {
-        return res.status(400).json({ message: parsed.error.errors[0]?.message || "Invalid update" });
-      }
-      const { createSessionManager } = await import("./components/session-manager");
-      const sessionManager = createSessionManager(req.params.agentId);
-      const todo = await sessionManager.updateTodo(
-        req.params.sessionId,
-        req.params.todoId,
-        parsed.data
-      );
-      if (!todo) {
-        return res.status(404).json({ message: "Todo not found" });
-      }
-      res.json(todo);
-    } catch (error) {
-      console.error("Error updating todo:", error);
-      res.status(500).json({ message: "Failed to update todo" });
-    }
-  });
-
-  // Archive a session
-  app.post("/api/agents/:agentId/sessions/:sessionId/archive", async (req, res) => {
-    try {
-      const agent = await storage.getAgent(req.params.agentId);
-      if (!agent) {
-        return res.status(404).json({ message: "Agent not found" });
-      }
-      const { createSessionManager } = await import("./components/session-manager");
-      const sessionManager = createSessionManager(req.params.agentId);
-      await sessionManager.archiveSession(req.params.sessionId);
-      res.json({ message: "Session archived" });
-    } catch (error) {
-      console.error("Error archiving session:", error);
-      res.status(500).json({ message: "Failed to archive session" });
-    }
-  });
-
-  // ============ END SESSION MANAGEMENT ROUTES ============
 
   // Upload domain knowledge document (returns parsed document)
   app.post("/api/upload-document", upload.single('file'), async (req, res) => {
