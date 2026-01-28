@@ -82,6 +82,7 @@ export default function SettingsPage() {
         guardrails: agent.guardrails,
         promptStyle: agent.promptStyle,
         customPrompt: agent.customPrompt,
+        clarifyingInsights: agent.clarifyingInsights || [],
         status: agent.status,
       });
       setEditedPrompt(agent.customPrompt || "");

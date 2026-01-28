@@ -479,6 +479,9 @@ export class MemStorage implements IStorage {
     // 8. Save sample-data.json
     writeJsonFile(getAgentFilePath(agent.id, AGENT_FILES.SAMPLE_DATA), agent.sampleDatasets || []);
 
+    // 9. Save clarifying-insights.json
+    writeJsonFile(getAgentFilePath(agent.id, "clarifying-insights.json"), agent.clarifyingInsights || []);
+
     // Clean up legacy files if they exist
     const legacyConfigPath = getAgentFilePath(agent.id, AGENT_FILES.LEGACY_CONFIG);
     const legacyDataPath = getAgentFilePath(agent.id, AGENT_FILES.LEGACY_DATA);
