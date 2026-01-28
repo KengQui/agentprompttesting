@@ -19,5 +19,12 @@
     "password": "$2b$10$niXGWpr0JPXuBIg7vlZf4eR/DDxBXXeMNYK0EvgJv.Ekz9EswuIk2",
     "phone": "0897923839",
     "createdAt": "2026-01-28T11:17:17.123Z"
+  },
+  {
+    "id": "11eed4ac-c5c4-40ec-9276-bee0b94ba4fd",
+    "username": "testuser_avCKF-",
+    "password": "$2b$10$1N1Qfh7CAjBFgpF8YO67B./mwM2Rvdlyn0bayvUsf1TzWTSVmQm/.",
+    "phone": "555-123-4567",
+    "createdAt": "2026-01-28T12:41:51.179Z"
   }
 ]

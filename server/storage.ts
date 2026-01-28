@@ -215,6 +215,7 @@ export class MemStorage implements IStorage {
     this.authSessions = new Map();
     this.loadFromDisk();
     this.loadUsersFromDisk();
+    this.loadAuthSessionsFromDisk();
   }
 
   private loadFromDisk() {
@@ -1209,6 +1210,45 @@ export class MemStorage implements IStorage {
 
   // ========== Auth Session Methods ==========
 
+  private loadAuthSessionsFromDisk() {
+    ensureDir(USERS_DIR);
+    
+    try {
+      const sessionsFile = path.join(USERS_DIR, "auth-sessions.json");
+      if (fs.existsSync(sessionsFile)) {
+        const content = fs.readFileSync(sessionsFile, "utf-8");
+        const sessions = JSON.parse(content) as AuthSession[];
+        const now = new Date();
+        let expiredCount = 0;
+        
+        for (const session of sessions) {
+          // Only load non-expired sessions
+          if (new Date(session.expiresAt) > now) {
+            this.authSessions.set(session.id, session);
+          } else {
+            expiredCount++;
+          }
+        }
+        
+        console.log(`[storage] Loaded ${this.authSessions.size} auth sessions from disk (${expiredCount} expired sessions cleaned up)`);
+        
+        // Save cleaned up sessions if any were expired
+        if (expiredCount > 0) {
+          this.saveAuthSessionsToDisk();
+        }
+      }
+    } catch (e) {
+      console.error("Failed to load auth sessions from disk:", e);
+    }
+  }
+
+  private saveAuthSessionsToDisk() {
+    ensureDir(USERS_DIR);
+    const sessionsFile = path.join(USERS_DIR, "auth-sessions.json");
+    const sessions = Array.from(this.authSessions.values());
+    fs.writeFileSync(sessionsFile, JSON.stringify(sessions, null, 2), "utf-8");
+  }
+
   async createAuthSession(userId: string): Promise<AuthSession> {
     const id = randomUUID();
     // Session expires in 7 days
@@ -1221,6 +1261,7 @@ export class MemStorage implements IStorage {
     };
 
     this.authSessions.set(id, session);
+    this.saveAuthSessionsToDisk();
     console.log(`[storage] Created auth session for user ${userId}`);
 
     return session;
@@ -1233,6 +1274,7 @@ export class MemStorage implements IStorage {
     // Check if session is expired
     if (new Date(session.expiresAt) < new Date()) {
       this.authSessions.delete(sessionId);
+      this.saveAuthSessionsToDisk();
       return undefined;
     }
 
@@ -1241,6 +1283,7 @@ export class MemStorage implements IStorage {
 
   async deleteAuthSession(sessionId: string): Promise<void> {
     this.authSessions.delete(sessionId);
+    this.saveAuthSessionsToDisk();
     console.log(`[storage] Deleted auth session ${sessionId}`);
   }
 
