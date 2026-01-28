@@ -1,7 +1,7 @@
 import { randomUUID } from "crypto";
 import * as fs from "fs";
 import * as path from "path";
-import type { Agent, InsertAgent, UpdateAgent, ChatMessage, InsertChatMessage, DomainDocument, SampleDataset, AgentStatus, PromptStyle, ClarifyingInsight, ChatSession, InsertChatSession, UpdateChatSession, ChatSessionWithPreview } from "@shared/schema";
+import type { Agent, InsertAgent, UpdateAgent, ChatMessage, InsertChatMessage, DomainDocument, SampleDataset, AgentStatus, PromptStyle, ClarifyingInsight, ChatSession, InsertChatSession, UpdateChatSession, ChatSessionWithPreview, AgentTrace, TurnTrace, ConfigSnapshot, ConfigHistory, UsageStats } from "@shared/schema";
 
 const AGENTS_DIR = "./agents";
 const COMPONENT_TEMPLATES_DIR = "./server/components";
@@ -164,6 +164,16 @@ export interface IStorage {
   getMessages(agentId: string, sessionId?: string): Promise<ChatMessage[]>;
   addMessage(message: InsertChatMessage): Promise<ChatMessage>;
   clearMessages(agentId: string, sessionId?: string): Promise<void>;
+  
+  // Tracing operations
+  getAgentTraces(agentId: string, sessionId?: string): Promise<AgentTrace | undefined>;
+  addTurnTrace(agentId: string, trace: TurnTrace): Promise<void>;
+  clearTraces(agentId: string, sessionId?: string): Promise<void>;
+  
+  // Config history operations
+  getConfigHistory(agentId: string): Promise<ConfigHistory | undefined>;
+  addConfigSnapshot(agentId: string, snapshot: Omit<ConfigSnapshot, "id" | "timestamp">): Promise<ConfigSnapshot>;
+  revertToSnapshot(agentId: string, snapshotId: string): Promise<Agent | undefined>;
 }
 
 export class MemStorage implements IStorage {
@@ -171,11 +181,15 @@ export class MemStorage implements IStorage {
   // Changed: messages are now stored per session: Map<agentId, Map<sessionId, ChatMessage[]>>
   private messages: Map<string, Map<string, ChatMessage[]>>;
   private sessions: Map<string, ChatSession[]>;
+  private traces: Map<string, AgentTrace>;
+  private configHistory: Map<string, ConfigHistory>;
 
   constructor() {
     this.agents = new Map();
     this.messages = new Map();
     this.sessions = new Map();
+    this.traces = new Map();
+    this.configHistory = new Map();
     this.loadFromDisk();
   }
 
@@ -796,6 +810,276 @@ export class MemStorage implements IStorage {
         }
       }
     }
+  }
+
+  // Tracing operations
+  private getTracesPath(agentId: string): string {
+    return getAgentFilePath(agentId, "traces.json");
+  }
+
+  private getConfigHistoryPath(agentId: string): string {
+    return getAgentFilePath(agentId, "config-history.json");
+  }
+
+  private saveTracesToDisk(agentId: string) {
+    const traces = this.traces.get(agentId);
+    if (traces) {
+      const tracesPath = this.getTracesPath(agentId);
+      writeJsonFile(tracesPath, traces);
+    }
+  }
+
+  private saveConfigHistoryToDisk(agentId: string) {
+    const history = this.configHistory.get(agentId);
+    if (history) {
+      const historyPath = this.getConfigHistoryPath(agentId);
+      writeJsonFile(historyPath, history);
+    }
+  }
+
+  private computeUsageStats(traces: TurnTrace[]): UsageStats {
+    const stats: UsageStats = {
+      hookCalls: {},
+      signalReads: {},
+      intentDistribution: {},
+      classificationMethods: {},
+      avgResponseTime: 0,
+      totalLlmCalls: 0,
+      totalTokensUsed: 0,
+      errorCount: 0,
+    };
+
+    let totalDuration = 0;
+    let durationCount = 0;
+
+    for (const trace of traces) {
+      if (trace.totalDuration) {
+        totalDuration += trace.totalDuration;
+        durationCount++;
+      }
+      if (!trace.success) {
+        stats.errorCount++;
+      }
+
+      for (const entry of trace.entries) {
+        if (entry.type === "hook_call") {
+          stats.hookCalls[entry.name] = (stats.hookCalls[entry.name] || 0) + 1;
+        }
+        if (entry.type === "signal_read") {
+          stats.signalReads[entry.name] = (stats.signalReads[entry.name] || 0) + 1;
+        }
+        if (entry.type === "intent_classification" && entry.metadata?.intent) {
+          stats.intentDistribution[entry.metadata.intent] = (stats.intentDistribution[entry.metadata.intent] || 0) + 1;
+        }
+        if (entry.type === "intent_classification" && entry.metadata?.classificationMethod) {
+          stats.classificationMethods[entry.metadata.classificationMethod] = (stats.classificationMethods[entry.metadata.classificationMethod] || 0) + 1;
+        }
+        if (entry.type === "llm_call") {
+          stats.totalLlmCalls++;
+          if (entry.metadata?.tokenCount) {
+            stats.totalTokensUsed += entry.metadata.tokenCount;
+          }
+        }
+      }
+    }
+
+    stats.avgResponseTime = durationCount > 0 ? totalDuration / durationCount : 0;
+    return stats;
+  }
+
+  async getAgentTraces(agentId: string, sessionId?: string): Promise<AgentTrace | undefined> {
+    let agentTrace = this.traces.get(agentId);
+    
+    // Load from disk if not in memory
+    if (!agentTrace) {
+      const tracesPath = this.getTracesPath(agentId);
+      if (fs.existsSync(tracesPath)) {
+        agentTrace = readJsonFile<AgentTrace>(tracesPath, undefined as any);
+        if (agentTrace) {
+          this.traces.set(agentId, agentTrace);
+        }
+      }
+    }
+
+    if (!agentTrace) {
+      return undefined;
+    }
+
+    // Filter by session if requested
+    if (sessionId) {
+      const filteredTraces = agentTrace.traces.filter(t => t.sessionId === sessionId);
+      return {
+        ...agentTrace,
+        traces: filteredTraces,
+        stats: this.computeUsageStats(filteredTraces),
+      };
+    }
+
+    return agentTrace;
+  }
+
+  async addTurnTrace(agentId: string, trace: TurnTrace): Promise<void> {
+    let agentTrace = this.traces.get(agentId);
+    const now = new Date().toISOString();
+
+    if (!agentTrace) {
+      // Load from disk or create new
+      const tracesPath = this.getTracesPath(agentId);
+      if (fs.existsSync(tracesPath)) {
+        agentTrace = readJsonFile<AgentTrace>(tracesPath, undefined as any);
+      }
+      if (!agentTrace) {
+        agentTrace = {
+          agentId,
+          traces: [],
+          stats: {
+            hookCalls: {},
+            signalReads: {},
+            intentDistribution: {},
+            classificationMethods: {},
+            avgResponseTime: 0,
+            totalLlmCalls: 0,
+            totalTokensUsed: 0,
+            errorCount: 0,
+          },
+          createdAt: now,
+          updatedAt: now,
+        };
+      }
+    }
+
+    agentTrace.traces.push(trace);
+    agentTrace.stats = this.computeUsageStats(agentTrace.traces);
+    agentTrace.updatedAt = now;
+
+    // Keep only last 100 traces to prevent unbounded growth
+    if (agentTrace.traces.length > 100) {
+      agentTrace.traces = agentTrace.traces.slice(-100);
+    }
+
+    this.traces.set(agentId, agentTrace);
+    this.saveTracesToDisk(agentId);
+  }
+
+  async clearTraces(agentId: string, sessionId?: string): Promise<void> {
+    const agentTrace = this.traces.get(agentId);
+    if (!agentTrace) return;
+
+    if (sessionId) {
+      agentTrace.traces = agentTrace.traces.filter(t => t.sessionId !== sessionId);
+      agentTrace.stats = this.computeUsageStats(agentTrace.traces);
+    } else {
+      agentTrace.traces = [];
+      agentTrace.stats = {
+        hookCalls: {},
+        signalReads: {},
+        intentDistribution: {},
+        classificationMethods: {},
+        avgResponseTime: 0,
+        totalLlmCalls: 0,
+        totalTokensUsed: 0,
+        errorCount: 0,
+      };
+    }
+
+    agentTrace.updatedAt = new Date().toISOString();
+    this.traces.set(agentId, agentTrace);
+    this.saveTracesToDisk(agentId);
+  }
+
+  // Config history operations
+  async getConfigHistory(agentId: string): Promise<ConfigHistory | undefined> {
+    let history = this.configHistory.get(agentId);
+    
+    // Load from disk if not in memory
+    if (!history) {
+      const historyPath = this.getConfigHistoryPath(agentId);
+      if (fs.existsSync(historyPath)) {
+        history = readJsonFile<ConfigHistory>(historyPath, undefined as any);
+        if (history) {
+          this.configHistory.set(agentId, history);
+        }
+      }
+    }
+
+    return history;
+  }
+
+  async addConfigSnapshot(agentId: string, snapshot: Omit<ConfigSnapshot, "id" | "timestamp">): Promise<ConfigSnapshot> {
+    let history = this.configHistory.get(agentId);
+    
+    if (!history) {
+      const historyPath = this.getConfigHistoryPath(agentId);
+      if (fs.existsSync(historyPath)) {
+        history = readJsonFile<ConfigHistory>(historyPath, undefined as any);
+      }
+      if (!history) {
+        history = {
+          agentId,
+          snapshots: [],
+          currentVersion: 0,
+        };
+      }
+    }
+
+    const newSnapshot: ConfigSnapshot = {
+      ...snapshot,
+      id: randomUUID(),
+      timestamp: new Date().toISOString(),
+    };
+
+    history.snapshots.push(newSnapshot);
+    history.currentVersion = history.snapshots.length;
+
+    // Keep only last 50 snapshots
+    if (history.snapshots.length > 50) {
+      history.snapshots = history.snapshots.slice(-50);
+    }
+
+    this.configHistory.set(agentId, history);
+    this.saveConfigHistoryToDisk(agentId);
+
+    return newSnapshot;
+  }
+
+  async revertToSnapshot(agentId: string, snapshotId: string): Promise<Agent | undefined> {
+    const history = await this.getConfigHistory(agentId);
+    if (!history) return undefined;
+
+    const snapshot = history.snapshots.find(s => s.id === snapshotId);
+    if (!snapshot) return undefined;
+
+    const agent = this.agents.get(agentId);
+    if (!agent) return undefined;
+
+    // Create a snapshot of current state before reverting
+    await this.addConfigSnapshot(agentId, {
+      agentId,
+      description: `Auto-save before revert to ${snapshot.description || 'previous version'}`,
+      changes: [],
+      config: {
+        name: agent.name,
+        businessUseCase: agent.businessUseCase,
+        domainKnowledge: agent.domainKnowledge,
+        validationRules: agent.validationRules,
+        guardrails: agent.guardrails,
+        promptStyle: agent.promptStyle,
+        customPrompt: agent.customPrompt,
+      },
+      isRevertPoint: false,
+    });
+
+    // Apply the snapshot config
+    const updates: UpdateAgent = {};
+    if (snapshot.config.name) updates.name = snapshot.config.name;
+    if (snapshot.config.businessUseCase) updates.businessUseCase = snapshot.config.businessUseCase;
+    if (snapshot.config.domainKnowledge !== undefined) updates.domainKnowledge = snapshot.config.domainKnowledge;
+    if (snapshot.config.validationRules !== undefined) updates.validationRules = snapshot.config.validationRules;
+    if (snapshot.config.guardrails !== undefined) updates.guardrails = snapshot.config.guardrails;
+    if (snapshot.config.promptStyle) updates.promptStyle = snapshot.config.promptStyle;
+    if (snapshot.config.customPrompt !== undefined) updates.customPrompt = snapshot.config.customPrompt;
+
+    return this.updateAgent(agentId, updates);
   }
 }
 

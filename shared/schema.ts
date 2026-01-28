@@ -280,3 +280,148 @@ export const sessionConfigSchema = z.object({
 });
 
 export type SessionConfig = z.infer<typeof sessionConfigSchema>;
+
+// === Agent Tracing & Debugging Schemas ===
+
+// Trace entry type enum
+export const traceEntryTypeEnum = z.enum([
+  "hook_call",
+  "signal_read",
+  "context_build",
+  "intent_classification",
+  "llm_call",
+  "state_change",
+  "validation",
+  "guardrail_check",
+  "flow_step",
+  "error",
+]);
+export type TraceEntryType = z.infer<typeof traceEntryTypeEnum>;
+
+// Individual trace entry for a single hook/signal/action
+export const traceEntrySchema = z.object({
+  id: z.string(),
+  type: traceEntryTypeEnum,
+  name: z.string(),
+  timestamp: z.string(),
+  duration: z.number().optional(),
+  input: z.record(z.any()).optional(),
+  output: z.record(z.any()).optional(),
+  metadata: z.object({
+    classificationMethod: z.string().optional(),
+    confidence: z.string().optional(),
+    intent: z.string().optional(),
+    keywords: z.array(z.string()).optional(),
+    tokenCount: z.number().optional(),
+    model: z.string().optional(),
+    stepId: z.string().optional(),
+    previousStep: z.string().optional(),
+    errorMessage: z.string().optional(),
+  }).optional(),
+});
+
+export type TraceEntry = z.infer<typeof traceEntrySchema>;
+
+// Aggregated usage statistics for hooks/signals
+export const usageStatsSchema = z.object({
+  hookCalls: z.record(z.number()).default({}),
+  signalReads: z.record(z.number()).default({}),
+  intentDistribution: z.record(z.number()).default({}),
+  classificationMethods: z.record(z.number()).default({}),
+  avgResponseTime: z.number().default(0),
+  totalLlmCalls: z.number().default(0),
+  totalTokensUsed: z.number().default(0),
+  errorCount: z.number().default(0),
+});
+
+export type UsageStats = z.infer<typeof usageStatsSchema>;
+
+// Full trace for a conversation turn
+export const turnTraceSchema = z.object({
+  id: z.string(),
+  sessionId: z.string(),
+  messageId: z.string().optional(),
+  userInput: z.string(),
+  agentResponse: z.string().optional(),
+  entries: z.array(traceEntrySchema).default([]),
+  startTime: z.string(),
+  endTime: z.string().optional(),
+  totalDuration: z.number().optional(),
+  success: z.boolean().default(true),
+});
+
+export type TurnTrace = z.infer<typeof turnTraceSchema>;
+
+// Agent trace collection for a session or agent
+export const agentTraceSchema = z.object({
+  agentId: z.string(),
+  sessionId: z.string().optional(),
+  traces: z.array(turnTraceSchema).default([]),
+  stats: usageStatsSchema.default({}),
+  createdAt: z.string(),
+  updatedAt: z.string(),
+});
+
+export type AgentTrace = z.infer<typeof agentTraceSchema>;
+
+// Config snapshot for change history
+export const configSnapshotSchema = z.object({
+  id: z.string(),
+  agentId: z.string(),
+  timestamp: z.string(),
+  description: z.string().optional(),
+  changes: z.array(z.object({
+    field: z.string(),
+    oldValue: z.any(),
+    newValue: z.any(),
+  })).default([]),
+  config: z.object({
+    name: z.string().optional(),
+    businessUseCase: z.string().optional(),
+    domainKnowledge: z.string().optional(),
+    validationRules: z.string().optional(),
+    guardrails: z.string().optional(),
+    promptStyle: promptStyleEnum.optional(),
+    customPrompt: z.string().optional(),
+  }),
+  isRevertPoint: z.boolean().default(false),
+});
+
+export type ConfigSnapshot = z.infer<typeof configSnapshotSchema>;
+
+// Config history for an agent
+export const configHistorySchema = z.object({
+  agentId: z.string(),
+  snapshots: z.array(configSnapshotSchema).default([]),
+  currentVersion: z.number().default(0),
+});
+
+export type ConfigHistory = z.infer<typeof configHistorySchema>;
+
+// Simulation request/result for testing config changes
+export const simulationRequestSchema = z.object({
+  agentId: z.string(),
+  testMessage: z.string(),
+  configOverrides: z.object({
+    validationRules: z.string().optional(),
+    guardrails: z.string().optional(),
+    customPrompt: z.string().optional(),
+  }),
+});
+
+export type SimulationRequest = z.infer<typeof simulationRequestSchema>;
+
+export const simulationResultSchema = z.object({
+  originalResponse: z.string(),
+  simulatedResponse: z.string(),
+  originalTrace: turnTraceSchema.optional(),
+  simulatedTrace: turnTraceSchema.optional(),
+  differences: z.array(z.object({
+    aspect: z.string(),
+    original: z.string(),
+    simulated: z.string(),
+  })).default([]),
+  timestamp: z.string(),
+});
+
+export type SimulationResult = z.infer<typeof simulationResultSchema>;

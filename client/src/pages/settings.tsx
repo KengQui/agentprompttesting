@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useParams, useLocation } from "wouter";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { ArrowLeft, Save, Trash2, Bot, Briefcase, Shield, AlertTriangle, Loader2, BookOpen, Upload, X, FileText, Code, Pencil, RotateCcw, HelpCircle, ExternalLink, Info, Sparkles, ChevronDown, Database, Check } from "lucide-react";
+import { ArrowLeft, Save, Trash2, Bot, Briefcase, Shield, AlertTriangle, Loader2, BookOpen, Upload, X, FileText, Code, Pencil, RotateCcw, HelpCircle, ExternalLink, Info, Sparkles, ChevronDown, Database, Check, Settings, Activity } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -12,6 +12,7 @@ import { Progress } from "@/components/ui/progress";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Dialog,
   DialogContent,
@@ -41,6 +42,7 @@ import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { generatePromptPreview, promptStyleInfo } from "@/lib/prompt-preview";
 import { validationRulesTemplate, guardrailsTemplate } from "@/lib/config-templates";
+import { TracingDashboard } from "@/components/tracing-dashboard";
 import type { Agent, UpdateAgent, AgentStatus, DomainDocument, SampleDataset, PromptStyle, GeminiModel } from "@shared/schema";
 import { geminiModelDisplayNames, defaultGenerationModel } from "@shared/schema";
 
@@ -127,6 +129,7 @@ export default function SettingsPage() {
   const [formData, setFormData] = useState<UpdateAgent | null>(null);
   const [currentStep, setCurrentStep] = useState(1);
   const [completedSteps, setCompletedSteps] = useState<Set<number>>(new Set());
+  const [activeTab, setActiveTab] = useState<"configuration" | "tracing">("configuration");
 
   const { data: agent, isLoading } = useQuery<Agent>({
     queryKey: ["/api/agents", params.id],
@@ -1290,19 +1293,32 @@ export default function SettingsPage() {
       </header>
 
       <main className="container mx-auto px-4 py-8">
-        <div className="flex gap-8">
-          <aside className="w-64 shrink-0 hidden md:block">
-            <div className="sticky top-24">
-              <SettingsStepIndicator 
-                currentStep={currentStep} 
-                onStepClick={setCurrentStep}
-                completedSteps={completedSteps}
-              />
-            </div>
-          </aside>
+        <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as "configuration" | "tracing")}>
+          <TabsList className="mb-6">
+            <TabsTrigger value="configuration" className="gap-2" data-testid="tab-configuration">
+              <Settings className="h-4 w-4" />
+              Configuration
+            </TabsTrigger>
+            <TabsTrigger value="tracing" className="gap-2" data-testid="tab-tracing">
+              <Activity className="h-4 w-4" />
+              Tracing
+            </TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="configuration">
+            <div className="flex gap-8">
+              <aside className="w-64 shrink-0 hidden md:block">
+                <div className="sticky top-24">
+                  <SettingsStepIndicator 
+                    currentStep={currentStep} 
+                    onStepClick={setCurrentStep}
+                    completedSteps={completedSteps}
+                  />
+                </div>
+              </aside>
 
-          <div className="flex-1 max-w-2xl space-y-6">
-            {renderCurrentStep()}
+              <div className="flex-1 max-w-2xl space-y-6">
+                {renderCurrentStep()}
 
             <div className="flex items-center justify-between pt-4 border-t">
               <Button
@@ -1388,6 +1404,12 @@ export default function SettingsPage() {
             </Card>
           </div>
         </div>
+      </TabsContent>
+      
+      <TabsContent value="tracing">
+        <TracingDashboard agentId={params.id!} agent={agent} />
+      </TabsContent>
+    </Tabs>
       </main>
     </div>
   );

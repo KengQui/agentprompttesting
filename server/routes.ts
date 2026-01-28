@@ -1,8 +1,9 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertAgentSchema, updateAgentSchema, insertChatSessionSchema, updateChatSessionSchema } from "@shared/schema";
+import { insertAgentSchema, updateAgentSchema, insertChatSessionSchema, updateChatSessionSchema, simulationRequestSchema } from "@shared/schema";
 import { z } from "zod";
+import type { TurnTrace, TraceEntry, ConfigSnapshot } from "@shared/schema";
 import { generateAgentResponse, generateValidationRules, generateGuardrails, generateSystemPrompt, generateSampleData, evaluateContextSufficiency, processClarifyingChat, generateValidationRulesWithInsights, generateGuardrailsWithInsights, type GenerationContext, type SystemPromptContext, type SampleDataGenerationContext, type ClarifyingChatContext } from "./gemini";
 import { loadAgentComponents, clearAgentCache, hasCustomComponents } from "./agent-loader";
 import { createRecoveryManager } from "./components/recovery-manager";
@@ -265,6 +266,8 @@ export async function registerRoutes(
       }
 
       const userInput = parsed.data.content;
+      const traceStartTime = Date.now();
+      const traceEntries: TraceEntry[] = [];
 
       // Add user message
       const userMessage = await storage.addMessage({
@@ -296,39 +299,128 @@ export async function registerRoutes(
       };
 
       let responseContent: string;
+      let traceSuccess = true;
+      let detectedIntent = "answer_question";
+      let classificationMethod = "standard";
 
       try {
         // Try to use orchestrator if agent has custom components
         if (hasCustomComponents(req.params.id)) {
+          classificationMethod = "orchestrator";
           const { orchestrator } = await loadAgentComponents(req.params.id, agentConfig);
           const turnResult = await orchestrator.processTurn(req.params.id, userInput);
+          detectedIntent = turnResult.intent;
+          
+          // Record intent classification trace
+          traceEntries.push({
+            id: `entry-${Date.now()}-1`,
+            type: "intent_classification",
+            name: "Orchestrator Intent Classification",
+            timestamp: new Date().toISOString(),
+            metadata: {
+              intent: turnResult.intent,
+              classificationMethod: "orchestrator",
+              confidence: turnResult.confidence || "high",
+            },
+          });
           
           // If the orchestrator handled it completely (like go_back, change_previous_answer)
           if (turnResult.nextAction !== 'generate_ai_response') {
             responseContent = turnResult.response;
+            traceEntries.push({
+              id: `entry-${Date.now()}-2`,
+              type: "hook_call",
+              name: "Orchestrator Direct Response",
+              timestamp: new Date().toISOString(),
+              metadata: { action: turnResult.nextAction },
+            });
           } else {
             // Pass to Gemini with intent context for better response generation
             const intentPrefix = turnResult.intent !== 'answer_question' 
               ? `[The user's intent appears to be: ${turnResult.intent}. Please respond accordingly.]\n\n`
               : '';
+            
+            const llmStartTime = Date.now();
             responseContent = await generateAgentResponse(
               agentConfig,
               intentPrefix + userInput,
               chatHistory
             );
+            
+            traceEntries.push({
+              id: `entry-${Date.now()}-3`,
+              type: "llm_call",
+              name: "Gemini Response Generation",
+              timestamp: new Date().toISOString(),
+              duration: Date.now() - llmStartTime,
+              metadata: { 
+                model: "gemini",
+                intent: turnResult.intent,
+              },
+            });
           }
         } else {
           // No custom components, use standard Gemini response
+          classificationMethod = "standard";
+          
+          traceEntries.push({
+            id: `entry-${Date.now()}-1`,
+            type: "intent_classification",
+            name: "Standard Classification",
+            timestamp: new Date().toISOString(),
+            metadata: {
+              intent: "answer_question",
+              classificationMethod: "standard",
+            },
+          });
+          
+          const llmStartTime = Date.now();
           responseContent = await generateAgentResponse(
             agentConfig,
             userInput,
             chatHistory
           );
+          
+          traceEntries.push({
+            id: `entry-${Date.now()}-2`,
+            type: "llm_call",
+            name: "Gemini Response Generation",
+            timestamp: new Date().toISOString(),
+            duration: Date.now() - llmStartTime,
+            metadata: { model: "gemini" },
+          });
         }
       } catch (aiError: any) {
         console.error("AI generation error:", aiError);
+        traceSuccess = false;
         responseContent = `I apologize, but I'm having trouble generating a response. ${aiError.message?.includes("GEMINI_API_KEY") ? "The Gemini API key may not be configured correctly." : "Please try again."}`;
+        
+        traceEntries.push({
+          id: `entry-${Date.now()}-err`,
+          type: "error",
+          name: "AI Generation Error",
+          timestamp: new Date().toISOString(),
+          metadata: { error: aiError.message || "Unknown error" },
+        });
       }
+
+      // Save trace data
+      const turnTrace: TurnTrace = {
+        id: `trace-${Date.now()}`,
+        sessionId: req.params.sessionId,
+        userInput,
+        agentResponse: responseContent,
+        startTime: new Date(traceStartTime).toISOString(),
+        endTime: new Date().toISOString(),
+        totalDuration: Date.now() - traceStartTime,
+        entries: traceEntries,
+        success: traceSuccess,
+      };
+      
+      // Fire and forget - don't block the response
+      storage.addTurnTrace(req.params.id, turnTrace).catch(err => {
+        console.error("Failed to save trace:", err);
+      });
 
       // Add assistant message
       const assistantMessage = await storage.addMessage({
@@ -397,6 +489,8 @@ export async function registerRoutes(
       }
 
       const userInput = parsed.data.content;
+      const traceStartTime = Date.now();
+      const traceEntries: TraceEntry[] = [];
 
       // Add user message
       const userMessage = await storage.addMessage({
@@ -428,6 +522,7 @@ export async function registerRoutes(
       };
 
       let responseContent: string;
+      let traceSuccess = true;
 
       try {
         // Try to use orchestrator if agent has custom components
@@ -435,32 +530,102 @@ export async function registerRoutes(
           const { orchestrator } = await loadAgentComponents(req.params.id, agentConfig);
           const turnResult = await orchestrator.processTurn(req.params.id, userInput);
           
+          traceEntries.push({
+            id: `entry-${Date.now()}-1`,
+            type: "intent_classification",
+            name: "Orchestrator Intent Classification",
+            timestamp: new Date().toISOString(),
+            metadata: {
+              intent: turnResult.intent,
+              classificationMethod: "orchestrator",
+              confidence: turnResult.confidence || "high",
+            },
+          });
+          
           // If the orchestrator handled it completely (like go_back, change_previous_answer)
           if (turnResult.nextAction !== 'generate_ai_response') {
             responseContent = turnResult.response;
+            traceEntries.push({
+              id: `entry-${Date.now()}-2`,
+              type: "hook_call",
+              name: "Orchestrator Direct Response",
+              timestamp: new Date().toISOString(),
+              metadata: { action: turnResult.nextAction },
+            });
           } else {
             // Pass to Gemini with intent context for better response generation
             const intentPrefix = turnResult.intent !== 'answer_question' 
               ? `[The user's intent appears to be: ${turnResult.intent}. Please respond accordingly.]\n\n`
               : '';
+            const llmStartTime = Date.now();
             responseContent = await generateAgentResponse(
               agentConfig,
               intentPrefix + userInput,
               chatHistory
             );
+            traceEntries.push({
+              id: `entry-${Date.now()}-3`,
+              type: "llm_call",
+              name: "Gemini Response Generation",
+              timestamp: new Date().toISOString(),
+              duration: Date.now() - llmStartTime,
+              metadata: { model: "gemini", intent: turnResult.intent },
+            });
           }
         } else {
           // No custom components, use standard Gemini response
+          traceEntries.push({
+            id: `entry-${Date.now()}-1`,
+            type: "intent_classification",
+            name: "Standard Classification",
+            timestamp: new Date().toISOString(),
+            metadata: { intent: "answer_question", classificationMethod: "standard" },
+          });
+          
+          const llmStartTime = Date.now();
           responseContent = await generateAgentResponse(
             agentConfig,
             userInput,
             chatHistory
           );
+          traceEntries.push({
+            id: `entry-${Date.now()}-2`,
+            type: "llm_call",
+            name: "Gemini Response Generation",
+            timestamp: new Date().toISOString(),
+            duration: Date.now() - llmStartTime,
+            metadata: { model: "gemini" },
+          });
         }
       } catch (aiError: any) {
         console.error("AI generation error:", aiError);
+        traceSuccess = false;
         responseContent = `I apologize, but I'm having trouble generating a response. ${aiError.message?.includes("GEMINI_API_KEY") ? "The Gemini API key may not be configured correctly." : "Please try again."}`;
+        traceEntries.push({
+          id: `entry-${Date.now()}-err`,
+          type: "error",
+          name: "AI Generation Error",
+          timestamp: new Date().toISOString(),
+          metadata: { error: aiError.message || "Unknown error" },
+        });
       }
+
+      // Save trace data
+      const turnTrace: TurnTrace = {
+        id: `trace-${Date.now()}`,
+        sessionId,
+        userInput,
+        agentResponse: responseContent,
+        startTime: new Date(traceStartTime).toISOString(),
+        endTime: new Date().toISOString(),
+        totalDuration: Date.now() - traceStartTime,
+        entries: traceEntries,
+        success: traceSuccess,
+      };
+      
+      storage.addTurnTrace(req.params.id, turnTrace).catch(err => {
+        console.error("Failed to save trace:", err);
+      });
 
       // Add assistant message
       const assistantMessage = await storage.addMessage({
@@ -831,6 +996,235 @@ export async function registerRoutes(
     } catch (error) {
       console.error("Error uploading sample data:", error);
       res.status(500).json({ message: "Failed to upload sample data" });
+    }
+  });
+
+  // === Agent Tracing API ===
+  
+  // Get traces for an agent (optionally filtered by session)
+  app.get("/api/agents/:id/traces", async (req, res) => {
+    try {
+      const agent = await storage.getAgent(req.params.id);
+      if (!agent) {
+        return res.status(404).json({ message: "Agent not found" });
+      }
+      
+      const sessionId = req.query.sessionId as string | undefined;
+      const traces = await storage.getAgentTraces(req.params.id, sessionId);
+      
+      res.json(traces || {
+        agentId: req.params.id,
+        traces: [],
+        stats: {
+          hookCalls: {},
+          signalReads: {},
+          intentDistribution: {},
+          classificationMethods: {},
+          avgResponseTime: 0,
+          totalLlmCalls: 0,
+          totalTokensUsed: 0,
+          errorCount: 0,
+        },
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      });
+    } catch (error) {
+      console.error("Error fetching traces:", error);
+      res.status(500).json({ message: "Failed to fetch traces" });
+    }
+  });
+
+  // Clear traces for an agent (optionally filtered by session)
+  app.delete("/api/agents/:id/traces", async (req, res) => {
+    try {
+      const agent = await storage.getAgent(req.params.id);
+      if (!agent) {
+        return res.status(404).json({ message: "Agent not found" });
+      }
+      
+      const sessionId = req.query.sessionId as string | undefined;
+      await storage.clearTraces(req.params.id, sessionId);
+      res.status(204).send();
+    } catch (error) {
+      console.error("Error clearing traces:", error);
+      res.status(500).json({ message: "Failed to clear traces" });
+    }
+  });
+
+  // === Config History API ===
+  
+  // Get config history for an agent
+  app.get("/api/agents/:id/config-history", async (req, res) => {
+    try {
+      const agent = await storage.getAgent(req.params.id);
+      if (!agent) {
+        return res.status(404).json({ message: "Agent not found" });
+      }
+      
+      const history = await storage.getConfigHistory(req.params.id);
+      
+      res.json(history || {
+        agentId: req.params.id,
+        snapshots: [],
+        currentVersion: 0,
+      });
+    } catch (error) {
+      console.error("Error fetching config history:", error);
+      res.status(500).json({ message: "Failed to fetch config history" });
+    }
+  });
+
+  // Add a config snapshot
+  app.post("/api/agents/:id/config-history", async (req, res) => {
+    try {
+      const agent = await storage.getAgent(req.params.id);
+      if (!agent) {
+        return res.status(404).json({ message: "Agent not found" });
+      }
+      
+      const snapshotSchema = z.object({
+        description: z.string().optional(),
+        changes: z.array(z.object({
+          field: z.string(),
+          oldValue: z.any(),
+          newValue: z.any(),
+        })).default([]),
+        config: z.object({
+          name: z.string().optional(),
+          businessUseCase: z.string().optional(),
+          domainKnowledge: z.string().optional(),
+          validationRules: z.string().optional(),
+          guardrails: z.string().optional(),
+          promptStyle: z.enum(["anthropic", "gemini", "openai", "custom"]).optional(),
+          customPrompt: z.string().optional(),
+        }),
+        isRevertPoint: z.boolean().default(false),
+      });
+      
+      const parsed = snapshotSchema.safeParse(req.body);
+      if (!parsed.success) {
+        return res.status(400).json({ message: parsed.error.message });
+      }
+      
+      const snapshot = await storage.addConfigSnapshot(req.params.id, {
+        agentId: req.params.id,
+        ...parsed.data,
+      });
+      
+      res.status(201).json(snapshot);
+    } catch (error) {
+      console.error("Error creating config snapshot:", error);
+      res.status(500).json({ message: "Failed to create config snapshot" });
+    }
+  });
+
+  // Revert to a config snapshot
+  app.post("/api/agents/:id/config-history/:snapshotId/revert", async (req, res) => {
+    try {
+      const agent = await storage.getAgent(req.params.id);
+      if (!agent) {
+        return res.status(404).json({ message: "Agent not found" });
+      }
+      
+      const revertedAgent = await storage.revertToSnapshot(req.params.id, req.params.snapshotId);
+      if (!revertedAgent) {
+        return res.status(404).json({ message: "Snapshot not found" });
+      }
+      
+      clearAgentCache(req.params.id);
+      res.json(revertedAgent);
+    } catch (error) {
+      console.error("Error reverting to snapshot:", error);
+      res.status(500).json({ message: "Failed to revert to snapshot" });
+    }
+  });
+
+  // Simulate config changes
+  app.post("/api/agents/:id/simulate", async (req, res) => {
+    try {
+      const agent = await storage.getAgent(req.params.id);
+      if (!agent) {
+        return res.status(404).json({ message: "Agent not found" });
+      }
+      
+      const simulateSchema = z.object({
+        testMessage: z.string().min(1),
+        configOverrides: z.object({
+          validationRules: z.string().optional(),
+          guardrails: z.string().optional(),
+          customPrompt: z.string().optional(),
+        }),
+      });
+      
+      const parsed = simulateSchema.safeParse(req.body);
+      if (!parsed.success) {
+        return res.status(400).json({ message: parsed.error.message });
+      }
+      
+      const { testMessage, configOverrides } = parsed.data;
+      
+      // Generate response with original config
+      const originalConfig = {
+        name: agent.name,
+        businessUseCase: agent.businessUseCase,
+        description: agent.description,
+        domainKnowledge: agent.domainKnowledge,
+        domainDocuments: agent.domainDocuments,
+        sampleDatasets: agent.sampleDatasets,
+        validationRules: agent.validationRules,
+        guardrails: agent.guardrails,
+        promptStyle: agent.promptStyle,
+        customPrompt: agent.customPrompt,
+      };
+      
+      // Generate response with simulated config
+      const simulatedConfig = {
+        ...originalConfig,
+        validationRules: configOverrides.validationRules ?? agent.validationRules,
+        guardrails: configOverrides.guardrails ?? agent.guardrails,
+        customPrompt: configOverrides.customPrompt ?? agent.customPrompt,
+      };
+      
+      let originalResponse: string;
+      let simulatedResponse: string;
+      
+      try {
+        originalResponse = await generateAgentResponse(originalConfig, testMessage, []);
+        simulatedResponse = await generateAgentResponse(simulatedConfig, testMessage, []);
+      } catch (aiError: any) {
+        return res.status(500).json({ 
+          message: `AI generation error: ${aiError.message || 'Unknown error'}` 
+        });
+      }
+      
+      // Find differences
+      const differences: { aspect: string; original: string; simulated: string }[] = [];
+      
+      if (originalResponse.length !== simulatedResponse.length) {
+        differences.push({
+          aspect: "Response Length",
+          original: `${originalResponse.length} characters`,
+          simulated: `${simulatedResponse.length} characters`,
+        });
+      }
+      
+      if (originalResponse !== simulatedResponse) {
+        differences.push({
+          aspect: "Content",
+          original: originalResponse.substring(0, 200) + (originalResponse.length > 200 ? "..." : ""),
+          simulated: simulatedResponse.substring(0, 200) + (simulatedResponse.length > 200 ? "..." : ""),
+        });
+      }
+      
+      res.json({
+        originalResponse,
+        simulatedResponse,
+        differences,
+        timestamp: new Date().toISOString(),
+      });
+    } catch (error) {
+      console.error("Error simulating config:", error);
+      res.status(500).json({ message: "Failed to simulate config" });
     }
   });
 
