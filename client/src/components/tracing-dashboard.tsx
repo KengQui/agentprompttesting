@@ -174,7 +174,7 @@ function TraceEntry({ trace }: { trace: TurnTrace }) {
   );
 }
 
-function ConfigHistoryPanel({ 
+export function ConfigHistoryPanel({ 
   agentId, 
   agent 
 }: { 
@@ -296,7 +296,7 @@ function ConfigHistoryPanel({
   );
 }
 
-function SimulationPanel({ 
+export function SimulationPanel({ 
   agentId, 
   agent 
 }: { 
@@ -629,10 +629,6 @@ export function TracingDashboard({ agentId, agent }: TracingDashboardProps) {
         </CardContent>
       </Card>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <SimulationPanel agentId={agentId} agent={agent} />
-        <ConfigHistoryPanel agentId={agentId} agent={agent} />
-      </div>
     </div>
   );
 }

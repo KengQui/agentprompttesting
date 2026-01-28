@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useParams, useLocation } from "wouter";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { ArrowLeft, Save, Trash2, Bot, Briefcase, Shield, AlertTriangle, Loader2, BookOpen, Upload, X, FileText, Code, Pencil, RotateCcw, HelpCircle, ExternalLink, Info, Sparkles, ChevronDown, Database, Check, Settings, Activity } from "lucide-react";
+import { ArrowLeft, Save, Trash2, Bot, Briefcase, Shield, AlertTriangle, Loader2, BookOpen, Upload, X, FileText, Code, Pencil, RotateCcw, HelpCircle, ExternalLink, Info, Sparkles, ChevronDown, Database, Check, Settings, Activity, FlaskConical } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -42,7 +42,7 @@ import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { generatePromptPreview, promptStyleInfo } from "@/lib/prompt-preview";
 import { validationRulesTemplate, guardrailsTemplate } from "@/lib/config-templates";
-import { TracingDashboard } from "@/components/tracing-dashboard";
+import { TracingDashboard, SimulationPanel, ConfigHistoryPanel } from "@/components/tracing-dashboard";
 import type { Agent, UpdateAgent, AgentStatus, DomainDocument, SampleDataset, PromptStyle, GeminiModel } from "@shared/schema";
 import { geminiModelDisplayNames, defaultGenerationModel } from "@shared/schema";
 
@@ -129,7 +129,7 @@ export default function SettingsPage() {
   const [formData, setFormData] = useState<UpdateAgent | null>(null);
   const [currentStep, setCurrentStep] = useState(1);
   const [completedSteps, setCompletedSteps] = useState<Set<number>>(new Set());
-  const [activeTab, setActiveTab] = useState<"configuration" | "tracing">("configuration");
+  const [activeTab, setActiveTab] = useState<"configuration" | "tracing" | "simulator">("configuration");
 
   const { data: agent, isLoading } = useQuery<Agent>({
     queryKey: ["/api/agents", params.id],
@@ -1293,7 +1293,7 @@ export default function SettingsPage() {
       </header>
 
       <main className="container mx-auto px-4 py-8">
-        <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as "configuration" | "tracing")}>
+        <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as "configuration" | "tracing" | "simulator")}>
           <TabsList className="mb-6">
             <TabsTrigger value="configuration" className="gap-2" data-testid="tab-configuration">
               <Settings className="h-4 w-4" />
@@ -1302,6 +1302,10 @@ export default function SettingsPage() {
             <TabsTrigger value="tracing" className="gap-2" data-testid="tab-tracing">
               <Activity className="h-4 w-4" />
               Tracing
+            </TabsTrigger>
+            <TabsTrigger value="simulator" className="gap-2" data-testid="tab-simulator">
+              <FlaskConical className="h-4 w-4" />
+              Simulator
             </TabsTrigger>
           </TabsList>
           
@@ -1408,6 +1412,71 @@ export default function SettingsPage() {
       
       <TabsContent value="tracing">
         <TracingDashboard agentId={params.id!} agent={agent} />
+      </TabsContent>
+
+      <TabsContent value="simulator">
+        <div className="space-y-6">
+          <div>
+            <h2 className="text-xl font-semibold">Config Simulator</h2>
+            <p className="text-sm text-muted-foreground">
+              Test configuration changes before applying them to your agent
+            </p>
+          </div>
+
+          <Card data-testid="card-current-configuration">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-base">
+                <Settings className="h-4 w-4 text-primary" />
+                Current Configuration
+              </CardTitle>
+              <CardDescription>
+                Active settings for this agent
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label className="text-xs text-muted-foreground">Validation Rules</Label>
+                  <div className="p-3 rounded-lg bg-muted text-xs font-mono max-h-32 overflow-auto" data-testid="text-validation-rules">
+                    {agent.validationRules ? (
+                      <pre className="whitespace-pre-wrap">{agent.validationRules.substring(0, 500)}{agent.validationRules.length > 500 ? '...' : ''}</pre>
+                    ) : (
+                      <span className="text-muted-foreground italic">No validation rules configured</span>
+                    )}
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-xs text-muted-foreground">Guardrails</Label>
+                  <div className="p-3 rounded-lg bg-muted text-xs font-mono max-h-32 overflow-auto" data-testid="text-guardrails">
+                    {agent.guardrails ? (
+                      <pre className="whitespace-pre-wrap">{agent.guardrails.substring(0, 500)}{agent.guardrails.length > 500 ? '...' : ''}</pre>
+                    ) : (
+                      <span className="text-muted-foreground italic">No guardrails configured</span>
+                    )}
+                  </div>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label className="text-xs text-muted-foreground">System Prompt Preview</Label>
+                <div className="p-3 rounded-lg bg-muted text-xs font-mono max-h-40 overflow-auto" data-testid="text-system-prompt">
+                  {(() => {
+                    const promptPreview = generatePromptPreview(agent.promptStyle || 'professional', agent);
+                    return promptPreview ? (
+                      <pre className="whitespace-pre-wrap">{promptPreview.substring(0, 800)}{promptPreview.length > 800 ? '...' : ''}</pre>
+                    ) : (
+                      <span className="text-muted-foreground italic">No system prompt configured</span>
+                    );
+                  })()}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <SimulationPanel agentId={params.id!} agent={agent} />
+            <ConfigHistoryPanel agentId={params.id!} agent={agent} />
+          </div>
+        </div>
       </TabsContent>
     </Tabs>
       </main>
