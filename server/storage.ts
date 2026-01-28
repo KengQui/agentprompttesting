@@ -6,6 +6,22 @@ import type { Agent, InsertAgent, UpdateAgent, ChatMessage, InsertChatMessage } 
 const AGENTS_DIR = "./agents";
 const COMPONENT_TEMPLATES_DIR = "./server/components";
 
+// File names for the multi-file agent structure
+const AGENT_FILES = {
+  META: "meta.yaml",
+  BUSINESS_USE_CASE: "business-use-case.md",
+  DOMAIN_KNOWLEDGE: "domain-knowledge.md",
+  VALIDATION_RULES: "validation-rules.yaml",
+  GUARDRAILS: "guardrails.yaml",
+  CUSTOM_PROMPT: "custom-prompt.md",
+  DOMAIN_DOCUMENTS: "domain-documents.json",
+  SAMPLE_DATA: "sample-data.json",
+  CHAT: "chat.json",
+  // Legacy file for migration
+  LEGACY_CONFIG: "config.yaml",
+  LEGACY_DATA: "data.json",
+};
+
 function ensureDir(dir: string) {
   if (!fs.existsSync(dir)) {
     fs.mkdirSync(dir, { recursive: true });
@@ -16,16 +32,70 @@ function getAgentDir(agentId: string) {
   return path.join(AGENTS_DIR, agentId);
 }
 
-function getConfigPath(agentId: string) {
-  return path.join(getAgentDir(agentId), "config.yaml");
+function getAgentFilePath(agentId: string, fileName: string) {
+  return path.join(getAgentDir(agentId), fileName);
 }
 
 function getChatPath(agentId: string) {
-  return path.join(getAgentDir(agentId), "chat.json");
+  return getAgentFilePath(agentId, AGENT_FILES.CHAT);
 }
 
 function getComponentsDir(agentId: string) {
   return path.join(getAgentDir(agentId), "components");
+}
+
+// Helper to read a text file safely
+function readTextFile(filePath: string): string {
+  if (fs.existsSync(filePath)) {
+    return fs.readFileSync(filePath, "utf-8").trim();
+  }
+  return "";
+}
+
+// Helper to write a text file
+function writeTextFile(filePath: string, content: string) {
+  fs.writeFileSync(filePath, content || "", "utf-8");
+}
+
+// Helper to read a JSON file safely
+function readJsonFile<T>(filePath: string, defaultValue: T): T {
+  if (fs.existsSync(filePath)) {
+    try {
+      const content = fs.readFileSync(filePath, "utf-8");
+      return JSON.parse(content) as T;
+    } catch (e) {
+      console.error(`Failed to parse JSON file ${filePath}:`, e);
+      return defaultValue;
+    }
+  }
+  return defaultValue;
+}
+
+// Helper to write a JSON file
+function writeJsonFile(filePath: string, data: unknown) {
+  fs.writeFileSync(filePath, JSON.stringify(data, null, 2), "utf-8");
+}
+
+// Parse simple YAML for meta.yaml (key: value format only)
+function parseSimpleYaml(content: string): Record<string, string> {
+  const result: Record<string, string> = {};
+  const lines = content.split("\n");
+  for (const line of lines) {
+    const match = line.match(/^([a-zA-Z_]+):\s*(.*)$/);
+    if (match) {
+      const [, key, value] = match;
+      result[key] = value.replace(/^["']|["']$/g, "").trim();
+    }
+  }
+  return result;
+}
+
+// Generate simple YAML from object (key: value format only)
+function generateSimpleYaml(data: Record<string, string | undefined>): string {
+  return Object.entries(data)
+    .filter(([, value]) => value !== undefined)
+    .map(([key, value]) => `${key}: "${value}"`)
+    .join("\n");
 }
 
 function copyComponentTemplates(agentId: string, agentName: string) {
@@ -227,37 +297,43 @@ export class MemStorage implements IStorage {
       for (const dir of dirs) {
         if (dir.isDirectory()) {
           const agentId = dir.name;
-          const configPath = getConfigPath(agentId);
           const chatPath = getChatPath(agentId);
           
-          // Load agent config
-          if (fs.existsSync(configPath)) {
-            try {
-              const content = fs.readFileSync(configPath, "utf-8");
-              const agent = this.parseYamlConfig(content, agentId);
+          try {
+            // Check if this is new multi-file structure or legacy
+            const metaPath = getAgentFilePath(agentId, AGENT_FILES.META);
+            const legacyConfigPath = getAgentFilePath(agentId, AGENT_FILES.LEGACY_CONFIG);
+            
+            let agent: Agent | null = null;
+            
+            if (fs.existsSync(metaPath)) {
+              // New multi-file structure
+              agent = this.loadAgentFromMultipleFiles(agentId);
+            } else if (fs.existsSync(legacyConfigPath)) {
+              // Legacy single-file structure - load and migrate
+              const content = fs.readFileSync(legacyConfigPath, "utf-8");
+              agent = this.parseLegacyYamlConfig(content, agentId);
+              
               if (agent) {
-                // Load complex data (arrays) from separate JSON file
-                const dataPath = path.join(AGENTS_DIR, agentId, "data.json");
-                if (fs.existsSync(dataPath)) {
-                  try {
-                    const dataContent = fs.readFileSync(dataPath, "utf-8");
-                    const complexData = JSON.parse(dataContent);
-                    agent.domainDocuments = complexData.domainDocuments || [];
-                    agent.sampleDatasets = complexData.sampleDatasets || [];
-                  } catch (e) {
-                    console.error(`Failed to load data.json for agent ${agentId}:`, e);
-                    agent.domainDocuments = [];
-                    agent.sampleDatasets = [];
-                  }
-                } else {
-                  agent.domainDocuments = [];
-                  agent.sampleDatasets = [];
+                // Load complex data from legacy data.json
+                const legacyDataPath = getAgentFilePath(agentId, AGENT_FILES.LEGACY_DATA);
+                if (fs.existsSync(legacyDataPath)) {
+                  const complexData = readJsonFile<{ domainDocuments?: unknown[]; sampleDatasets?: unknown[] }>(legacyDataPath, {});
+                  agent.domainDocuments = complexData.domainDocuments || [];
+                  agent.sampleDatasets = complexData.sampleDatasets || [];
                 }
-                this.agents.set(agentId, agent);
+                
+                // Migrate to new structure
+                this.saveAgentToDisk(agent);
+                console.log(`[storage] Migrated agent ${agentId} to multi-file structure`);
               }
-            } catch (e) {
-              console.error(`Failed to load agent ${agentId}:`, e);
             }
+            
+            if (agent) {
+              this.agents.set(agentId, agent);
+            }
+          } catch (e) {
+            console.error(`Failed to load agent ${agentId}:`, e);
           }
           
           // Load chat history
@@ -277,8 +353,49 @@ export class MemStorage implements IStorage {
     }
   }
 
-  private parseYamlConfig(content: string, agentId: string): Agent | null {
-    // Simple YAML parser for our format
+  private loadAgentFromMultipleFiles(agentId: string): Agent | null {
+    const agentDir = getAgentDir(agentId);
+    
+    // Read meta.yaml for basic info
+    const metaContent = readTextFile(getAgentFilePath(agentId, AGENT_FILES.META));
+    const meta = parseSimpleYaml(metaContent);
+    
+    if (!meta.name || !meta.createdAt) {
+      console.error(`[storage] Invalid meta.yaml for agent ${agentId}`);
+      return null;
+    }
+    
+    // Read all content files
+    const businessUseCase = readTextFile(getAgentFilePath(agentId, AGENT_FILES.BUSINESS_USE_CASE));
+    const domainKnowledge = readTextFile(getAgentFilePath(agentId, AGENT_FILES.DOMAIN_KNOWLEDGE));
+    const validationRules = readTextFile(getAgentFilePath(agentId, AGENT_FILES.VALIDATION_RULES));
+    const guardrails = readTextFile(getAgentFilePath(agentId, AGENT_FILES.GUARDRAILS));
+    const customPrompt = readTextFile(getAgentFilePath(agentId, AGENT_FILES.CUSTOM_PROMPT));
+    
+    // Read JSON files
+    const domainDocuments = readJsonFile<unknown[]>(getAgentFilePath(agentId, AGENT_FILES.DOMAIN_DOCUMENTS), []);
+    const sampleDatasets = readJsonFile<unknown[]>(getAgentFilePath(agentId, AGENT_FILES.SAMPLE_DATA), []);
+    
+    return {
+      id: agentId,
+      name: meta.name,
+      status: meta.status || "configured",
+      createdAt: meta.createdAt,
+      updatedAt: meta.updatedAt || meta.createdAt,
+      promptStyle: meta.promptStyle || "anthropic",
+      description: meta.description || "",
+      businessUseCase,
+      domainKnowledge,
+      validationRules,
+      guardrails,
+      customPrompt,
+      domainDocuments,
+      sampleDatasets,
+    };
+  }
+
+  private parseLegacyYamlConfig(content: string, agentId: string): Agent | null {
+    // Simple YAML parser for legacy format
     const lines = content.split("\n");
     const agent: Partial<Agent> = { id: agentId };
     let currentKey = "";
@@ -317,6 +434,10 @@ export class MemStorage implements IStorage {
       return null;
     }
 
+    // Set defaults for arrays
+    agent.domainDocuments = agent.domainDocuments || [];
+    agent.sampleDatasets = agent.sampleDatasets || [];
+
     return agent as Agent;
   }
 
@@ -324,41 +445,49 @@ export class MemStorage implements IStorage {
     const agentDir = getAgentDir(agent.id);
     ensureDir(agentDir);
 
-    // Save as YAML-like format for readability
-    const yaml = `name: "${agent.name}"
-status: ${agent.status}
-createdAt: ${agent.createdAt}
-updatedAt: ${agent.updatedAt}
-promptStyle: ${agent.promptStyle || "anthropic"}
+    // 1. Save meta.yaml - basic agent info
+    const metaYaml = generateSimpleYaml({
+      name: agent.name,
+      status: agent.status,
+      createdAt: agent.createdAt,
+      updatedAt: agent.updatedAt,
+      promptStyle: agent.promptStyle || "anthropic",
+      description: agent.description || "",
+    });
+    writeTextFile(getAgentFilePath(agent.id, AGENT_FILES.META), metaYaml);
 
-businessUseCase: |
-  ${(agent.businessUseCase || "").split("\n").join("\n  ")}
+    // 2. Save business-use-case.md
+    writeTextFile(getAgentFilePath(agent.id, AGENT_FILES.BUSINESS_USE_CASE), agent.businessUseCase || "");
 
-description: |
-  ${(agent.description || "").split("\n").join("\n  ")}
+    // 3. Save domain-knowledge.md
+    writeTextFile(getAgentFilePath(agent.id, AGENT_FILES.DOMAIN_KNOWLEDGE), agent.domainKnowledge || "");
 
-domainKnowledge: |
-  ${(agent.domainKnowledge || "").split("\n").join("\n  ")}
+    // 4. Save validation-rules.yaml
+    writeTextFile(getAgentFilePath(agent.id, AGENT_FILES.VALIDATION_RULES), agent.validationRules || "");
 
-validationRules: |
-  ${(agent.validationRules || "").split("\n").join("\n  ")}
+    // 5. Save guardrails.yaml
+    writeTextFile(getAgentFilePath(agent.id, AGENT_FILES.GUARDRAILS), agent.guardrails || "");
 
-guardrails: |
-  ${(agent.guardrails || "").split("\n").join("\n  ")}
+    // 6. Save custom-prompt.md
+    writeTextFile(getAgentFilePath(agent.id, AGENT_FILES.CUSTOM_PROMPT), agent.customPrompt || "");
 
-customPrompt: |
-  ${(agent.customPrompt || "").split("\n").join("\n  ")}
-`;
+    // 7. Save domain-documents.json
+    writeJsonFile(getAgentFilePath(agent.id, AGENT_FILES.DOMAIN_DOCUMENTS), agent.domainDocuments || []);
 
-    fs.writeFileSync(getConfigPath(agent.id), yaml, "utf-8");
-    
-    // Save complex data (arrays) as JSON in separate files
-    const dataPath = path.join(agentDir, "data.json");
-    const complexData = {
-      domainDocuments: agent.domainDocuments || [],
-      sampleDatasets: agent.sampleDatasets || [],
-    };
-    fs.writeFileSync(dataPath, JSON.stringify(complexData, null, 2), "utf-8");
+    // 8. Save sample-data.json
+    writeJsonFile(getAgentFilePath(agent.id, AGENT_FILES.SAMPLE_DATA), agent.sampleDatasets || []);
+
+    // Clean up legacy files if they exist
+    const legacyConfigPath = getAgentFilePath(agent.id, AGENT_FILES.LEGACY_CONFIG);
+    const legacyDataPath = getAgentFilePath(agent.id, AGENT_FILES.LEGACY_DATA);
+    if (fs.existsSync(legacyConfigPath)) {
+      fs.unlinkSync(legacyConfigPath);
+      console.log(`[storage] Removed legacy config.yaml for agent ${agent.id}`);
+    }
+    if (fs.existsSync(legacyDataPath)) {
+      fs.unlinkSync(legacyDataPath);
+      console.log(`[storage] Removed legacy data.json for agent ${agent.id}`);
+    }
   }
 
   private saveMessagesToDisk(agentId: string) {
