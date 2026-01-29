@@ -63,5 +63,11 @@
     "username": "testuser__-O8tn",
     "password": "$2b$10$HLsa6ajlllz27nDfX2KILu9X9rS.llFgPm7aH5UhOobFVQnFbCdWy",
     "createdAt": "2026-01-29T21:02:28.468Z"
+  },
+  {
+    "id": "44d3b275-5e06-4016-8e55-e85a83d87a0c",
+    "username": "mocktest_Zq6ryn",
+    "password": "$2b$10$xnuoogp1pW54.v3An1l4M.6Hjtr1nO1LXYmzy1p5tqicgWwYWQg8u",
+    "createdAt": "2026-01-29T21:37:40.130Z"
   }
 ]
