@@ -854,18 +854,36 @@ export async function registerRoutes(
               ? `[The user's intent appears to be: ${turnResult.intent}. Please respond accordingly.]\n\n`
               : '';
             const llmStartTime = Date.now();
-            responseContent = await generateAgentResponse(
+            const rawResponse = await generateAgentResponse(
               agentConfig,
               intentPrefix + userInput,
               chatHistory
             );
+            
+            // Validate AI response using shared helper
+            const validation = validateAIResponse(rawResponse);
+            responseContent = validation.recoveryResponse;
+            
+            if (!validation.isValid) {
+              traceEntries.push({
+                id: `entry-${Date.now()}-recovery`,
+                type: "recovery",
+                name: "Response Validation Recovery",
+                timestamp: new Date().toISOString(),
+                metadata: { 
+                  reason: "Detected invalid/placeholder response",
+                  originalResponse: validation.originalResponse.substring(0, 100),
+                },
+              });
+            }
+            
             traceEntries.push({
               id: `entry-${Date.now()}-3`,
               type: "llm_call",
               name: "Gemini Response Generation",
               timestamp: new Date().toISOString(),
               duration: Date.now() - llmStartTime,
-              metadata: { model: "gemini", intent: turnResult.intent },
+              metadata: { model: "gemini", intent: turnResult.intent, validated: validation.isValid },
             });
           }
         } else {
@@ -879,18 +897,36 @@ export async function registerRoutes(
           });
           
           const llmStartTime = Date.now();
-          responseContent = await generateAgentResponse(
+          const rawResponse = await generateAgentResponse(
             agentConfig,
             userInput,
             chatHistory
           );
+          
+          // Validate AI response using shared helper
+          const validation = validateAIResponse(rawResponse);
+          responseContent = validation.recoveryResponse;
+          
+          if (!validation.isValid) {
+            traceEntries.push({
+              id: `entry-${Date.now()}-recovery`,
+              type: "recovery",
+              name: "Response Validation Recovery",
+              timestamp: new Date().toISOString(),
+              metadata: { 
+                reason: "Detected invalid/placeholder response",
+                originalResponse: validation.originalResponse.substring(0, 100),
+              },
+            });
+          }
+          
           traceEntries.push({
             id: `entry-${Date.now()}-2`,
             type: "llm_call",
             name: "Gemini Response Generation",
             timestamp: new Date().toISOString(),
             duration: Date.now() - llmStartTime,
-            metadata: { model: "gemini" },
+            metadata: { model: "gemini", validated: validation.isValid },
           });
         }
       } catch (aiError: any) {
