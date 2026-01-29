@@ -20,7 +20,8 @@ import type {
   ClassificationResult, 
   ConversationContext, 
   TurnResult,
-  AgentConfig 
+  AgentConfig,
+  ChatHistoryItem
 } from './types';
 
 export interface OrchestratorConfig {
@@ -38,15 +39,15 @@ export class Orchestrator {
 
   constructor(config: OrchestratorConfig = {}) {
     this.turnManager = new TurnManager(config.turnManager);
-    
+
     const flowSteps = config.flowController?.steps?.map(s => s.id) ?? [];
     this.stateManager = new StateManager({
       ...config.stateManager,
       flowSteps
     });
-    
+
     this.flowController = new FlowController(config.flowController);
-    
+
     this.agentConfig = config.agentConfig ?? {
       name: 'Assistant',
       businessUseCase: 'General assistance',
@@ -59,12 +60,36 @@ export class Orchestrator {
     const currentStep = this.flowController.getStep(state.currentStep);
     const previousStep = this.flowController.getPreviousStep(state.currentStep, state);
 
+    // Build minimal conversation history from recent state
+    const conversationHistory: ChatHistoryItem[] = [];
+
+    // Add previous Q&A if available
+    if (previousStep && state.lastAnswer) {
+      conversationHistory.push({
+        role: 'assistant',
+        content: previousStep.question || ''
+      });
+      conversationHistory.push({
+        role: 'user',
+        content: state.lastAnswer
+      });
+    }
+
+    // Add current question if available
+    if (currentStep) {
+      conversationHistory.push({
+        role: 'assistant',
+        content: currentStep.question || ''
+      });
+    }
+
     return {
       currentQuestion: currentStep?.question,
       previousQuestion: previousStep?.question,
       previousAnswer: state.lastAnswer,
       awaitingConfirmation: state.awaitingConfirmation,
-      pendingSuggestion: state.pendingSuggestion
+      pendingSuggestion: state.pendingSuggestion,
+      conversationHistory
     };
   }
 
@@ -87,7 +112,7 @@ export class Orchestrator {
     }
 
     const value = classification.extractedValue || userInput.trim();
-    
+
     if (!this.flowController.validateAnswer(currentStep, value)) {
       return {
         intent: 'answer_question',
@@ -111,9 +136,9 @@ export class Orchestrator {
     }
 
     this.stateManager.markFlowComplete(conversationId);
-    
+
     const originalIntent = this.stateManager.getOriginalIntent(conversationId);
-    
+
     if (this.flowController.hasFulfillment()) {
       const fulfillmentResponse = this.flowController.generateFulfillmentResponse(updatedState, originalIntent);
       return {
@@ -121,7 +146,7 @@ export class Orchestrator {
         response: fulfillmentResponse
       };
     }
-    
+
     return {
       intent: 'answer_question',
       response: originalIntent || userInput,
@@ -145,7 +170,7 @@ export class Orchestrator {
         response: fulfillmentResponse
       };
     }
-    
+
     return {
       intent: 'answer_question',
       response: userInput,
@@ -172,7 +197,7 @@ export class Orchestrator {
 
     this.stateManager.goBackToStep(conversationId, previousStep.id);
     const previousAnswer = state.answers[previousStep.field];
-    
+
     let response = `Going back to the previous question.\n\n${this.flowController.generateQuestion(previousStep)}`;
     if (previousAnswer) {
       response += `\n\n(Your previous answer was: ${previousAnswer})`;
@@ -200,7 +225,7 @@ export class Orchestrator {
     if (classification.proposedChange) {
       const { field, newValue } = classification.proposedChange;
       const step = this.flowController.getStepByField(field);
-      
+
       if (step) {
         this.stateManager.setAnswer(conversationId, field, newValue);
         return {
@@ -253,7 +278,7 @@ export class Orchestrator {
 
   protected async handleConfirm(conversationId: string, classification: ClassificationResult): Promise<TurnResult> {
     this.stateManager.clearAwaitingConfirmation(conversationId);
-    
+
     return {
       intent: 'confirm',
       response: "Great, confirmed! Let's continue.",
@@ -263,7 +288,7 @@ export class Orchestrator {
 
   protected async handleReject(conversationId: string, classification: ClassificationResult): Promise<TurnResult> {
     this.stateManager.clearAwaitingConfirmation(conversationId);
-    
+
     return {
       intent: 'reject',
       response: "No problem. What would you like to do instead?",
@@ -284,7 +309,7 @@ export class Orchestrator {
     }
 
     let response = "I'm not sure I understood that. ";
-    
+
     if (currentStep) {
       response += `Let me repeat the question: ${this.flowController.generateQuestion(currentStep)}`;
     } else {
@@ -302,33 +327,33 @@ export class Orchestrator {
   async processTurn(conversationId: string, userInput: string): Promise<TurnResult> {
     try {
       const state = this.stateManager.getOrCreateState(conversationId);
-      
+
       if (!state.originalIntent && userInput.trim()) {
         this.stateManager.setOriginalIntent(conversationId, userInput.trim());
       }
-      
+
       const context = this.buildContext(conversationId);
       const classification = await this.turnManager.classifyIntent(userInput, context);
 
       switch (classification.intent) {
         case 'answer_question':
           return this.handleAnswerQuestion(conversationId, classification, userInput);
-        
+
         case 'go_back':
           return this.handleGoBack(conversationId, classification);
-        
+
         case 'change_previous_answer':
           return this.handleChangePreviousAnswer(conversationId, classification, userInput);
-        
+
         case 'request_clarification':
           return this.handleRequestClarification(conversationId, classification, userInput);
-        
+
         case 'confirm':
           return this.handleConfirm(conversationId, classification);
-        
+
         case 'reject':
           return this.handleReject(conversationId, classification);
-        
+
         case 'unclear':
         case 'error':
         default:
@@ -348,7 +373,7 @@ export class Orchestrator {
     const firstStep = this.flowController.getSteps()[0];
 
     let message = this.flowController.getWelcomeMessage();
-    
+
     if (firstStep) {
       message += '\n\n' + this.flowController.generateQuestion(firstStep);
     }

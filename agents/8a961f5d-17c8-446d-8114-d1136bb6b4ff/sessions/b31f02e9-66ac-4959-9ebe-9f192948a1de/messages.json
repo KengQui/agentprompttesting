@@ -1,0 +1,50 @@
+[
+  {
+    "id": "345fa9a2-636e-4fbd-aaa7-c0f65325ff78",
+    "agentId": "8a961f5d-17c8-446d-8114-d1136bb6b4ff",
+    "sessionId": "b31f02e9-66ac-4959-9ebe-9f192948a1de",
+    "role": "user",
+    "content": "how much social security did I pay last month",
+    "timestamp": "2026-01-29T02:47:27.730Z"
+  },
+  {
+    "id": "c4309bfc-48e2-4450-bc5d-cee51dcbdeed",
+    "agentId": "8a961f5d-17c8-446d-8114-d1136bb6b4ff",
+    "sessionId": "b31f02e9-66ac-4959-9ebe-9f192948a1de",
+    "role": "assistant",
+    "content": "Okay, I can help you with that. To calculate how much you paid for social security last month, can you please confirm which month you're asking about?",
+    "timestamp": "2026-01-29T02:47:29.550Z"
+  },
+  {
+    "id": "23b85397-65d3-4462-adfe-e28d23522c6f",
+    "agentId": "8a961f5d-17c8-446d-8114-d1136bb6b4ff",
+    "sessionId": "b31f02e9-66ac-4959-9ebe-9f192948a1de",
+    "role": "user",
+    "content": "last month",
+    "timestamp": "2026-01-29T02:47:41.734Z"
+  },
+  {
+    "id": "97648aef-c8f6-4461-979c-f30b2c822cc8",
+    "agentId": "8a961f5d-17c8-446d-8114-d1136bb6b4ff",
+    "sessionId": "b31f02e9-66ac-4959-9ebe-9f192948a1de",
+    "role": "assistant",
+    "content": "Okay, John. I see that for the pay period ending January 14, 2026, and paid on January 16, 2026, you paid $223.51 in Social Security tax. For the pay period ending January 28, 2026, and paid on January 30, 2026, you paid $223.51 in Social Security tax. Would you like me to calculate the total?\n",
+    "timestamp": "2026-01-29T02:47:43.070Z"
+  },
+  {
+    "id": "00696b37-1a72-455d-b6ed-de14ab8d5248",
+    "agentId": "8a961f5d-17c8-446d-8114-d1136bb6b4ff",
+    "sessionId": "b31f02e9-66ac-4959-9ebe-9f192948a1de",
+    "role": "user",
+    "content": "I got a pay increase this year, how much has my pay check increase",
+    "timestamp": "2026-01-29T02:51:36.772Z"
+  },
+  {
+    "id": "76e4f588-7555-4bcd-9c86-4d6601c455c3",
+    "agentId": "8a961f5d-17c8-446d-8114-d1136bb6b4ff",
+    "sessionId": "b31f02e9-66ac-4959-9ebe-9f192948a1de",
+    "role": "assistant",
+    "content": "Okay, John. I can help you with that. Your gross pay in December 2025 was $3,500.00, and your gross pay in January 2026 was $3,605.00. This means your gross pay increased by $105.00 per pay period. Your net pay in December 2025 was $2173.10, and your net pay in January 2026 was $2242.80. This means your net pay increased by $69.70 per pay period.\n",
+    "timestamp": "2026-01-29T02:51:39.070Z"
+  }
+]

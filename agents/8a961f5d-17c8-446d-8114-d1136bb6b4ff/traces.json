@@ -366,6 +366,108 @@
         }
       ],
       "success": true
+    },
+    {
+      "id": "trace-1769654849549",
+      "sessionId": "b31f02e9-66ac-4959-9ebe-9f192948a1de",
+      "userInput": "how much social security did I pay last month",
+      "agentResponse": "Okay, I can help you with that. To calculate how much you paid for social security last month, can you please confirm which month you're asking about?",
+      "startTime": "2026-01-29T02:47:27.730Z",
+      "endTime": "2026-01-29T02:47:29.549Z",
+      "totalDuration": 1819,
+      "entries": [
+        {
+          "id": "entry-1769654848799-1",
+          "type": "intent_classification",
+          "name": "Orchestrator Intent Classification",
+          "timestamp": "2026-01-29T02:47:28.799Z",
+          "metadata": {
+            "intent": "answer_question",
+            "classificationMethod": "orchestrator",
+            "confidence": "high"
+          }
+        },
+        {
+          "id": "entry-1769654849549-3",
+          "type": "llm_call",
+          "name": "Gemini Response Generation",
+          "timestamp": "2026-01-29T02:47:29.549Z",
+          "duration": 750,
+          "metadata": {
+            "model": "gemini",
+            "intent": "answer_question"
+          }
+        }
+      ],
+      "success": true
+    },
+    {
+      "id": "trace-1769654863070",
+      "sessionId": "b31f02e9-66ac-4959-9ebe-9f192948a1de",
+      "userInput": "last month",
+      "agentResponse": "Okay, John. I see that for the pay period ending January 14, 2026, and paid on January 16, 2026, you paid $223.51 in Social Security tax. For the pay period ending January 28, 2026, and paid on January 30, 2026, you paid $223.51 in Social Security tax. Would you like me to calculate the total?\n",
+      "startTime": "2026-01-29T02:47:41.734Z",
+      "endTime": "2026-01-29T02:47:43.070Z",
+      "totalDuration": 1336,
+      "entries": [
+        {
+          "id": "entry-1769654861735-1",
+          "type": "intent_classification",
+          "name": "Orchestrator Intent Classification",
+          "timestamp": "2026-01-29T02:47:41.735Z",
+          "metadata": {
+            "intent": "answer_question",
+            "classificationMethod": "orchestrator",
+            "confidence": "high"
+          }
+        },
+        {
+          "id": "entry-1769654863070-3",
+          "type": "llm_call",
+          "name": "Gemini Response Generation",
+          "timestamp": "2026-01-29T02:47:43.070Z",
+          "duration": 1335,
+          "metadata": {
+            "model": "gemini",
+            "intent": "answer_question"
+          }
+        }
+      ],
+      "success": true
+    },
+    {
+      "id": "trace-1769655099069",
+      "sessionId": "b31f02e9-66ac-4959-9ebe-9f192948a1de",
+      "userInput": "I got a pay increase this year, how much has my pay check increase",
+      "agentResponse": "Okay, John. I can help you with that. Your gross pay in December 2025 was $3,500.00, and your gross pay in January 2026 was $3,605.00. This means your gross pay increased by $105.00 per pay period. Your net pay in December 2025 was $2173.10, and your net pay in January 2026 was $2242.80. This means your net pay increased by $69.70 per pay period.\n",
+      "startTime": "2026-01-29T02:51:36.772Z",
+      "endTime": "2026-01-29T02:51:39.069Z",
+      "totalDuration": 2297,
+      "entries": [
+        {
+          "id": "entry-1769655097728-1",
+          "type": "intent_classification",
+          "name": "Orchestrator Intent Classification",
+          "timestamp": "2026-01-29T02:51:37.728Z",
+          "metadata": {
+            "intent": "answer_question",
+            "classificationMethod": "orchestrator",
+            "confidence": "high"
+          }
+        },
+        {
+          "id": "entry-1769655099069-3",
+          "type": "llm_call",
+          "name": "Gemini Response Generation",
+          "timestamp": "2026-01-29T02:51:39.069Z",
+          "duration": 1341,
+          "metadata": {
+            "model": "gemini",
+            "intent": "answer_question"
+          }
+        }
+      ],
+      "success": true
     }
   ],
   "stats": {
@@ -374,17 +476,17 @@
     },
     "signalReads": {},
     "intentDistribution": {
-      "answer_question": 9,
+      "answer_question": 12,
       "request_clarification": 2
     },
     "classificationMethods": {
-      "orchestrator": 11
+      "orchestrator": 14
     },
-    "avgResponseTime": 6733.4,
-    "totalLlmCalls": 9,
+    "avgResponseTime": 5598.923076923077,
+    "totalLlmCalls": 12,
     "totalTokensUsed": 0,
     "errorCount": 0
   },
   "createdAt": "2026-01-28T22:47:34.209Z",
-  "updatedAt": "2026-01-28T23:18:31.980Z"
+  "updatedAt": "2026-01-29T02:51:39.069Z"
 }

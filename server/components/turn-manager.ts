@@ -108,6 +108,15 @@ export class TurnManager {
       detectedIntents['rejection'] = true;
     }
 
+    // If it's a question with clarification keywords, always treat as ambiguous
+    // so LLM can distinguish between clarification and follow-up
+    const hasQuestion = userInputLower.includes('?');
+    const hasClarificationKeywords = detectedIntents['clarification'];
+
+    if (hasQuestion && hasClarificationKeywords) {
+      return { isAmbiguous: true, detectedIntents };
+    }
+
     const nonClarificationIntents = Object.keys(detectedIntents).filter(k => k !== 'clarification');
     const isAmbiguous = nonClarificationIntents.length >= 2;
 
@@ -156,26 +165,11 @@ export class TurnManager {
       };
     }
 
-    // Priority 5: Clarification request
-    // BUT exclude short follow-up questions that reference previous context
-    // (e.g., "how about this year?", "what about next month?", "and this one?")
-    const followUpPatterns = [
-      /^(how|what|and)\s+(about|for|if)/i,
-      /^(this|that|next|last)\s+(year|month|week|one)/i,
-      /^and\s+(the|this|that)/i,
-      /^(how|what)\s+about\s+/i
-    ];
-    const isFollowUpQuestion = followUpPatterns.some(pattern => pattern.test(inputLower));
-    
-    if (this.hasKeywords(inputLower, this.clarificationKeywords) && 
-        inputLower.includes('?') && 
-        !isFollowUpQuestion) {
-      return {
-        intent: 'request_clarification',
-        classificationMethod: 'keyword',
-        confidence: 'medium',
-        needsExplanation: true
-      };
+    // Priority 5: Questions with clarification keywords
+    // Let LLM decide if it's clarification or follow-up (removed pattern matching!)
+    if (this.hasKeywords(inputLower, this.clarificationKeywords) && inputLower.includes('?')) {
+      // Mark as ambiguous so it goes to LLM
+      return null;
     }
 
     // Default: Treat as answer to current question
@@ -196,47 +190,116 @@ export class TurnManager {
     context: ConversationContext, 
     detectedIntents: Record<string, boolean>
   ): string {
+    // Build conversation history context
+    const recentHistory = context.conversationHistory && context.conversationHistory.length > 0
+      ? context.conversationHistory
+          .map((turn, i) => `${turn.role === 'assistant' ? 'System' : 'User'}: ${turn.content}`)
+          .join('\n')
+      : 'No previous conversation';
+
     return `You are an intent classifier for a conversation system.
 
 CONTEXT:
-Current question: ${context.currentQuestion || 'unknown'}
-Previous question: ${context.previousQuestion || 'unknown'}
-Previous answer: ${context.previousAnswer || 'unknown'}
+Current question being asked: "${context.currentQuestion || 'unknown'}"
+Previous question asked: "${context.previousQuestion || 'unknown'}"
+User's previous answer: "${context.previousAnswer || 'unknown'}"
+
+Recent conversation:
+${recentHistory}
+
 Awaiting confirmation: ${context.awaitingConfirmation || false}
-Pending suggestion: ${context.pendingSuggestion || 'none'}
+${context.pendingSuggestion ? `Pending suggestion: "${context.pendingSuggestion}"` : ''}
 
 USER INPUT: "${userInput}"
 
-KEYWORD ANALYSIS:
-Detected keyword types: ${Object.keys(detectedIntents).join(', ') || 'none'}
+DETECTED KEYWORDS: ${Object.keys(detectedIntents).join(', ') || 'none'}
 
-TASK: Classify the user's PRIMARY intent into ONE category:
+YOUR TASK: Classify the user's PRIMARY intent into ONE category.
 
-1. answer_question - Responding to current question
-2. go_back - Return to previous step
-3. change_previous_answer - Correct earlier answer
-4. request_clarification - Asking for explanation
-5. confirm - Accepting suggestion (only if awaiting_confirmation=true)
-6. reject - Rejecting suggestion (only if awaiting_confirmation=true)
-7. unclear - Cannot determine intent
+INTENT TYPES & CRITERIA:
 
-RULES:
-- If awaiting confirmation and user says yes/confirm/correct → "confirm"
-- If awaiting confirmation and user says no/wrong/incorrect → "reject"
-- If user says "back" or "previous" → "go_back"
-- If user says "actually" or "change" → "change_previous_answer"
-- If user asks a question (contains ?) → "request_clarification"
-- If providing info for current question → "answer_question"
+1. **answer_question** - User is responding to or engaging with the current question
+   Criteria:
+   - Providing information relevant to current question
+   - Follow-up questions that BUILD ON previous discussion (e.g., "how about this year?" after discussing last year)
+   - Exploring options related to current question (e.g., "what if I did monthly instead?")
+   - References something just discussed (uses "this", "that", "it" referring to recent context)
 
-Respond ONLY with this JSON structure:
+2. **request_clarification** - User doesn't understand YOUR question or needs explanation
+   Criteria:
+   - Asks what you MEAN by your question (e.g., "What do you mean by state?")
+   - Says they don't understand the question itself
+   - Asks why you're asking this question
+   - Asks for examples of valid answers
+   - Genuinely confused about what you want
+
+3. **go_back** - User wants to return to a previous step
+   Criteria:
+   - Explicit navigation language ("go back", "previous", "return")
+   - Wants to change location in conversation flow
+
+4. **change_previous_answer** - User wants to correct an earlier answer
+   Criteria:
+   - Says "actually", "change", "I meant", "should be"
+   - References a previous answer and provides correction
+
+5. **confirm** - Accepting a suggestion (ONLY if awaiting_confirmation=true)
+   Criteria:
+   - Says yes/confirm/correct/looks good
+   - Must be awaiting confirmation
+
+6. **reject** - Rejecting a suggestion (ONLY if awaiting_confirmation=true)
+   Criteria:
+   - Says no/wrong/incorrect
+   - Must be awaiting confirmation
+
+7. **unclear** - Cannot determine what user wants
+   Criteria:
+   - Off-topic, gibberish, or completely unrelated to conversation
+   - No clear intent detectable
+
+CRITICAL DISTINCTION - Clarification vs Follow-up:
+
+The key difference is whether user is asking about YOUR QUESTION or ENGAGING WITH the topic:
+
+❌ request_clarification: "What do you mean by pay frequency?" 
+   → User doesn't understand YOUR question
+
+✅ answer_question: "How about biweekly?" 
+   → User understood question, is exploring options
+
+❌ request_clarification: "I don't understand what you're asking"
+   → User is confused about the question itself
+
+✅ answer_question: "What if I change it to monthly?" 
+   → User is engaging with the topic, exploring alternatives
+
+❌ request_clarification: "Can you explain why you need my state?"
+   → Asking about YOUR reasoning/question
+
+✅ answer_question: "How about this year instead?" 
+   → Building on previous context, continuing the conversation
+
+CONTEXT CLUES:
+- If user references something from recent conversation → likely answer_question (follow-up)
+- If user asks "what do you mean" or "I don't understand" → likely request_clarification
+- Look at conversation history to see if they're building on previous discussion
+
+REASONING PROCESS:
+1. Check conversation history - does user reference something we just discussed? → answer_question
+2. Check if user asks about YOUR question itself → request_clarification  
+3. Check for explicit navigation/correction keywords → go_back or change_previous_answer
+4. Default to answer_question if user is engaging with the topic
+
+Respond ONLY with this JSON:
 {
-  "intent": "<one of the intent types>",
+  "intent": "<one of: answer_question, go_back, change_previous_answer, request_clarification, confirm, reject, unclear>",
   "confidence": "<high, medium, or low>",
-  "reasoning": "<brief explanation>",
+  "reasoning": "<1-2 sentences explaining why this intent, especially if distinguishing clarification vs follow-up>",
   "extracted_value": "<value if answering or correcting, null otherwise>",
   "proposed_change": {"field": "<field name>", "new_value": "<value>"} (only for change_previous_answer),
   "target_question": "<field name>" (only for go_back),
-  "clarification_topic": "<topic>" (only for request_clarification)
+  "clarification_topic": "<what user is confused about>" (only for request_clarification)
 }`;
   }
 
@@ -255,7 +318,7 @@ Respond ONLY with this JSON structure:
 
     try {
       const prompt = this.buildDisambiguationPrompt(userInput, context, detectedIntents);
-      
+
       const response = await this.llmClient.models.generateContent({
         model: this.model,
         contents: prompt,
@@ -269,7 +332,7 @@ Respond ONLY with this JSON structure:
       if (text) {
         const llmResult = JSON.parse(text);
         const intent = llmResult.intent as IntentType || 'unclear';
-        
+
         const result: ClassificationResult = {
           intent,
           classificationMethod: 'llm',
