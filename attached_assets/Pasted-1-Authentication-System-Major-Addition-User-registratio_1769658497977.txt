@@ -1,0 +1,52 @@
+1. Authentication System (Major Addition)
+User registration and login with username/password
+Session management with cookies (7-day expiration)
+Password reset flow (username verification → set new password)
+Agent isolation (each user sees only their own agents)
+Protected routes with ownership verification
+2. Chat Session Management (Major Addition)
+Multiple sessions per agent
+Session sidebar with previews and message counts
+Inline session renaming
+Session-based message storage (/agents/{id}/sessions/{session-id}/messages.json)
+Migration from legacy single-file format
+3. Context Progress Indicator
+Compact header bar showing context window fill level
+Color-coded status (green/yellow/red)
+4. Agent Tracing & Debugging (Major Addition)
+Trace entries for hooks, signals, LLM calls, state changes
+Usage statistics (hook calls, signal reads, intent distribution)
+Turn traces for each conversation turn
+Config history with snapshots and revert points
+Simulation system for testing config changes
+5. New Data Models
+ChatSession schema
+SessionMeta, SessionMessage, ContextSummary schemas
+TraceEntry, TurnTrace, AgentTrace schemas
+ConfigSnapshot, ConfigHistory schemas
+SimulationRequest, SimulationResult schemas
+User and AuthSession schemas
+Content to Revise
+1. Last Updated Date
+Change from January 28 to January 29, 2026
+2. Overview Section
+Add authentication capability
+Update key capabilities list to include multi-session support
+3. Architecture → Project Structure
+Add /data/users.json for user storage
+Update agent folder structure to show sessions/ subfolder
+Add session-related files (sessions.json, session folders)
+4. API Reference
+Add authentication endpoints (/api/auth/register, /api/auth/login, /api/auth/logout, /api/auth/me, /api/auth/reset-password)
+Add session endpoints (/api/agents/:id/sessions, rename, delete)
+Update message endpoints to include sessionId
+5. Data Models Section
+Add User schema
+Add ChatSession schema
+Update ChatMessage to show sessionId field
+Add tracing schemas
+6. Configuration Section
+Add user storage location
+Document session configuration options
+7. Version History
+Add entry for January 29, 2026 covering authentication & sessions
