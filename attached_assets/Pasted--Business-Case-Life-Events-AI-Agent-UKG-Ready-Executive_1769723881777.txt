@@ -1,0 +1,161 @@
+## Business Case: Life Events AI Agent (UKG Ready)
+
+### Executive summary
+
+Employees frequently need help with **Qualifying Life Events (QLEs)**—marriage, birth/adoption, loss of coverage, moves, divorce—yet the process is time-sensitive and policy-driven. A **Life Events AI Agent** for UKG Ready will provide 24/7, consistent guidance, reduce HR/Benefits ticket volume, improve submission completeness (correct event type/date/docs), and reduce missed deadlines and coverage gaps. The agent uses a **customer-specific policy table** (uploaded/mocked for prototype; derived from configuration in production) to avoid inaccurate guidance.
+
+---
+
+### Problem / opportunity
+
+**Common pain points**
+
+* Employees don’t know if they qualify, what they can change, what documents are required, or how effective dates work.
+* HR/Benefits gets repetitive, high-volume questions and “status check” follow-ups.
+* Incomplete/incorrect submissions (wrong event type, missing dates/docs) cause back-and-forth, delays, and denials.
+* Missed submission windows lead to exceptions and unhappy employees—sometimes resulting in coverage gaps.
+
+**Why it matters**
+
+* QLEs are high-impact moments; delays and confusion create strong negative employee experience.
+* HR/Benefits time is expensive; QLE inquiries are predictable and largely standardized.
+
+---
+
+### Proposed solution
+
+A **Life Events AI Agent** embedded in the employee support experience (or prototype app for usability tests) that:
+
+1. **Understands the employee’s situation** and maps it to a QLE category
+2. Uses a **customer-specific policy table** (or handbook excerpts) as source of truth for:
+
+   * submission window
+   * allowed changes
+   * documentation requirements
+   * effective date rules and approval steps
+3. **Asks minimal intake questions** (event date, who is affected, desired changes, benefits impacted, docs available)
+4. Provides **step-by-step guidance** to complete the process (system-agnostic in prototype; ESS steps in production)
+5. **Escalates** when policy is unclear or exceptions are required, with a structured handoff summary
+
+---
+
+### Target users
+
+* **Employees (ESS)** needing QLE help
+* **HR/Benefits** teams handling escalations and exceptions
+* **Payroll/Benefits admins** (indirectly) through reduced rework and cleaner submissions
+
+---
+
+### Scope (MVP)
+
+**In scope**
+
+* Common life events: marriage, divorce, birth, adoption/placement, loss/gain of other coverage, move affecting plan availability, death of dependent/spouse, dependent aging out
+* Document guidance (what is typically needed + customer-specific rules if available)
+* Deadline/window guidance and “outside window” escalation handling
+* Effective date explanations (policy-driven; no promises if unknown)
+* Handoff summary generation
+
+**Out of scope (guardrails)**
+
+* Legal advice (divorce/custody)
+* Tax advice (what to claim)
+* Handling coverage disputes beyond explanation (route to HR/Benefits)
+
+---
+
+### Benefits and value
+
+**Employee experience**
+
+* Faster answers, fewer missed windows, clearer next steps
+* Lower anxiety during major life changes
+
+**Operational efficiency**
+
+* Ticket deflection for repetitive “how do I / do I qualify / what docs / when effective” inquiries
+* Reduced HR follow-ups due to improved intake completeness and fewer incorrect submissions
+
+**Risk reduction**
+
+* Consistent, policy-aware guidance decreases incorrect recommendations
+* Structured escalation reduces sensitive-data handling and improves compliance
+
+---
+
+### Metrics / KPIs
+
+* **Ticket deflection rate** for QLE-related inquiries
+* **First-contact resolution rate** (issues resolved without HR follow-up)
+* **Submission completeness rate** (event date present, correct event type, docs attached when required)
+* **Time-to-submit** (from question to successful submission)
+* **Reduction in “outside window” exception requests**
+* Employee **CSAT** for benefits support
+
+---
+
+### ROI model (how to justify)
+
+You can estimate ROI with a simple formula:
+
+**Annual savings** ≈
+`(QLE inquiry volume per year) × (deflection %) × (avg minutes per ticket) × (HR hourly cost / 60)`
+
+Example inputs to plug in (use your own):
+
+* QLE inquiries/year: 5,000
+* Deflection: 30–50%
+* Avg handling time: 8–12 minutes
+* HR cost: $40–$60/hr
+
+Also consider soft savings:
+
+* fewer retroactive corrections
+* fewer employee escalations
+* reduced carrier/broker back-and-forth due to missing docs
+
+---
+
+### Risks and mitigations
+
+**Risk:** Customer policies vary; incorrect guidance harms trust
+
+* **Mitigation:** Policy table as source of truth; “don’t guess” rule; escalate when missing
+
+**Risk:** Users ask for legal/tax advice
+
+* **Mitigation:** hard guardrails + redirect to HR/professionals
+
+**Risk:** Document handling / sensitive data
+
+* **Mitigation:** do not accept sensitive docs in chat; use secure upload channels
+
+---
+
+### Implementation approach
+
+**Prototype**
+
+* Use mock customer policy tables (Strict/Moderate/Lenient) + sample employee dataset
+* Evaluate usability: clarity, trust, completion success, escalation flow
+
+**Production (future)**
+
+* Replace mocked policy with:
+
+  * configuration-derived policy table (where available), and/or
+  * customer handbook/SPD ingestion + validation
+* Add telemetry: what users ask, where they drop off, escalation reasons
+
+---
+
+### Recommendation
+
+Proceed with a prototype-driven rollout:
+
+1. Validate the conversational workflow with 3 policy profiles
+2. Measure completion, comprehension, and escalation quality
+3. Use findings to prioritize integration points and customer configuration mapping in UKG Ready
+
+If you want, I can also turn this into a **one-page slide-style business case** (Problem → Solution → Value → KPIs → Risks) for sharing internally.
