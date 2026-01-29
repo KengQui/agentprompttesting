@@ -71,9 +71,42 @@ Add retry mechanism when AI responses fail validation or API errors occur.
 
 ---
 
+### 3. Prompt Diagnosis Tool
+**Status:** Planned  
+**Added:** January 29, 2026
+
+**Description:**  
+When users experience unexpected behavior in agent conversations, provide a diagnostic tool to identify whether the issue stems from the system prompt configuration or the agent's runtime behavior (validation rules, guardrails, domain knowledge).
+
+**Features:**
+- "Diagnose Issue" button on problematic messages in chat interface
+- AI-powered analysis comparing the response against system prompt vs agent configuration
+- Clear verdict identifying the likely source (system prompt, guardrails, validation rules, domain knowledge, etc.)
+- Actionable suggestions for fixing the identified issue
+- Option to test with modified configuration before applying changes
+
+**Implementation Approach:**
+1. Add diagnosis button to individual chat messages
+2. Send conversation context + all prompt components to AI for analysis
+3. Display diagnosis panel showing:
+   - Which component is likely causing the behavior
+   - Specific rules/sections that may be conflicting
+   - Suggested fixes with one-click apply option
+
+**Related Files:**
+- `client/src/pages/chat.tsx`
+- `server/routes.ts` (new diagnosis endpoint)
+- Agent configuration files in `agents/{agentId}/`
+
+**Notes:**
+- Could integrate with existing tracing/debugging panel
+- Consider caching diagnosis results for repeated issues
+
+---
+
 ## Priority: Low
 
-### 3. Unit Tests for Response Validation
+### 4. Unit Tests for Response Validation
 **Status:** Planned  
 **Added:** January 29, 2026
 
