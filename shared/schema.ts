@@ -51,6 +51,44 @@ export const sampleDatasetSchema = z.object({
 
 export type SampleDataset = z.infer<typeof sampleDatasetSchema>;
 
+// Agent action field schema (for action parameters)
+export const actionFieldSchema = z.object({
+  name: z.string(),
+  type: z.enum(["string", "number", "boolean", "date", "select"]),
+  label: z.string(),
+  required: z.boolean().default(true),
+  options: z.array(z.string()).optional(), // For select type
+  description: z.string().optional(),
+});
+
+export type ActionField = z.infer<typeof actionFieldSchema>;
+
+// Agent action schema (defines what actions the agent can simulate)
+export const agentActionSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  description: z.string(),
+  category: z.string().default("general"),
+  requiredFields: z.array(actionFieldSchema).default([]),
+  confirmationMessage: z.string().default(""),
+  successMessage: z.string().default(""),
+  affectedDataFields: z.array(z.string()).default([]), // Which mock data fields this action modifies
+});
+
+export type AgentAction = z.infer<typeof agentActionSchema>;
+
+// Mock user state schema (simulated user data the agent can read/modify)
+export const mockUserStateSchema = z.object({
+  id: z.string(),
+  name: z.string(), // e.g., "Employee Profile", "Policy Details"
+  description: z.string().default(""),
+  fields: z.record(z.any()).default({}), // Key-value pairs of user data
+  isGenerated: z.boolean().default(false),
+  createdAt: z.string(),
+});
+
+export type MockUserState = z.infer<typeof mockUserStateSchema>;
+
 // Clarifying insight from AI Q&A
 export const clarifyingInsightSchema = z.object({
   id: z.string(),
@@ -77,6 +115,8 @@ export const agentSchema = z.object({
   promptStyle: promptStyleEnum.default("anthropic"),
   customPrompt: z.string().default(""),
   clarifyingInsights: z.array(clarifyingInsightSchema).default([]),
+  availableActions: z.array(agentActionSchema).default([]),
+  mockUserState: z.array(mockUserStateSchema).default([]),
   status: agentStatusEnum.default("draft"),
   createdAt: z.string(),
   updatedAt: z.string(),
@@ -167,6 +207,8 @@ export const wizardStepSchema = z.object({
   promptStyle: promptStyleEnum.default("anthropic"),
   customPrompt: z.string().default(""),
   clarifyingInsights: z.array(clarifyingInsightSchema).default([]),
+  availableActions: z.array(agentActionSchema).default([]),
+  mockUserState: z.array(mockUserStateSchema).default([]),
 });
 
 export type WizardStepData = z.infer<typeof wizardStepSchema>;

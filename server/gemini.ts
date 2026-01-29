@@ -1,6 +1,6 @@
 import { GoogleGenAI } from "@google/genai";
 import { generatePrompt, type PromptContext } from "./prompt-templates";
-import type { PromptStyle, DomainDocument, GeminiModel, SampleDataset, ClarifyingInsight } from "@shared/schema";
+import type { PromptStyle, DomainDocument, GeminiModel, SampleDataset, ClarifyingInsight, AgentAction, MockUserState } from "@shared/schema";
 import { defaultGenerationModel } from "@shared/schema";
 import { v4 as uuidv4 } from "uuid";
 
@@ -47,11 +47,282 @@ export interface AgentContext {
   guardrails: string;
   promptStyle?: PromptStyle;
   customPrompt?: string;
+  availableActions?: AgentAction[];
+  mockUserState?: MockUserState[];
 }
 
 export interface ChatHistory {
   role: "user" | "assistant";
   content: string;
+}
+
+// Result of parsing an AI response for action blocks
+export interface ParsedActionResult {
+  hasAction: boolean;
+  actionName?: string;
+  actionFields?: Record<string, any>;
+  cleanedResponse: string;
+  rawActionBlock?: string;
+  parseError?: string;
+}
+
+// Result of executing an action
+export interface ActionExecutionResult {
+  success: boolean;
+  actionName: string;
+  fields: Record<string, any>;
+  message: string;
+  updatedMockState?: MockUserState[];
+}
+
+// Parse action blocks from AI response
+export function parseActionFromResponse(response: string): ParsedActionResult {
+  const actionBlockRegex = /```action\s*\n?([\s\S]*?)```/i;
+  const match = response.match(actionBlockRegex);
+  
+  if (!match) {
+    return { hasAction: false, cleanedResponse: response };
+  }
+  
+  const rawBlock = match[0];
+  const blockContent = match[1].trim();
+  
+  // Parse the action block
+  const actionNameMatch = blockContent.match(/^ACTION:\s*(.+?)$/mi);
+  // Use multiline capture to handle pretty-printed JSON spanning multiple lines
+  const fieldsMatch = blockContent.match(/^FIELDS:\s*([\s\S]+)$/mi);
+  
+  if (!actionNameMatch) {
+    return { hasAction: false, cleanedResponse: response };
+  }
+  
+  const actionName = actionNameMatch[1].trim();
+  let actionFields: Record<string, any> = {};
+  let parseError: string | undefined;
+  
+  if (fieldsMatch) {
+    try {
+      // Try to parse the fields as JSON
+      const rawFields = fieldsMatch[1].trim();
+      actionFields = JSON.parse(rawFields);
+    } catch (e) {
+      console.error("Failed to parse action fields:", e);
+      parseError = `Failed to parse action fields: ${e instanceof Error ? e.message : 'Invalid JSON'}`;
+    }
+  }
+  
+  // Remove the action block from the response for clean display
+  const cleanedResponse = response.replace(rawBlock, '').trim();
+  
+  return {
+    hasAction: true,
+    actionName,
+    actionFields,
+    cleanedResponse,
+    rawActionBlock: rawBlock,
+    parseError
+  };
+}
+
+// Execute a simulated action and update mock state
+export function executeSimulatedAction(
+  actionName: string,
+  fields: Record<string, any>,
+  availableActions: AgentAction[],
+  currentMockState: MockUserState[]
+): ActionExecutionResult {
+  // Find the action definition
+  const action = availableActions.find(
+    a => a.name.toLowerCase() === actionName.toLowerCase() || 
+         a.name.toLowerCase().replace(/\s+/g, '_') === actionName.toLowerCase()
+  );
+  
+  if (!action) {
+    return {
+      success: false,
+      actionName,
+      fields,
+      message: `Action "${actionName}" is not available.`
+    };
+  }
+  
+  // Validate required fields are present (check for undefined/null, not falsy)
+  const missingFields = action.requiredFields.filter(
+    f => (fields[f.name] === undefined || fields[f.name] === null) && f.name !== 'id'
+  );
+  
+  if (missingFields.length > 0) {
+    return {
+      success: false,
+      actionName,
+      fields,
+      message: `Missing required fields: ${missingFields.map(f => f.label).join(', ')}`
+    };
+  }
+  
+  // Clone the mock state for modification
+  const updatedMockState = JSON.parse(JSON.stringify(currentMockState)) as MockUserState[];
+  
+  // Determine target profile/entity based on action name and provided fields
+  // Look for fields like 'profileId', 'entityId', 'targetId', or state category matches
+  const targetId = fields.profileId || fields.entityId || fields.targetId || fields.id;
+  
+  // Apply simulated action effects based on category
+  if (action.category === 'create' || action.category === 'add') {
+    // For create/add actions, add the new item to the most appropriate state
+    const targetState = updatedMockState.find(s => 
+      s.name.toLowerCase().includes(action.name.split(' ').pop()?.toLowerCase() || '') ||
+      action.name.toLowerCase().includes(s.name.toLowerCase())
+    );
+    
+    if (targetState && Array.isArray(targetState.fields)) {
+      targetState.fields.push({
+        id: `sim_${Date.now()}`,
+        ...fields,
+        createdAt: new Date().toISOString()
+      });
+    } else if (targetState && typeof targetState.fields === 'object') {
+      // If fields is an object that should contain arrays, try to find the right array
+      const fieldsObj = targetState.fields as Record<string, any>;
+      for (const key of Object.keys(fieldsObj)) {
+        if (Array.isArray(fieldsObj[key])) {
+          fieldsObj[key].push({
+            id: `sim_${Date.now()}`,
+            ...fields,
+            createdAt: new Date().toISOString()
+          });
+          break;
+        }
+      }
+    }
+  } else if (action.category === 'update' || action.category === 'modify') {
+    // For update actions, modify the targeted state or array item
+    let updated = false;
+    
+    // First try to find and update an item in an array by targetId
+    if (targetId) {
+      for (const state of updatedMockState) {
+        // Handle array-based fields (e.g., list of dependents, policies)
+        if (Array.isArray(state.fields)) {
+          const itemIndex = state.fields.findIndex(
+            (item: any) => item.id === targetId || item.entityId === targetId || item.dependentId === targetId
+          );
+          if (itemIndex >= 0) {
+            Object.assign(state.fields[itemIndex], fields);
+            updated = true;
+            break;
+          }
+        } 
+        // Handle object with nested arrays
+        else if (typeof state.fields === 'object') {
+          const fieldsObj = state.fields as Record<string, any>;
+          // Check if this object directly matches targetId
+          if (fieldsObj.id === targetId || fieldsObj.employeeId === targetId || fieldsObj.userId === targetId) {
+            Object.assign(fieldsObj, fields);
+            updated = true;
+            break;
+          }
+          // Check nested arrays
+          for (const key of Object.keys(fieldsObj)) {
+            if (Array.isArray(fieldsObj[key])) {
+              const itemIndex = fieldsObj[key].findIndex(
+                (item: any) => item.id === targetId || item.entityId === targetId || item.dependentId === targetId
+              );
+              if (itemIndex >= 0) {
+                Object.assign(fieldsObj[key][itemIndex], fields);
+                updated = true;
+                break;
+              }
+            }
+          }
+          if (updated) break;
+        }
+      }
+    }
+    
+    // Fallback: match by action name if no targetId or not found
+    if (!updated) {
+      const targetState = updatedMockState.find(s => 
+        s.name.toLowerCase().includes(action.name.split(' ').pop()?.toLowerCase() || '') ||
+        action.name.toLowerCase().includes(s.name.toLowerCase())
+      );
+      
+      if (targetState && typeof targetState.fields === 'object' && !Array.isArray(targetState.fields)) {
+        Object.assign(targetState.fields, fields);
+        updated = true;
+      }
+    }
+    
+    if (!updated) {
+      return {
+        success: false,
+        actionName: action.name,
+        fields,
+        message: `Could not find target to update. ${targetId ? `No item with ID ${targetId} was found.` : 'Please specify a target ID.'}`
+      };
+    }
+  } else if (action.category === 'delete' || action.category === 'remove') {
+    // For delete actions, remove items from arrays
+    let deleted = false;
+    
+    if (targetId) {
+      for (const state of updatedMockState) {
+        // Handle top-level arrays
+        if (Array.isArray(state.fields)) {
+          const originalLength = state.fields.length;
+          state.fields = state.fields.filter(
+            (item: any) => item.id !== targetId && item.entityId !== targetId && item.dependentId !== targetId
+          );
+          if (state.fields.length < originalLength) {
+            deleted = true;
+            break;
+          }
+        }
+        // Handle object with nested arrays
+        else if (typeof state.fields === 'object') {
+          const fieldsObj = state.fields as Record<string, any>;
+          for (const key of Object.keys(fieldsObj)) {
+            if (Array.isArray(fieldsObj[key])) {
+              const originalLength = fieldsObj[key].length;
+              fieldsObj[key] = fieldsObj[key].filter(
+                (item: any) => item.id !== targetId && item.entityId !== targetId && item.dependentId !== targetId
+              );
+              if (fieldsObj[key].length < originalLength) {
+                deleted = true;
+                break;
+              }
+            }
+          }
+          if (deleted) break;
+        }
+      }
+    }
+    
+    if (!deleted) {
+      return {
+        success: false,
+        actionName: action.name,
+        fields,
+        message: `Could not find item to delete. ${targetId ? `No item with ID ${targetId} was found.` : 'Please specify a target ID.'}`
+      };
+    }
+  }
+  
+  // Build success message
+  let message = action.successMessage || `Successfully executed: ${action.name}`;
+  
+  // Replace placeholders in success message
+  for (const [key, value] of Object.entries(fields)) {
+    message = message.replace(new RegExp(`\\{${key}\\}`, 'gi'), String(value));
+  }
+  
+  return {
+    success: true,
+    actionName: action.name,
+    fields,
+    message,
+    updatedMockState
+  };
 }
 
 export async function generateAgentResponse(
@@ -174,6 +445,72 @@ function hasPlaceholders(customPrompt: string): boolean {
   return placeholderPattern.test(customPrompt);
 }
 
+// Build action simulation section for system prompt
+function buildActionsText(agent: AgentContext): string {
+  if (!agent.availableActions || agent.availableActions.length === 0) {
+    return "";
+  }
+  
+  let section = `## Available Actions (Action Simulation Mode)
+
+You can SIMULATE performing the following actions when the user requests them. When the user asks you to perform an action, you should:
+1. Confirm you understand what they want to do
+2. Gather any missing required information through conversation
+3. When ready to execute, output the action in this EXACT format:
+
+\`\`\`action
+ACTION: action_name
+FIELDS: {"field_name": "value", "other_field": "value"}
+\`\`\`
+
+After outputting the action block, provide a confirmation message explaining what was done.
+
+### Available Actions:\n`;
+
+  for (const action of agent.availableActions) {
+    section += `\n**${action.name}** (${action.category})\n`;
+    section += `Description: ${action.description}\n`;
+    if (action.requiredFields.length > 0) {
+      section += `Required fields:\n`;
+      for (const field of action.requiredFields) {
+        section += `  - ${field.name} (${field.type}): ${field.label}`;
+        if (field.options) {
+          section += ` [Options: ${field.options.join(", ")}]`;
+        }
+        section += `\n`;
+      }
+    }
+    if (action.confirmationMessage) {
+      section += `Before executing: "${action.confirmationMessage}"\n`;
+    }
+    if (action.successMessage) {
+      section += `After success: "${action.successMessage}"\n`;
+    }
+  }
+  
+  return section;
+}
+
+// Build mock user state section for system prompt
+function buildMockUserStateText(agent: AgentContext): string {
+  if (!agent.mockUserState || agent.mockUserState.length === 0) {
+    return "";
+  }
+  
+  let section = "## Current User Profile (Mock Data for Simulation)\n\n";
+  section += "This is the simulated user's current data. Reference this when answering questions about their profile or when actions would modify their data.\n\n";
+  
+  for (const state of agent.mockUserState) {
+    section += `### ${state.name}\n`;
+    if (state.description) {
+      section += `${state.description}\n`;
+    }
+    section += "```json\n" + JSON.stringify(state.fields, null, 2) + "\n```\n\n";
+  }
+  
+  return section;
+}
+
 function getSystemPrompt(agent: AgentContext): string {
   // Use custom prompt if the user has edited it
   if (agent.customPrompt && agent.customPrompt.trim()) {
@@ -181,13 +518,21 @@ function getSystemPrompt(agent: AgentContext): string {
     
     // If custom prompt uses placeholders, process them
     if (hasPlaceholders(customPrompt)) {
-      return processCustomPrompt(customPrompt, agent);
+      let prompt = processCustomPrompt(customPrompt, agent);
+      // Also add actions and mock state
+      const actionsText = buildActionsText(agent);
+      const mockStateText = buildMockUserStateText(agent);
+      if (actionsText) prompt += `\n\n${actionsText}`;
+      if (mockStateText) prompt += `\n\n${mockStateText}`;
+      return prompt;
     }
     
     // If no placeholders used, append domain knowledge and guardrails automatically
     // This ensures the agent still has access to important context
     const domainKnowledgeText = buildDomainKnowledgeText(agent);
     const sampleDatasetsText = buildSampleDatasetsText(agent);
+    const actionsText = buildActionsText(agent);
+    const mockStateText = buildMockUserStateText(agent);
     const currentDate = new Date().toLocaleDateString('en-US', { 
       weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' 
     });
@@ -220,6 +565,16 @@ function getSystemPrompt(agent: AgentContext): string {
     // Add guardrails if available - these are critical for safety
     if (agent.guardrails) {
       fullPrompt += `\n\n## Guardrails (CRITICAL - Must Follow)\n${agent.guardrails}`;
+    }
+    
+    // Add available actions if configured
+    if (actionsText) {
+      fullPrompt += `\n\n${actionsText}`;
+    }
+    
+    // Add mock user state if configured
+    if (mockStateText) {
+      fullPrompt += `\n\n${mockStateText}`;
     }
     
     return fullPrompt;
@@ -811,5 +1166,169 @@ Generate safety guardrails for an AI agent handling this use case.`;
   } catch (error: any) {
     console.error("Gemini API error:", error?.message || error);
     throw new Error(`Failed to generate guardrails: ${error?.message || error}`);
+  }
+}
+
+// ====== Action Simulation Generation ======
+
+export interface ActionsGenerationContext {
+  businessUseCase: string;
+  domainKnowledge?: string;
+  domainDocuments?: DomainDocument[];
+  model?: GeminiModel;
+}
+
+export interface GeneratedActionsResult {
+  actions: Array<{
+    id: string;
+    name: string;
+    description: string;
+    category: string;
+    requiredFields: Array<{
+      name: string;
+      type: "string" | "number" | "boolean" | "date" | "select";
+      label: string;
+      required: boolean;
+      options?: string[];
+      description?: string;
+    }>;
+    confirmationMessage: string;
+    successMessage: string;
+    affectedDataFields: string[];
+  }>;
+  mockUserState: Array<{
+    id: string;
+    name: string;
+    description: string;
+    fields: Record<string, any>;
+    isGenerated: boolean;
+    createdAt: string;
+  }>;
+}
+
+export async function generateActionsAndMockData(context: ActionsGenerationContext): Promise<GeneratedActionsResult> {
+  const modelToUse = context.model || defaultGenerationModel;
+  if (!process.env.GEMINI_API_KEY) {
+    throw new Error("GEMINI_API_KEY is not configured");
+  }
+
+  const domainDocsText = context.domainDocuments?.length 
+    ? context.domainDocuments.map(doc => `${doc.filename}: ${doc.content}`).join("\n\n")
+    : "";
+
+  const systemPrompt = `You are an expert at designing agent capabilities for HR/business AI assistants. Based on the business use case, generate a list of ACTIONS the agent can simulate (fake execute) and MOCK USER DATA for testing.
+
+Your response must be ONLY valid JSON with this exact structure:
+{
+  "actions": [
+    {
+      "name": "action_name_snake_case",
+      "description": "What this action does",
+      "category": "category_name",
+      "requiredFields": [
+        {
+          "name": "field_name",
+          "type": "string|number|boolean|date|select",
+          "label": "Human Readable Label",
+          "required": true,
+          "options": ["option1", "option2"],
+          "description": "Field description"
+        }
+      ],
+      "confirmationMessage": "Message shown before executing: You are about to...",
+      "successMessage": "Message shown after success: Successfully...",
+      "affectedDataFields": ["field1", "field2"]
+    }
+  ],
+  "mockUserState": [
+    {
+      "name": "Profile/Record Name",
+      "description": "What this data represents",
+      "fields": {
+        "fieldName": "value",
+        "anotherField": 123
+      }
+    }
+  ]
+}
+
+Guidelines:
+1. Generate 3-8 realistic actions the agent could perform
+2. Actions should be things users would ask to do (submit, update, add, remove, request, etc.)
+3. Each action should have realistic required fields
+4. Generate 1-3 mock data profiles with realistic sample data
+5. Mock data should include fields that actions will read/modify
+6. Use realistic but clearly fake sample data (e.g., "Jane Doe", "john.smith@company.com")
+
+Output ONLY the JSON, no markdown, no explanation.`;
+
+  const userPrompt = `Business Use Case: ${context.businessUseCase}
+
+${context.domainKnowledge ? `Domain Knowledge: ${context.domainKnowledge}` : ""}
+
+${domainDocsText ? `Domain Documents:\n${domainDocsText}` : ""}
+
+Generate actions and mock user data for this AI agent.`;
+
+  try {
+    const response = await ai.models.generateContent({
+      model: modelToUse,
+      config: {
+        systemInstruction: systemPrompt,
+      },
+      contents: [{ role: "user", parts: [{ text: userPrompt }] }],
+    });
+
+    const content = response.text || "";
+    
+    // Parse the JSON response
+    let parsed;
+    try {
+      // Clean up potential markdown wrapping
+      let cleanedContent = content.trim();
+      if (cleanedContent.startsWith("```json")) {
+        cleanedContent = cleanedContent.replace(/^```json\s*\n?/, "").replace(/\n?```\s*$/, "");
+      } else if (cleanedContent.startsWith("```")) {
+        cleanedContent = cleanedContent.replace(/^```\s*\n?/, "").replace(/\n?```\s*$/, "");
+      }
+      parsed = JSON.parse(cleanedContent);
+    } catch (parseError) {
+      console.error("Failed to parse generated actions JSON:", content);
+      throw new Error("Failed to parse generated actions. Please try again.");
+    }
+
+    // Add IDs and timestamps to the parsed data
+    const now = new Date().toISOString();
+    const actions = (parsed.actions || []).map((action: any, index: number) => ({
+      id: uuidv4(),
+      name: action.name || `action_${index}`,
+      description: action.description || "",
+      category: action.category || "general",
+      requiredFields: (action.requiredFields || []).map((field: any) => ({
+        name: field.name || "",
+        type: field.type || "string",
+        label: field.label || field.name || "",
+        required: field.required !== false,
+        options: field.options,
+        description: field.description,
+      })),
+      confirmationMessage: action.confirmationMessage || "",
+      successMessage: action.successMessage || "",
+      affectedDataFields: action.affectedDataFields || [],
+    }));
+
+    const mockUserState = (parsed.mockUserState || []).map((state: any) => ({
+      id: uuidv4(),
+      name: state.name || "Mock Profile",
+      description: state.description || "",
+      fields: state.fields || {},
+      isGenerated: true,
+      createdAt: now,
+    }));
+
+    return { actions, mockUserState };
+  } catch (error: any) {
+    console.error("Gemini API error:", error?.message || error);
+    throw new Error(`Failed to generate actions: ${error?.message || error}`);
   }
 }

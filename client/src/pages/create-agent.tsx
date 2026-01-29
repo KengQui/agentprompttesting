@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { useLocation } from "wouter";
 import { useMutation } from "@tanstack/react-query";
-import { ArrowLeft, ArrowRight, Check, Briefcase, Shield, AlertTriangle, Eye, Bot, BookOpen, Upload, X, FileText, Code, Pencil, RotateCcw, HelpCircle, ExternalLink, Info, Sparkles, Loader2, ChevronDown, Database } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check, Briefcase, Shield, AlertTriangle, Eye, Bot, BookOpen, Upload, X, FileText, Code, Pencil, RotateCcw, HelpCircle, ExternalLink, Info, Sparkles, Loader2, ChevronDown, Database, Zap, Plus, Trash2, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -28,7 +28,7 @@ import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { generatePromptPreview, promptStyleInfo } from "@/lib/prompt-preview";
 import { validationRulesTemplate, guardrailsTemplate } from "@/lib/config-templates";
-import type { WizardStepData, Agent, DomainDocument, SampleDataset, PromptStyle, GeminiModel, ClarifyingInsight } from "@shared/schema";
+import type { WizardStepData, Agent, DomainDocument, SampleDataset, PromptStyle, GeminiModel, ClarifyingInsight, AgentAction, MockUserState, ActionField } from "@shared/schema";
 import { geminiModelDisplayNames, defaultGenerationModel } from "@shared/schema";
 import { ClarifyingChatDialog } from "@/components/clarifying-chat-dialog";
 
@@ -39,7 +39,8 @@ const steps = [
   { id: 4, name: "Validation Rules", icon: Shield, description: "Set input/output validation rules" },
   { id: 5, name: "Guardrails", icon: AlertTriangle, description: "Define safety boundaries" },
   { id: 6, name: "Sample Data", icon: Database, description: "Upload or generate sample data" },
-  { id: 7, name: "Review", icon: Eye, description: "Preview and create your agent" },
+  { id: 7, name: "Available Actions", icon: Zap, description: "Define actions agent can simulate" },
+  { id: 8, name: "Review", icon: Eye, description: "Preview and create your agent" },
 ];
 
 function StepIndicator({ currentStep }: { currentStep: number }) {
@@ -1221,7 +1222,315 @@ function Step6SampleData({
   );
 }
 
-function Step7Review({
+function Step7AvailableActions({
+  data,
+  onUpdate,
+}: {
+  data: WizardStepData;
+  onUpdate: (data: Partial<WizardStepData>) => void;
+}) {
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [selectedModel, setSelectedModel] = useState<GeminiModel>(defaultGenerationModel);
+  const [viewingAction, setViewingAction] = useState<AgentAction | null>(null);
+  const [viewingMockState, setViewingMockState] = useState<MockUserState | null>(null);
+  const { toast } = useToast();
+
+  const handleGenerate = async (model: GeminiModel) => {
+    if (!data.businessUseCase) {
+      toast({
+        title: "Missing information",
+        description: "Please complete the Business Use Case step first.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsGenerating(true);
+    try {
+      const response = await fetch('/api/generate-actions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          businessUseCase: data.businessUseCase,
+          domainKnowledge: data.domainKnowledge,
+          domainDocuments: data.domainDocuments,
+          model,
+        }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to generate actions');
+      }
+
+      const result = await response.json();
+      onUpdate({
+        availableActions: result.actions,
+        mockUserState: result.mockUserState,
+      });
+
+      toast({
+        title: "Actions generated",
+        description: `Generated ${result.actions.length} actions and ${result.mockUserState.length} mock profiles.`,
+      });
+    } catch (error: any) {
+      toast({
+        title: "Generation failed",
+        description: error.message || "Failed to generate actions",
+        variant: "destructive",
+      });
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
+  const handleRemoveAction = (id: string) => {
+    const current = data.availableActions || [];
+    onUpdate({ availableActions: current.filter(a => a.id !== id) });
+  };
+
+  const handleRemoveMockState = (id: string) => {
+    const current = data.mockUserState || [];
+    onUpdate({ mockUserState: current.filter(s => s.id !== id) });
+  };
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <Zap className="h-5 w-5 text-primary" />
+          Available Actions
+        </CardTitle>
+        <CardDescription>
+          Define what actions your agent can simulate. These allow the agent to "fake" performing actions like updating policies, adding dependents, or submitting requests.
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-6">
+        <div className="flex items-center justify-between">
+          <div className="text-sm text-muted-foreground">
+            Generate actions based on your business use case
+          </div>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                type="button"
+                variant="default"
+                disabled={isGenerating}
+                data-testid="button-generate-actions"
+              >
+                {isGenerating ? (
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                ) : (
+                  <Sparkles className="h-4 w-4 mr-2" />
+                )}
+                {isGenerating ? "Generating..." : "Generate Actions"}
+                <ChevronDown className="h-3 w-3 ml-2" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-56">
+              {(Object.keys(geminiModelDisplayNames) as GeminiModel[]).map((model) => (
+                <DropdownMenuItem
+                  key={model}
+                  onClick={() => {
+                    setSelectedModel(model);
+                    handleGenerate(model);
+                  }}
+                  data-testid={`menu-item-actions-model-${model}`}
+                >
+                  {geminiModelDisplayNames[model]}
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+
+        {(data.availableActions?.length || 0) > 0 && (
+          <div className="space-y-3">
+            <Label className="text-sm font-medium flex items-center gap-2">
+              <Zap className="h-4 w-4" />
+              Actions ({data.availableActions?.length})
+            </Label>
+            <div className="space-y-2 max-h-[250px] overflow-y-auto">
+              {data.availableActions?.map((action) => (
+                <div
+                  key={action.id}
+                  className="flex items-start gap-3 p-3 rounded-lg border bg-card"
+                  data-testid={`action-item-${action.id}`}
+                >
+                  <Zap className="h-4 w-4 mt-1 text-primary shrink-0" />
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <p className="text-sm font-medium">{action.name}</p>
+                      <Badge variant="outline" className="text-xs">
+                        {action.category}
+                      </Badge>
+                      {action.requiredFields.length > 0 && (
+                        <Badge variant="secondary" className="text-xs">
+                          {action.requiredFields.length} fields
+                        </Badge>
+                      )}
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
+                      {action.description}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-1 shrink-0">
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => setViewingAction(action)}
+                      data-testid={`button-view-action-${action.id}`}
+                    >
+                      <Eye className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => handleRemoveAction(action.id)}
+                      data-testid={`button-remove-action-${action.id}`}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {(data.mockUserState?.length || 0) > 0 && (
+          <div className="space-y-3">
+            <Label className="text-sm font-medium flex items-center gap-2">
+              <User className="h-4 w-4" />
+              Mock User Profiles ({data.mockUserState?.length})
+            </Label>
+            <div className="space-y-2 max-h-[200px] overflow-y-auto">
+              {data.mockUserState?.map((state) => (
+                <div
+                  key={state.id}
+                  className="flex items-start gap-3 p-3 rounded-lg border bg-card"
+                  data-testid={`mock-state-item-${state.id}`}
+                >
+                  <User className="h-4 w-4 mt-1 text-muted-foreground shrink-0" />
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2">
+                      <p className="text-sm font-medium">{state.name}</p>
+                      {state.isGenerated && (
+                        <Badge variant="secondary" className="text-xs">
+                          <Sparkles className="h-3 w-3 mr-1" />
+                          AI Generated
+                        </Badge>
+                      )}
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {Object.keys(state.fields).length} fields
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-1 shrink-0">
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => setViewingMockState(state)}
+                      data-testid={`button-view-mock-state-${state.id}`}
+                    >
+                      <Eye className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => handleRemoveMockState(state.id)}
+                      data-testid={`button-remove-mock-state-${state.id}`}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {(data.availableActions?.length || 0) === 0 && (data.mockUserState?.length || 0) === 0 && (
+          <div className="text-center py-8 text-muted-foreground">
+            <Zap className="h-12 w-12 mx-auto mb-3 opacity-50" />
+            <p className="text-sm">No actions defined yet</p>
+            <p className="text-xs mt-1">Click "Generate Actions" to create actions based on your use case</p>
+          </div>
+        )}
+
+        <Dialog open={viewingAction !== null} onOpenChange={(open) => !open && setViewingAction(null)}>
+          <DialogContent className="max-w-2xl" data-testid="dialog-action-viewer">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2" data-testid="text-action-name">
+                <Zap className="h-5 w-5 text-primary" />
+                {viewingAction?.name}
+                <Badge variant="outline" className="ml-2">
+                  {viewingAction?.category}
+                </Badge>
+              </DialogTitle>
+              <DialogDescription data-testid="text-action-description">
+                {viewingAction?.description}
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              {viewingAction?.requiredFields && viewingAction.requiredFields.length > 0 && (
+                <div>
+                  <Label className="text-sm font-medium">Required Fields</Label>
+                  <div className="mt-2 space-y-2">
+                    {viewingAction.requiredFields.map((field, idx) => (
+                      <div key={idx} className="flex items-center gap-2 text-sm p-2 bg-muted rounded">
+                        <Badge variant="outline">{field.type}</Badge>
+                        <span className="font-medium">{field.label}</span>
+                        {field.required && <Badge variant="secondary">Required</Badge>}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+              {viewingAction?.confirmationMessage && (
+                <div>
+                  <Label className="text-sm font-medium">Confirmation Message</Label>
+                  <p className="text-sm text-muted-foreground mt-1">{viewingAction.confirmationMessage}</p>
+                </div>
+              )}
+              {viewingAction?.successMessage && (
+                <div>
+                  <Label className="text-sm font-medium">Success Message</Label>
+                  <p className="text-sm text-muted-foreground mt-1">{viewingAction.successMessage}</p>
+                </div>
+              )}
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        <Dialog open={viewingMockState !== null} onOpenChange={(open) => !open && setViewingMockState(null)}>
+          <DialogContent className="max-w-2xl" data-testid="dialog-mock-state-viewer">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2" data-testid="text-mock-state-name">
+                <User className="h-5 w-5" />
+                {viewingMockState?.name}
+              </DialogTitle>
+              <DialogDescription data-testid="text-mock-state-description">
+                {viewingMockState?.description}
+              </DialogDescription>
+            </DialogHeader>
+            <div className="overflow-auto max-h-[400px]">
+              <pre className="p-4 bg-muted rounded-lg text-sm font-mono whitespace-pre-wrap">
+                {JSON.stringify(viewingMockState?.fields || {}, null, 2)}
+              </pre>
+            </div>
+          </DialogContent>
+        </Dialog>
+      </CardContent>
+    </Card>
+  );
+}
+
+function Step8Review({
   data,
   onUpdate,
 }: {
@@ -1635,6 +1944,9 @@ export default function CreateAgent() {
     guardrails: "",
     promptStyle: "custom",
     customPrompt: "",
+    clarifyingInsights: [],
+    availableActions: [],
+    mockUserState: [],
   });
 
   const createMutation = useMutation({
@@ -1673,8 +1985,9 @@ export default function CreateAgent() {
       case 4:
       case 5:
       case 6:
-        return true; // Optional steps
       case 7:
+        return true; // Optional steps
+      case 8:
         return true;
       default:
         return false;
@@ -1682,7 +1995,7 @@ export default function CreateAgent() {
   };
 
   const handleNext = () => {
-    if (currentStep < 7) {
+    if (currentStep < 8) {
       setCurrentStep(currentStep + 1);
     } else {
       createMutation.mutate(formData);
@@ -1712,7 +2025,9 @@ export default function CreateAgent() {
       case 6:
         return <Step6SampleData data={formData} onUpdate={updateFormData} />;
       case 7:
-        return <Step7Review data={formData} onUpdate={updateFormData} />;
+        return <Step7AvailableActions data={formData} onUpdate={updateFormData} />;
+      case 8:
+        return <Step8Review data={formData} onUpdate={updateFormData} />;
       default:
         return null;
     }
@@ -1773,7 +2088,7 @@ export default function CreateAgent() {
             className="gap-2"
             data-testid="button-next"
           >
-            {currentStep === 7 ? (
+            {currentStep === 8 ? (
               createMutation.isPending ? (
                 "Creating..."
               ) : (

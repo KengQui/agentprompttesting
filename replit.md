@@ -1,7 +1,25 @@
 # Agent Studio - AI Agent Configuration Platform
 
 ## Overview
-Agent Studio is a web application designed for the end-to-end creation, configuration, and management of AI agents. It provides an intuitive 7-step wizard interface for users to define essential AI agent parameters such as business use cases, domain knowledge, validation rules, guardrails, and sample datasets. The platform aims to streamline the development and deployment of tailored AI agents for various business needs.
+Agent Studio is a web application designed for the end-to-end creation, configuration, and management of AI agents. It provides an intuitive 8-step wizard interface for users to define essential AI agent parameters such as business use cases, domain knowledge, validation rules, guardrails, sample datasets, and simulated actions. The platform aims to streamline the development and deployment of tailored AI agents for various business needs.
+
+## Action Simulation Feature
+Agent Studio supports action simulation, allowing AI agents to fake executing actions (e.g., adding dependents to health policies, updating employee records) without connecting to real APIs. This enables realistic testing of agent workflows.
+
+### How It Works
+1. **Configure Actions**: In the wizard's "Available Actions" step (step 7), users can auto-generate or manually define actions with required fields, categories (create, update, delete), confirmation messages, and success messages.
+2. **Set Up Mock User State**: Define mock user profiles with sample data that actions can reference and modify.
+3. **AI Executes Actions**: When users chat with the agent, the AI can simulate actions by outputting special action blocks in the format:
+   ```action
+   ACTION: action_name
+   FIELDS: {"field": "value"}
+   ```
+4. **State Updates**: The system parses action blocks, validates fields, executes simulated updates to mock state, and returns clean confirmation messages to users.
+
+### Key Files
+- `server/gemini.ts`: Contains `parseActionFromResponse()` and `executeSimulatedAction()` functions
+- `server/routes.ts`: Integrates action processing in chat message handlers (4 code paths)
+- `shared/schema.ts`: Defines `AgentAction` and `MockUserState` types
 
 ## User Preferences
 - Using Google Gemini AI (via Google AI Studio) for agent responses

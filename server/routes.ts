@@ -29,7 +29,7 @@ async function requireAuth(req: AuthenticatedRequest, res: Response, next: NextF
   req.user = user;
   next();
 }
-import { generateAgentResponse, generateValidationRules, generateGuardrails, generateSystemPrompt, generateSampleData, evaluateContextSufficiency, processClarifyingChat, generateValidationRulesWithInsights, generateGuardrailsWithInsights, type GenerationContext, type SystemPromptContext, type SampleDataGenerationContext, type ClarifyingChatContext } from "./gemini";
+import { generateAgentResponse, generateValidationRules, generateGuardrails, generateSystemPrompt, generateSampleData, evaluateContextSufficiency, processClarifyingChat, generateValidationRulesWithInsights, generateGuardrailsWithInsights, generateActionsAndMockData, parseActionFromResponse, executeSimulatedAction, type GenerationContext, type SystemPromptContext, type SampleDataGenerationContext, type ClarifyingChatContext, type ActionsGenerationContext } from "./gemini";
 import { loadAgentComponents, clearAgentCache, hasCustomComponents } from "./agent-loader";
 import { createRecoveryManager } from "./components/recovery-manager";
 import multer from "multer";
@@ -561,6 +561,8 @@ export async function registerRoutes(
         guardrails: agent.guardrails,
         promptStyle: agent.promptStyle,
         customPrompt: agent.customPrompt,
+        availableActions: agent.availableActions,
+        mockUserState: agent.mockUserState,
       };
 
       let responseContent: string;
@@ -629,6 +631,59 @@ export async function registerRoutes(
               });
             }
             
+            // Check for simulated action in the response (orchestrator path)
+            if (agent.availableActions && agent.availableActions.length > 0) {
+              const parsedAction = parseActionFromResponse(responseContent);
+              
+              if (parsedAction.hasAction && parsedAction.actionName) {
+                // Handle parse errors
+                if (parsedAction.parseError) {
+                  traceEntries.push({
+                    id: `entry-${Date.now()}-action-error`,
+                    type: "action_simulation",
+                    name: `Action Parse Error`,
+                    timestamp: new Date().toISOString(),
+                    metadata: { error: parsedAction.parseError, actionName: parsedAction.actionName },
+                  });
+                  responseContent = parsedAction.cleanedResponse || 
+                    `I tried to perform "${parsedAction.actionName}" but encountered an error processing the action. Please try again.`;
+                } else {
+                  const actionResult = executeSimulatedAction(
+                    parsedAction.actionName,
+                    parsedAction.actionFields || {},
+                    agent.availableActions,
+                    agent.mockUserState || []
+                  );
+                  
+                  traceEntries.push({
+                    id: `entry-${Date.now()}-action`,
+                    type: "action_simulation",
+                    name: `Action: ${actionResult.actionName}`,
+                    timestamp: new Date().toISOString(),
+                    metadata: {
+                      actionName: actionResult.actionName,
+                      fields: actionResult.fields,
+                      success: actionResult.success,
+                      message: actionResult.message
+                    },
+                  });
+                  
+                  if (actionResult.success && actionResult.updatedMockState) {
+                    await storage.updateAgent(req.params.id, {
+                      mockUserState: actionResult.updatedMockState
+                    });
+                  }
+                  
+                  responseContent = parsedAction.cleanedResponse;
+                  if (!responseContent.trim()) {
+                    responseContent = actionResult.message;
+                  } else if (!actionResult.success) {
+                    responseContent += `\n\n(Action failed: ${actionResult.message})`;
+                  }
+                }
+              }
+            }
+            
             traceEntries.push({
               id: `entry-${Date.now()}-3`,
               type: "llm_call",
@@ -679,6 +734,58 @@ export async function registerRoutes(
                 originalResponse: validation.originalResponse.substring(0, 100),
               },
             });
+          }
+          
+          // Check for simulated action in the response (standard path)
+          if (agent.availableActions && agent.availableActions.length > 0) {
+            const parsedAction = parseActionFromResponse(responseContent);
+            
+            if (parsedAction.hasAction && parsedAction.actionName) {
+              if (parsedAction.parseError) {
+                traceEntries.push({
+                  id: `entry-${Date.now()}-action-error`,
+                  type: "action_simulation",
+                  name: `Action Parse Error`,
+                  timestamp: new Date().toISOString(),
+                  metadata: { error: parsedAction.parseError, actionName: parsedAction.actionName },
+                });
+                responseContent = parsedAction.cleanedResponse || 
+                  `I tried to perform "${parsedAction.actionName}" but encountered an error processing the action. Please try again.`;
+              } else {
+                const actionResult = executeSimulatedAction(
+                  parsedAction.actionName,
+                  parsedAction.actionFields || {},
+                  agent.availableActions,
+                  agent.mockUserState || []
+                );
+                
+                traceEntries.push({
+                  id: `entry-${Date.now()}-action`,
+                  type: "action_simulation",
+                  name: `Action: ${actionResult.actionName}`,
+                  timestamp: new Date().toISOString(),
+                  metadata: {
+                    actionName: actionResult.actionName,
+                    fields: actionResult.fields,
+                    success: actionResult.success,
+                    message: actionResult.message
+                  },
+                });
+                
+                if (actionResult.success && actionResult.updatedMockState) {
+                  await storage.updateAgent(req.params.id, {
+                    mockUserState: actionResult.updatedMockState
+                  });
+                }
+                
+                responseContent = parsedAction.cleanedResponse;
+                if (!responseContent.trim()) {
+                  responseContent = actionResult.message;
+                } else if (!actionResult.success) {
+                  responseContent += `\n\n(Action failed: ${actionResult.message})`;
+                }
+              }
+            }
           }
           
           traceEntries.push({
@@ -815,6 +922,8 @@ export async function registerRoutes(
         guardrails: agent.guardrails,
         promptStyle: agent.promptStyle,
         customPrompt: agent.customPrompt,
+        availableActions: agent.availableActions,
+        mockUserState: agent.mockUserState,
       };
 
       let responseContent: string;
@@ -877,6 +986,58 @@ export async function registerRoutes(
               });
             }
             
+            // Check for simulated action in the response (legacy orchestrator path)
+            if (agent.availableActions && agent.availableActions.length > 0) {
+              const parsedAction = parseActionFromResponse(responseContent);
+              
+              if (parsedAction.hasAction && parsedAction.actionName) {
+                if (parsedAction.parseError) {
+                  traceEntries.push({
+                    id: `entry-${Date.now()}-action-error`,
+                    type: "action_simulation",
+                    name: `Action Parse Error`,
+                    timestamp: new Date().toISOString(),
+                    metadata: { error: parsedAction.parseError, actionName: parsedAction.actionName },
+                  });
+                  responseContent = parsedAction.cleanedResponse || 
+                    `I tried to perform "${parsedAction.actionName}" but encountered an error processing the action. Please try again.`;
+                } else {
+                  const actionResult = executeSimulatedAction(
+                    parsedAction.actionName,
+                    parsedAction.actionFields || {},
+                    agent.availableActions,
+                    agent.mockUserState || []
+                  );
+                  
+                  traceEntries.push({
+                    id: `entry-${Date.now()}-action`,
+                    type: "action_simulation",
+                    name: `Action: ${actionResult.actionName}`,
+                    timestamp: new Date().toISOString(),
+                    metadata: {
+                      actionName: actionResult.actionName,
+                      fields: actionResult.fields,
+                      success: actionResult.success,
+                      message: actionResult.message
+                    },
+                  });
+                  
+                  if (actionResult.success && actionResult.updatedMockState) {
+                    await storage.updateAgent(req.params.id, {
+                      mockUserState: actionResult.updatedMockState
+                    });
+                  }
+                  
+                  responseContent = parsedAction.cleanedResponse;
+                  if (!responseContent.trim()) {
+                    responseContent = actionResult.message;
+                  } else if (!actionResult.success) {
+                    responseContent += `\n\n(Action failed: ${actionResult.message})`;
+                  }
+                }
+              }
+            }
+            
             traceEntries.push({
               id: `entry-${Date.now()}-3`,
               type: "llm_call",
@@ -918,6 +1079,58 @@ export async function registerRoutes(
                 originalResponse: validation.originalResponse.substring(0, 100),
               },
             });
+          }
+          
+          // Check for simulated action in the response (legacy standard path)
+          if (agent.availableActions && agent.availableActions.length > 0) {
+            const parsedAction = parseActionFromResponse(responseContent);
+            
+            if (parsedAction.hasAction && parsedAction.actionName) {
+              if (parsedAction.parseError) {
+                traceEntries.push({
+                  id: `entry-${Date.now()}-action-error`,
+                  type: "action_simulation",
+                  name: `Action Parse Error`,
+                  timestamp: new Date().toISOString(),
+                  metadata: { error: parsedAction.parseError, actionName: parsedAction.actionName },
+                });
+                responseContent = parsedAction.cleanedResponse || 
+                  `I tried to perform "${parsedAction.actionName}" but encountered an error processing the action. Please try again.`;
+              } else {
+                const actionResult = executeSimulatedAction(
+                  parsedAction.actionName,
+                  parsedAction.actionFields || {},
+                  agent.availableActions,
+                  agent.mockUserState || []
+                );
+                
+                traceEntries.push({
+                  id: `entry-${Date.now()}-action`,
+                  type: "action_simulation",
+                  name: `Action: ${actionResult.actionName}`,
+                  timestamp: new Date().toISOString(),
+                  metadata: {
+                    actionName: actionResult.actionName,
+                    fields: actionResult.fields,
+                    success: actionResult.success,
+                    message: actionResult.message
+                  },
+                });
+                
+                if (actionResult.success && actionResult.updatedMockState) {
+                  await storage.updateAgent(req.params.id, {
+                    mockUserState: actionResult.updatedMockState
+                  });
+                }
+                
+                responseContent = parsedAction.cleanedResponse;
+                if (!responseContent.trim()) {
+                  responseContent = actionResult.message;
+                } else if (!actionResult.success) {
+                  responseContent += `\n\n(Action failed: ${actionResult.message})`;
+                }
+              }
+            }
           }
           
           traceEntries.push({
@@ -1326,6 +1539,41 @@ export async function registerRoutes(
     } catch (error) {
       console.error("Error uploading sample data:", error);
       res.status(500).json({ message: "Failed to upload sample data" });
+    }
+  });
+
+  // Generate actions and mock user data based on business use case
+  app.post("/api/generate-actions", async (req, res) => {
+    try {
+      const schema = z.object({
+        businessUseCase: z.string().min(1, "Business use case is required"),
+        domainKnowledge: z.string().optional(),
+        domainDocuments: z.array(z.object({
+          id: z.string(),
+          filename: z.string(),
+          content: z.string(),
+          uploadedAt: z.string(),
+        })).optional(),
+        model: z.string().optional(),
+      });
+
+      const parsed = schema.safeParse(req.body);
+      if (!parsed.success) {
+        return res.status(400).json({ message: parsed.error.errors[0]?.message || "Invalid input" });
+      }
+
+      const context: ActionsGenerationContext = {
+        businessUseCase: parsed.data.businessUseCase,
+        domainKnowledge: parsed.data.domainKnowledge,
+        domainDocuments: parsed.data.domainDocuments,
+        model: parsed.data.model as any,
+      };
+
+      const result = await generateActionsAndMockData(context);
+      res.json(result);
+    } catch (error: any) {
+      console.error("Error generating actions:", error);
+      res.status(500).json({ message: error?.message || "Failed to generate actions" });
     }
   });
 

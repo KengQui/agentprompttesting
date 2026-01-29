@@ -1,0 +1,56 @@
+{
+  "agentId": "96dcbd4b-18b3-432c-b5ea-d80fa9c58d3a",
+  "traces": [
+    {
+      "id": "trace-1769720704586",
+      "sessionId": "dffc50bc-dd3e-4b20-a052-1d2917cfe9b1",
+      "userInput": "I want to add my daughter Sarah, age 10, as a dependent to my health plan",
+      "agentResponse": "Okay, I can help with that. To add Sarah as a dependent, I'll need a few more details:\n\n*   **Sarah's full legal name**\n*   **Sarah's date of birth**\n*   **Documentation to verify dependent status:** This could be a birth certificate or adoption record.\n\nOnce I have this information and the documentation, I'll submit the request to add Sarah to your health plan. Do you have those details available?",
+      "startTime": "2026-01-29T21:05:02.491Z",
+      "endTime": "2026-01-29T21:05:04.586Z",
+      "totalDuration": 2095,
+      "entries": [
+        {
+          "id": "entry-1769720703441-1",
+          "type": "intent_classification",
+          "name": "Orchestrator Intent Classification",
+          "timestamp": "2026-01-29T21:05:03.441Z",
+          "metadata": {
+            "intent": "answer_question",
+            "classificationMethod": "orchestrator",
+            "confidence": "high"
+          }
+        },
+        {
+          "id": "entry-1769720704586-3",
+          "type": "llm_call",
+          "name": "Gemini Response Generation",
+          "timestamp": "2026-01-29T21:05:04.586Z",
+          "duration": 1145,
+          "metadata": {
+            "model": "gemini",
+            "intent": "answer_question",
+            "validated": true
+          }
+        }
+      ],
+      "success": true
+    }
+  ],
+  "stats": {
+    "hookCalls": {},
+    "signalReads": {},
+    "intentDistribution": {
+      "answer_question": 1
+    },
+    "classificationMethods": {
+      "orchestrator": 1
+    },
+    "avgResponseTime": 2095,
+    "totalLlmCalls": 1,
+    "totalTokensUsed": 0,
+    "errorCount": 0
+  },
+  "createdAt": "2026-01-29T21:05:04.586Z",
+  "updatedAt": "2026-01-29T21:05:04.586Z"
+}

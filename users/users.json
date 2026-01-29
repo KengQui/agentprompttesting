@@ -57,5 +57,11 @@
     "username": "testuser_pdW_wf",
     "password": "$2b$10$Ow5TTGh53t0iAVMS2E0RteeshlhbwY9/sWCfAWoCkDefLmGBbG42i",
     "createdAt": "2026-01-29T03:21:26.459Z"
+  },
+  {
+    "id": "51b8d60c-c1ee-4426-a281-35f6677f37d8",
+    "username": "testuser__-O8tn",
+    "password": "$2b$10$HLsa6ajlllz27nDfX2KILu9X9rS.llFgPm7aH5UhOobFVQnFbCdWy",
+    "createdAt": "2026-01-29T21:02:28.468Z"
   }
 ]
