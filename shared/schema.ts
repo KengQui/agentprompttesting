@@ -100,6 +100,17 @@ export const clarifyingInsightSchema = z.object({
 
 export type ClarifyingInsight = z.infer<typeof clarifyingInsightSchema>;
 
+// Mock mode enum for agent behavior
+export const mockModeEnum = z.enum(["disabled", "full", "read_only"]);
+export type MockMode = z.infer<typeof mockModeEnum>;
+
+// Mock mode descriptions for UI
+export const mockModeDescriptions: Record<MockMode, string> = {
+  "disabled": "Real API mode - calls actual backend APIs",
+  "full": "Full mock mode - simulates all actions locally without API calls",
+  "read_only": "Read-only mock - allows reads but simulates writes locally"
+};
+
 // Agent schema
 export const agentSchema = z.object({
   id: z.string(),
@@ -117,6 +128,7 @@ export const agentSchema = z.object({
   clarifyingInsights: z.array(clarifyingInsightSchema).default([]),
   availableActions: z.array(agentActionSchema).default([]),
   mockUserState: z.array(mockUserStateSchema).default([]),
+  mockMode: mockModeEnum.default("full"), // Default to full mock for usability testing
   status: agentStatusEnum.default("draft"),
   createdAt: z.string(),
   updatedAt: z.string(),
@@ -209,6 +221,7 @@ export const wizardStepSchema = z.object({
   clarifyingInsights: z.array(clarifyingInsightSchema).default([]),
   availableActions: z.array(agentActionSchema).default([]),
   mockUserState: z.array(mockUserStateSchema).default([]),
+  mockMode: mockModeEnum.default("full"),
 });
 
 export type WizardStepData = z.infer<typeof wizardStepSchema>;

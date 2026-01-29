@@ -28,8 +28,9 @@ import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { generatePromptPreview, promptStyleInfo } from "@/lib/prompt-preview";
 import { validationRulesTemplate, guardrailsTemplate } from "@/lib/config-templates";
-import type { WizardStepData, Agent, DomainDocument, SampleDataset, PromptStyle, GeminiModel, ClarifyingInsight, AgentAction, MockUserState, ActionField } from "@shared/schema";
-import { geminiModelDisplayNames, defaultGenerationModel } from "@shared/schema";
+import type { WizardStepData, Agent, DomainDocument, SampleDataset, PromptStyle, GeminiModel, ClarifyingInsight, AgentAction, MockUserState, ActionField, MockMode } from "@shared/schema";
+import { geminiModelDisplayNames, defaultGenerationModel, mockModeDescriptions } from "@shared/schema";
+import { Switch } from "@/components/ui/switch";
 import { ClarifyingChatDialog } from "@/components/clarifying-chat-dialog";
 
 const steps = [
@@ -1344,6 +1345,44 @@ function Step7AvailableActions({
           </DropdownMenu>
         </div>
 
+        <div className="p-4 rounded-lg border bg-muted/50 space-y-4">
+          <div className="flex items-center justify-between">
+            <div className="space-y-1">
+              <Label className="text-sm font-medium flex items-center gap-2">
+                <Shield className="h-4 w-4" />
+                Mock Mode
+              </Label>
+              <p className="text-xs text-muted-foreground">
+                {mockModeDescriptions[data.mockMode || "full"]}
+              </p>
+            </div>
+            <RadioGroup
+              value={data.mockMode || "full"}
+              onValueChange={(value: MockMode) => onUpdate({ mockMode: value })}
+              className="flex gap-2"
+              data-testid="radio-mock-mode"
+            >
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="full" id="mock-full" data-testid="radio-mock-full" />
+                <Label htmlFor="mock-full" className="text-sm cursor-pointer">Full Mock</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="read_only" id="mock-readonly" data-testid="radio-mock-readonly" />
+                <Label htmlFor="mock-readonly" className="text-sm cursor-pointer">Read-Only</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="disabled" id="mock-disabled" data-testid="radio-mock-disabled" />
+                <Label htmlFor="mock-disabled" className="text-sm cursor-pointer">Disabled</Label>
+              </div>
+            </RadioGroup>
+          </div>
+          <div className="text-xs text-muted-foreground space-y-1">
+            <p><strong>Full Mock:</strong> Agent simulates all actions locally using mock data. No API calls are made.</p>
+            <p><strong>Read-Only:</strong> Agent can read real data but simulates write operations locally.</p>
+            <p><strong>Disabled:</strong> Agent uses real API calls (requires actual backend integration).</p>
+          </div>
+        </div>
+
         {(data.availableActions?.length || 0) > 0 && (
           <div className="space-y-3">
             <Label className="text-sm font-medium flex items-center gap-2">
@@ -1947,6 +1986,7 @@ export default function CreateAgent() {
     clarifyingInsights: [],
     availableActions: [],
     mockUserState: [],
+    mockMode: "full",
   });
 
   const createMutation = useMutation({

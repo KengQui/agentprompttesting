@@ -2,7 +2,7 @@ import { randomUUID } from "crypto";
 import * as fs from "fs";
 import * as path from "path";
 import bcrypt from "bcryptjs";
-import type { Agent, InsertAgent, UpdateAgent, ChatMessage, InsertChatMessage, DomainDocument, SampleDataset, AgentStatus, PromptStyle, ClarifyingInsight, ChatSession, InsertChatSession, UpdateChatSession, ChatSessionWithPreview, AgentTrace, TurnTrace, ConfigSnapshot, ConfigHistory, UsageStats, User, InsertUser, AuthSession, PublicUser } from "@shared/schema";
+import type { Agent, InsertAgent, UpdateAgent, ChatMessage, InsertChatMessage, DomainDocument, SampleDataset, AgentStatus, PromptStyle, ClarifyingInsight, ChatSession, InsertChatSession, UpdateChatSession, ChatSessionWithPreview, AgentTrace, TurnTrace, ConfigSnapshot, ConfigHistory, UsageStats, User, InsertUser, AuthSession, PublicUser, AgentAction, MockUserState, MockMode } from "@shared/schema";
 
 const AGENTS_DIR = "./agents";
 const USERS_DIR = "./users";
@@ -432,6 +432,8 @@ export class MemStorage implements IStorage {
     const domainDocuments = readJsonFile<DomainDocument[]>(getAgentFilePath(agentId, AGENT_FILES.DOMAIN_DOCUMENTS), []);
     const sampleDatasets = readJsonFile<SampleDataset[]>(getAgentFilePath(agentId, AGENT_FILES.SAMPLE_DATA), []);
     const clarifyingInsights = readJsonFile<ClarifyingInsight[]>(getAgentFilePath(agentId, "clarifying-insights.json"), []);
+    const availableActions = readJsonFile<AgentAction[]>(getAgentFilePath(agentId, "available-actions.json"), []);
+    const mockUserState = readJsonFile<MockUserState[]>(getAgentFilePath(agentId, "mock-user-state.json"), []);
     
     return {
       id: agentId,
@@ -441,6 +443,7 @@ export class MemStorage implements IStorage {
       createdAt: meta.createdAt,
       updatedAt: meta.updatedAt || meta.createdAt,
       promptStyle: (meta.promptStyle || "anthropic") as PromptStyle,
+      mockMode: (meta.mockMode || "full") as MockMode,
       description: meta.description || "",
       businessUseCase,
       domainKnowledge,
@@ -450,6 +453,8 @@ export class MemStorage implements IStorage {
       domainDocuments,
       sampleDatasets,
       clarifyingInsights,
+      availableActions,
+      mockUserState,
     };
   }
 
@@ -512,6 +517,7 @@ export class MemStorage implements IStorage {
       createdAt: agent.createdAt,
       updatedAt: agent.updatedAt,
       promptStyle: agent.promptStyle || "anthropic",
+      mockMode: agent.mockMode || "full",
       description: agent.description || "",
     });
     writeTextFile(getAgentFilePath(agent.id, AGENT_FILES.META), metaYaml);
@@ -539,6 +545,12 @@ export class MemStorage implements IStorage {
 
     // 9. Save clarifying-insights.json
     writeJsonFile(getAgentFilePath(agent.id, "clarifying-insights.json"), agent.clarifyingInsights || []);
+
+    // 10. Save available-actions.json
+    writeJsonFile(getAgentFilePath(agent.id, "available-actions.json"), agent.availableActions || []);
+
+    // 11. Save mock-user-state.json
+    writeJsonFile(getAgentFilePath(agent.id, "mock-user-state.json"), agent.mockUserState || []);
 
     // Clean up legacy files if they exist
     const legacyConfigPath = getAgentFilePath(agent.id, AGENT_FILES.LEGACY_CONFIG);
