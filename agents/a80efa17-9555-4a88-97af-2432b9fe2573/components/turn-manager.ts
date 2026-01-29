@@ -1,5 +1,5 @@
 /**
- * Turn Manager - Pay check
+ * Turn Manager - pay 3
  * 
  * Customized intent classification for this agent.
  * Modify keywords to match your domain-specific language.
@@ -38,12 +38,12 @@ const CONFIG: TurnManagerConfig = {
   ]
 };
 
-export class PaycheckTurnManager extends BaseTurnManager {
+export class Pay3TurnManager extends BaseTurnManager {
   constructor() {
     super(CONFIG);
   }
 }
 
-export function createTurnManager(): PaycheckTurnManager {
-  return new PaycheckTurnManager();
+export function createTurnManager(): Pay3TurnManager {
+  return new Pay3TurnManager();
 }

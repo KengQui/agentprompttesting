@@ -1,3 +1,5 @@
+Business Use Case: Paycheck Q&A Agent (Employee Payroll Support)
+
 This agent helps employees quickly understand their paycheck by answering common pay-related questions in plain language and guiding them to the right next step—without needing to open a ticket or wait for HR/Payroll support.
 
 Problem it solves

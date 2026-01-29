@@ -1,5 +1,5 @@
 /**
- * Flow Controller - Pay check
+ * Flow Controller - pay 3
  * 
  * Define your conversation flow steps here.
  * Customize questions, validation, and help text.
@@ -30,12 +30,12 @@ const CONFIG: FlowControllerConfig = {
   completionMessage: "Thanks for chatting! Let me know if you need anything else."
 };
 
-export class PaycheckFlowController extends BaseFlowController {
+export class Pay3FlowController extends BaseFlowController {
   constructor() {
     super(CONFIG);
   }
 }
 
-export function createFlowController(): PaycheckFlowController {
-  return new PaycheckFlowController();
+export function createFlowController(): Pay3FlowController {
+  return new Pay3FlowController();
 }

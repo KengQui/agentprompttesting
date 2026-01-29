@@ -1,5 +1,5 @@
 /**
- * Orchestrator - Pay check
+ * Orchestrator - pay 3
  * 
  * Coordinates all components for this agent.
  * Override handlers to customize behavior.
@@ -11,11 +11,11 @@
 import { 
   Orchestrator as BaseOrchestrator
 } from '../../../server/components/orchestrator';
-import { PaycheckTurnManager } from './turn-manager';
-import { PaycheckFlowController } from './flow-controller';
+import { Pay3TurnManager } from './turn-manager';
+import { Pay3FlowController } from './flow-controller';
 import type { ClassificationResult, TurnResult, AgentConfig } from '../../../server/components/types';
 
-export class PaycheckOrchestrator extends BaseOrchestrator {
+export class Pay3Orchestrator extends BaseOrchestrator {
   constructor(agentConfig: AgentConfig) {
     super({
       agentConfig,
@@ -33,8 +33,8 @@ export class PaycheckOrchestrator extends BaseOrchestrator {
       }
     });
 
-    this.turnManager = new PaycheckTurnManager();
-    this.flowController = new PaycheckFlowController();
+    this.turnManager = new Pay3TurnManager();
+    this.flowController = new Pay3FlowController();
   }
 
   protected async handleAnswerQuestion(
@@ -50,6 +50,6 @@ export class PaycheckOrchestrator extends BaseOrchestrator {
   }
 }
 
-export function createOrchestrator(agentConfig: AgentConfig): PaycheckOrchestrator {
-  return new PaycheckOrchestrator(agentConfig);
+export function createOrchestrator(agentConfig: AgentConfig): Pay3Orchestrator {
+  return new Pay3Orchestrator(agentConfig);
 }
