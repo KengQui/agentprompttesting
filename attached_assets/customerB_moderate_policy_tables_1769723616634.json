@@ -1,0 +1,242 @@
+{
+  "customer_id": "customerB_moderate",
+  "policy_bundle_version": "2026.01",
+  "generated_on": "2026-01-29",
+  "tables": {
+    "life_events_qle": {
+      "policy_type": "life_events_qle",
+      "customer_id": "customerB_moderate",
+      "policy_version": "2026.01",
+      "generated_on": "2026-01-29",
+      "defaults": {
+        "submission_window_days": 30,
+        "approval_required": true,
+        "docs_required_default": false,
+        "consistency_rule": "Changes must be consistent with the life event.",
+        "escalation_if_missing_policy": true,
+        "notes": [
+          "Documentation required for certain events; others may be attestation-based.",
+          "HR/Benefits may review before approval."
+        ]
+      },
+      "events": {
+        "Marriage": {
+          "window_days": 30,
+          "allowed_changes": [
+            "Add spouse",
+            "Change coverage tier",
+            "Update beneficiaries"
+          ],
+          "required_documents": [
+            "Marriage certificate"
+          ],
+          "effective_date_rule": {
+            "type": "first_of_next_month",
+            "description": "First of month after submission (or approval)."
+          },
+          "approval_required": true
+        },
+        "Divorce_LegalSeparation_Annulment": {
+          "window_days": 30,
+          "allowed_changes": [
+            "Remove spouse",
+            "Change coverage tier",
+            "Update beneficiaries"
+          ],
+          "required_documents": [
+            "Divorce decree / court order"
+          ],
+          "effective_date_rule": {
+            "type": "end_of_month",
+            "description": "End of month of event date."
+          },
+          "approval_required": true
+        },
+        "Birth": {
+          "window_days": 30,
+          "allowed_changes": [
+            "Add child",
+            "Change coverage tier",
+            "Start/Change DCFSA"
+          ],
+          "required_documents": [
+            "Hospital record or birth certificate"
+          ],
+          "effective_date_rule": {
+            "type": "event_date_retro",
+            "description": "Effective on date of birth if submitted within window."
+          },
+          "approval_required": true
+        },
+        "Adoption_Placement_Foster": {
+          "window_days": 30,
+          "allowed_changes": [
+            "Add child",
+            "Change coverage tier",
+            "Start/Change DCFSA"
+          ],
+          "required_documents": [
+            "Adoption/placement paperwork"
+          ],
+          "effective_date_rule": {
+            "type": "event_date",
+            "description": "Effective on placement date."
+          },
+          "approval_required": true
+        },
+        "Death_of_Spouse_or_Dependent": {
+          "window_days": 30,
+          "allowed_changes": [
+            "Remove dependent/spouse",
+            "Change coverage tier",
+            "Update beneficiaries"
+          ],
+          "required_documents": [
+            "Death certificate (if requested)"
+          ],
+          "effective_date_rule": {
+            "type": "end_of_month",
+            "description": "End of month of event date."
+          },
+          "approval_required": true
+        },
+        "Loss_of_Other_Coverage": {
+          "window_days": 30,
+          "allowed_changes": [
+            "Enroll employee",
+            "Add dependents losing coverage",
+            "Change coverage tier"
+          ],
+          "required_documents": [
+            "Coverage termination letter or COBRA notice"
+          ],
+          "effective_date_rule": {
+            "type": "day_after_loss",
+            "description": "Day after other coverage ends."
+          },
+          "approval_required": true
+        },
+        "Gain_of_Other_Coverage": {
+          "window_days": 30,
+          "allowed_changes": [
+            "Drop coverage for those gaining other coverage"
+          ],
+          "required_documents": [
+            "Proof of new coverage (if requested)"
+          ],
+          "effective_date_rule": {
+            "type": "align_to_new_coverage",
+            "description": "Align to new coverage start date."
+          },
+          "approval_required": true
+        },
+        "Move_Affecting_Plan_Availability": {
+          "window_days": 30,
+          "allowed_changes": [
+            "Change medical plan if current plan not available",
+            "Update address"
+          ],
+          "required_documents": [
+            "Proof of new address (if requested)"
+          ],
+          "effective_date_rule": {
+            "type": "first_of_next_month",
+            "description": "First of month after move/submission."
+          },
+          "approval_required": true
+        },
+        "Work_Status_Eligibility_Change": {
+          "window_days": 30,
+          "allowed_changes": [
+            "Enroll or drop benefits due to eligibility change"
+          ],
+          "required_documents": [],
+          "effective_date_rule": {
+            "type": "eligibility_date",
+            "description": "Effective on eligibility change date."
+          },
+          "approval_required": true
+        },
+        "Dependent_Eligibility_Change_AgeOut": {
+          "window_days": 30,
+          "allowed_changes": [
+            "Remove dependent",
+            "Change coverage tier"
+          ],
+          "required_documents": [],
+          "effective_date_rule": {
+            "type": "end_of_month",
+            "description": "End of month of ineligibility."
+          },
+          "approval_required": true
+        },
+        "Medicaid_CHIP_Change": {
+          "window_days": 60,
+          "allowed_changes": [
+            "Enroll",
+            "Drop coverage"
+          ],
+          "required_documents": [
+            "Medicaid/CHIP notice"
+          ],
+          "effective_date_rule": {
+            "type": "policy_specific",
+            "description": "Per plan rules."
+          },
+          "approval_required": true
+        }
+      }
+    },
+    "address_change": {
+      "policy_type": "address_change",
+      "customer_id": "customerB_moderate",
+      "policy_version": "2026.01",
+      "generated_on": "2026-01-29",
+      "defaults": {
+        "approval_required": true,
+        "effective_date_mode": "immediate_or_on_approval",
+        "allow_po_box_as_residential": true,
+        "pii_rules": {
+          "do_not_collect": [
+            "full_ssn",
+            "full_bank_account"
+          ],
+          "ok_to_collect": [
+            "new_address_fields",
+            "effective_date_preference"
+          ]
+        }
+      },
+      "routing_rules": [
+        {
+          "when": "move_to_new_state == true",
+          "route_to": "Payroll",
+          "reason": "Withholding may change; payroll review recommended."
+        }
+      ],
+      "validation_rules": [
+        {
+          "rule": "state_format_2_letter",
+          "severity": "error"
+        },
+        {
+          "rule": "zip_format_5_or_9",
+          "severity": "error"
+        },
+        {
+          "rule": "required_fields_present",
+          "severity": "error"
+        },
+        {
+          "rule": "po_box_used_for_residential",
+          "severity": "warning"
+        }
+      ],
+      "address_types_supported": [
+        "Home/Residential",
+        "Mailing",
+        "Both"
+      ]
+    }
+  }
+}
