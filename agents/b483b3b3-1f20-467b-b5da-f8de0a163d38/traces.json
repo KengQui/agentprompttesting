@@ -1,0 +1,91 @@
+{
+  "agentId": "b483b3b3-1f20-467b-b5da-f8de0a163d38",
+  "traces": [
+    {
+      "id": "trace-1769728235992",
+      "sessionId": "a3b71d31-efcb-4d27-a303-14348d6a18a8",
+      "userInput": "I have a new baby",
+      "agentResponse": "Congratulations on your new baby! This qualifies as a life event that allows you to make changes to your benefits.\n\nGenerally, you can add your child to your medical, dental, and vision plans. You may also be able to start or change your contributions to a Dependent Care Flexible Spending Account (DCFSA).\n\nFor customerB_moderate, the effective date for these changes would be the date of birth, as long as you submit the request within 30 days of the birth date. You'll need to provide a hospital record or birth certificate as documentation.\n\nWould you like me to walk you through the steps to make these changes in UKG Ready ESS?",
+      "startTime": "2026-01-29T23:10:33.552Z",
+      "endTime": "2026-01-29T23:10:35.992Z",
+      "totalDuration": 2440,
+      "entries": [
+        {
+          "id": "entry-1769728234581-1",
+          "type": "intent_classification",
+          "name": "Orchestrator Intent Classification",
+          "timestamp": "2026-01-29T23:10:34.581Z",
+          "metadata": {
+            "intent": "answer_question",
+            "classificationMethod": "orchestrator",
+            "confidence": "high"
+          }
+        },
+        {
+          "id": "entry-1769728235992-3",
+          "type": "llm_call",
+          "name": "Gemini Response Generation",
+          "timestamp": "2026-01-29T23:10:35.992Z",
+          "duration": 1411,
+          "metadata": {
+            "model": "gemini",
+            "intent": "answer_question",
+            "validated": true
+          }
+        }
+      ],
+      "success": true
+    },
+    {
+      "id": "trace-1769728640300",
+      "sessionId": "a3b71d31-efcb-4d27-a303-14348d6a18a8",
+      "userInput": "yes",
+      "agentResponse": "Okay! Here are the general steps to make changes due to the birth of your child in UKG Ready ESS:\n\n1.  **Log in to UKG Ready ESS:** Access the Employee Self Service portal through your company's website or the UKG Ready mobile app.\n2.  **Navigate to Benefits:** Look for a \"Benefits\" or \"My Benefits\" section. The exact wording may vary.\n3.  **Find Life Events:** Within the Benefits section, there should be an option to report a \"Life Event\" or \"Qualifying Life Event.\"\n4.  **Select \"Birth\":** Choose \"Birth\" from the list of life event options.\n5.  **Enter Event Date:** Input the date your child was born.\n6.  **Make Elections:** Follow the prompts to add your child to your desired benefit plans (medical, dental, vision) and make any changes to your DCFSA contributions.\n7.  **Upload Documentation:** You'll likely be prompted to upload the required documentation, which is a hospital record or birth certificate.\n8.  **Review and Submit:** Carefully review all the changes you've made, and then submit your request.\n\nLet me know if you get stuck at any point in the process!",
+      "startTime": "2026-01-29T23:17:18.283Z",
+      "endTime": "2026-01-29T23:17:20.300Z",
+      "totalDuration": 2017,
+      "entries": [
+        {
+          "id": "entry-1769728638284-1",
+          "type": "intent_classification",
+          "name": "Orchestrator Intent Classification",
+          "timestamp": "2026-01-29T23:17:18.284Z",
+          "metadata": {
+            "intent": "answer_question",
+            "classificationMethod": "orchestrator",
+            "confidence": "high"
+          }
+        },
+        {
+          "id": "entry-1769728640300-3",
+          "type": "llm_call",
+          "name": "Gemini Response Generation",
+          "timestamp": "2026-01-29T23:17:20.300Z",
+          "duration": 2016,
+          "metadata": {
+            "model": "gemini",
+            "intent": "answer_question",
+            "validated": true
+          }
+        }
+      ],
+      "success": true
+    }
+  ],
+  "stats": {
+    "hookCalls": {},
+    "signalReads": {},
+    "intentDistribution": {
+      "answer_question": 2
+    },
+    "classificationMethods": {
+      "orchestrator": 2
+    },
+    "avgResponseTime": 2228.5,
+    "totalLlmCalls": 2,
+    "totalTokensUsed": 0,
+    "errorCount": 0
+  },
+  "createdAt": "2026-01-29T23:10:35.992Z",
+  "updatedAt": "2026-01-29T23:17:20.300Z"
+}

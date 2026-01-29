@@ -1,0 +1,52 @@
+### 1. Required Information
+
+To process a Qualifying Life Event (QLE) request, the agent needs to gather the following:
+
+*   **Employee Identity**: Confirmation of the employee initiating the request (implicit via ESS login).
+*   **Stated Life Event**: The type of life event the employee has experienced (e.g., "marriage," "birth," "loss of coverage").
+*   **Event Date**: The precise date the life event occurred (e.g., marriage date, birth date, date coverage was lost).
+*   **Desired Changes**: What benefit changes the employee wishes to make (e.g., "add spouse to medical," "remove child from dental," "change medical plan").
+*   **Affected Individuals**: Names and relationship of any dependents/individuals impacted by the change (if applicable).
+*   **Acknowledgement of Documentation**: Confirmation of understanding documentation requirements.
+
+### 2. Validation Criteria
+
+A QLE request is considered valid if it meets the following conditions, based on customer policy:
+
+*   **Recognized QLE Type**: The stated life event must match one of the defined `life_events_qle` types in the customer's policy (e.g., "Marriage", "Birth", "Loss_of_Other_Coverage").
+*   **Valid Event Date**: The provided event date must be a plausible past or present date, not in the distant future.
+*   **Within Submission Window**: The event date must fall within the specific `window_days` (e.g., 30 days, 60 days for Medicaid/CHIP) from the current date. The employee must be submitting within this period relative to the `event_date`.
+*   **Consistency of Changes**: The `desired_changes` must be consistent with the identified QLE type and adhere to the `consistency_rule` defined in the policy (e.g., "Add spouse" is consistent with "Marriage"; "Remove spouse" is consistent with "Divorce").
+*   **Documentation Identified**: For events requiring documentation, the agent must clearly state what `required_documents` are needed based on the policy.
+*   **Effective Date Understanding**: The employee should be informed of and acknowledge understanding of the `effective_date_rule` specific to their QLE type.
+*   **Customer Policy Availability**: The specific QLE type and its rules must be explicitly defined in the customer's `life_events_qle` policy table. If a rule isn't available, the agent must not guess.
+*   **HR/Benefits Review Conditions**: Certain situations automatically trigger a requirement for HR/Benefits review, even if other criteria are met:
+    *   Request is outside the standard `submission_window_days`.
+    *   The event involves complex dependent situations (e.g., non-standard relationships, guardianships).
+    *   The event involves domestic partner eligibility (if not explicitly covered by policy).
+    *   Disputes or unclear circumstances.
+    *   Policy explicitly states `approval_required: true` for the event.
+
+### 3. What to do when validation fails
+
+When a request or part of it fails validation, the agent should:
+
+*   **For Missing Information**:
+    *   Politely prompt the employee for the specific missing details (e.g., "What was the exact date of the marriage?", "Could you tell me what changes you'd like to make to your benefits?").
+*   **For Unrecognized QLE Type**:
+    *   Inform the employee that the situation described doesn't immediately match a known Qualifying Life Event in their company's policy.
+    *   Offer to explore general benefits change options or escalate to HR/Benefits for a review of their specific situation.
+*   **For Event Outside Submission Window**:
+    *   Explain that the request appears to be outside the allowed `submission_window_days`.
+    *   State the policy (e.g., "Changes must typically be submitted within 30 days of the event date.").
+    *   Offer to escalate the request to HR/Benefits for an exception review, explaining that exceptions are not guaranteed.
+*   **For Inconsistent or Disallowed Changes**:
+    *   Explain why the requested change cannot be made based on the specific QLE and the `consistency_rule` (e.g., "You can add your new spouse to benefits, but removing a child would require a different qualifying event.").
+    *   Suggest allowed changes or offer to escalate if the employee believes an exception applies.
+*   **For Missing or Unclear Documentation**:
+    *   Clearly state the `required_documents` for the event.
+    *   Explain the importance of submitting these documents and where/how to do so (e.g., "You will need to upload a copy of your marriage certificate in UKG Ready ESS.").
+*   **For Policy Not Found / Complex Situations / Required HR Review**:
+    *   Inform the employee that their request requires review by HR/Benefits due to policy gaps, complexity, or specific company rules.
+    *   Prepare a clear handoff summary for HR/Benefits, including all gathered information, the identified QLE (if any), the employee's desired changes, any validation failures, and the reason for escalation.
+    *   Assure the employee that HR/Benefits will follow up.

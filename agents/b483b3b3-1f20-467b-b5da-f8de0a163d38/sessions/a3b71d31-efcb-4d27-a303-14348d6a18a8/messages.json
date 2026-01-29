@@ -1,0 +1,34 @@
+[
+  {
+    "id": "6f6e7286-4401-4cd0-97ea-371f368a3846",
+    "agentId": "b483b3b3-1f20-467b-b5da-f8de0a163d38",
+    "sessionId": "a3b71d31-efcb-4d27-a303-14348d6a18a8",
+    "role": "user",
+    "content": "I have a new baby",
+    "timestamp": "2026-01-29T23:10:33.552Z"
+  },
+  {
+    "id": "3ea8d643-d58a-4c64-8eb5-d02eedda1943",
+    "agentId": "b483b3b3-1f20-467b-b5da-f8de0a163d38",
+    "sessionId": "a3b71d31-efcb-4d27-a303-14348d6a18a8",
+    "role": "assistant",
+    "content": "Congratulations on your new baby! This qualifies as a life event that allows you to make changes to your benefits.\n\nGenerally, you can add your child to your medical, dental, and vision plans. You may also be able to start or change your contributions to a Dependent Care Flexible Spending Account (DCFSA).\n\nFor customerB_moderate, the effective date for these changes would be the date of birth, as long as you submit the request within 30 days of the birth date. You'll need to provide a hospital record or birth certificate as documentation.\n\nWould you like me to walk you through the steps to make these changes in UKG Ready ESS?",
+    "timestamp": "2026-01-29T23:10:35.992Z"
+  },
+  {
+    "id": "f33b571a-2c7b-42fd-87eb-7e3a1cdc1f89",
+    "agentId": "b483b3b3-1f20-467b-b5da-f8de0a163d38",
+    "sessionId": "a3b71d31-efcb-4d27-a303-14348d6a18a8",
+    "role": "user",
+    "content": "yes",
+    "timestamp": "2026-01-29T23:17:18.283Z"
+  },
+  {
+    "id": "212ff0fb-1ee8-4bc9-bd15-148d76eb92ef",
+    "agentId": "b483b3b3-1f20-467b-b5da-f8de0a163d38",
+    "sessionId": "a3b71d31-efcb-4d27-a303-14348d6a18a8",
+    "role": "assistant",
+    "content": "Okay! Here are the general steps to make changes due to the birth of your child in UKG Ready ESS:\n\n1.  **Log in to UKG Ready ESS:** Access the Employee Self Service portal through your company's website or the UKG Ready mobile app.\n2.  **Navigate to Benefits:** Look for a \"Benefits\" or \"My Benefits\" section. The exact wording may vary.\n3.  **Find Life Events:** Within the Benefits section, there should be an option to report a \"Life Event\" or \"Qualifying Life Event.\"\n4.  **Select \"Birth\":** Choose \"Birth\" from the list of life event options.\n5.  **Enter Event Date:** Input the date your child was born.\n6.  **Make Elections:** Follow the prompts to add your child to your desired benefit plans (medical, dental, vision) and make any changes to your DCFSA contributions.\n7.  **Upload Documentation:** You'll likely be prompted to upload the required documentation, which is a hospital record or birth certificate.\n8.  **Review and Submit:** Carefully review all the changes you've made, and then submit your request.\n\nLet me know if you get stuck at any point in the process!",
+    "timestamp": "2026-01-29T23:17:20.301Z"
+  }
+]
