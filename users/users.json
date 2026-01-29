@@ -69,5 +69,17 @@
     "username": "mocktest_Zq6ryn",
     "password": "$2b$10$xnuoogp1pW54.v3An1l4M.6Hjtr1nO1LXYmzy1p5tqicgWwYWQg8u",
     "createdAt": "2026-01-29T21:37:40.130Z"
+  },
+  {
+    "id": "93e1980e-609f-4d42-82b9-1f3f1e8d0481",
+    "username": "testuser_u0z2sA",
+    "password": "$2b$10$d6gPv9Qgu.gAlaSqZdqYtupTc4RCGEfHcwWcGVTleGj4uwcuaUnw6",
+    "createdAt": "2026-01-29T22:49:18.527Z"
+  },
+  {
+    "id": "db33460d-fe80-4660-b231-bab770a6a3f7",
+    "username": "testuser_aZ9oY3",
+    "password": "$2b$10$jHqS5FxBnmv6xOi4tjtpt.4Ae98uaoWNqK4bu8.8I7W708WqbccUa",
+    "createdAt": "2026-01-29T22:53:56.476Z"
   }
 ]

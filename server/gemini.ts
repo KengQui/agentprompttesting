@@ -1368,9 +1368,15 @@ export interface ExtractionResult {
 }
 
 function loadExtractionRules(): ExtractionRulesConfig {
-  const rulesPath = path.join(__dirname, "extraction-rules.json");
-  const content = fs.readFileSync(rulesPath, "utf-8");
-  return JSON.parse(content);
+  // Use process.cwd() which is reliable in both ESM and CJS environments
+  const rulesPath = path.join(process.cwd(), "server", "extraction-rules.json");
+  
+  if (fs.existsSync(rulesPath)) {
+    const content = fs.readFileSync(rulesPath, "utf-8");
+    return JSON.parse(content);
+  }
+  
+  throw new Error(`Extraction rules config not found at: ${rulesPath}`);
 }
 
 export async function extractBusinessCaseContent(
@@ -1387,13 +1393,14 @@ export async function extractBusinessCaseContent(
   let rules: ExtractionRulesConfig;
   try {
     rules = loadExtractionRules();
-  } catch (error) {
+  } catch (error: any) {
+    console.error("Failed to load extraction rules:", error?.message || error);
     return {
       extractedContent: businessCaseText,
       discardedSummary: [],
       keepCategories: [],
       success: false,
-      error: "Failed to load extraction rules config"
+      error: "Failed to load extraction rules config: " + (error?.message || String(error))
     };
   }
 
