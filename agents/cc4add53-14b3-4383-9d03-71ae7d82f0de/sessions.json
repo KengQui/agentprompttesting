@@ -32,6 +32,13 @@
     "agentId": "cc4add53-14b3-4383-9d03-71ae7d82f0de",
     "title": "New Session",
     "createdAt": "2026-01-28T14:16:57.428Z",
-    "updatedAt": "2026-01-28T14:33:29.530Z"
+    "updatedAt": "2026-01-29T11:52:24.817Z"
+  },
+  {
+    "id": "3d875117-72a7-47ce-91c1-ab11b5f30de5",
+    "agentId": "cc4add53-14b3-4383-9d03-71ae7d82f0de",
+    "title": "New Session",
+    "createdAt": "2026-01-29T12:57:36.819Z",
+    "updatedAt": "2026-01-29T12:57:36.819Z"
   }
 ]

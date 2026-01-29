@@ -408,22 +408,57 @@
         }
       ],
       "success": true
+    },
+    {
+      "id": "trace-1769687544814",
+      "sessionId": "e2325c98-7754-49e5-ac82-d7d20726a548",
+      "userInput": "?",
+      "agentResponse": "What is your question? I'll be back with an answer.",
+      "startTime": "2026-01-29T11:52:24.280Z",
+      "endTime": "2026-01-29T11:52:24.814Z",
+      "totalDuration": 534,
+      "entries": [
+        {
+          "id": "entry-1769687544291-1",
+          "type": "intent_classification",
+          "name": "Orchestrator Intent Classification",
+          "timestamp": "2026-01-29T11:52:24.291Z",
+          "metadata": {
+            "intent": "answer_question",
+            "classificationMethod": "orchestrator",
+            "confidence": "high"
+          }
+        },
+        {
+          "id": "entry-1769687544814-3",
+          "type": "llm_call",
+          "name": "Gemini Response Generation",
+          "timestamp": "2026-01-29T11:52:24.814Z",
+          "duration": 523,
+          "metadata": {
+            "model": "gemini",
+            "intent": "answer_question",
+            "validated": true
+          }
+        }
+      ],
+      "success": true
     }
   ],
   "stats": {
     "hookCalls": {},
     "signalReads": {},
     "intentDistribution": {
-      "answer_question": 12
+      "answer_question": 13
     },
     "classificationMethods": {
-      "orchestrator": 12
+      "orchestrator": 13
     },
-    "avgResponseTime": 642,
-    "totalLlmCalls": 12,
+    "avgResponseTime": 633.6923076923077,
+    "totalLlmCalls": 13,
     "totalTokensUsed": 0,
     "errorCount": 0
   },
   "createdAt": "2026-01-28T10:40:12.960Z",
-  "updatedAt": "2026-01-28T14:33:29.529Z"
+  "updatedAt": "2026-01-29T11:52:24.814Z"
 }

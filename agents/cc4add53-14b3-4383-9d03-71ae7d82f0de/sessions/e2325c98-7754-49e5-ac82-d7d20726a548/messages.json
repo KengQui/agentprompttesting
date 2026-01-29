@@ -30,5 +30,21 @@
     "role": "assistant",
     "content": "Hasta la vista, baby.\n",
     "timestamp": "2026-01-28T14:33:29.530Z"
+  },
+  {
+    "id": "347f40ad-d43b-4f82-a811-b48ed6656184",
+    "agentId": "cc4add53-14b3-4383-9d03-71ae7d82f0de",
+    "sessionId": "e2325c98-7754-49e5-ac82-d7d20726a548",
+    "role": "user",
+    "content": "?",
+    "timestamp": "2026-01-29T11:52:24.280Z"
+  },
+  {
+    "id": "95274af8-c16c-451d-a705-8f6cee355a8a",
+    "agentId": "cc4add53-14b3-4383-9d03-71ae7d82f0de",
+    "sessionId": "e2325c98-7754-49e5-ac82-d7d20726a548",
+    "role": "assistant",
+    "content": "What is your question? I'll be back with an answer.",
+    "timestamp": "2026-01-29T11:52:24.817Z"
   }
 ]
