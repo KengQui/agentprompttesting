@@ -94,5 +94,21 @@
     "role": "assistant",
     "content": "Describe your question or issue.",
     "timestamp": "2026-01-29T03:02:22.119Z"
+  },
+  {
+    "id": "5ad38e1f-41d3-4863-953f-3848b2851f8d",
+    "agentId": "8a961f5d-17c8-446d-8114-d1136bb6b4ff",
+    "sessionId": "b31f02e9-66ac-4959-9ebe-9f192948a1de",
+    "role": "user",
+    "content": "what is the extra tax I have to pay as a result of my pay increase?",
+    "timestamp": "2026-01-29T03:21:13.528Z"
+  },
+  {
+    "id": "e0c667f9-111a-45c2-9624-d69521c5ca85",
+    "agentId": "8a961f5d-17c8-446d-8114-d1136bb6b4ff",
+    "sessionId": "b31f02e9-66ac-4959-9ebe-9f192948a1de",
+    "role": "assistant",
+    "content": "Okay, John. I can help you with that.\n\nIn December 2025, your federal tax was $480.15, your state tax was $254.00, your social security tax was $217.00, and your medicare tax was $50.75.\n\nIn January 2026, your federal tax was $494.55, your state tax was $261.62, your social security tax was $223.51, and your medicare tax was $52.27.\n\nThis means that your federal tax increased by $14.40, your state tax increased by $7.62, your social security tax increased by $6.51, and your medicare tax increased by $1.52.\n",
+    "timestamp": "2026-01-29T03:21:16.094Z"
   }
 ]

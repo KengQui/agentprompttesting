@@ -566,6 +566,40 @@
         }
       ],
       "success": true
+    },
+    {
+      "id": "trace-1769656876093",
+      "sessionId": "b31f02e9-66ac-4959-9ebe-9f192948a1de",
+      "userInput": "what is the extra tax I have to pay as a result of my pay increase?",
+      "agentResponse": "Okay, John. I can help you with that.\n\nIn December 2025, your federal tax was $480.15, your state tax was $254.00, your social security tax was $217.00, and your medicare tax was $50.75.\n\nIn January 2026, your federal tax was $494.55, your state tax was $261.62, your social security tax was $223.51, and your medicare tax was $52.27.\n\nThis means that your federal tax increased by $14.40, your state tax increased by $7.62, your social security tax increased by $6.51, and your medicare tax increased by $1.52.\n",
+      "startTime": "2026-01-29T03:21:13.528Z",
+      "endTime": "2026-01-29T03:21:16.093Z",
+      "totalDuration": 2565,
+      "entries": [
+        {
+          "id": "entry-1769656874643-1",
+          "type": "intent_classification",
+          "name": "Orchestrator Intent Classification",
+          "timestamp": "2026-01-29T03:21:14.643Z",
+          "metadata": {
+            "intent": "answer_question",
+            "classificationMethod": "orchestrator",
+            "confidence": "high"
+          }
+        },
+        {
+          "id": "entry-1769656876093-3",
+          "type": "llm_call",
+          "name": "Gemini Response Generation",
+          "timestamp": "2026-01-29T03:21:16.093Z",
+          "duration": 1450,
+          "metadata": {
+            "model": "gemini",
+            "intent": "answer_question"
+          }
+        }
+      ],
+      "success": true
     }
   ],
   "stats": {
@@ -574,17 +608,17 @@
     },
     "signalReads": {},
     "intentDistribution": {
-      "answer_question": 14,
+      "answer_question": 15,
       "request_clarification": 3
     },
     "classificationMethods": {
-      "orchestrator": 17
+      "orchestrator": 18
     },
-    "avgResponseTime": 4863.1875,
-    "totalLlmCalls": 14,
+    "avgResponseTime": 4728,
+    "totalLlmCalls": 15,
     "totalTokensUsed": 0,
     "errorCount": 0
   },
   "createdAt": "2026-01-28T22:47:34.209Z",
-  "updatedAt": "2026-01-29T03:02:22.118Z"
+  "updatedAt": "2026-01-29T03:21:16.093Z"
 }

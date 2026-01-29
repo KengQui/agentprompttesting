@@ -33,6 +33,49 @@ import { generateAgentResponse, generateValidationRules, generateGuardrails, gen
 import { loadAgentComponents, clearAgentCache, hasCustomComponents } from "./agent-loader";
 import { createRecoveryManager } from "./components/recovery-manager";
 import multer from "multer";
+
+// Shared helper to validate AI responses and detect garbage/placeholder output
+interface ResponseValidationResult {
+  isValid: boolean;
+  originalResponse: string;
+  recoveryResponse: string;
+}
+
+function validateAIResponse(response: string): ResponseValidationResult {
+  const trimmed = response.trim();
+  const lowered = trimmed.toLowerCase();
+  
+  // Patterns that indicate placeholder/template text that shouldn't be shown to users
+  const invalidPatterns = [
+    /^describe your question/i,
+    /^what can i help you with/i,
+    /^hello!?\s*i'?m here to help/i,
+    /^please provide more details/i,
+    /^i need more information/i,
+  ];
+  
+  // Check if response matches any invalid pattern AND is suspiciously short
+  const matchesPattern = invalidPatterns.some(pattern => pattern.test(trimmed));
+  const isTooShort = trimmed.length < 80;
+  
+  // Also check for exact matches to common placeholder text
+  const exactInvalid = [
+    "describe your question or issue.",
+    "describe your question or issue",
+    "what can i help you with today?",
+  ];
+  const isExactMatch = exactInvalid.includes(lowered);
+  
+  const isInvalid = isExactMatch || (matchesPattern && isTooShort);
+  
+  const recoveryMessage = "I apologize, but I wasn't able to fully process that question. Could you please rephrase it, or let me know specifically what information you're looking for from your paycheck data? For example, you could ask about specific deductions, tax withholdings, or pay changes between periods.";
+  
+  return {
+    isValid: !isInvalid,
+    originalResponse: trimmed,
+    recoveryResponse: isInvalid ? recoveryMessage : trimmed,
+  };
+}
 import { v4 as uuidv4 } from "uuid";
 
 // Configure multer for file uploads (memory storage for text extraction)
@@ -563,11 +606,28 @@ export async function registerRoutes(
               : '';
             
             const llmStartTime = Date.now();
-            responseContent = await generateAgentResponse(
+            const rawResponse = await generateAgentResponse(
               agentConfig,
               intentPrefix + userInput,
               chatHistory
             );
+            
+            // Validate AI response using shared helper
+            const validation = validateAIResponse(rawResponse);
+            responseContent = validation.recoveryResponse;
+            
+            if (!validation.isValid) {
+              traceEntries.push({
+                id: `entry-${Date.now()}-recovery`,
+                type: "recovery",
+                name: "Response Validation Recovery",
+                timestamp: new Date().toISOString(),
+                metadata: { 
+                  reason: "Detected invalid/placeholder response",
+                  originalResponse: validation.originalResponse.substring(0, 100),
+                },
+              });
+            }
             
             traceEntries.push({
               id: `entry-${Date.now()}-3`,
@@ -578,6 +638,7 @@ export async function registerRoutes(
               metadata: { 
                 model: "gemini",
                 intent: turnResult.intent,
+                validated: validation.isValid,
               },
             });
           }
@@ -597,11 +658,28 @@ export async function registerRoutes(
           });
           
           const llmStartTime = Date.now();
-          responseContent = await generateAgentResponse(
+          const rawResponse = await generateAgentResponse(
             agentConfig,
             userInput,
             chatHistory
           );
+          
+          // Validate AI response using shared helper
+          const validation = validateAIResponse(rawResponse);
+          responseContent = validation.recoveryResponse;
+          
+          if (!validation.isValid) {
+            traceEntries.push({
+              id: `entry-${Date.now()}-recovery`,
+              type: "recovery",
+              name: "Response Validation Recovery",
+              timestamp: new Date().toISOString(),
+              metadata: { 
+                reason: "Detected invalid/placeholder response",
+                originalResponse: validation.originalResponse.substring(0, 100),
+              },
+            });
+          }
           
           traceEntries.push({
             id: `entry-${Date.now()}-2`,
@@ -609,7 +687,7 @@ export async function registerRoutes(
             name: "Gemini Response Generation",
             timestamp: new Date().toISOString(),
             duration: Date.now() - llmStartTime,
-            metadata: { model: "gemini" },
+            metadata: { model: "gemini", validated: validation.isValid },
           });
         }
       } catch (aiError: any) {

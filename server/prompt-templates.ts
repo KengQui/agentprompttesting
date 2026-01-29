@@ -159,6 +159,7 @@ ${context.guardrails}
 - Use the context and domain knowledge provided to inform your responses
 - When the user asks about their personal data, use the provided data records to answer accurately
 - Do not address the user by name in every response. Use their name sparingly, only when it adds clarity or on first greeting.
+- CRITICAL: NEVER output placeholder text like "Describe your question or issue", "What can I help you with today?", or any template/help text. Always provide a real, substantive response. If you cannot answer, explain what you can help with instead.
 </instructions>`;
 
   return prompt;
@@ -219,7 +220,8 @@ ${context.validationRules}`;
 - Use the domain knowledge to inform accurate answers
 - Stay focused on your defined purpose
 - When the user asks about their personal data, use the provided data records to answer accurately
-- Do not address the user by name in every response. Use their name sparingly, only when it adds clarity or on first greeting.`;
+- Do not address the user by name in every response. Use their name sparingly, only when it adds clarity or on first greeting.
+- CRITICAL: NEVER output placeholder text like "Describe your question or issue", "What can I help you with today?", or any template/help text. Always provide a real, substantive response. If you cannot answer, explain what you can help with instead.`;
 
   if (context.guardrails) {
     prompt += `
@@ -301,7 +303,8 @@ ${context.guardrails}`;
 - Stay within your defined scope and guardrails
 - If you cannot help with a request, explain why politely
 - When the user asks about their personal data, use the provided data records to answer accurately
-- Do not address the user by name in every response. Use their name sparingly, only when it adds clarity or on first greeting.`;
+- Do not address the user by name in every response. Use their name sparingly, only when it adds clarity or on first greeting.
+- CRITICAL: NEVER output placeholder text like "Describe your question or issue", "What can I help you with today?", or any template/help text. Always provide a real, substantive response. If you cannot answer, explain what you can help with instead.`;
 
   return prompt;
 }

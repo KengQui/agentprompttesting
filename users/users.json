@@ -51,5 +51,11 @@
     "username": "e2e_user_lViF7P",
     "password": "$2b$10$WIozU4TJu0h1EG6ykIQyPut6e5BQKpqr2hK12zZBxqQRsoDqZAAcu",
     "createdAt": "2026-01-28T23:17:04.832Z"
+  },
+  {
+    "id": "6e6ec6cd-2387-4159-9b75-acaffae270e7",
+    "username": "testuser_pdW_wf",
+    "password": "$2b$10$Ow5TTGh53t0iAVMS2E0RteeshlhbwY9/sWCfAWoCkDefLmGBbG42i",
+    "createdAt": "2026-01-29T03:21:26.459Z"
   }
 ]
