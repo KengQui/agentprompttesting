@@ -1,0 +1,78 @@
+{
+  "description": "Configuration for the Smart Business Case Extractor. Edit this file to control what content gets extracted for prompt generation.",
+  "version": "1.0",
+  
+  "keepCategories": {
+    "agentRole": {
+      "description": "Content defining what the agent does and its identity",
+      "keywords": ["agent", "assistant", "understands", "provides", "guidance", "helps", "support"],
+      "sectionHeaders": ["proposed solution", "solution", "what it does", "agent capabilities", "features"]
+    },
+    "targetUsers": {
+      "description": "Who the agent serves and their needs",
+      "keywords": ["employees", "users", "customers", "target", "audience", "personas"],
+      "sectionHeaders": ["target users", "audience", "who", "user types", "personas"]
+    },
+    "scope": {
+      "description": "What's in scope and out of scope for the agent",
+      "keywords": ["in scope", "out of scope", "handles", "covers", "includes", "excludes"],
+      "sectionHeaders": ["scope", "mvp", "boundaries", "coverage"]
+    },
+    "domainRules": {
+      "description": "Business rules, policies, and domain-specific logic",
+      "keywords": ["policy", "rules", "requirements", "process", "workflow", "deadline", "window", "documentation", "effective date"],
+      "sectionHeaders": ["domain", "business rules", "policies", "requirements", "process"]
+    },
+    "guardrails": {
+      "description": "What the agent should NOT do, escalation criteria, safety boundaries",
+      "keywords": ["escalate", "do not", "don't", "cannot", "should not", "avoid", "never", "restrict", "limit", "sensitive", "legal", "tax", "advice"],
+      "sectionHeaders": ["guardrails", "out of scope", "risks", "mitigations", "constraints", "limitations", "escalation"]
+    },
+    "escalationCriteria": {
+      "description": "When to hand off to humans",
+      "keywords": ["escalate", "handoff", "human", "exception", "unclear", "route to", "refer to"],
+      "sectionHeaders": ["escalation", "handoff", "exceptions", "human support"]
+    },
+    "problemContext": {
+      "description": "Pain points that explain WHY the agent exists",
+      "keywords": ["pain points", "problem", "challenge", "issue", "confusion", "delay", "error"],
+      "sectionHeaders": ["problem", "opportunity", "pain points", "challenges"]
+    }
+  },
+  
+  "discardCategories": {
+    "roiAndMetrics": {
+      "description": "Business justification numbers - not needed for agent behavior",
+      "keywords": ["roi", "savings", "cost", "$", "deflection rate", "kpi", "metric", "measure"],
+      "sectionHeaders": ["roi", "metrics", "kpis", "benefits and value", "value"]
+    },
+    "implementationDetails": {
+      "description": "Technical implementation plans - not agent behavior",
+      "keywords": ["prototype", "production", "rollout", "integration", "telemetry", "configuration", "implementation"],
+      "sectionHeaders": ["implementation", "approach", "rollout", "technical", "architecture"]
+    },
+    "executiveSummary": {
+      "description": "High-level summary that duplicates content elsewhere",
+      "keywords": [],
+      "sectionHeaders": ["executive summary", "summary", "overview", "tldr"]
+    },
+    "recommendations": {
+      "description": "Action items for stakeholders - not agent behavior",
+      "keywords": ["recommend", "proceed with", "next steps", "validation", "measure"],
+      "sectionHeaders": ["recommendation", "next steps", "conclusion"]
+    },
+    "formulasAndExamples": {
+      "description": "ROI formulas and example calculations",
+      "keywords": ["formula", "calculate", "example inputs", "plug in"],
+      "sectionHeaders": ["roi model", "formula", "calculation"]
+    }
+  },
+  
+  "extractionPrompt": "You are a smart extractor that analyzes business case documents and extracts ONLY the content relevant for creating an AI agent's system prompt.\n\nYour job is to:\n1. KEEP content about: what the agent does, who it serves, domain rules/policies, guardrails (what NOT to do), escalation criteria, and problem context that explains the agent's purpose\n2. DISCARD content about: ROI calculations, metrics/KPIs, implementation plans, executive summaries, recommendations, formulas\n\nOutput a clean, focused version that contains only the operational content needed to define agent behavior.",
+  
+  "outputFormat": {
+    "includeExtractedSections": true,
+    "includeDiscardedSummary": true,
+    "maxLength": 4000
+  }
+}

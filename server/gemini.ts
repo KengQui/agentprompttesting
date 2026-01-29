@@ -3,6 +3,8 @@ import { generatePrompt, type PromptContext } from "./prompt-templates";
 import type { PromptStyle, DomainDocument, GeminiModel, SampleDataset, ClarifyingInsight, AgentAction, MockUserState } from "@shared/schema";
 import { defaultGenerationModel } from "@shared/schema";
 import { v4 as uuidv4 } from "uuid";
+import * as fs from "fs";
+import * as path from "path";
 
 export interface ContextEvaluationResult {
   hasEnoughContext: boolean;
@@ -1330,5 +1332,157 @@ Generate actions and mock user data for this AI agent.`;
   } catch (error: any) {
     console.error("Gemini API error:", error?.message || error);
     throw new Error(`Failed to generate actions: ${error?.message || error}`);
+  }
+}
+
+// Smart Business Case Extractor
+// Reads extraction rules from config file and extracts only prompt-relevant content
+
+export interface ExtractionRulesConfig {
+  description: string;
+  version: string;
+  keepCategories: Record<string, {
+    description: string;
+    keywords: string[];
+    sectionHeaders: string[];
+  }>;
+  discardCategories: Record<string, {
+    description: string;
+    keywords: string[];
+    sectionHeaders: string[];
+  }>;
+  extractionPrompt: string;
+  outputFormat: {
+    includeExtractedSections: boolean;
+    includeDiscardedSummary: boolean;
+    maxLength: number;
+  };
+}
+
+export interface ExtractionResult {
+  extractedContent: string;
+  discardedSummary: string[];
+  keepCategories: string[];
+  success: boolean;
+  error?: string;
+}
+
+function loadExtractionRules(): ExtractionRulesConfig {
+  const rulesPath = path.join(__dirname, "extraction-rules.json");
+  const content = fs.readFileSync(rulesPath, "utf-8");
+  return JSON.parse(content);
+}
+
+export async function extractBusinessCaseContent(
+  businessCaseText: string,
+  model?: GeminiModel
+): Promise<ExtractionResult> {
+  const modelToUse = model || defaultGenerationModel;
+  
+  if (!process.env.GEMINI_API_KEY) {
+    throw new Error("GEMINI_API_KEY is not configured");
+  }
+
+  // Load the extraction rules from config
+  let rules: ExtractionRulesConfig;
+  try {
+    rules = loadExtractionRules();
+  } catch (error) {
+    return {
+      extractedContent: businessCaseText,
+      discardedSummary: [],
+      keepCategories: [],
+      success: false,
+      error: "Failed to load extraction rules config"
+    };
+  }
+
+  // Build the system prompt from config
+  const keepCategoriesList = Object.entries(rules.keepCategories)
+    .map(([name, cat]) => `- **${name}**: ${cat.description}`)
+    .join("\n");
+  
+  const discardCategoriesList = Object.entries(rules.discardCategories)
+    .map(([name, cat]) => `- **${name}**: ${cat.description}`)
+    .join("\n");
+
+  const systemPrompt = `${rules.extractionPrompt}
+
+## Categories to KEEP (extract this content):
+${keepCategoriesList}
+
+## Categories to DISCARD (remove this content):
+${discardCategoriesList}
+
+Respond with a JSON object containing:
+{
+  "extractedContent": "The cleaned business case with only prompt-relevant content, formatted clearly",
+  "discardedSummary": ["List of section names/topics that were removed"],
+  "keepCategories": ["List of categories that were found and kept"]
+}
+
+Keep the extracted content well-organized and readable. Remove any ROI formulas, metrics, implementation plans, and executive summaries. Focus on what defines agent behavior.`;
+
+  const userPrompt = `Extract the prompt-relevant content from this business case document:
+
+---
+${businessCaseText}
+---
+
+Return only the JSON response with extracted content.`;
+
+  try {
+    const response = await ai.models.generateContent({
+      model: modelToUse,
+      config: {
+        systemInstruction: systemPrompt,
+      },
+      contents: [{ role: "user", parts: [{ text: userPrompt }] }],
+    });
+
+    const content = response.text || "";
+    
+    // Parse the JSON response
+    let parsed;
+    try {
+      let cleanedContent = content.trim();
+      if (cleanedContent.startsWith("```json")) {
+        cleanedContent = cleanedContent.replace(/^```json\s*\n?/, "").replace(/\n?```\s*$/, "");
+      } else if (cleanedContent.startsWith("```")) {
+        cleanedContent = cleanedContent.replace(/^```\s*\n?/, "").replace(/\n?```\s*$/, "");
+      }
+      parsed = JSON.parse(cleanedContent);
+    } catch (parseError) {
+      console.error("Failed to parse extraction result:", content);
+      return {
+        extractedContent: businessCaseText,
+        discardedSummary: [],
+        keepCategories: [],
+        success: false,
+        error: "Failed to parse extraction result"
+      };
+    }
+
+    // Enforce max length if configured
+    let extractedContent = parsed.extractedContent || businessCaseText;
+    if (rules.outputFormat.maxLength && extractedContent.length > rules.outputFormat.maxLength) {
+      extractedContent = extractedContent.substring(0, rules.outputFormat.maxLength) + "\n\n[Content truncated to fit maximum length]";
+    }
+
+    return {
+      extractedContent,
+      discardedSummary: parsed.discardedSummary || [],
+      keepCategories: parsed.keepCategories || [],
+      success: true
+    };
+  } catch (error: any) {
+    console.error("Gemini API error during extraction:", error?.message || error);
+    return {
+      extractedContent: businessCaseText,
+      discardedSummary: [],
+      keepCategories: [],
+      success: false,
+      error: `Extraction failed: ${error?.message || error}`
+    };
   }
 }

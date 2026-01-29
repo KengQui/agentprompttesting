@@ -29,7 +29,7 @@ async function requireAuth(req: AuthenticatedRequest, res: Response, next: NextF
   req.user = user;
   next();
 }
-import { generateAgentResponse, generateValidationRules, generateGuardrails, generateSystemPrompt, generateSampleData, evaluateContextSufficiency, processClarifyingChat, generateValidationRulesWithInsights, generateGuardrailsWithInsights, generateActionsAndMockData, parseActionFromResponse, executeSimulatedAction, type GenerationContext, type SystemPromptContext, type SampleDataGenerationContext, type ClarifyingChatContext, type ActionsGenerationContext } from "./gemini";
+import { generateAgentResponse, generateValidationRules, generateGuardrails, generateSystemPrompt, generateSampleData, evaluateContextSufficiency, processClarifyingChat, generateValidationRulesWithInsights, generateGuardrailsWithInsights, generateActionsAndMockData, parseActionFromResponse, executeSimulatedAction, extractBusinessCaseContent, type GenerationContext, type SystemPromptContext, type SampleDataGenerationContext, type ClarifyingChatContext, type ActionsGenerationContext, type ExtractionResult } from "./gemini";
 import { loadAgentComponents, clearAgentCache, hasCustomComponents } from "./agent-loader";
 import { createRecoveryManager } from "./components/recovery-manager";
 import multer from "multer";
@@ -1539,6 +1539,31 @@ export async function registerRoutes(
     } catch (error) {
       console.error("Error uploading sample data:", error);
       res.status(500).json({ message: "Failed to upload sample data" });
+    }
+  });
+
+  // Smart Business Case Extractor - extracts only prompt-relevant content
+  app.post("/api/extract-business-case", async (req, res) => {
+    try {
+      const schema = z.object({
+        businessCaseText: z.string().min(1, "Business case text is required"),
+        model: z.string().optional(),
+      });
+
+      const parsed = schema.safeParse(req.body);
+      if (!parsed.success) {
+        return res.status(400).json({ message: parsed.error.errors[0]?.message || "Invalid input" });
+      }
+
+      const result = await extractBusinessCaseContent(
+        parsed.data.businessCaseText,
+        parsed.data.model as any
+      );
+      
+      res.json(result);
+    } catch (error: any) {
+      console.error("Error extracting business case:", error);
+      res.status(500).json({ message: error?.message || "Failed to extract business case content" });
     }
   });
 
