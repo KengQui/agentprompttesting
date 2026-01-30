@@ -726,7 +726,7 @@ function getSystemPrompt(agent: AgentContext): string {
   if (agent.customPrompt && agent.customPrompt.trim()) {
     const customPrompt = agent.customPrompt.trim();
     
-    // If custom prompt uses placeholders, process them
+    // If custom prompt uses legacy placeholders, process them
     if (hasPlaceholders(customPrompt)) {
       let prompt = processCustomPrompt(customPrompt, agent);
       // Also add actions and mock state
@@ -737,17 +737,43 @@ function getSystemPrompt(agent: AgentContext): string {
       return prompt;
     }
     
-    // If no placeholders used, append domain knowledge and guardrails automatically
-    // This ensures the agent still has access to important context
-    const domainKnowledgeText = buildDomainKnowledgeText(agent);
+    // Build the data sections
     const sampleDatasetsText = buildSampleDatasetsText(agent);
     const actionsText = buildActionsText(agent);
     const mockStateText = buildMockUserStateText(agent);
+    
+    let fullPrompt = customPrompt;
+    
+    // Check for new-style placeholder markers and replace them
+    const hasSampleDataMarker = fullPrompt.includes('{{SAMPLE_DATA}}');
+    const hasActionsMarker = fullPrompt.includes('{{AVAILABLE_ACTIONS}}');
+    
+    // Replace {{SAMPLE_DATA}} marker with actual sample data
+    if (hasSampleDataMarker) {
+      const sampleDataContent = sampleDatasetsText || mockStateText || 'No sample data configured for this simulation.';
+      fullPrompt = fullPrompt.replace('{{SAMPLE_DATA}}', sampleDataContent);
+    }
+    
+    // Replace {{AVAILABLE_ACTIONS}} marker with actual actions
+    if (hasActionsMarker) {
+      const actionsContent = actionsText || 'No actions configured for this simulation.';
+      fullPrompt = fullPrompt.replace('{{AVAILABLE_ACTIONS}}', actionsContent);
+    }
+    
+    // If markers were found and replaced, we're done (add mock state if not included in sample data)
+    if (hasSampleDataMarker || hasActionsMarker) {
+      // If sample data marker was used and we used sampleDatasetsText, also append mockStateText if it exists
+      if (hasSampleDataMarker && sampleDatasetsText && mockStateText) {
+        fullPrompt += `\n\n${mockStateText}`;
+      }
+      return fullPrompt;
+    }
+    
+    // Fallback: If no markers found, append data to end (backward compatibility)
+    const domainKnowledgeText = buildDomainKnowledgeText(agent);
     const currentDate = new Date().toLocaleDateString('en-US', { 
       weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' 
     });
-    
-    let fullPrompt = customPrompt;
     
     // Add current date
     fullPrompt += `\n\n## Current Date\nToday is: ${currentDate}`;
@@ -969,17 +995,29 @@ Your goal is to transform this information into a clear, effective system prompt
    - Use clear headings and structure (XML tags like <domain_context>, <rules>, etc.)
    - Prioritize actionable information over background details
 
-3. **Incorporate sample data as reference context**:
-   - If sample data is provided, include it in a <sample_data> or <examples> section
-   - Instruct the chatbot to use this as examples of data structure and format
-   - The chatbot should reference these examples when explaining capabilities or answering questions
+3. **Include Sample Data Placeholder (REQUIRED)**:
+   - ALWAYS include a sample data section with the exact marker: \`{{SAMPLE_DATA}}\`
+   - Use this format in your generated prompt:
+     \`\`\`
+     <sample_data>
+     {{SAMPLE_DATA}}
+     </sample_data>
+     \`\`\`
+   - Place this section after domain knowledge/validation rules but before interaction guidelines
+   - Include instructions like: "Reference the sample data below when providing personalized responses..."
+   - Include this marker even if no sample data was provided in the inputs - it will be populated at runtime
 
-4. **Simulate available actions in responses**:
-   - If available actions are provided, list them in an <available_actions> or <capabilities> section
-   - Instruct the chatbot to respond AS IF it can perform these actions
-   - Use language like "I'll submit that for you" or "I've processed your request"
-   - Provide realistic responses that simulate successful action execution
-   - Be clear that the chatbot should act as if these functions work, even though they're simulated
+4. **Include Available Actions Placeholder (REQUIRED)**:
+   - ALWAYS include an available actions section with the exact marker: \`{{AVAILABLE_ACTIONS}}\`
+   - Use this format in your generated prompt:
+     \`\`\`
+     <available_actions>
+     {{AVAILABLE_ACTIONS}}
+     </available_actions>
+     \`\`\`
+   - Place this section after sample data but before interaction guidelines
+   - Include instructions like: "When performing actions, use the available actions listed above. Respond AS IF you can perform these actions using language like 'I'll submit that for you' or 'I've processed your request'..."
+   - Include this marker even if no actions were provided in the inputs - it will be populated at runtime
 
 5. **Embed validation rules naturally**: Integrate validation rules into the instructions where they're relevant, not as a separate list.
 
