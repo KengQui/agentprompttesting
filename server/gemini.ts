@@ -726,46 +726,55 @@ function getSystemPrompt(agent: AgentContext): string {
   if (agent.customPrompt && agent.customPrompt.trim()) {
     const customPrompt = agent.customPrompt.trim();
     
-    // If custom prompt uses legacy placeholders, process them
-    if (hasPlaceholders(customPrompt)) {
-      let prompt = processCustomPrompt(customPrompt, agent);
-      // Also add actions and mock state
-      const actionsText = buildActionsText(agent);
-      const mockStateText = buildMockUserStateText(agent);
-      if (actionsText) prompt += `\n\n${actionsText}`;
-      if (mockStateText) prompt += `\n\n${mockStateText}`;
-      return prompt;
-    }
-    
-    // Build the data sections
+    // Build the data sections upfront
     const sampleDatasetsText = buildSampleDatasetsText(agent);
     const actionsText = buildActionsText(agent);
     const mockStateText = buildMockUserStateText(agent);
     
     let fullPrompt = customPrompt;
     
-    // Check for new-style placeholder markers and replace them
+    // If custom prompt uses legacy placeholders, process them first
+    if (hasPlaceholders(customPrompt)) {
+      fullPrompt = processCustomPrompt(customPrompt, agent);
+    }
+    
+    // Check for new-style placeholder markers and replace them (use replaceAll for all occurrences)
     const hasSampleDataMarker = fullPrompt.includes('{{SAMPLE_DATA}}');
     const hasActionsMarker = fullPrompt.includes('{{AVAILABLE_ACTIONS}}');
     
-    // Replace {{SAMPLE_DATA}} marker with actual sample data
+    // Replace all {{SAMPLE_DATA}} markers with actual sample data
     if (hasSampleDataMarker) {
       const sampleDataContent = sampleDatasetsText || mockStateText || 'No sample data configured for this simulation.';
-      fullPrompt = fullPrompt.replace('{{SAMPLE_DATA}}', sampleDataContent);
+      fullPrompt = fullPrompt.replaceAll('{{SAMPLE_DATA}}', sampleDataContent);
     }
     
-    // Replace {{AVAILABLE_ACTIONS}} marker with actual actions
+    // Replace all {{AVAILABLE_ACTIONS}} markers with actual actions
     if (hasActionsMarker) {
       const actionsContent = actionsText || 'No actions configured for this simulation.';
-      fullPrompt = fullPrompt.replace('{{AVAILABLE_ACTIONS}}', actionsContent);
+      fullPrompt = fullPrompt.replaceAll('{{AVAILABLE_ACTIONS}}', actionsContent);
     }
     
-    // If markers were found and replaced, we're done (add mock state if not included in sample data)
+    // If new-style markers were found and replaced, add mock state if needed and return
     if (hasSampleDataMarker || hasActionsMarker) {
-      // If sample data marker was used and we used sampleDatasetsText, also append mockStateText if it exists
+      // If sample data marker was used with sampleDatasetsText, also append mockStateText if it exists
       if (hasSampleDataMarker && sampleDatasetsText && mockStateText) {
         fullPrompt += `\n\n${mockStateText}`;
       }
+      // If no markers used mockStateText but it exists, append it
+      if (!hasSampleDataMarker && mockStateText) {
+        fullPrompt += `\n\n${mockStateText}`;
+      }
+      // If actions marker wasn't present but actionsText exists, append it
+      if (!hasActionsMarker && actionsText) {
+        fullPrompt += `\n\n${actionsText}`;
+      }
+      return fullPrompt;
+    }
+    
+    // If legacy placeholders were processed but no new markers, add actions and mock state
+    if (hasPlaceholders(customPrompt)) {
+      if (actionsText) fullPrompt += `\n\n${actionsText}`;
+      if (mockStateText) fullPrompt += `\n\n${mockStateText}`;
       return fullPrompt;
     }
     
