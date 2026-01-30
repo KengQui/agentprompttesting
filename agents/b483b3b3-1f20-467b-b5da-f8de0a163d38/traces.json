@@ -315,22 +315,57 @@
         }
       ],
       "success": true
+    },
+    {
+      "id": "trace-1769736282180",
+      "sessionId": "0632648a-0b29-4a97-93fa-7348f3c2cccf",
+      "userInput": "I want to add my spouse to my health insurance",
+      "agentResponse": "Okay, I can help you with that. To start, could you please tell me what qualifying life event has occurred that allows you to add your spouse to your health insurance at this time? For example, was it a marriage, birth, or loss of other coverage? Also, what was the date of the event?",
+      "startTime": "2026-01-30T01:24:40.133Z",
+      "endTime": "2026-01-30T01:24:42.180Z",
+      "totalDuration": 2047,
+      "entries": [
+        {
+          "id": "entry-1769736281172-1",
+          "type": "intent_classification",
+          "name": "Orchestrator Intent Classification",
+          "timestamp": "2026-01-30T01:24:41.172Z",
+          "metadata": {
+            "intent": "answer_question",
+            "classificationMethod": "orchestrator",
+            "confidence": "high"
+          }
+        },
+        {
+          "id": "entry-1769736282180-3",
+          "type": "llm_call",
+          "name": "Gemini Response Generation",
+          "timestamp": "2026-01-30T01:24:42.180Z",
+          "duration": 1008,
+          "metadata": {
+            "model": "gemini",
+            "intent": "answer_question",
+            "validated": true
+          }
+        }
+      ],
+      "success": true
     }
   ],
   "stats": {
     "hookCalls": {},
     "signalReads": {},
     "intentDistribution": {
-      "answer_question": 9
+      "answer_question": 10
     },
     "classificationMethods": {
-      "orchestrator": 9
+      "orchestrator": 10
     },
-    "avgResponseTime": 1725.3333333333333,
-    "totalLlmCalls": 9,
+    "avgResponseTime": 1757.5,
+    "totalLlmCalls": 10,
     "totalTokensUsed": 0,
     "errorCount": 0
   },
   "createdAt": "2026-01-29T23:10:35.992Z",
-  "updatedAt": "2026-01-30T01:22:00.805Z"
+  "updatedAt": "2026-01-30T01:24:42.180Z"
 }
