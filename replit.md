@@ -48,7 +48,7 @@ Agent Studio utilizes a modern web application architecture with a clear separat
         - **Context Progress Bar**: Compact header indicator showing context window fill level with color-coded status
         - **Cancel Response**: Ability to cancel AI responses mid-generation
     - **Agent Management**: Pages for listing, editing, and deleting agents.
-    - **Multi-provider Prompt Styling**: Users can select and preview system prompt styles tailored for Anthropic, Gemini, or OpenAI, with custom prompt editing capabilities.
+    - **AI-Powered Prompt Generation**: System prompts are automatically generated using AI with a meta-prompt that follows prompt engineering best practices. The AI curates domain knowledge, embeds validation rules naturally, makes guardrails enforceable, and determines appropriate output formats based on the use case. Users can optionally customize the generated prompt.
     - **Smart Generation**: AI evaluates context and engages in clarifying questions when necessary to gather sufficient information for generating validation rules or guardrails.
 
 ### Backend
