@@ -1,0 +1,46 @@
+CODE UPDATE FOR getSystemPrompt() FUNCTION
+==========================================
+
+Add this logic to your getSystemPrompt() function (around lines 733-788):
+
+// Existing code:
+function getSystemPrompt(agent) {
+  let prompt = agent.customPrompt || getDefaultPrompt(agent);
+  
+  // NEW CODE - Add marker replacements:
+  
+  // Replace {{SAMPLE_DATA}} marker with actual sample data
+  const sampleDataText = buildMockUserStateText(agent);
+  if (prompt.includes('{{SAMPLE_DATA}}')) {
+    prompt = prompt.replace(
+      '{{SAMPLE_DATA}}', 
+      sampleDataText || 'No sample data configured for this simulation.'
+    );
+  } else {
+    // Fallback: If marker not found, append to end (backward compatibility)
+    if (sampleDataText) {
+      prompt += '\n\n## Sample Data\n' + sampleDataText;
+    }
+  }
+  
+  // Replace {{AVAILABLE_ACTIONS}} marker with actual actions
+  const actionsText = buildActionsText(agent);
+  if (prompt.includes('{{AVAILABLE_ACTIONS}}')) {
+    prompt = prompt.replace(
+      '{{AVAILABLE_ACTIONS}}', 
+      actionsText || 'No actions configured for this simulation.'
+    );
+  } else {
+    // Fallback: If marker not found, append to end (backward compatibility)
+    if (actionsText) {
+      prompt += '\n\n## Available Actions\n' + actionsText;
+    }
+  }
+  
+  return prompt;
+}
+
+// This approach:
+// 1. Tries to replace markers first (clean insertion)
+// 2. Falls back to appending if markers not found (backward compatibility)
+// 3. Handles cases where data/actions are not configured

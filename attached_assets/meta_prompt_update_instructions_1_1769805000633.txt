@@ -1,0 +1,91 @@
+UPDATED META-PROMPT INSTRUCTIONS (for your generator prompt around lines 972-982)
+====================================================================================
+
+Replace your current instructions about sample data and available actions with this:
+
+---
+
+## Important: Data Placeholder Markers
+
+The generated system prompt MUST include these placeholder sections with specific markers:
+
+1. **Sample Data Section:**
+Always include this section in the appropriate location (typically after domain knowledge or validation rules):
+
+```
+<sample_data>
+{{SAMPLE_DATA}}
+</sample_data>
+```
+
+OR if using markdown format:
+
+```
+## Sample Data
+{{SAMPLE_DATA}}
+```
+
+2. **Available Actions Section:**
+Always include this section (typically after sample data and before interaction guidelines):
+
+```
+<available_actions>
+{{AVAILABLE_ACTIONS}}
+</available_actions>
+```
+
+OR if using markdown format:
+
+```
+## Available Actions
+{{AVAILABLE_ACTIONS}}
+```
+
+**Critical Requirements:**
+- Use EXACTLY these marker strings: `{{SAMPLE_DATA}}` and `{{AVAILABLE_ACTIONS}}`
+- Include these markers even if no sample data or actions were provided in the inputs
+- Do NOT include the actual sample data or actions content in the generated prompt
+- These markers will be replaced with real data at runtime
+
+**Placement Guidance:**
+- Place `{{SAMPLE_DATA}}` after domain knowledge/validation rules but before interaction guidelines
+- Place `{{AVAILABLE_ACTIONS}}` after sample data but before interaction guidelines
+- The prompt should reference these sections naturally (e.g., "Reference the sample data below when responding...")
+
+---
+
+EXAMPLE of what Gemini should generate:
+
+```
+<role_and_purpose>
+You are a Life Event Change Assistant...
+</role_and_purpose>
+
+<domain_context>
+[domain knowledge here]
+</domain_context>
+
+<validation_rules>
+[validation rules here]
+</validation_rules>
+
+<guardrails>
+[guardrails here]
+</guardrails>
+
+<sample_data>
+{{SAMPLE_DATA}}
+</sample_data>
+
+<available_actions>
+{{AVAILABLE_ACTIONS}}
+</available_actions>
+
+<interaction_guidelines>
+Reference the sample data above when providing personalized responses...
+When performing actions, use the available actions listed above...
+</interaction_guidelines>
+```
+
+---
+
