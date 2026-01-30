@@ -310,27 +310,10 @@ ${context.guardrails}`;
 }
 
 export function generatePrompt(style: PromptStyle, context: PromptContext): string {
-  switch (style) {
-    case "anthropic":
-      return generateAnthropicStylePrompt(context);
-    case "gemini":
-      return generateGeminiStylePrompt(context);
-    case "openai":
-      return generateOpenAIStylePrompt(context);
-    default:
-      return generateAnthropicStylePrompt(context);
-  }
+  // Always use Gemini style for consistent prompt generation
+  return generateGeminiStylePrompt(context);
 }
 
 export function getPromptStyleDescription(style: PromptStyle): string {
-  switch (style) {
-    case "anthropic":
-      return "Uses XML tags for clear section separation. Best for complex instructions with multiple components.";
-    case "gemini":
-      return "Uses Markdown headers with constraints placed at the end. Optimized for direct, structured responses.";
-    case "openai":
-      return "Uses Markdown with bold emphasis and explicit role definitions. Great for detailed instruction following.";
-    default:
-      return "";
-  }
+  return "Uses Markdown headers with constraints placed at the end. Optimized for direct, structured responses.";
 }

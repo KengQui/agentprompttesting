@@ -4,8 +4,8 @@ import { z } from "zod";
 export const agentStatusEnum = z.enum(["draft", "configured", "active"]);
 export type AgentStatus = z.infer<typeof agentStatusEnum>;
 
-// Prompt style enum
-export const promptStyleEnum = z.enum(["anthropic", "gemini", "openai", "custom"]);
+// Prompt style enum (simplified to use gemini only)
+export const promptStyleEnum = z.enum(["gemini"]);
 export type PromptStyle = z.infer<typeof promptStyleEnum>;
 
 // Gemini model enum for generation
@@ -123,7 +123,7 @@ export const agentSchema = z.object({
   sampleDatasets: z.array(sampleDatasetSchema).default([]),
   validationRules: z.string().default(""),
   guardrails: z.string().default(""),
-  promptStyle: promptStyleEnum.default("anthropic"),
+  promptStyle: promptStyleEnum.default("gemini"),
   customPrompt: z.string().default(""),
   clarifyingInsights: z.array(clarifyingInsightSchema).default([]),
   availableActions: z.array(agentActionSchema).default([]),
@@ -216,7 +216,7 @@ export const wizardStepSchema = z.object({
   sampleDatasets: z.array(sampleDatasetSchema).default([]),
   validationRules: z.string().default(""),
   guardrails: z.string().default(""),
-  promptStyle: promptStyleEnum.default("anthropic"),
+  promptStyle: promptStyleEnum.default("gemini"),
   customPrompt: z.string().default(""),
   clarifyingInsights: z.array(clarifyingInsightSchema).default([]),
   availableActions: z.array(agentActionSchema).default([]),
