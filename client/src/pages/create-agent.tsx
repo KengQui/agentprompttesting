@@ -26,7 +26,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest } from "@/lib/queryClient";
-import { generatePromptPreview, promptStyleInfo } from "@/lib/prompt-preview";
+import { generatePromptPreview } from "@/lib/prompt-preview";
 import { validationRulesTemplate, guardrailsTemplate } from "@/lib/config-templates";
 import type { WizardStepData, Agent, DomainDocument, SampleDataset, PromptStyle, GeminiModel, ClarifyingInsight, AgentAction, MockUserState, ActionField, MockMode } from "@shared/schema";
 import { geminiModelDisplayNames, defaultGenerationModel, mockModeDescriptions } from "@shared/schema";
@@ -1710,18 +1710,17 @@ function Step8Review({
   data: WizardStepData;
   onUpdate: (data: Partial<WizardStepData>) => void;
 }) {
-  const selectedStyle = data.promptStyle || "custom";
-  const [isEditing, setIsEditing] = useState(selectedStyle === "custom");
+  const [isEditing, setIsEditing] = useState(false);
   const [editedPrompt, setEditedPrompt] = useState(data.customPrompt || "");
   const [generatedPrompt, setGeneratedPrompt] = useState(data.customPrompt || "");
   const [isGenerating, setIsGenerating] = useState(false);
   const [generationError, setGenerationError] = useState<string | null>(null);
   const [selectedModel, setSelectedModel] = useState<GeminiModel>(defaultGenerationModel);
 
-  const generatePrompt = async (style: PromptStyle, model?: GeminiModel) => {
+  const generatePromptFromAPI = async (model?: GeminiModel) => {
     const modelToUse = model || selectedModel;
     if (!data.name || !data.businessUseCase) {
-      const fallback = generatePromptPreview(style, data);
+      const fallback = generatePromptPreview("gemini", data);
       setGeneratedPrompt(fallback);
       setEditedPrompt(fallback);
       return;
@@ -1737,16 +1736,17 @@ function Step8Review({
         domainDocuments: data.domainDocuments,
         validationRules: data.validationRules,
         guardrails: data.guardrails,
-        promptStyle: style,
+        promptStyle: "gemini",
         model: modelToUse,
       });
       const result = await response.json();
       setGeneratedPrompt(result.systemPrompt);
       setEditedPrompt(result.systemPrompt);
+      onUpdate({ customPrompt: result.systemPrompt });
     } catch (error: any) {
       console.error("Failed to generate system prompt:", error);
       setGenerationError(error.message || "Failed to generate prompt");
-      const fallback = generatePromptPreview(style, data);
+      const fallback = generatePromptPreview("gemini", data);
       setGeneratedPrompt(fallback);
       setEditedPrompt(fallback);
     } finally {
@@ -1755,37 +1755,17 @@ function Step8Review({
   };
 
   useEffect(() => {
-    if (selectedStyle === "custom") {
-      if (data.customPrompt) {
-        setEditedPrompt(data.customPrompt);
-        setGeneratedPrompt(data.customPrompt);
-      }
-      return;
-    }
     if (data.customPrompt) {
       setEditedPrompt(data.customPrompt);
       setGeneratedPrompt(data.customPrompt);
     } else if (data.name && data.businessUseCase) {
-      generatePrompt(selectedStyle);
+      generatePromptFromAPI();
     } else {
-      const fallback = generatePromptPreview(selectedStyle, data);
+      const fallback = generatePromptPreview("gemini", data);
       setGeneratedPrompt(fallback);
       setEditedPrompt(fallback);
     }
-  }, [data.name, data.businessUseCase, data.domainKnowledge, data.domainDocuments, data.validationRules, data.guardrails, selectedStyle]);
-
-  const handleStyleChange = (style: string) => {
-    const newStyle = style as PromptStyle;
-    onUpdate({ promptStyle: newStyle, customPrompt: "" });
-    setIsEditing(false);
-    if (newStyle === "custom") {
-      setGeneratedPrompt("");
-      setEditedPrompt("");
-      setIsEditing(true);
-    } else {
-      generatePrompt(newStyle);
-    }
-  };
+  }, [data.name, data.businessUseCase, data.domainKnowledge, data.domainDocuments, data.validationRules, data.guardrails]);
 
   const handleEditToggle = () => {
     if (!isEditing) {
@@ -1801,13 +1781,8 @@ function Step8Review({
 
   const handleResetPrompt = () => {
     onUpdate({ customPrompt: "" });
-    generatePrompt(selectedStyle);
+    generatePromptFromAPI();
     setIsEditing(false);
-  };
-
-  const handleRegeneratePrompt = () => {
-    onUpdate({ customPrompt: "" });
-    generatePrompt(selectedStyle);
   };
 
   const displayPrompt = data.customPrompt || generatedPrompt;
@@ -1880,178 +1855,92 @@ function Step8Review({
           <CardTitle className="flex items-center gap-2">
             <Code className="h-5 w-5 text-primary" />
             Generated Prompt
-            {data.customPrompt && (
-              <Badge variant="secondary">Customized</Badge>
-            )}
           </CardTitle>
           <CardDescription>
-            This is the system prompt that will be sent to the AI. Choose a style or edit directly.
+            A system prompt has been automatically generated based on your configuration.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div>
-            <div className="flex items-center gap-2 mb-3">
-              <Label>Prompt Style</Label>
-              <Dialog>
-                <DialogTrigger asChild>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    className="h-6 px-2 text-xs text-muted-foreground hover:text-foreground"
-                    data-testid="button-learn-more-styles"
-                  >
-                    <HelpCircle className="h-3.5 w-3.5 mr-1" />
-                    Learn more
-                  </Button>
-                </DialogTrigger>
-                <DialogContent className="max-w-lg">
-                  <DialogHeader>
-                    <DialogTitle>Prompt Engineering Styles</DialogTitle>
-                    <DialogDescription>
-                      Different AI providers have developed distinct best practices for prompt engineering. Choose the style that works best for your use case.
-                    </DialogDescription>
-                  </DialogHeader>
-                  <div className="space-y-4 mt-4">
-                    {(["anthropic", "gemini", "openai", "custom"] as PromptStyle[]).map((style) => (
-                      <div key={style} className="space-y-2">
-                        <div className="flex items-center justify-between">
-                          <h4 className="font-medium">{promptStyleInfo[style].name}</h4>
-                          {promptStyleInfo[style].link && (
-                            <a
-                              href={promptStyleInfo[style].link}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-xs text-primary hover:underline flex items-center gap-1"
-                              data-testid={`link-${style}-docs`}
-                            >
-                              View docs
-                              <ExternalLink className="h-3 w-3" />
-                            </a>
-                          )}
-                        </div>
-                        <p className="text-sm text-muted-foreground">
-                          {promptStyleInfo[style].detailedDescription}
-                        </p>
-                      </div>
-                    ))}
-                  </div>
-                </DialogContent>
-              </Dialog>
-            </div>
-            <RadioGroup
-              value={selectedStyle}
-              onValueChange={handleStyleChange}
-              className="grid grid-cols-2 sm:grid-cols-4 gap-3"
-              data-testid="prompt-style-radio-group"
-            >
-              {(["anthropic", "gemini", "openai", "custom"] as PromptStyle[]).map((style) => (
-                <div key={style} className="flex items-center space-x-2">
-                  <RadioGroupItem 
-                    value={style} 
-                    id={`style-${style}`}
-                    data-testid={`radio-${style}`}
-                  />
-                  <Label 
-                    htmlFor={`style-${style}`} 
-                    className="text-sm cursor-pointer"
-                  >
-                    {promptStyleInfo[style].name}
-                  </Label>
-                </div>
-              ))}
-            </RadioGroup>
-            <p className="text-xs text-muted-foreground mt-2">
-              {promptStyleInfo[selectedStyle].description}
-            </p>
-          </div>
-
           <div className="space-y-2">
             <div className="flex items-center justify-between flex-wrap gap-2">
-              <Label>{selectedStyle === "custom" ? "Your Custom Prompt" : "Prompt Preview"}</Label>
-              {selectedStyle !== "custom" && (
-                <div className="flex items-center gap-2">
-                  <span className="text-sm text-muted-foreground">AI model used</span>
-                  {!isGenerating && !isEditing && (
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="sm"
-                          className="gap-1 h-7"
-                          data-testid="button-regenerate-prompt"
+              <Label>Prompt Preview</Label>
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-muted-foreground">AI model</span>
+                {!isGenerating && !isEditing && (
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        className="gap-1 h-7"
+                        data-testid="button-regenerate-prompt"
+                      >
+                        {geminiModelDisplayNames[selectedModel]}
+                        <ChevronDown className="h-3 w-3" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      {(Object.keys(geminiModelDisplayNames) as GeminiModel[]).map((model) => (
+                        <DropdownMenuItem
+                          key={model}
+                          onClick={() => {
+                            setSelectedModel(model);
+                            onUpdate({ customPrompt: "" });
+                            generatePromptFromAPI(model);
+                          }}
+                          data-testid={`menu-item-prompt-model-${model}`}
                         >
-                          {geminiModelDisplayNames[selectedModel]}
-                          <ChevronDown className="h-3 w-3" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        {(Object.keys(geminiModelDisplayNames) as GeminiModel[]).map((model) => (
-                          <DropdownMenuItem
-                            key={model}
-                            onClick={() => {
-                              setSelectedModel(model);
-                              onUpdate({ customPrompt: "" });
-                              generatePrompt(selectedStyle, model);
-                            }}
-                            data-testid={`menu-item-prompt-model-${model}`}
-                          >
-                            {geminiModelDisplayNames[model]}
-                          </DropdownMenuItem>
-                        ))}
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  )}
-                  {isGenerating && (
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      className="gap-1 h-7"
-                      disabled
-                    >
-                      <Loader2 className="h-3 w-3 animate-spin" />
-                      Generating...
-                    </Button>
-                  )}
-                </div>
-              )}
-            </div>
-            {selectedStyle !== "custom" && (
-              <div className="flex items-center justify-end gap-2">
-                {data.customPrompt && !isGenerating && (
+                          {geminiModelDisplayNames[model]}
+                        </DropdownMenuItem>
+                      ))}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                )}
+                {isGenerating && (
                   <Button
                     type="button"
-                    variant="ghost"
+                    variant="outline"
                     size="sm"
-                    onClick={handleResetPrompt}
                     className="gap-1 h-7"
-                    data-testid="button-reset-prompt"
+                    disabled
                   >
-                    <RotateCcw className="h-3 w-3" />
-                    Reset
+                    <Loader2 className="h-3 w-3 animate-spin" />
+                    Generating...
                   </Button>
                 )}
+              </div>
+            </div>
+            <div className="flex items-center justify-end gap-2">
+              {data.customPrompt && !isGenerating && (
                 <Button
                   type="button"
                   variant="ghost"
                   size="sm"
-                  onClick={isEditing ? handleSaveEdit : handleEditToggle}
+                  onClick={handleResetPrompt}
                   className="gap-1 h-7"
-                  disabled={isGenerating}
-                  data-testid="button-edit-prompt"
+                  data-testid="button-reset-prompt"
                 >
-                  <Pencil className="h-3 w-3" />
-                  {isEditing ? "Save" : "Edit"}
+                  <RotateCcw className="h-3 w-3" />
+                  Regenerate
                 </Button>
-              </div>
-            )}
+              )}
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={isEditing ? handleSaveEdit : handleEditToggle}
+                className="gap-1 h-7"
+                disabled={isGenerating}
+                data-testid="button-edit-prompt"
+              >
+                <Pencil className="h-3 w-3" />
+                {isEditing ? "Save" : "Edit"}
+              </Button>
+            </div>
             
             <p className="text-xs text-muted-foreground">
-              {selectedStyle === "custom" 
-                ? "Write your own system prompt with complete control over the instructions."
-                : "Gemini generates a custom prompt based on your configuration and selected style."}
+              AI generates a custom prompt based on your configuration. You can edit it if needed.
             </p>
 
             {generationError && (
@@ -2061,18 +1950,7 @@ function Step8Review({
               </div>
             )}
             
-            {selectedStyle === "custom" ? (
-              <Textarea
-                value={editedPrompt}
-                onChange={(e) => {
-                  setEditedPrompt(e.target.value);
-                  onUpdate({ customPrompt: e.target.value });
-                }}
-                placeholder="Write your system prompt here. This is the instruction that will be sent to the AI to define its behavior, personality, and capabilities..."
-                className="min-h-[270px] resize-y font-mono text-xs"
-                data-testid="textarea-custom-prompt"
-              />
-            ) : isGenerating ? (
+            {isGenerating ? (
               <div 
                 className="rounded-md bg-muted/50 p-4 min-h-[300px] flex flex-col items-center justify-center gap-3"
                 data-testid="prompt-loading"
@@ -2115,7 +1993,7 @@ export default function CreateAgent() {
     sampleDatasets: [],
     validationRules: "",
     guardrails: "",
-    promptStyle: "custom",
+    promptStyle: "gemini",
     customPrompt: "",
     clarifyingInsights: [],
     availableActions: [],
