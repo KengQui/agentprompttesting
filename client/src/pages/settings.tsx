@@ -40,10 +40,9 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest } from "@/lib/queryClient";
-import { generatePromptPreview, promptStyleInfo } from "@/lib/prompt-preview";
 import { validationRulesTemplate, guardrailsTemplate } from "@/lib/config-templates";
 import { TracingDashboard, SimulationPanel, ConfigHistoryPanel } from "@/components/tracing-dashboard";
-import type { Agent, UpdateAgent, AgentStatus, DomainDocument, SampleDataset, PromptStyle, GeminiModel } from "@shared/schema";
+import type { Agent, UpdateAgent, AgentStatus, DomainDocument, SampleDataset, GeminiModel } from "@shared/schema";
 import { geminiModelDisplayNames, defaultGenerationModel } from "@shared/schema";
 
 const settingsSteps = [
@@ -158,7 +157,8 @@ export default function SettingsPage() {
     if (data.validationRules) completed.add(4);
     if (data.guardrails) completed.add(5);
     if (data.sampleDatasets && data.sampleDatasets.length > 0) completed.add(6);
-    if (data.promptStyle || data.customPrompt) completed.add(7);
+    // Step 7 (Prompt) is auto-completed since prompt is AI-generated based on other steps
+    if (data.businessUseCase) completed.add(7);
     return completed;
   };
 
@@ -1067,92 +1067,27 @@ export default function SettingsPage() {
                 )}
               </CardTitle>
               <CardDescription>
-                Choose a prompt style and optionally customize the system prompt
+                View and optionally customize the system prompt. The prompt is automatically generated using AI-powered prompt engineering based on your agent's configuration.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div>
-                <div className="flex items-center gap-2 mb-3">
-                  <Label>Prompt Style</Label>
-                  <Dialog>
-                    <DialogTrigger asChild>
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        className="h-6 px-2 text-xs text-muted-foreground hover:text-foreground"
-                        data-testid="settings-button-learn-more-styles"
-                      >
-                        <HelpCircle className="h-3.5 w-3.5 mr-1" />
-                        Learn more
-                      </Button>
-                    </DialogTrigger>
-                    <DialogContent className="max-w-lg">
-                      <DialogHeader>
-                        <DialogTitle>Prompt Engineering Styles</DialogTitle>
-                        <DialogDescription>
-                          Different AI providers have developed distinct best practices for prompt engineering. Choose the style that works best for your use case.
-                        </DialogDescription>
-                      </DialogHeader>
-                      <div className="space-y-4 mt-4">
-                        {(["anthropic", "gemini", "openai"] as PromptStyle[]).map((style) => (
-                          <div key={style} className="space-y-2">
-                            <div className="flex items-center justify-between">
-                              <h4 className="font-medium">{promptStyleInfo[style].name}</h4>
-                              <a
-                                href={promptStyleInfo[style].link}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="text-xs text-primary hover:underline flex items-center gap-1"
-                                data-testid={`settings-link-${style}-docs`}
-                              >
-                                View docs
-                                <ExternalLink className="h-3 w-3" />
-                              </a>
-                            </div>
-                            <p className="text-sm text-muted-foreground">
-                              {promptStyleInfo[style].detailedDescription}
-                            </p>
-                          </div>
-                        ))}
-                      </div>
-                    </DialogContent>
-                  </Dialog>
+              <div className="p-3 bg-blue-50 dark:bg-blue-950 rounded-md border border-blue-200 dark:border-blue-800">
+                <div className="flex items-start gap-2">
+                  <Sparkles className="h-4 w-4 text-blue-600 dark:text-blue-400 mt-0.5 shrink-0" />
+                  <div>
+                    <p className="text-sm font-medium text-blue-800 dark:text-blue-200">
+                      AI-Powered Prompt Generation
+                    </p>
+                    <p className="text-xs text-blue-700 dark:text-blue-300 mt-1">
+                      Your system prompt is intelligently crafted based on your agent's name, business use case, domain knowledge, validation rules, guardrails, sample data, and available actions. The AI curates and organizes this information following prompt engineering best practices.
+                    </p>
+                  </div>
                 </div>
-                <RadioGroup
-                  value={formData.promptStyle || "anthropic"}
-                  onValueChange={(value) => {
-                    updateFormDataAndTrackCompletion({ promptStyle: value as PromptStyle, customPrompt: "" });
-                    setEditedPrompt("");
-                    setIsEditingPrompt(false);
-                  }}
-                  className="grid grid-cols-3 gap-3"
-                  data-testid="settings-prompt-style-radio-group"
-                >
-                  {(["anthropic", "gemini", "openai"] as PromptStyle[]).map((style) => (
-                    <div key={style} className="flex items-center space-x-2">
-                      <RadioGroupItem 
-                        value={style} 
-                        id={`settings-style-${style}`}
-                        data-testid={`settings-radio-${style}`}
-                      />
-                      <Label 
-                        htmlFor={`settings-style-${style}`} 
-                        className="text-sm cursor-pointer"
-                      >
-                        {promptStyleInfo[style].name}
-                      </Label>
-                    </div>
-                  ))}
-                </RadioGroup>
-                <p className="text-xs text-muted-foreground mt-2">
-                  {promptStyleInfo[formData.promptStyle || "anthropic"].description}
-                </p>
               </div>
 
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <Label>Custom Prompt</Label>
+                  <Label>System Prompt</Label>
                   <div className="flex gap-2">
                     {formData.customPrompt && (
                       <Button
@@ -1168,7 +1103,7 @@ export default function SettingsPage() {
                         data-testid="settings-button-reset-prompt"
                       >
                         <RotateCcw className="h-3 w-3" />
-                        Reset
+                        Reset to Auto
                       </Button>
                     )}
                     <Button
@@ -1187,28 +1122,24 @@ export default function SettingsPage() {
                       data-testid="settings-button-edit-prompt"
                     >
                       <Pencil className="h-3 w-3" />
-                      {isEditingPrompt ? "Save" : "Edit"}
+                      {isEditingPrompt ? "Save" : "Customize"}
                     </Button>
                   </div>
                 </div>
                 
-                <p className="text-xs text-muted-foreground mb-2">
-                  The actual prompt uses your platform's personality from personality-prompt.txt
-                </p>
-                
                 {isEditingPrompt && (
-                  <div className="mb-3 p-3 bg-blue-50 dark:bg-blue-950 rounded-md border border-blue-200 dark:border-blue-800">
-                    <p className="text-xs font-medium text-blue-800 dark:text-blue-200 mb-1">
+                  <div className="mb-3 p-3 bg-amber-50 dark:bg-amber-950 rounded-md border border-amber-200 dark:border-amber-800">
+                    <p className="text-xs font-medium text-amber-800 dark:text-amber-200 mb-1">
                       Available Placeholders
                     </p>
-                    <p className="text-xs text-blue-700 dark:text-blue-300 mb-2">
+                    <p className="text-xs text-amber-700 dark:text-amber-300 mb-2">
                       Use these placeholders and they will be replaced with your agent's configuration:
                     </p>
                     <div className="flex flex-wrap gap-1">
                       {["{{name}}", "{{businessUseCase}}", "{{domainKnowledge}}", "{{validationRules}}", "{{guardrails}}", "{{sampleDatasets}}", "{{currentDate}}"].map((placeholder) => (
                         <code 
                           key={placeholder}
-                          className="px-1.5 py-0.5 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 rounded text-xs cursor-pointer hover:bg-blue-200 dark:hover:bg-blue-800"
+                          className="px-1.5 py-0.5 bg-amber-100 dark:bg-amber-900 text-amber-800 dark:text-amber-200 rounded text-xs cursor-pointer hover:bg-amber-200 dark:hover:bg-amber-800"
                           onClick={() => {
                             setEditedPrompt((prev) => prev + placeholder);
                           }}
@@ -1219,7 +1150,7 @@ export default function SettingsPage() {
                         </code>
                       ))}
                     </div>
-                    <p className="text-xs text-blue-600 dark:text-blue-400 mt-2 italic">
+                    <p className="text-xs text-amber-600 dark:text-amber-400 mt-2 italic">
                       If no placeholders are used, domain knowledge and guardrails will be automatically appended to your custom prompt.
                     </p>
                   </div>
@@ -1235,10 +1166,14 @@ export default function SettingsPage() {
                   />
                 ) : (
                   <div 
-                    className="rounded-md bg-muted/50 p-4 text-xs font-mono max-h-[200px] overflow-y-auto whitespace-pre-wrap"
+                    className="rounded-md bg-muted/50 p-4 text-xs font-mono max-h-[300px] overflow-y-auto whitespace-pre-wrap"
                     data-testid="settings-prompt-preview"
                   >
-                    {formData.customPrompt || generatePromptPreview(formData.promptStyle || "anthropic", formData)}
+                    {formData.customPrompt || (
+                      <div className="text-muted-foreground italic">
+                        The system prompt will be automatically generated when you save. It will incorporate your agent's configuration using AI-powered prompt engineering best practices.
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
@@ -1479,8 +1414,10 @@ export default function SettingsPage() {
                     <p className="text-xs text-muted-foreground">Sample Datasets</p>
                   </div>
                   <div className="p-2 rounded-lg bg-muted/50 text-center">
-                    <p className="text-lg font-semibold" data-testid="text-prompt-style">{promptStyleInfo[agent.promptStyle || 'anthropic']?.name || agent.promptStyle}</p>
-                    <p className="text-xs text-muted-foreground">Prompt Style</p>
+                    <p className="text-lg font-semibold" data-testid="text-prompt-style">
+                      {agent.customPrompt ? 'Custom' : 'AI Generated'}
+                    </p>
+                    <p className="text-xs text-muted-foreground">Prompt Type</p>
                   </div>
                   <div className="p-2 rounded-lg bg-muted/50 text-center">
                     <div className="text-lg font-semibold" data-testid="text-agent-status">
@@ -1527,25 +1464,14 @@ export default function SettingsPage() {
                   <Code className="h-4 w-4 text-muted-foreground" />
                   System Prompt
                 </h4>
-                {agent.promptStyle === 'custom' && agent.customPrompt && (
-                  <div className="space-y-2 mb-3">
-                    <Label className="text-xs text-muted-foreground">Custom Prompt</Label>
-                    <div className="p-3 rounded-lg bg-primary/5 border border-primary/20 text-xs font-mono max-h-24 overflow-auto" data-testid="text-custom-prompt">
-                      <pre className="whitespace-pre-wrap">{agent.customPrompt.substring(0, 400)}{agent.customPrompt.length > 400 ? '...' : ''}</pre>
-                    </div>
-                  </div>
-                )}
                 <div className="space-y-2">
-                  <Label className="text-xs text-muted-foreground">Generated System Prompt</Label>
+                  <Label className="text-xs text-muted-foreground">System Prompt</Label>
                   <div className="p-3 rounded-lg bg-muted text-xs font-mono max-h-40 overflow-auto" data-testid="text-system-prompt">
-                    {(() => {
-                      const promptPreview = generatePromptPreview(agent.promptStyle || 'anthropic', agent);
-                      return promptPreview ? (
-                        <pre className="whitespace-pre-wrap">{promptPreview.substring(0, 800)}{promptPreview.length > 800 ? '...' : ''}</pre>
-                      ) : (
-                        <span className="text-muted-foreground italic">No system prompt configured</span>
-                      );
-                    })()}
+                    {agent.customPrompt ? (
+                      <pre className="whitespace-pre-wrap">{agent.customPrompt.substring(0, 800)}{agent.customPrompt.length > 800 ? '...' : ''}</pre>
+                    ) : (
+                      <span className="text-muted-foreground italic">System prompt will be AI-generated based on your configuration</span>
+                    )}
                   </div>
                 </div>
               </div>

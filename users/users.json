@@ -87,5 +87,11 @@
     "username": "testuser",
     "password": "$2b$10$I/2sVUlRamxk0Bdxef9q5eQqaW.EgAg/ObjEEJfH3rRXONvUm7uEO",
     "createdAt": "2026-01-30T01:21:45.913Z"
+  },
+  {
+    "id": "44f036e6-f515-42a1-baf9-744ca823796d",
+    "username": "e2e_tester",
+    "password": "$2b$10$0PhigI3LH8D.0TjB7GDTJufEW6gXGbCd.YrmsCwdPl3tfthYhXUfa",
+    "createdAt": "2026-01-30T03:11:00.116Z"
   }
 ]

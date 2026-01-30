@@ -1426,7 +1426,7 @@ export async function registerRoutes(
     }
   });
 
-  // Generate system prompt using AI based on prompt style
+  // Generate system prompt using AI with intelligent prompt engineering
   app.post("/api/generate/system-prompt", async (req, res) => {
     try {
       const systemPromptRequestSchema = z.object({
@@ -1441,7 +1441,32 @@ export async function registerRoutes(
         })).optional(),
         validationRules: z.string().optional(),
         guardrails: z.string().optional(),
-        promptStyle: z.enum(["anthropic", "gemini", "openai"]),
+        sampleDatasets: z.array(z.object({
+          id: z.string(),
+          name: z.string(),
+          description: z.string().optional(),
+          content: z.string(),
+          format: z.enum(["json", "csv", "text"]),
+          isGenerated: z.boolean().optional(),
+          createdAt: z.string(),
+        })).optional(),
+        availableActions: z.array(z.object({
+          id: z.string(),
+          name: z.string(),
+          description: z.string(),
+          category: z.string().optional(),
+          requiredFields: z.array(z.object({
+            name: z.string(),
+            type: z.enum(["string", "number", "boolean", "date", "select"]),
+            label: z.string(),
+            required: z.boolean().optional(),
+            options: z.array(z.string()).optional(),
+            description: z.string().optional(),
+          })).optional(),
+          confirmationMessage: z.string().optional(),
+          successMessage: z.string().optional(),
+          affectedDataFields: z.array(z.string()).optional(),
+        })).optional(),
         model: z.enum(["gemini-2.5-flash", "gemini-2.5-pro", "gemini-3-flash-preview", "gemini-3-pro-preview"]).optional(),
       });
 
@@ -1457,7 +1482,8 @@ export async function registerRoutes(
         domainDocuments: parsed.data.domainDocuments,
         validationRules: parsed.data.validationRules,
         guardrails: parsed.data.guardrails,
-        promptStyle: parsed.data.promptStyle,
+        sampleDatasets: parsed.data.sampleDatasets,
+        availableActions: parsed.data.availableActions,
         model: parsed.data.model,
       };
 

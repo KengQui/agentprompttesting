@@ -747,7 +747,8 @@ export interface SystemPromptContext {
   domainDocuments?: DomainDocument[];
   validationRules?: string;
   guardrails?: string;
-  promptStyle: PromptStyle;
+  sampleDatasets?: SampleDataset[];
+  availableActions?: AgentAction[];
   model?: GeminiModel;
 }
 
@@ -759,59 +760,138 @@ export async function generateSystemPrompt(context: SystemPromptContext): Promis
 
   const domainDocsText = context.domainDocuments?.length 
     ? context.domainDocuments.map(doc => `${doc.filename}: ${doc.content}`).join("\n\n")
-    : "";
+    : "None provided";
 
-  const styleInstructions: Record<PromptStyle, string> = {
-    anthropic: `Generate the system prompt using Anthropic Claude's recommended XML-based format. Use XML tags like <role>, <purpose>, <context>, <rules>, and <constraints> to clearly separate different sections. This structured approach helps Claude understand boundaries between different types of information.`,
-    gemini: `Generate the system prompt using Google Gemini's recommended Markdown-based format. Use clear Markdown headers (##) to organize sections. Place constraints and restrictions at the end of the prompt. Use bullet points for lists and keep the structure clean and readable.`,
-    openai: `Generate the system prompt using OpenAI's recommended conversational format. Write the prompt as a natural conversation establishing the AI's role and behavior. Use clear, direct language without heavy formatting. Focus on tone and personality while maintaining clarity.`,
-    custom: `Generate the system prompt in a clean, professional format. Use clear structure with sections for role, purpose, context, rules, and constraints. Adapt the format based on what works best for the specific use case.`,
-  };
+  const sampleDataText = context.sampleDatasets?.length
+    ? context.sampleDatasets.map(ds => `${ds.name} (${ds.format}): ${ds.content}`).join("\n\n")
+    : "None provided";
 
-  const systemPrompt = `You are an expert prompt engineer specializing in creating high-quality system prompts for AI agents.
+  const actionsText = context.availableActions?.length
+    ? context.availableActions.map(action => 
+        `- ${action.name}: ${action.description}${action.requiredFields?.length ? ` (requires: ${action.requiredFields.map(f => f.name).join(', ')})` : ''}`
+      ).join("\n")
+    : "None provided";
 
-Your task is to generate a complete, production-ready system prompt for an AI agent based on the configuration provided.
+  const metaPrompt = `You are an expert AI prompt engineer. Your task is to create a high-quality system prompt for a customer-facing chatbot based on the user's requirements.
 
-${styleInstructions[context.promptStyle]}
+You will receive the following information:
+- Agent name
+- Business use case
+- Domain knowledge
+- Validation rules
+- Guardrails
+- Sample data (optional)
+- Available actions (optional)
 
-The system prompt should:
-1. Clearly establish the agent's identity and role
-2. Define the agent's purpose based on the business use case
-3. Incorporate any domain knowledge naturally
-4. Include validation rules as behavioral guidelines
-5. Embed guardrails as firm constraints the agent must follow
-6. Be professional, clear, and comprehensive
+Your goal is to transform this information into a clear, effective system prompt that follows prompt engineering best practices.
 
-Output ONLY the system prompt - no explanations, no code blocks, no markdown wrapping around the prompt itself. The output should be ready to use directly as a system prompt.`;
+## Instructions for creating the prompt:
 
-  const userPrompt = `Create a system prompt for an AI agent with the following configuration:
+1. **Start with role and purpose**:
+   - Use the provided agent name as the chatbot's identity
+   - Begin with: "You are [Agent Name], a chatbot that helps with [purpose from business use case]"
+   - Clearly state what the chatbot does for end-users
 
-Agent Name: ${context.name}
+2. **Curate domain knowledge**: Don't dump all domain information. Instead:
+   - Extract only the most relevant facts needed for the chatbot to function
+   - Organize information logically by topic or workflow
+   - Use clear headings and structure (XML tags like <domain_context>, <rules>, etc.)
+   - Prioritize actionable information over background details
 
-Business Use Case: ${context.businessUseCase}
+3. **Incorporate sample data as reference context**:
+   - If sample data is provided, include it in a <sample_data> or <examples> section
+   - Instruct the chatbot to use this as examples of data structure and format
+   - The chatbot should reference these examples when explaining capabilities or answering questions
 
-${context.domainKnowledge ? `Domain Knowledge:\n${context.domainKnowledge}` : ""}
+4. **Simulate available actions in responses**:
+   - If available actions are provided, list them in an <available_actions> or <capabilities> section
+   - Instruct the chatbot to respond AS IF it can perform these actions
+   - Use language like "I'll submit that for you" or "I've processed your request"
+   - Provide realistic responses that simulate successful action execution
+   - Be clear that the chatbot should act as if these functions work, even though they're simulated
 
-${domainDocsText ? `Domain Documents:\n${domainDocsText}` : ""}
+5. **Embed validation rules naturally**: Integrate validation rules into the instructions where they're relevant, not as a separate list.
 
-${context.validationRules ? `Validation Rules:\n${context.validationRules}` : ""}
+6. **Make guardrails enforceable**: Transform guardrails into clear behavioral instructions:
+   - Use "always" and "never" statements
+   - Be specific about what to do AND what not to do
+   - Include examples if the guardrail is complex
 
-${context.guardrails ? `Guardrails:\n${context.guardrails}` : ""}
+7. **Add interaction guidelines**: Include how the chatbot should communicate:
+   - Tone and style appropriate for the business use case
+   - How to handle unclear requests
+   - When to ask clarifying questions
 
-Prompt Style: ${context.promptStyle}
+8. **Determine appropriate output format based on use case**:
+   - If the chatbot needs to execute tasks or return data for system integration → specify structured format (JSON, key-value pairs, etc.)
+   - If the chatbot generates documents or lists → specify formatting (markdown, bullet points, numbered steps)
+   - If the chatbot has conversational Q&A → allow natural language responses
+   - Be explicit about the format in the instructions
 
-Generate a complete system prompt following the ${context.promptStyle} prompt engineering best practices.`;
+9. **Keep it concise but complete**: Remove redundancy and generic fluff. Every sentence should serve a purpose.
+
+## Format your output as:
+
+<system_prompt>
+[The complete, ready-to-use system prompt here]
+</system_prompt>
+
+<reasoning>
+[Brief explanation of key decisions you made in structuring this prompt, including:
+- Why you chose the output format
+- How you organized the domain knowledge
+- Any assumptions you made about missing information]
+</reasoning>`;
+
+  const userPrompt = `## Input Information:
+
+**Agent Name:**
+${context.name}
+
+**Business Use Case:**
+${context.businessUseCase}
+
+**Domain Knowledge:**
+${context.domainKnowledge || "None provided"}
+
+**Domain Documents:**
+${domainDocsText}
+
+**Validation Rules:**
+${context.validationRules || "None provided"}
+
+**Guardrails:**
+${context.guardrails || "None provided"}
+
+**Sample Data:**
+${sampleDataText}
+
+**Available Actions:**
+${actionsText}
+
+---
+
+Now create a well-structured system prompt following the instructions above.`;
 
   try {
     const response = await ai.models.generateContent({
       model: modelToUse,
       config: {
-        systemInstruction: systemPrompt,
+        systemInstruction: metaPrompt,
       },
       contents: [{ role: "user", parts: [{ text: userPrompt }] }],
     });
 
-    return response.text || "Unable to generate system prompt. Please try again.";
+    const responseText = response.text || "";
+    
+    // Extract the system prompt from between the <system_prompt> tags
+    const systemPromptMatch = responseText.match(/<system_prompt>([\s\S]*?)<\/system_prompt>/);
+    if (systemPromptMatch && systemPromptMatch[1]) {
+      return systemPromptMatch[1].trim();
+    }
+    
+    // If no tags found, return the whole response (fallback)
+    return responseText.trim() || "Unable to generate system prompt. Please try again.";
   } catch (error: any) {
     console.error("Gemini API error:", error?.message || error);
     throw new Error(`Failed to generate system prompt: ${error?.message || error}`);
