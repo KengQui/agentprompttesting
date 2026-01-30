@@ -1,0 +1,82 @@
+[
+  {
+    "id": "593b936e-6934-4005-b936-627eb1985499",
+    "agentId": "b483b3b3-1f20-467b-b5da-f8de0a163d38",
+    "sessionId": "02a49048-4e7e-400d-9c7e-9e464855db12",
+    "role": "user",
+    "content": "i want to add my spouse my health insurance benefits",
+    "timestamp": "2026-01-30T01:07:41.801Z"
+  },
+  {
+    "id": "6a038d7b-0d78-4168-827c-30d6ac9c095b",
+    "agentId": "b483b3b3-1f20-467b-b5da-f8de0a163d38",
+    "sessionId": "02a49048-4e7e-400d-9c7e-9e464855db12",
+    "role": "assistant",
+    "content": "Okay, I can help you with that. To add your spouse to your health insurance, you'll need to start a Qualifying Life Event (QLE) request.\n\nFirst, can you confirm that you've recently experienced a qualifying life event, such as marriage, birth of a child, or loss of other coverage? And if so, what was the date of the event?",
+    "timestamp": "2026-01-30T01:07:43.979Z"
+  },
+  {
+    "id": "f035ca41-b1c8-44bb-b7ee-1f54840e25eb",
+    "agentId": "b483b3b3-1f20-467b-b5da-f8de0a163d38",
+    "sessionId": "02a49048-4e7e-400d-9c7e-9e464855db12",
+    "role": "user",
+    "content": "marriage",
+    "timestamp": "2026-01-30T01:08:03.086Z"
+  },
+  {
+    "id": "c4344548-c684-4f18-b073-5d3aa89fc1f5",
+    "agentId": "b483b3b3-1f20-467b-b5da-f8de0a163d38",
+    "sessionId": "02a49048-4e7e-400d-9c7e-9e464855db12",
+    "role": "assistant",
+    "content": "Great! And what was the date of your marriage?",
+    "timestamp": "2026-01-30T01:08:03.725Z"
+  },
+  {
+    "id": "e148d08c-1e8b-482b-b918-6681bd531742",
+    "agentId": "b483b3b3-1f20-467b-b5da-f8de0a163d38",
+    "sessionId": "02a49048-4e7e-400d-9c7e-9e464855db12",
+    "role": "user",
+    "content": "dec 25. 2025",
+    "timestamp": "2026-01-30T01:08:13.182Z"
+  },
+  {
+    "id": "6c6493bd-6ff8-4401-b079-28fd06ac0ba7",
+    "agentId": "b483b3b3-1f20-467b-b5da-f8de0a163d38",
+    "sessionId": "02a49048-4e7e-400d-9c7e-9e464855db12",
+    "role": "assistant",
+    "content": "Thanks. To add your spouse to your medical, dental, and vision plans due to your marriage, you'll generally need to provide a marriage certificate.\n\nSince your marriage date was December 25, 2025, you're within the 30-day submission window. This means you're likely still eligible to make changes.\n\nGenerally, the change would be effective the first of the month after you submit the request (or after HR/Benefits approves it).\n\nDoes that sound right?",
+    "timestamp": "2026-01-30T01:08:14.481Z"
+  },
+  {
+    "id": "1842791d-d5f9-4d7a-8736-ed366197659a",
+    "agentId": "b483b3b3-1f20-467b-b5da-f8de0a163d38",
+    "sessionId": "02a49048-4e7e-400d-9c7e-9e464855db12",
+    "role": "user",
+    "content": "I have no clue",
+    "timestamp": "2026-01-30T01:08:39.710Z"
+  },
+  {
+    "id": "132a2a8f-ce08-4442-b35f-610d22d4dfe6",
+    "agentId": "b483b3b3-1f20-467b-b5da-f8de0a163d38",
+    "sessionId": "02a49048-4e7e-400d-9c7e-9e464855db12",
+    "role": "assistant",
+    "content": "Okay, no problem. Let's break it down:\n\n*   **Qualifying Life Event:** Getting married is a qualifying life event, which allows you to make changes to your benefits outside of the normal open enrollment period.\n*   **Submission Window:** You generally have 30 days from the date of the event (your marriage) to submit the request to add your spouse to your benefits. Since you were married on December 25, 2025 and today is January 30, 2026, you're still within that window.\n*   **Effective Date:** The effective date is when the changes to your benefits actually start. In most cases, that would be the first day of the month following your submission (or after HR/Benefits approves it).\n\nSo, if you submit the request today, the changes to your benefits (adding your spouse) would likely be effective on March 1, 2026.\n\nIs that explanation helpful?",
+    "timestamp": "2026-01-30T01:08:41.643Z"
+  },
+  {
+    "id": "0016ff00-21c7-41c0-80f0-dcfc2527c401",
+    "agentId": "b483b3b3-1f20-467b-b5da-f8de0a163d38",
+    "sessionId": "02a49048-4e7e-400d-9c7e-9e464855db12",
+    "role": "user",
+    "content": "Yes",
+    "timestamp": "2026-01-30T01:08:55.582Z"
+  },
+  {
+    "id": "de50d799-df46-4f8a-abe8-f7a13c333dd5",
+    "agentId": "b483b3b3-1f20-467b-b5da-f8de0a163d38",
+    "sessionId": "02a49048-4e7e-400d-9c7e-9e464855db12",
+    "role": "assistant",
+    "content": "Great! To proceed, you'll want to:\n\n1.  Log in to UKG Ready ESS.\n2.  Navigate to the \"Benefits\" section. This may be under \"My Benefits\" or a similar label.\n3.  Look for a section on \"Life Events\" or \"Qualifying Life Events.\"\n4.  Start a new life event request and select \"Marriage\" as the event type.\n5.  Enter the date of your marriage (December 25, 2025).\n6.  Indicate that you want to add your spouse to your medical, dental, and vision plans.\n7.  You'll also need to upload a copy of your marriage certificate.\n\nDoes that make sense?",
+    "timestamp": "2026-01-30T01:08:57.097Z"
+  }
+]

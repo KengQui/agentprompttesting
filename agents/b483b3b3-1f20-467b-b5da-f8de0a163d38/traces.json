@@ -70,22 +70,197 @@
         }
       ],
       "success": true
+    },
+    {
+      "id": "trace-1769735263977",
+      "sessionId": "02a49048-4e7e-400d-9c7e-9e464855db12",
+      "userInput": "i want to add my spouse my health insurance benefits",
+      "agentResponse": "Okay, I can help you with that. To add your spouse to your health insurance, you'll need to start a Qualifying Life Event (QLE) request.\n\nFirst, can you confirm that you've recently experienced a qualifying life event, such as marriage, birth of a child, or loss of other coverage? And if so, what was the date of the event?",
+      "startTime": "2026-01-30T01:07:41.801Z",
+      "endTime": "2026-01-30T01:07:43.977Z",
+      "totalDuration": 2176,
+      "entries": [
+        {
+          "id": "entry-1769735262905-1",
+          "type": "intent_classification",
+          "name": "Orchestrator Intent Classification",
+          "timestamp": "2026-01-30T01:07:42.905Z",
+          "metadata": {
+            "intent": "answer_question",
+            "classificationMethod": "orchestrator",
+            "confidence": "high"
+          }
+        },
+        {
+          "id": "entry-1769735263977-3",
+          "type": "llm_call",
+          "name": "Gemini Response Generation",
+          "timestamp": "2026-01-30T01:07:43.977Z",
+          "duration": 1072,
+          "metadata": {
+            "model": "gemini",
+            "intent": "answer_question",
+            "validated": true
+          }
+        }
+      ],
+      "success": true
+    },
+    {
+      "id": "trace-1769735283725",
+      "sessionId": "02a49048-4e7e-400d-9c7e-9e464855db12",
+      "userInput": "marriage",
+      "agentResponse": "Great! And what was the date of your marriage?",
+      "startTime": "2026-01-30T01:08:03.086Z",
+      "endTime": "2026-01-30T01:08:03.725Z",
+      "totalDuration": 639,
+      "entries": [
+        {
+          "id": "entry-1769735283087-1",
+          "type": "intent_classification",
+          "name": "Orchestrator Intent Classification",
+          "timestamp": "2026-01-30T01:08:03.087Z",
+          "metadata": {
+            "intent": "answer_question",
+            "classificationMethod": "orchestrator",
+            "confidence": "high"
+          }
+        },
+        {
+          "id": "entry-1769735283725-3",
+          "type": "llm_call",
+          "name": "Gemini Response Generation",
+          "timestamp": "2026-01-30T01:08:03.725Z",
+          "duration": 638,
+          "metadata": {
+            "model": "gemini",
+            "intent": "answer_question",
+            "validated": true
+          }
+        }
+      ],
+      "success": true
+    },
+    {
+      "id": "trace-1769735294481",
+      "sessionId": "02a49048-4e7e-400d-9c7e-9e464855db12",
+      "userInput": "dec 25. 2025",
+      "agentResponse": "Thanks. To add your spouse to your medical, dental, and vision plans due to your marriage, you'll generally need to provide a marriage certificate.\n\nSince your marriage date was December 25, 2025, you're within the 30-day submission window. This means you're likely still eligible to make changes.\n\nGenerally, the change would be effective the first of the month after you submit the request (or after HR/Benefits approves it).\n\nDoes that sound right?",
+      "startTime": "2026-01-30T01:08:13.182Z",
+      "endTime": "2026-01-30T01:08:14.481Z",
+      "totalDuration": 1299,
+      "entries": [
+        {
+          "id": "entry-1769735293182-1",
+          "type": "intent_classification",
+          "name": "Orchestrator Intent Classification",
+          "timestamp": "2026-01-30T01:08:13.182Z",
+          "metadata": {
+            "intent": "answer_question",
+            "classificationMethod": "orchestrator",
+            "confidence": "high"
+          }
+        },
+        {
+          "id": "entry-1769735294481-3",
+          "type": "llm_call",
+          "name": "Gemini Response Generation",
+          "timestamp": "2026-01-30T01:08:14.481Z",
+          "duration": 1299,
+          "metadata": {
+            "model": "gemini",
+            "intent": "answer_question",
+            "validated": true
+          }
+        }
+      ],
+      "success": true
+    },
+    {
+      "id": "trace-1769735321642",
+      "sessionId": "02a49048-4e7e-400d-9c7e-9e464855db12",
+      "userInput": "I have no clue",
+      "agentResponse": "Okay, no problem. Let's break it down:\n\n*   **Qualifying Life Event:** Getting married is a qualifying life event, which allows you to make changes to your benefits outside of the normal open enrollment period.\n*   **Submission Window:** You generally have 30 days from the date of the event (your marriage) to submit the request to add your spouse to your benefits. Since you were married on December 25, 2025 and today is January 30, 2026, you're still within that window.\n*   **Effective Date:** The effective date is when the changes to your benefits actually start. In most cases, that would be the first day of the month following your submission (or after HR/Benefits approves it).\n\nSo, if you submit the request today, the changes to your benefits (adding your spouse) would likely be effective on March 1, 2026.\n\nIs that explanation helpful?",
+      "startTime": "2026-01-30T01:08:39.710Z",
+      "endTime": "2026-01-30T01:08:41.642Z",
+      "totalDuration": 1932,
+      "entries": [
+        {
+          "id": "entry-1769735319711-1",
+          "type": "intent_classification",
+          "name": "Orchestrator Intent Classification",
+          "timestamp": "2026-01-30T01:08:39.711Z",
+          "metadata": {
+            "intent": "answer_question",
+            "classificationMethod": "orchestrator",
+            "confidence": "high"
+          }
+        },
+        {
+          "id": "entry-1769735321642-3",
+          "type": "llm_call",
+          "name": "Gemini Response Generation",
+          "timestamp": "2026-01-30T01:08:41.642Z",
+          "duration": 1931,
+          "metadata": {
+            "model": "gemini",
+            "intent": "answer_question",
+            "validated": true
+          }
+        }
+      ],
+      "success": true
+    },
+    {
+      "id": "trace-1769735337096",
+      "sessionId": "02a49048-4e7e-400d-9c7e-9e464855db12",
+      "userInput": "Yes",
+      "agentResponse": "Great! To proceed, you'll want to:\n\n1.  Log in to UKG Ready ESS.\n2.  Navigate to the \"Benefits\" section. This may be under \"My Benefits\" or a similar label.\n3.  Look for a section on \"Life Events\" or \"Qualifying Life Events.\"\n4.  Start a new life event request and select \"Marriage\" as the event type.\n5.  Enter the date of your marriage (December 25, 2025).\n6.  Indicate that you want to add your spouse to your medical, dental, and vision plans.\n7.  You'll also need to upload a copy of your marriage certificate.\n\nDoes that make sense?",
+      "startTime": "2026-01-30T01:08:55.582Z",
+      "endTime": "2026-01-30T01:08:57.096Z",
+      "totalDuration": 1514,
+      "entries": [
+        {
+          "id": "entry-1769735335583-1",
+          "type": "intent_classification",
+          "name": "Orchestrator Intent Classification",
+          "timestamp": "2026-01-30T01:08:55.583Z",
+          "metadata": {
+            "intent": "answer_question",
+            "classificationMethod": "orchestrator",
+            "confidence": "high"
+          }
+        },
+        {
+          "id": "entry-1769735337096-3",
+          "type": "llm_call",
+          "name": "Gemini Response Generation",
+          "timestamp": "2026-01-30T01:08:57.096Z",
+          "duration": 1513,
+          "metadata": {
+            "model": "gemini",
+            "intent": "answer_question",
+            "validated": true
+          }
+        }
+      ],
+      "success": true
     }
   ],
   "stats": {
     "hookCalls": {},
     "signalReads": {},
     "intentDistribution": {
-      "answer_question": 2
+      "answer_question": 7
     },
     "classificationMethods": {
-      "orchestrator": 2
+      "orchestrator": 7
     },
-    "avgResponseTime": 2228.5,
-    "totalLlmCalls": 2,
+    "avgResponseTime": 1716.7142857142858,
+    "totalLlmCalls": 7,
     "totalTokensUsed": 0,
     "errorCount": 0
   },
   "createdAt": "2026-01-29T23:10:35.992Z",
-  "updatedAt": "2026-01-29T23:17:20.300Z"
+  "updatedAt": "2026-01-30T01:08:57.096Z"
 }
