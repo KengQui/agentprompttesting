@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useParams, useLocation } from "wouter";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { ArrowLeft, Save, Trash2, Bot, Briefcase, Shield, AlertTriangle, Loader2, BookOpen, Upload, X, FileText, Code, Pencil, RotateCcw, HelpCircle, ExternalLink, Info, Sparkles, ChevronDown, Database, Check, Settings, Activity, FlaskConical } from "lucide-react";
+import { ArrowLeft, Save, Trash2, Bot, Briefcase, Shield, AlertTriangle, Loader2, BookOpen, Upload, X, FileText, Code, Pencil, RotateCcw, HelpCircle, ExternalLink, Info, Sparkles, ChevronDown, Database, Check, Settings, Activity, FlaskConical, Zap, User, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -42,8 +42,8 @@ import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { validationRulesTemplate, guardrailsTemplate } from "@/lib/config-templates";
 import { TracingDashboard, SimulationPanel, ConfigHistoryPanel } from "@/components/tracing-dashboard";
-import type { Agent, UpdateAgent, AgentStatus, DomainDocument, SampleDataset, GeminiModel } from "@shared/schema";
-import { geminiModelDisplayNames, defaultGenerationModel } from "@shared/schema";
+import type { Agent, UpdateAgent, AgentStatus, DomainDocument, SampleDataset, GeminiModel, AgentAction, MockUserState, MockMode } from "@shared/schema";
+import { geminiModelDisplayNames, defaultGenerationModel, mockModeDescriptions } from "@shared/schema";
 
 const settingsSteps = [
   { id: 1, name: "General", icon: Bot, description: "Name and status" },
@@ -52,7 +52,8 @@ const settingsSteps = [
   { id: 4, name: "Validation Rules", icon: Shield, description: "Set input/output validation rules" },
   { id: 5, name: "Guardrails", icon: AlertTriangle, description: "Define safety boundaries" },
   { id: 6, name: "Sample Data", icon: Database, description: "Upload or generate sample data" },
-  { id: 7, name: "Prompt Configuration", icon: Code, description: "Customize the system prompt" },
+  { id: 7, name: "Available Actions", icon: Zap, description: "Define actions agent can simulate" },
+  { id: 8, name: "Prompt Configuration", icon: Code, description: "Customize the system prompt" },
 ];
 
 function SettingsStepIndicator({ 
@@ -145,9 +146,12 @@ export default function SettingsPage() {
   const [isGeneratingValidation, setIsGeneratingValidation] = useState(false);
   const [isGeneratingGuardrails, setIsGeneratingGuardrails] = useState(false);
   const [isGeneratingSampleData, setIsGeneratingSampleData] = useState(false);
+  const [isGeneratingActions, setIsGeneratingActions] = useState(false);
   const [sampleDataType, setSampleDataType] = useState("customer records");
   const [sampleRecordCount, setSampleRecordCount] = useState(10);
   const [sampleFormat, setSampleFormat] = useState<"json" | "csv" | "text">("json");
+  const [viewingAction, setViewingAction] = useState<AgentAction | null>(null);
+  const [viewingMockState, setViewingMockState] = useState<MockUserState | null>(null);
 
   const computeCompletedSteps = (data: Partial<UpdateAgent>): Set<number> => {
     const completed = new Set<number>();
@@ -157,8 +161,9 @@ export default function SettingsPage() {
     if (data.validationRules) completed.add(4);
     if (data.guardrails) completed.add(5);
     if (data.sampleDatasets && data.sampleDatasets.length > 0) completed.add(6);
-    // Step 7 (Prompt) is auto-completed since prompt is AI-generated based on other steps
-    if (data.businessUseCase) completed.add(7);
+    if (data.availableActions && data.availableActions.length > 0) completed.add(7);
+    // Step 8 (Prompt) is auto-completed since prompt is AI-generated based on other steps
+    if (data.businessUseCase) completed.add(8);
     return completed;
   };
 
@@ -175,6 +180,9 @@ export default function SettingsPage() {
         promptStyle: agent.promptStyle,
         customPrompt: agent.customPrompt,
         clarifyingInsights: agent.clarifyingInsights || [],
+        availableActions: agent.availableActions || [],
+        mockUserState: agent.mockUserState || [],
+        mockMode: agent.mockMode || "full",
         status: agent.status,
       });
       setEditedPrompt(agent.customPrompt || "");
@@ -189,6 +197,7 @@ export default function SettingsPage() {
         guardrails: agent.guardrails,
         promptStyle: agent.promptStyle,
         customPrompt: agent.customPrompt,
+        availableActions: agent.availableActions || [],
       }));
     }
   }, [agent, formData]);
@@ -414,6 +423,65 @@ export default function SettingsPage() {
     } finally {
       setIsGeneratingSampleData(false);
     }
+  };
+
+  const handleGenerateActions = async (model: GeminiModel) => {
+    if (!formData?.businessUseCase) {
+      toast({
+        title: "Missing information",
+        description: "Please complete the Business Use Case step first.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsGeneratingActions(true);
+    try {
+      const response = await fetch('/api/generate-actions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          businessUseCase: formData.businessUseCase,
+          domainKnowledge: formData.domainKnowledge,
+          domainDocuments: formData.domainDocuments,
+          model,
+        }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to generate actions');
+      }
+
+      const result = await response.json();
+      updateFormDataAndTrackCompletion({
+        availableActions: result.actions,
+        mockUserState: result.mockUserState,
+      });
+
+      toast({
+        title: "Actions generated",
+        description: `Generated ${result.actions.length} actions and ${result.mockUserState.length} mock profiles.`,
+      });
+    } catch (error: any) {
+      toast({
+        title: "Generation failed",
+        description: error.message || "Failed to generate actions",
+        variant: "destructive",
+      });
+    } finally {
+      setIsGeneratingActions(false);
+    }
+  };
+
+  const handleRemoveAction = (id: string) => {
+    const current = formData?.availableActions || [];
+    updateFormDataAndTrackCompletion({ availableActions: current.filter(a => a.id !== id) });
+  };
+
+  const handleRemoveMockState = (id: string) => {
+    const current = formData?.mockUserState || [];
+    updateFormDataAndTrackCompletion({ mockUserState: current.filter(s => s.id !== id) });
   };
 
   const updateMutation = useMutation({
@@ -1056,6 +1124,277 @@ export default function SettingsPage() {
         );
 
       case 7:
+        return (
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Zap className="h-5 w-5 text-primary" />
+                Available Actions
+              </CardTitle>
+              <CardDescription>
+                Define what actions your agent can simulate. These allow the agent to "fake" performing actions like updating policies, adding dependents, or submitting requests.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="flex items-center justify-between">
+                <div className="text-sm text-muted-foreground">
+                  Generate actions based on your business use case
+                </div>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      type="button"
+                      variant="default"
+                      disabled={isGeneratingActions}
+                      data-testid="settings-button-generate-actions"
+                    >
+                      {isGeneratingActions ? (
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      ) : (
+                        <Sparkles className="h-4 w-4 mr-2" />
+                      )}
+                      {isGeneratingActions ? "Generating..." : "Generate Actions"}
+                      <ChevronDown className="h-3 w-3 ml-2" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-56">
+                    {(Object.keys(geminiModelDisplayNames) as GeminiModel[]).map((model) => (
+                      <DropdownMenuItem
+                        key={model}
+                        onClick={() => handleGenerateActions(model)}
+                        data-testid={`settings-menu-item-actions-model-${model}`}
+                      >
+                        {geminiModelDisplayNames[model]}
+                      </DropdownMenuItem>
+                    ))}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+
+              <div className="p-4 rounded-lg border bg-muted/50 space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="space-y-1">
+                    <Label className="text-sm font-medium flex items-center gap-2">
+                      <Shield className="h-4 w-4" />
+                      Mock Mode
+                    </Label>
+                    <p className="text-xs text-muted-foreground">
+                      {mockModeDescriptions[formData.mockMode || "full"]}
+                    </p>
+                  </div>
+                  <RadioGroup
+                    value={formData.mockMode || "full"}
+                    onValueChange={(value: MockMode) => updateFormDataAndTrackCompletion({ mockMode: value })}
+                    className="flex gap-2"
+                    data-testid="settings-radio-mock-mode"
+                  >
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="full" id="settings-mock-full" data-testid="settings-radio-mock-full" />
+                      <Label htmlFor="settings-mock-full" className="text-sm cursor-pointer">Full Mock</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="read_only" id="settings-mock-readonly" data-testid="settings-radio-mock-readonly" />
+                      <Label htmlFor="settings-mock-readonly" className="text-sm cursor-pointer">Read-Only</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="disabled" id="settings-mock-disabled" data-testid="settings-radio-mock-disabled" />
+                      <Label htmlFor="settings-mock-disabled" className="text-sm cursor-pointer">Disabled</Label>
+                    </div>
+                  </RadioGroup>
+                </div>
+                <div className="text-xs text-muted-foreground space-y-1">
+                  <p><strong>Full Mock:</strong> Agent simulates all actions locally using mock data. No API calls are made.</p>
+                  <p><strong>Read-Only:</strong> Agent can read real data but simulates write operations locally.</p>
+                  <p><strong>Disabled:</strong> Agent uses real API calls (requires actual backend integration).</p>
+                </div>
+              </div>
+
+              {(formData.availableActions?.length || 0) > 0 && (
+                <div className="space-y-3">
+                  <Label className="text-sm font-medium flex items-center gap-2">
+                    <Zap className="h-4 w-4" />
+                    Actions ({formData.availableActions?.length})
+                  </Label>
+                  <div className="space-y-2 max-h-[250px] overflow-y-auto">
+                    {formData.availableActions?.map((action) => (
+                      <div
+                        key={action.id}
+                        className="flex items-start gap-3 p-3 rounded-lg border bg-card"
+                        data-testid={`settings-action-item-${action.id}`}
+                      >
+                        <Zap className="h-4 w-4 mt-1 text-primary shrink-0" />
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <p className="text-sm font-medium">{action.name}</p>
+                            <Badge variant="outline" className="text-xs">
+                              {action.category}
+                            </Badge>
+                            {action.requiredFields.length > 0 && (
+                              <Badge variant="secondary" className="text-xs">
+                                {action.requiredFields.length} fields
+                              </Badge>
+                            )}
+                          </div>
+                          <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
+                            {action.description}
+                          </p>
+                        </div>
+                        <div className="flex items-center gap-1 shrink-0">
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => setViewingAction(action)}
+                            data-testid={`settings-button-view-action-${action.id}`}
+                          >
+                            <Eye className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => handleRemoveAction(action.id)}
+                            data-testid={`settings-button-remove-action-${action.id}`}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {(formData.mockUserState?.length || 0) > 0 && (
+                <div className="space-y-3">
+                  <Label className="text-sm font-medium flex items-center gap-2">
+                    <User className="h-4 w-4" />
+                    Mock User Profiles ({formData.mockUserState?.length})
+                  </Label>
+                  <div className="space-y-2 max-h-[200px] overflow-y-auto">
+                    {formData.mockUserState?.map((state) => (
+                      <div
+                        key={state.id}
+                        className="flex items-start gap-3 p-3 rounded-lg border bg-card"
+                        data-testid={`settings-mock-state-item-${state.id}`}
+                      >
+                        <User className="h-4 w-4 mt-1 text-muted-foreground shrink-0" />
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2">
+                            <p className="text-sm font-medium">{state.name}</p>
+                            {state.isGenerated && (
+                              <Badge variant="secondary" className="text-xs">
+                                <Sparkles className="h-3 w-3 mr-1" />
+                                AI Generated
+                              </Badge>
+                            )}
+                          </div>
+                          <p className="text-xs text-muted-foreground mt-1">
+                            {Object.keys(state.fields).length} fields
+                          </p>
+                        </div>
+                        <div className="flex items-center gap-1 shrink-0">
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => setViewingMockState(state)}
+                            data-testid={`settings-button-view-mock-state-${state.id}`}
+                          >
+                            <Eye className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => handleRemoveMockState(state.id)}
+                            data-testid={`settings-button-remove-mock-state-${state.id}`}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {(formData.availableActions?.length || 0) === 0 && (formData.mockUserState?.length || 0) === 0 && (
+                <div className="text-center py-8 text-muted-foreground">
+                  <Zap className="h-12 w-12 mx-auto mb-3 opacity-50" />
+                  <p className="text-sm">No actions defined yet</p>
+                  <p className="text-xs mt-1">Click "Generate Actions" to create actions based on your use case</p>
+                </div>
+              )}
+
+              <Dialog open={viewingAction !== null} onOpenChange={(open) => !open && setViewingAction(null)}>
+                <DialogContent className="max-w-2xl" data-testid="settings-dialog-action-viewer">
+                  <DialogHeader>
+                    <DialogTitle className="flex items-center gap-2" data-testid="settings-text-action-name">
+                      <Zap className="h-5 w-5 text-primary" />
+                      {viewingAction?.name}
+                      <Badge variant="outline" className="ml-2">
+                        {viewingAction?.category}
+                      </Badge>
+                    </DialogTitle>
+                    <DialogDescription data-testid="settings-text-action-description">
+                      {viewingAction?.description}
+                    </DialogDescription>
+                  </DialogHeader>
+                  <div className="space-y-4">
+                    {viewingAction?.requiredFields && viewingAction.requiredFields.length > 0 && (
+                      <div>
+                        <Label className="text-sm font-medium">Required Fields</Label>
+                        <div className="mt-2 space-y-2">
+                          {viewingAction.requiredFields.map((field, idx) => (
+                            <div key={idx} className="flex items-center gap-2 text-sm p-2 bg-muted rounded">
+                              <Badge variant="outline">{field.type}</Badge>
+                              <span className="font-medium">{field.label}</span>
+                              {field.required && <Badge variant="secondary">Required</Badge>}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    {viewingAction?.confirmationMessage && (
+                      <div>
+                        <Label className="text-sm font-medium">Confirmation Message</Label>
+                        <p className="text-sm text-muted-foreground mt-1">{viewingAction.confirmationMessage}</p>
+                      </div>
+                    )}
+                    {viewingAction?.successMessage && (
+                      <div>
+                        <Label className="text-sm font-medium">Success Message</Label>
+                        <p className="text-sm text-muted-foreground mt-1">{viewingAction.successMessage}</p>
+                      </div>
+                    )}
+                  </div>
+                </DialogContent>
+              </Dialog>
+
+              <Dialog open={viewingMockState !== null} onOpenChange={(open) => !open && setViewingMockState(null)}>
+                <DialogContent className="max-w-2xl" data-testid="settings-dialog-mock-state-viewer">
+                  <DialogHeader>
+                    <DialogTitle className="flex items-center gap-2" data-testid="settings-text-mock-state-name">
+                      <User className="h-5 w-5" />
+                      {viewingMockState?.name}
+                    </DialogTitle>
+                    <DialogDescription data-testid="settings-text-mock-state-description">
+                      {viewingMockState?.description}
+                    </DialogDescription>
+                  </DialogHeader>
+                  <div className="overflow-auto max-h-[400px]">
+                    <pre className="p-4 bg-muted rounded-lg text-sm font-mono whitespace-pre-wrap">
+                      {JSON.stringify(viewingMockState?.fields || {}, null, 2)}
+                    </pre>
+                  </div>
+                </DialogContent>
+              </Dialog>
+            </CardContent>
+          </Card>
+        );
+
+      case 8:
         return (
           <Card>
             <CardHeader>
