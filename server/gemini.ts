@@ -75,6 +75,156 @@ export interface ActionExecutionResult {
   fields: Record<string, any>;
   message: string;
   updatedMockState?: MockUserState[];
+  updatedSampleDatasets?: SampleDataset[];
+}
+
+// Parse CSV line handling quoted fields properly - preserves raw values
+function parseCSVLine(line: string): string[] {
+  const result: string[] = [];
+  let current = '';
+  let inQuotes = false;
+  
+  for (let i = 0; i < line.length; i++) {
+    const char = line[i];
+    const nextChar = line[i + 1];
+    
+    if (char === '"') {
+      if (inQuotes && nextChar === '"') {
+        current += '"';
+        i++;
+      } else {
+        inQuotes = !inQuotes;
+      }
+    } else if (char === ',' && !inQuotes) {
+      result.push(current);
+      current = '';
+    } else {
+      current += char;
+    }
+  }
+  result.push(current);
+  return result;
+}
+
+// Escape value for CSV output
+function escapeCSVValue(value: any): string {
+  const str = String(value ?? '');
+  if (str.includes(',') || str.includes('"') || str.includes('\n')) {
+    return '"' + str.replace(/"/g, '""') + '"';
+  }
+  return str;
+}
+
+// Extended MockUserState with format metadata for round-trip
+interface WorkingData extends MockUserState {
+  _format?: 'json' | 'csv' | 'text';
+  _csvHeaders?: string[];
+}
+
+// Convert sample datasets to a workable data structure for action execution
+export function sampleDatasetsToWorkingData(sampleDatasets: SampleDataset[]): WorkingData[] {
+  const result: WorkingData[] = [];
+  
+  for (const dataset of sampleDatasets) {
+    try {
+      let fields: Record<string, any> = {};
+      const cleanedContent = dataset.content
+        .replace(/^```(?:json|csv|text|)?\s*\n?/gi, '')
+        .replace(/\n?```\s*$/gi, '')
+        .trim();
+      
+      let format: 'json' | 'csv' | 'text' = dataset.format || 'json';
+      let csvHeaders: string[] | undefined;
+      
+      if (format === 'json') {
+        const parsed = JSON.parse(cleanedContent);
+        fields = parsed;
+      } else if (format === 'csv') {
+        const lines = cleanedContent.split('\n').filter(l => l.trim());
+        if (lines.length > 0) {
+          csvHeaders = parseCSVLine(lines[0]);
+          const rows = lines.slice(1).map(line => {
+            const values = parseCSVLine(line);
+            const obj: Record<string, any> = {};
+            csvHeaders!.forEach((h, i) => {
+              obj[h] = values[i] ?? '';
+            });
+            return obj;
+          });
+          fields = rows;
+        }
+      } else {
+        fields = { _textContent: cleanedContent };
+      }
+      
+      result.push({
+        id: dataset.id,
+        name: dataset.name,
+        description: dataset.description,
+        fields,
+        isGenerated: dataset.isGenerated,
+        createdAt: dataset.createdAt,
+        _format: format,
+        _csvHeaders: csvHeaders
+      });
+    } catch (e) {
+      const strippedContent = dataset.content
+        .replace(/^```(?:json|csv|text|)?\s*\n?/gi, '')
+        .replace(/\n?```\s*$/gi, '')
+        .trim();
+      result.push({
+        id: dataset.id,
+        name: dataset.name,
+        description: dataset.description,
+        fields: { _textContent: strippedContent },
+        isGenerated: dataset.isGenerated,
+        createdAt: dataset.createdAt,
+        _format: 'text'
+      });
+    }
+  }
+  
+  return result;
+}
+
+// Convert working data back to sample datasets format
+export function workingDataToSampleDatasets(
+  workingData: WorkingData[], 
+  originalDatasets: SampleDataset[]
+): SampleDataset[] {
+  return workingData.map(data => {
+    const original = originalDatasets.find(d => d.id === data.id);
+    const format = data._format || original?.format || 'json';
+    
+    let content: string;
+    
+    if (format === 'text') {
+      content = data.fields._textContent ?? JSON.stringify(data.fields, null, 2);
+    } else if (format === 'csv' && Array.isArray(data.fields)) {
+      const headers = data._csvHeaders || (data.fields.length > 0 ? Object.keys(data.fields[0]) : []);
+      const csvLines = [headers.map(h => escapeCSVValue(h)).join(',')];
+      for (const row of data.fields) {
+        csvLines.push(headers.map(h => escapeCSVValue(row[h])).join(','));
+      }
+      content = csvLines.join('\n');
+    } else if (Array.isArray(data.fields)) {
+      content = JSON.stringify(data.fields, null, 2);
+    } else if (data.fields._textContent !== undefined) {
+      content = data.fields._textContent;
+    } else {
+      content = JSON.stringify(data.fields, null, 2);
+    }
+    
+    return {
+      id: data.id,
+      name: data.name,
+      description: data.description,
+      content,
+      format,
+      isGenerated: data.isGenerated,
+      createdAt: data.createdAt
+    };
+  });
 }
 
 // Parse action blocks from AI response
@@ -325,6 +475,27 @@ export function executeSimulatedAction(
     message,
     updatedMockState
   };
+}
+
+// Execute action with sample datasets - handles conversion automatically
+export function executeActionWithSampleData(
+  actionName: string,
+  fields: Record<string, any>,
+  availableActions: AgentAction[],
+  sampleDatasets: SampleDataset[]
+): ActionExecutionResult {
+  const workingData = sampleDatasetsToWorkingData(sampleDatasets);
+  const result = executeSimulatedAction(actionName, fields, availableActions, workingData);
+  
+  if (result.success) {
+    const dataToConvert = (result.updatedMockState || workingData) as WorkingData[];
+    result.updatedSampleDatasets = workingDataToSampleDatasets(
+      dataToConvert,
+      sampleDatasets
+    );
+  }
+  
+  return result;
 }
 
 export async function generateAgentResponse(
@@ -1335,7 +1506,9 @@ export async function generateActionsAndMockData(context: ActionsGenerationConte
     ? context.domainDocuments.map(doc => `${doc.filename}: ${doc.content}`).join("\n\n")
     : "";
 
-  const systemPrompt = `You are an expert at designing agent capabilities for HR/business AI assistants. Based on the business use case, generate a list of ACTIONS the agent can simulate (fake execute) and MOCK USER DATA for testing.
+  const systemPrompt = `You are an expert at designing agent capabilities for HR/business AI assistants. Based on the business use case, generate a list of ACTIONS the agent can simulate (fake execute).
+
+Note: The agent already has sample data uploaded separately. You only need to generate actions that work with that data.
 
 Your response must be ONLY valid JSON with this exact structure:
 {
@@ -1358,16 +1531,6 @@ Your response must be ONLY valid JSON with this exact structure:
       "successMessage": "Message shown after success: Successfully...",
       "affectedDataFields": ["field1", "field2"]
     }
-  ],
-  "mockUserState": [
-    {
-      "name": "Profile/Record Name",
-      "description": "What this data represents",
-      "fields": {
-        "fieldName": "value",
-        "anotherField": 123
-      }
-    }
   ]
 }
 
@@ -1375,9 +1538,7 @@ Guidelines:
 1. Generate 3-8 realistic actions the agent could perform
 2. Actions should be things users would ask to do (submit, update, add, remove, request, etc.)
 3. Each action should have realistic required fields
-4. Generate 1-3 mock data profiles with realistic sample data
-5. Mock data should include fields that actions will read/modify
-6. Use realistic but clearly fake sample data (e.g., "Jane Doe", "john.smith@company.com")
+4. Actions will work with the sample data the user has already uploaded
 
 Output ONLY the JSON, no markdown, no explanation.`;
 
@@ -1436,16 +1597,9 @@ Generate actions and mock user data for this AI agent.`;
       affectedDataFields: action.affectedDataFields || [],
     }));
 
-    const mockUserState = (parsed.mockUserState || []).map((state: any) => ({
-      id: uuidv4(),
-      name: state.name || "Mock Profile",
-      description: state.description || "",
-      fields: state.fields || {},
-      isGenerated: true,
-      createdAt: now,
-    }));
-
-    return { actions, mockUserState };
+    // Return empty mockUserState for backward compatibility
+    // Actions now work with sample data uploaded in Step 6
+    return { actions, mockUserState: [] };
   } catch (error: any) {
     console.error("Gemini API error:", error?.message || error);
     throw new Error(`Failed to generate actions: ${error?.message || error}`);

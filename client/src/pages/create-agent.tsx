@@ -1367,7 +1367,6 @@ function Step7AvailableActions({
   const [isGenerating, setIsGenerating] = useState(false);
   const [selectedModel, setSelectedModel] = useState<GeminiModel>(defaultGenerationModel);
   const [viewingAction, setViewingAction] = useState<AgentAction | null>(null);
-  const [viewingMockState, setViewingMockState] = useState<MockUserState | null>(null);
   const { toast } = useToast();
 
   const handleGenerate = async (model: GeminiModel) => {
@@ -1401,12 +1400,11 @@ function Step7AvailableActions({
       const result = await response.json();
       onUpdate({
         availableActions: result.actions,
-        mockUserState: result.mockUserState,
       });
 
       toast({
         title: "Actions generated",
-        description: `Generated ${result.actions.length} actions and ${result.mockUserState.length} mock profiles.`,
+        description: `Generated ${result.actions.length} actions based on your sample data.`,
       });
     } catch (error: any) {
       toast({
@@ -1424,10 +1422,6 @@ function Step7AvailableActions({
     onUpdate({ availableActions: current.filter(a => a.id !== id) });
   };
 
-  const handleRemoveMockState = (id: string) => {
-    const current = data.mockUserState || [];
-    onUpdate({ mockUserState: current.filter(s => s.id !== id) });
-  };
 
   return (
     <Card>
@@ -1437,7 +1431,7 @@ function Step7AvailableActions({
           Available Actions
         </CardTitle>
         <CardDescription>
-          Define what actions your agent can simulate. These allow the agent to "fake" performing actions like updating policies, adding dependents, or submitting requests.
+          Define what actions your agent can simulate. Actions use your sample data to perform operations like updating records, adding entries, or making changes. Make sure to add sample data in Step 6 first.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
@@ -1573,61 +1567,7 @@ function Step7AvailableActions({
           </div>
         )}
 
-        {(data.mockUserState?.length || 0) > 0 && (
-          <div className="space-y-3">
-            <Label className="text-sm font-medium flex items-center gap-2">
-              <User className="h-4 w-4" />
-              Mock User Profiles ({data.mockUserState?.length})
-            </Label>
-            <div className="space-y-2 max-h-[200px] overflow-y-auto">
-              {data.mockUserState?.map((state) => (
-                <div
-                  key={state.id}
-                  className="flex items-start gap-3 p-3 rounded-lg border bg-card"
-                  data-testid={`mock-state-item-${state.id}`}
-                >
-                  <User className="h-4 w-4 mt-1 text-muted-foreground shrink-0" />
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <p className="text-sm font-medium">{state.name}</p>
-                      {state.isGenerated && (
-                        <Badge variant="secondary" className="text-xs">
-                          <Sparkles className="h-3 w-3 mr-1" />
-                          AI Generated
-                        </Badge>
-                      )}
-                    </div>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      {Object.keys(state.fields).length} fields
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-1 shrink-0">
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => setViewingMockState(state)}
-                      data-testid={`button-view-mock-state-${state.id}`}
-                    >
-                      <Eye className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => handleRemoveMockState(state.id)}
-                      data-testid={`button-remove-mock-state-${state.id}`}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {(data.availableActions?.length || 0) === 0 && (data.mockUserState?.length || 0) === 0 && (
+        {(data.availableActions?.length || 0) === 0 && (
           <div className="text-center py-8 text-muted-foreground">
             <Zap className="h-12 w-12 mx-auto mb-3 opacity-50" />
             <p className="text-sm">No actions defined yet</p>
@@ -1680,24 +1620,6 @@ function Step7AvailableActions({
           </DialogContent>
         </Dialog>
 
-        <Dialog open={viewingMockState !== null} onOpenChange={(open) => !open && setViewingMockState(null)}>
-          <DialogContent className="max-w-2xl" data-testid="dialog-mock-state-viewer">
-            <DialogHeader>
-              <DialogTitle className="flex items-center gap-2" data-testid="text-mock-state-name">
-                <User className="h-5 w-5" />
-                {viewingMockState?.name}
-              </DialogTitle>
-              <DialogDescription data-testid="text-mock-state-description">
-                {viewingMockState?.description}
-              </DialogDescription>
-            </DialogHeader>
-            <div className="overflow-auto max-h-[400px]">
-              <pre className="p-4 bg-muted rounded-lg text-sm font-mono whitespace-pre-wrap">
-                {JSON.stringify(viewingMockState?.fields || {}, null, 2)}
-              </pre>
-            </div>
-          </DialogContent>
-        </Dialog>
       </CardContent>
     </Card>
   );

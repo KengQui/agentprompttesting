@@ -93,5 +93,11 @@
     "username": "e2e_tester",
     "password": "$2b$10$0PhigI3LH8D.0TjB7GDTJufEW6gXGbCd.YrmsCwdPl3tfthYhXUfa",
     "createdAt": "2026-01-30T03:11:00.116Z"
+  },
+  {
+    "id": "7e8e96c0-db3f-410a-9325-5d4cb684aae0",
+    "username": "e2etest_funjO6",
+    "password": "$2b$10$zzSGLso9vWnGSvVkqwdrse7aj6oWmnQz1DLmwaYGb1eJK7Lzn3Aay",
+    "createdAt": "2026-01-30T19:43:28.725Z"
   }
 ]

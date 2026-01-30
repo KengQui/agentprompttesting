@@ -29,7 +29,7 @@ async function requireAuth(req: AuthenticatedRequest, res: Response, next: NextF
   req.user = user;
   next();
 }
-import { generateAgentResponse, generateValidationRules, generateGuardrails, generateSystemPrompt, generateSampleData, evaluateContextSufficiency, processClarifyingChat, generateValidationRulesWithInsights, generateGuardrailsWithInsights, generateActionsAndMockData, parseActionFromResponse, executeSimulatedAction, extractBusinessCaseContent, type GenerationContext, type SystemPromptContext, type SampleDataGenerationContext, type ClarifyingChatContext, type ActionsGenerationContext, type ExtractionResult } from "./gemini";
+import { generateAgentResponse, generateValidationRules, generateGuardrails, generateSystemPrompt, generateSampleData, evaluateContextSufficiency, processClarifyingChat, generateValidationRulesWithInsights, generateGuardrailsWithInsights, generateActionsAndMockData, parseActionFromResponse, executeSimulatedAction, executeActionWithSampleData, extractBusinessCaseContent, sampleDatasetsToWorkingData, workingDataToSampleDatasets, type GenerationContext, type SystemPromptContext, type SampleDataGenerationContext, type ClarifyingChatContext, type ActionsGenerationContext, type ExtractionResult } from "./gemini";
 import { loadAgentComponents, clearAgentCache, hasCustomComponents } from "./agent-loader";
 import { createRecoveryManager } from "./components/recovery-manager";
 import multer from "multer";
@@ -77,6 +77,60 @@ function validateAIResponse(response: string): ResponseValidationResult {
   };
 }
 import { v4 as uuidv4 } from "uuid";
+import type { Agent, SampleDataset, MockUserState, AgentAction } from "@shared/schema";
+import type { ActionExecutionResult } from "./gemini";
+
+// Helper to execute action with sample data or legacy mockUserState
+async function executeAgentAction(
+  parsedAction: { actionName: string; actionFields?: Record<string, any> },
+  agent: Agent,
+  agentId: string
+): Promise<{ result: ActionExecutionResult; shouldUpdateStorage: boolean }> {
+  const hasSampleData = agent.sampleDatasets && agent.sampleDatasets.length > 0;
+  const hasLegacyMockState = agent.mockUserState && agent.mockUserState.length > 0;
+  
+  let actionResult: ActionExecutionResult;
+  
+  if (hasSampleData) {
+    actionResult = executeActionWithSampleData(
+      parsedAction.actionName,
+      parsedAction.actionFields || {},
+      agent.availableActions || [],
+      agent.sampleDatasets!
+    );
+  } else if (hasLegacyMockState) {
+    actionResult = executeSimulatedAction(
+      parsedAction.actionName,
+      parsedAction.actionFields || {},
+      agent.availableActions || [],
+      agent.mockUserState!
+    );
+  } else {
+    actionResult = executeSimulatedAction(
+      parsedAction.actionName,
+      parsedAction.actionFields || {},
+      agent.availableActions || [],
+      []
+    );
+  }
+  
+  let shouldUpdateStorage = false;
+  if (actionResult.success) {
+    if (hasSampleData && actionResult.updatedSampleDatasets) {
+      await storage.updateAgent(agentId, {
+        sampleDatasets: actionResult.updatedSampleDatasets
+      });
+      shouldUpdateStorage = true;
+    } else if (hasLegacyMockState && actionResult.updatedMockState) {
+      await storage.updateAgent(agentId, {
+        mockUserState: actionResult.updatedMockState
+      });
+      shouldUpdateStorage = true;
+    }
+  }
+  
+  return { result: actionResult, shouldUpdateStorage };
+}
 
 // Configure multer for file uploads (memory storage for text extraction)
 const upload = multer({
@@ -648,11 +702,11 @@ export async function registerRoutes(
                   responseContent = parsedAction.cleanedResponse || 
                     `I tried to perform "${parsedAction.actionName}" but encountered an error processing the action. Please try again.`;
                 } else {
-                  const actionResult = executeSimulatedAction(
-                    parsedAction.actionName,
-                    parsedAction.actionFields || {},
-                    agent.availableActions,
-                    agent.mockUserState || []
+                  // Execute action with sample data or legacy mockUserState
+                  const { result: actionResult } = await executeAgentAction(
+                    { actionName: parsedAction.actionName, actionFields: parsedAction.actionFields },
+                    agent,
+                    req.params.id
                   );
                   
                   traceEntries.push({
@@ -667,12 +721,6 @@ export async function registerRoutes(
                       message: actionResult.message
                     },
                   });
-                  
-                  if (actionResult.success && actionResult.updatedMockState) {
-                    await storage.updateAgent(req.params.id, {
-                      mockUserState: actionResult.updatedMockState
-                    });
-                  }
                   
                   responseContent = parsedAction.cleanedResponse;
                   if (!responseContent.trim()) {
@@ -752,11 +800,11 @@ export async function registerRoutes(
                 responseContent = parsedAction.cleanedResponse || 
                   `I tried to perform "${parsedAction.actionName}" but encountered an error processing the action. Please try again.`;
               } else {
-                const actionResult = executeSimulatedAction(
-                  parsedAction.actionName,
-                  parsedAction.actionFields || {},
-                  agent.availableActions,
-                  agent.mockUserState || []
+                // Execute action with sample data or legacy mockUserState
+                const { result: actionResult } = await executeAgentAction(
+                  { actionName: parsedAction.actionName, actionFields: parsedAction.actionFields },
+                  agent,
+                  req.params.id
                 );
                 
                 traceEntries.push({
@@ -771,12 +819,6 @@ export async function registerRoutes(
                     message: actionResult.message
                   },
                 });
-                
-                if (actionResult.success && actionResult.updatedMockState) {
-                  await storage.updateAgent(req.params.id, {
-                    mockUserState: actionResult.updatedMockState
-                  });
-                }
                 
                 responseContent = parsedAction.cleanedResponse;
                 if (!responseContent.trim()) {
@@ -1002,11 +1044,11 @@ export async function registerRoutes(
                   responseContent = parsedAction.cleanedResponse || 
                     `I tried to perform "${parsedAction.actionName}" but encountered an error processing the action. Please try again.`;
                 } else {
-                  const actionResult = executeSimulatedAction(
-                    parsedAction.actionName,
-                    parsedAction.actionFields || {},
-                    agent.availableActions,
-                    agent.mockUserState || []
+                  // Execute action with sample data or legacy mockUserState
+                  const { result: actionResult } = await executeAgentAction(
+                    { actionName: parsedAction.actionName, actionFields: parsedAction.actionFields },
+                    agent,
+                    req.params.id
                   );
                   
                   traceEntries.push({
@@ -1021,12 +1063,6 @@ export async function registerRoutes(
                       message: actionResult.message
                     },
                   });
-                  
-                  if (actionResult.success && actionResult.updatedMockState) {
-                    await storage.updateAgent(req.params.id, {
-                      mockUserState: actionResult.updatedMockState
-                    });
-                  }
                   
                   responseContent = parsedAction.cleanedResponse;
                   if (!responseContent.trim()) {
@@ -1097,11 +1133,11 @@ export async function registerRoutes(
                 responseContent = parsedAction.cleanedResponse || 
                   `I tried to perform "${parsedAction.actionName}" but encountered an error processing the action. Please try again.`;
               } else {
-                const actionResult = executeSimulatedAction(
-                  parsedAction.actionName,
-                  parsedAction.actionFields || {},
-                  agent.availableActions,
-                  agent.mockUserState || []
+                // Execute action with sample data or legacy mockUserState
+                const { result: actionResult } = await executeAgentAction(
+                  { actionName: parsedAction.actionName, actionFields: parsedAction.actionFields },
+                  agent,
+                  req.params.id
                 );
                 
                 traceEntries.push({
@@ -1116,12 +1152,6 @@ export async function registerRoutes(
                     message: actionResult.message
                   },
                 });
-                
-                if (actionResult.success && actionResult.updatedMockState) {
-                  await storage.updateAgent(req.params.id, {
-                    mockUserState: actionResult.updatedMockState
-                  });
-                }
                 
                 responseContent = parsedAction.cleanedResponse;
                 if (!responseContent.trim()) {
