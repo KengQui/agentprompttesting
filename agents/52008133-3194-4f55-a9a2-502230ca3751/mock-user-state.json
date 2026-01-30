@@ -1,0 +1,74 @@
+[
+  {
+    "id": "44f1a77c-5482-418b-af63-849a541af9bf",
+    "name": "Jane Doe's Profile",
+    "description": "An established employee who is married with one child.",
+    "fields": {
+      "employee_id": "EMP-10234",
+      "full_name": "Jane M. Doe",
+      "email": "jane.doe@company.com",
+      "address": {
+        "street": "123 Maple St",
+        "city": "Pleasantville",
+        "state": "CA",
+        "zip": "90210"
+      },
+      "dependents": [
+        {
+          "dependent_id": "DEP-4567A",
+          "name": "Robert Doe",
+          "relationship": "Spouse",
+          "date_of_birth": "1985-05-20"
+        },
+        {
+          "dependent_id": "DEP-4567B",
+          "name": "Emily Doe",
+          "relationship": "Child",
+          "date_of_birth": "2018-11-10"
+        }
+      ],
+      "current_benefits": {
+        "medical_plan": "PPO Gold Plan",
+        "coverage_tier": "Family"
+      },
+      "active_life_events": [],
+      "escalation_history": []
+    },
+    "isGenerated": true,
+    "createdAt": "2026-01-30T01:32:56.189Z"
+  },
+  {
+    "id": "b62d8f18-fb58-43fb-b1cb-c1b17bac6017",
+    "name": "John Smith's Profile",
+    "description": "A single employee with no dependents, renting an apartment.",
+    "fields": {
+      "employee_id": "EMP-25896",
+      "full_name": "John R. Smith",
+      "email": "john.smith@company.com",
+      "address": {
+        "street": "456 Oak Ave, Apt 7B",
+        "city": "Metropolis",
+        "state": "NY",
+        "zip": "10001"
+      },
+      "dependents": [],
+      "current_benefits": {
+        "medical_plan": "HSA Silver Plan",
+        "coverage_tier": "Employee Only"
+      },
+      "active_life_events": [
+        {
+          "event_id": "QLE-2024-00156",
+          "event_type": "Loss_of_Other_Coverage",
+          "event_date": "2024-07-15",
+          "status": "Awaiting Documents",
+          "submission_deadline": "2024-08-14",
+          "documents_uploaded": []
+        }
+      ],
+      "escalation_history": []
+    },
+    "isGenerated": true,
+    "createdAt": "2026-01-30T01:32:56.189Z"
+  }
+]

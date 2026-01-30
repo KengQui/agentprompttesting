@@ -1,0 +1,91 @@
+{
+  "agentId": "52008133-3194-4f55-a9a2-502230ca3751",
+  "traces": [
+    {
+      "id": "trace-1769736825136",
+      "sessionId": "0592479e-3844-4609-8b1d-df18b00cdc29",
+      "userInput": "We just adopted a baby",
+      "agentResponse": "Congratulations on your adoption! This qualifies as a Qualified Life Event, allowing you to make certain changes to your benefits.\n\nTypically, you can:\n\n*   Add the child to your health, dental, and vision plans.\n*   Change your coverage tier (e.g., from Employee + Child to Employee + Family).\n*   Start or change your Dependent Care Flexible Spending Account (DCFSA).\n\nTo make these changes, you'll generally need to provide adoption or placement paperwork. The changes are typically effective on the date of placement. You have 30 days from the date of adoption/placement to submit these changes.\n\nDoes this sound like what you're looking to do?",
+      "startTime": "2026-01-30T01:33:43.563Z",
+      "endTime": "2026-01-30T01:33:45.136Z",
+      "totalDuration": 1573,
+      "entries": [
+        {
+          "id": "entry-1769736823586-1",
+          "type": "intent_classification",
+          "name": "Orchestrator Intent Classification",
+          "timestamp": "2026-01-30T01:33:43.586Z",
+          "metadata": {
+            "intent": "answer_question",
+            "classificationMethod": "orchestrator",
+            "confidence": "high"
+          }
+        },
+        {
+          "id": "entry-1769736825136-3",
+          "type": "llm_call",
+          "name": "Gemini Response Generation",
+          "timestamp": "2026-01-30T01:33:45.136Z",
+          "duration": 1550,
+          "metadata": {
+            "model": "gemini",
+            "intent": "answer_question",
+            "validated": true
+          }
+        }
+      ],
+      "success": true
+    },
+    {
+      "id": "trace-1769736837782",
+      "sessionId": "0592479e-3844-4609-8b1d-df18b00cdc29",
+      "userInput": "yes",
+      "agentResponse": "Great. To proceed in UKG Ready, navigate to \"Benefits\" and then \"Life Events\". You'll want to select \"Adoption/Placement/Foster\" as your life event and enter the placement date.\n\nFrom there, you’ll be able to make the necessary changes to your benefits elections and add your child as a dependent. You will need to upload the adoption/placement paperwork.\n\nAs a reminder, all changes are subject to HR/Benefits approval.\n\nDo you have the required documents available?",
+      "startTime": "2026-01-30T01:33:56.548Z",
+      "endTime": "2026-01-30T01:33:57.782Z",
+      "totalDuration": 1234,
+      "entries": [
+        {
+          "id": "entry-1769736836548-1",
+          "type": "intent_classification",
+          "name": "Orchestrator Intent Classification",
+          "timestamp": "2026-01-30T01:33:56.548Z",
+          "metadata": {
+            "intent": "answer_question",
+            "classificationMethod": "orchestrator",
+            "confidence": "high"
+          }
+        },
+        {
+          "id": "entry-1769736837782-3",
+          "type": "llm_call",
+          "name": "Gemini Response Generation",
+          "timestamp": "2026-01-30T01:33:57.782Z",
+          "duration": 1234,
+          "metadata": {
+            "model": "gemini",
+            "intent": "answer_question",
+            "validated": true
+          }
+        }
+      ],
+      "success": true
+    }
+  ],
+  "stats": {
+    "hookCalls": {},
+    "signalReads": {},
+    "intentDistribution": {
+      "answer_question": 2
+    },
+    "classificationMethods": {
+      "orchestrator": 2
+    },
+    "avgResponseTime": 1403.5,
+    "totalLlmCalls": 2,
+    "totalTokensUsed": 0,
+    "errorCount": 0
+  },
+  "createdAt": "2026-01-30T01:33:45.136Z",
+  "updatedAt": "2026-01-30T01:33:57.782Z"
+}
