@@ -70,22 +70,92 @@
         }
       ],
       "success": true
+    },
+    {
+      "id": "trace-1769737051533",
+      "sessionId": "b743fbb5-5e67-4a04-8831-44854bf0f6d4",
+      "userInput": "I am having a baby in 2 weeks time",
+      "agentResponse": "Congratulations! I can help you understand how this qualifies as a life event and what benefits changes you can make.\n\nTo start, having a baby is a Qualified Life Event that allows you to make changes to your benefits. Because the baby is due in 2 weeks, I estimate the birth date to be around Friday, February 13, 2026. This means you'll have a limited time to make changes, so it's good to be prepared.\n\nWith the birth of your child, you can:\n*   Add the child to your coverage.\n*   Change your coverage tier (for example, from Employee + Spouse to Employee + Family).\n*   Start or change your Dependent Care Flexible Spending Account (DCFSA).\n\nDo you plan to enroll the baby in your health coverage and/or adjust your DCFSA?",
+      "startTime": "2026-01-30T01:37:28.641Z",
+      "endTime": "2026-01-30T01:37:31.533Z",
+      "totalDuration": 2892,
+      "entries": [
+        {
+          "id": "entry-1769737049720-1",
+          "type": "intent_classification",
+          "name": "Orchestrator Intent Classification",
+          "timestamp": "2026-01-30T01:37:29.720Z",
+          "metadata": {
+            "intent": "answer_question",
+            "classificationMethod": "orchestrator",
+            "confidence": "high"
+          }
+        },
+        {
+          "id": "entry-1769737051533-3",
+          "type": "llm_call",
+          "name": "Gemini Response Generation",
+          "timestamp": "2026-01-30T01:37:31.533Z",
+          "duration": 1812,
+          "metadata": {
+            "model": "gemini",
+            "intent": "answer_question",
+            "validated": true
+          }
+        }
+      ],
+      "success": true
+    },
+    {
+      "id": "trace-1769737064178",
+      "sessionId": "b743fbb5-5e67-4a04-8831-44854bf0f6d4",
+      "userInput": "both",
+      "agentResponse": "Okay, great. Since you plan to enroll the baby in your health coverage and adjust your DCFSA, here's some more information:\n\n*   **Documentation:** To add your child, you’ll need to provide a hospital record or birth certificate.\n*   **Effective Date:** Coverage is effective on the date of birth, if you submit the request within 30 days of the birth. Since the birth is expected around February 13, 2026, you’ll want to submit the request before March 15, 2026 to ensure it's effective the date of birth.\n*   **Where to make changes:** You can make these changes in UKG Ready. Navigate to the \"Benefits\" section, find the \"Life Events\" option, and then select \"Birth\". Follow the prompts to add your child and make any necessary changes to your DCFSA.\n\nWould you like me to walk you through the steps in UKG Ready?",
+      "startTime": "2026-01-30T01:37:42.096Z",
+      "endTime": "2026-01-30T01:37:44.178Z",
+      "totalDuration": 2082,
+      "entries": [
+        {
+          "id": "entry-1769737062097-1",
+          "type": "intent_classification",
+          "name": "Orchestrator Intent Classification",
+          "timestamp": "2026-01-30T01:37:42.097Z",
+          "metadata": {
+            "intent": "answer_question",
+            "classificationMethod": "orchestrator",
+            "confidence": "high"
+          }
+        },
+        {
+          "id": "entry-1769737064178-3",
+          "type": "llm_call",
+          "name": "Gemini Response Generation",
+          "timestamp": "2026-01-30T01:37:44.178Z",
+          "duration": 2081,
+          "metadata": {
+            "model": "gemini",
+            "intent": "answer_question",
+            "validated": true
+          }
+        }
+      ],
+      "success": true
     }
   ],
   "stats": {
     "hookCalls": {},
     "signalReads": {},
     "intentDistribution": {
-      "answer_question": 2
+      "answer_question": 4
     },
     "classificationMethods": {
-      "orchestrator": 2
+      "orchestrator": 4
     },
-    "avgResponseTime": 1403.5,
-    "totalLlmCalls": 2,
+    "avgResponseTime": 1945.25,
+    "totalLlmCalls": 4,
     "totalTokensUsed": 0,
     "errorCount": 0
   },
   "createdAt": "2026-01-30T01:33:45.136Z",
-  "updatedAt": "2026-01-30T01:33:57.782Z"
+  "updatedAt": "2026-01-30T01:37:44.178Z"
 }

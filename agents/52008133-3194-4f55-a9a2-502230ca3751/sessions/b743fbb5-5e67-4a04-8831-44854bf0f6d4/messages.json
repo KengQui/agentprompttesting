@@ -1,0 +1,34 @@
+[
+  {
+    "id": "2a77fdd4-ab84-4207-a1f4-5b28f9fe5b11",
+    "agentId": "52008133-3194-4f55-a9a2-502230ca3751",
+    "sessionId": "b743fbb5-5e67-4a04-8831-44854bf0f6d4",
+    "role": "user",
+    "content": "I am having a baby in 2 weeks time",
+    "timestamp": "2026-01-30T01:37:28.641Z"
+  },
+  {
+    "id": "e4397bb1-80d4-4add-8ebd-4f15f119cc31",
+    "agentId": "52008133-3194-4f55-a9a2-502230ca3751",
+    "sessionId": "b743fbb5-5e67-4a04-8831-44854bf0f6d4",
+    "role": "assistant",
+    "content": "Congratulations! I can help you understand how this qualifies as a life event and what benefits changes you can make.\n\nTo start, having a baby is a Qualified Life Event that allows you to make changes to your benefits. Because the baby is due in 2 weeks, I estimate the birth date to be around Friday, February 13, 2026. This means you'll have a limited time to make changes, so it's good to be prepared.\n\nWith the birth of your child, you can:\n*   Add the child to your coverage.\n*   Change your coverage tier (for example, from Employee + Spouse to Employee + Family).\n*   Start or change your Dependent Care Flexible Spending Account (DCFSA).\n\nDo you plan to enroll the baby in your health coverage and/or adjust your DCFSA?",
+    "timestamp": "2026-01-30T01:37:31.533Z"
+  },
+  {
+    "id": "6684a1c5-0b2a-4fed-bbfa-51f05b569bf2",
+    "agentId": "52008133-3194-4f55-a9a2-502230ca3751",
+    "sessionId": "b743fbb5-5e67-4a04-8831-44854bf0f6d4",
+    "role": "user",
+    "content": "both",
+    "timestamp": "2026-01-30T01:37:42.096Z"
+  },
+  {
+    "id": "3236238a-9712-4470-bb35-18bb5ecbf88b",
+    "agentId": "52008133-3194-4f55-a9a2-502230ca3751",
+    "sessionId": "b743fbb5-5e67-4a04-8831-44854bf0f6d4",
+    "role": "assistant",
+    "content": "Okay, great. Since you plan to enroll the baby in your health coverage and adjust your DCFSA, here's some more information:\n\n*   **Documentation:** To add your child, you’ll need to provide a hospital record or birth certificate.\n*   **Effective Date:** Coverage is effective on the date of birth, if you submit the request within 30 days of the birth. Since the birth is expected around February 13, 2026, you’ll want to submit the request before March 15, 2026 to ensure it's effective the date of birth.\n*   **Where to make changes:** You can make these changes in UKG Ready. Navigate to the \"Benefits\" section, find the \"Life Events\" option, and then select \"Birth\". Follow the prompts to add your child and make any necessary changes to your DCFSA.\n\nWould you like me to walk you through the steps in UKG Ready?",
+    "timestamp": "2026-01-30T01:37:44.178Z"
+  }
+]
