@@ -350,22 +350,57 @@
         }
       ],
       "success": true
+    },
+    {
+      "id": "trace-1769736306780",
+      "sessionId": "0632648a-0b29-4a97-93fa-7348f3c2cccf",
+      "userInput": "loss of other coverage , Feb 1",
+      "agentResponse": "Okay, I understand that your spouse recently lost other coverage on February 1, 2026, and you'd like to add them to your health insurance.\n\nWith a loss of coverage, you can typically enroll yourself and/or your dependents who lost coverage, or change your coverage tier.\n\nTo add your spouse, you’ll need to submit a coverage termination letter or COBRA notice as documentation.\n\nIf you submit the request with the required documentation within 30 days of the coverage loss, coverage will be effective the day after the other coverage ends.\n\nTo start the process, log in to UKG Ready ESS and navigate to Benefits > Life Events. You'll want to select \"Loss of Other Coverage\" and follow the prompts to add your spouse and elect the appropriate coverage. The system will then prompt you to upload the necessary documentation.\n\nDoes that sound like the right next step?",
+      "startTime": "2026-01-30T01:25:04.737Z",
+      "endTime": "2026-01-30T01:25:06.780Z",
+      "totalDuration": 2043,
+      "entries": [
+        {
+          "id": "entry-1769736304738-1",
+          "type": "intent_classification",
+          "name": "Orchestrator Intent Classification",
+          "timestamp": "2026-01-30T01:25:04.738Z",
+          "metadata": {
+            "intent": "answer_question",
+            "classificationMethod": "orchestrator",
+            "confidence": "high"
+          }
+        },
+        {
+          "id": "entry-1769736306780-3",
+          "type": "llm_call",
+          "name": "Gemini Response Generation",
+          "timestamp": "2026-01-30T01:25:06.780Z",
+          "duration": 2042,
+          "metadata": {
+            "model": "gemini",
+            "intent": "answer_question",
+            "validated": true
+          }
+        }
+      ],
+      "success": true
     }
   ],
   "stats": {
     "hookCalls": {},
     "signalReads": {},
     "intentDistribution": {
-      "answer_question": 10
+      "answer_question": 11
     },
     "classificationMethods": {
-      "orchestrator": 10
+      "orchestrator": 11
     },
-    "avgResponseTime": 1757.5,
-    "totalLlmCalls": 10,
+    "avgResponseTime": 1783.4545454545455,
+    "totalLlmCalls": 11,
     "totalTokensUsed": 0,
     "errorCount": 0
   },
   "createdAt": "2026-01-29T23:10:35.992Z",
-  "updatedAt": "2026-01-30T01:24:42.180Z"
+  "updatedAt": "2026-01-30T01:25:06.780Z"
 }
