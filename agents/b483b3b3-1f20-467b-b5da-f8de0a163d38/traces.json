@@ -245,22 +245,92 @@
         }
       ],
       "success": true
+    },
+    {
+      "id": "trace-1769736100089",
+      "sessionId": "0632648a-0b29-4a97-93fa-7348f3c2cccf",
+      "userInput": "i want to add my new born to my health insurance",
+      "agentResponse": "I can help with that. Adding a newborn to your health insurance is a qualifying life event. To assist you, I need to confirm a few details.\n\nFirst, could you please confirm the date of birth of your child? Also, are you also planning to update your Dependent Care FSA (DCFSA)?",
+      "startTime": "2026-01-30T01:21:38.179Z",
+      "endTime": "2026-01-30T01:21:40.089Z",
+      "totalDuration": 1910,
+      "entries": [
+        {
+          "id": "entry-1769736099120-1",
+          "type": "intent_classification",
+          "name": "Orchestrator Intent Classification",
+          "timestamp": "2026-01-30T01:21:39.120Z",
+          "metadata": {
+            "intent": "answer_question",
+            "classificationMethod": "orchestrator",
+            "confidence": "high"
+          }
+        },
+        {
+          "id": "entry-1769736100089-3",
+          "type": "llm_call",
+          "name": "Gemini Response Generation",
+          "timestamp": "2026-01-30T01:21:40.089Z",
+          "duration": 969,
+          "metadata": {
+            "model": "gemini",
+            "intent": "answer_question",
+            "validated": true
+          }
+        }
+      ],
+      "success": true
+    },
+    {
+      "id": "trace-1769736120805",
+      "sessionId": "0632648a-0b29-4a97-93fa-7348f3c2cccf",
+      "userInput": "Jan 1",
+      "agentResponse": "Thank you. Since you had a baby on January 1st, you can add the child to your health plan, change your coverage tier, and adjust your DCFSA.\n\nTo make these changes, you’ll need to provide a hospital record or birth certificate. According to our policy, the change will be effective on the date of birth, which is January 1st, as long as you submit the request within the 30-day window.\n\nTo begin, access the UKG Ready Employee Self Service (ESS) and navigate to the benefits section to initiate a life event change. You'll want to locate the area to add your newborn as a dependent and make the desired changes to your health coverage and DCFSA.\n\nDo you have access to the necessary documents?",
+      "startTime": "2026-01-30T01:21:59.204Z",
+      "endTime": "2026-01-30T01:22:00.805Z",
+      "totalDuration": 1601,
+      "entries": [
+        {
+          "id": "entry-1769736119204-1",
+          "type": "intent_classification",
+          "name": "Orchestrator Intent Classification",
+          "timestamp": "2026-01-30T01:21:59.204Z",
+          "metadata": {
+            "intent": "answer_question",
+            "classificationMethod": "orchestrator",
+            "confidence": "high"
+          }
+        },
+        {
+          "id": "entry-1769736120805-3",
+          "type": "llm_call",
+          "name": "Gemini Response Generation",
+          "timestamp": "2026-01-30T01:22:00.805Z",
+          "duration": 1601,
+          "metadata": {
+            "model": "gemini",
+            "intent": "answer_question",
+            "validated": true
+          }
+        }
+      ],
+      "success": true
     }
   ],
   "stats": {
     "hookCalls": {},
     "signalReads": {},
     "intentDistribution": {
-      "answer_question": 7
+      "answer_question": 9
     },
     "classificationMethods": {
-      "orchestrator": 7
+      "orchestrator": 9
     },
-    "avgResponseTime": 1716.7142857142858,
-    "totalLlmCalls": 7,
+    "avgResponseTime": 1725.3333333333333,
+    "totalLlmCalls": 9,
     "totalTokensUsed": 0,
     "errorCount": 0
   },
   "createdAt": "2026-01-29T23:10:35.992Z",
-  "updatedAt": "2026-01-30T01:08:57.096Z"
+  "updatedAt": "2026-01-30T01:22:00.805Z"
 }

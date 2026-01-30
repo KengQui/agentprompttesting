@@ -81,5 +81,11 @@
     "username": "testuser_aZ9oY3",
     "password": "$2b$10$jHqS5FxBnmv6xOi4tjtpt.4Ae98uaoWNqK4bu8.8I7W708WqbccUa",
     "createdAt": "2026-01-29T22:53:56.476Z"
+  },
+  {
+    "id": "b66460f0-de0a-43f7-adde-89f8621b82b2",
+    "username": "testuser",
+    "password": "$2b$10$I/2sVUlRamxk0Bdxef9q5eQqaW.EgAg/ObjEEJfH3rRXONvUm7uEO",
+    "createdAt": "2026-01-30T01:21:45.913Z"
   }
 ]
