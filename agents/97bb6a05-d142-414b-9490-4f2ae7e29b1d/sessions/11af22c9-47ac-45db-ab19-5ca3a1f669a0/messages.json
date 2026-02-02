@@ -78,5 +78,37 @@
     "role": "assistant",
     "content": "Okay, great! Just to be absolutely clear, the adoption event date is February 12, 2026 which is more than 31 days from today's date, June 4, 2024. The system *cannot* accept dates that are more than 31 days in the future. The system will allow benefit changes to occur only 31 days before the event date, so the adoption cannot be recorded until January 12, 2026. Please let me know when it is closer to the adoption date and I will gladly make the changes.\n\nI will note that after the adoption, you have 31 days from the date of adoption to make changes to your benefits. Please let me know if you have any more questions!",
     "timestamp": "2026-02-02T18:54:00.837Z"
+  },
+  {
+    "id": "d2671e80-8d83-45f8-a395-55f4706097a0",
+    "agentId": "97bb6a05-d142-414b-9490-4f2ae7e29b1d",
+    "sessionId": "11af22c9-47ac-45db-ab19-5ca3a1f669a0",
+    "role": "user",
+    "content": "What is today's date?",
+    "timestamp": "2026-02-02T21:18:08.447Z"
+  },
+  {
+    "id": "5657230b-7182-40dd-825e-547ccf52fff2",
+    "agentId": "97bb6a05-d142-414b-9490-4f2ae7e29b1d",
+    "sessionId": "11af22c9-47ac-45db-ab19-5ca3a1f669a0",
+    "role": "assistant",
+    "content": "Today is Monday, February 2, 2026",
+    "timestamp": "2026-02-02T21:18:09.999Z"
+  },
+  {
+    "id": "37dd7cd8-fee9-4a21-a9ab-968eab1f590c",
+    "agentId": "97bb6a05-d142-414b-9490-4f2ae7e29b1d",
+    "sessionId": "11af22c9-47ac-45db-ab19-5ca3a1f669a0",
+    "role": "user",
+    "content": "What is today's date?",
+    "timestamp": "2026-02-02T21:18:23.698Z"
+  },
+  {
+    "id": "1f71b732-f799-4a8f-b360-99fb878aa1a4",
+    "agentId": "97bb6a05-d142-414b-9490-4f2ae7e29b1d",
+    "sessionId": "11af22c9-47ac-45db-ab19-5ca3a1f669a0",
+    "role": "assistant",
+    "content": "Today is Monday, February 2, 2026.",
+    "timestamp": "2026-02-02T21:18:25.270Z"
   }
 ]

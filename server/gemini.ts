@@ -722,9 +722,19 @@ function buildMockUserStateText(agent: AgentContext): string {
 }
 
 function getSystemPrompt(agent: AgentContext): string {
+  // Always compute the current date upfront - this must be included in ALL prompts
+  const currentDate = new Date().toLocaleDateString('en-US', { 
+    weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' 
+  });
+  const currentDateSection = `\n\n## Current Date\nToday is: ${currentDate}`;
+  
   // Use custom prompt if the user has edited it
   if (agent.customPrompt && agent.customPrompt.trim()) {
     const customPrompt = agent.customPrompt.trim();
+    
+    // Check if the original custom prompt already includes a {{currentDate}} placeholder
+    // If so, we don't need to append the date section (to avoid duplication)
+    const hasCurrentDatePlaceholder = /\{\{currentDate\}\}/i.test(customPrompt);
     
     // Build the data sections upfront
     const sampleDatasetsText = buildSampleDatasetsText(agent);
@@ -768,6 +778,10 @@ function getSystemPrompt(agent: AgentContext): string {
       if (!hasActionsMarker && actionsText) {
         fullPrompt += `\n\n${actionsText}`;
       }
+      // Include current date only if not already included via {{currentDate}} placeholder
+      if (!hasCurrentDatePlaceholder) {
+        fullPrompt += currentDateSection;
+      }
       return fullPrompt;
     }
     
@@ -775,17 +789,18 @@ function getSystemPrompt(agent: AgentContext): string {
     if (hasPlaceholders(customPrompt)) {
       if (actionsText) fullPrompt += `\n\n${actionsText}`;
       if (mockStateText) fullPrompt += `\n\n${mockStateText}`;
+      // Include current date only if not already included via {{currentDate}} placeholder
+      if (!hasCurrentDatePlaceholder) {
+        fullPrompt += currentDateSection;
+      }
       return fullPrompt;
     }
     
     // Fallback: If no markers found, append data to end (backward compatibility)
     const domainKnowledgeText = buildDomainKnowledgeText(agent);
-    const currentDate = new Date().toLocaleDateString('en-US', { 
-      weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' 
-    });
     
-    // Add current date
-    fullPrompt += `\n\n## Current Date\nToday is: ${currentDate}`;
+    // Add current date (no placeholder was used, so we must add it)
+    fullPrompt += currentDateSection;
     
     // Add business use case if available
     if (agent.businessUseCase) {
