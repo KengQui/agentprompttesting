@@ -1,28 +1,17 @@
 /**
  * Flow Controller - Life event
  * 
- * Define your conversation flow steps here.
- * Customize questions, validation, and help text.
+ * Uses dynamic field extraction from validation-rules.yaml instead of static steps.
+ * The Orchestrator handles batching (2-3 fields per turn) automatically.
  */
 
 import { 
   FlowController as BaseFlowController, 
-  FlowControllerConfig,
-  FlowStep 
+  FlowControllerConfig
 } from '../../../server/components/flow-controller';
 
-const STEPS: FlowStep[] = [
-  {
-    id: 'greeting',
-    question: "What can I help you with today?",
-    field: 'initial_request',
-    type: 'text',
-    helpText: 'Describe your question or issue.'
-  }
-];
-
 const CONFIG: FlowControllerConfig = {
-  steps: STEPS,
+  steps: [],
   welcomeMessage: "Hello! I'm here to help. What can I do for you?",
   completionMessage: "Thanks for chatting! Let me know if you need anything else."
 };

@@ -1,5 +1,5 @@
 /**
- * Flow Controller - 1Payroll employee test 1
+ * Flow Controller - Life Event Agent
  * 
  * Uses dynamic field extraction from validation-rules.yaml instead of static steps.
  * The Orchestrator handles batching (2-3 fields per turn) automatically.
@@ -16,12 +16,12 @@ const CONFIG: FlowControllerConfig = {
   completionMessage: "Thanks for chatting! Let me know if you need anything else."
 };
 
-export class PayrollEmployeeTest1FlowController extends BaseFlowController {
+export class LifeEventAgentFlowController extends BaseFlowController {
   constructor() {
     super(CONFIG);
   }
 }
 
-export function createFlowController(): PayrollEmployeeTest1FlowController {
-  return new PayrollEmployeeTest1FlowController();
+export function createFlowController(): LifeEventAgentFlowController {
+  return new LifeEventAgentFlowController();
 }

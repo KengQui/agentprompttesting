@@ -1,0 +1,18 @@
+[
+  {
+    "id": "5d59be53-d26f-49d4-9b8c-6cd50a75dc20",
+    "agentId": "8a370835-04ed-42c0-94d3-d3951e90a44e",
+    "sessionId": "81a8e06e-c5d2-4f70-bf1c-2470902ef393",
+    "role": "user",
+    "content": "I need to add my new spouse to my health insurance",
+    "timestamp": "2026-02-02T21:57:13.168Z"
+  },
+  {
+    "id": "a840d2e2-17d7-4019-a1c5-fc0b80d456d7",
+    "agentId": "8a370835-04ed-42c0-94d3-d3951e90a44e",
+    "sessionId": "81a8e06e-c5d2-4f70-bf1c-2470902ef393",
+    "role": "assistant",
+    "content": "Okay, I can help you with that. To get started, I need some information about the qualifying life event.\n\nCan you please provide the following:\n*   Your employee identity (e.g., employee ID, SSN, or other identifier)\n*   The life event that occurred (marriage, birth, divorce, adoption, or other)\n*   The date of the event\n*   The changes you'd like to make to your benefits\n*   The names and relationships of the individuals affected by this change\n*   Confirmation that you acknowledge the need to provide supporting documentation\n\nOnce I have this information, I can process your request.",
+    "timestamp": "2026-02-02T21:57:15.618Z"
+  }
+]

@@ -1,0 +1,28 @@
+[
+  {
+    "id": "action_1770069397326",
+    "name": "add_dependent",
+    "description": "Adds a dependent or spouse to an employee's benefits in mock mode.",
+    "category": "general",
+    "requiredFields": [
+      {
+        "name": "dependent_name",
+        "type": "string",
+        "label": "Dependent Name",
+        "required": true
+      },
+      {
+        "name": "relation",
+        "type": "string",
+        "label": "Relation",
+        "required": true
+      }
+    ],
+    "confirmationMessage": "Are you sure you want to add this dependent?",
+    "successMessage": "Dependent added to employee record successfully.",
+    "affectedDataFields": [
+      "dependent_name",
+      "relation"
+    ]
+  }
+]

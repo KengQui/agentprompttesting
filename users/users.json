@@ -105,5 +105,29 @@
     "username": "e2e_test_user",
     "password": "$2b$10$xq7yA8h0W/eoL07TCYlQzOnS6mYkn8SHqvjJFbDvDKaK1H/V8SWY2",
     "createdAt": "2026-02-02T18:18:25.792Z"
+  },
+  {
+    "id": "640d38c7-d41e-416b-92e8-c75f84ca9ab5",
+    "username": "e2etest_batch@test.com",
+    "password": "$2b$10$1YowmcdsSNvi6UpK5MGQkOr5mnrawiRxRMo.y1dCTwDcasyxQnXzO",
+    "createdAt": "2026-02-02T21:53:42.114Z"
+  },
+  {
+    "id": "2325e7ee-bfc6-470c-b4c3-09055ea0d961",
+    "username": "batchtest_2iXC9q@test.com",
+    "password": "$2b$10$mTj77WBgE6aughM4r1cyteLESpZLLrucef2uuPivMhOL6TX.MmXC2",
+    "createdAt": "2026-02-02T21:54:36.584Z"
+  },
+  {
+    "id": "5ef9bf09-1bbf-45b9-8e3c-77503945c128",
+    "username": "batch_test_gYHxyZ@example.com",
+    "password": "$2b$10$j2.tbDgCaq81wFpaD95ex.SLDFyBNoK/RW97.w8GtKaW0oXxkycKO",
+    "createdAt": "2026-02-02T22:00:25.624Z"
+  },
+  {
+    "id": "f1db2541-fbb4-497f-98fb-ec887cc29a5f",
+    "username": "testuser_batch_rubIMB@test.com",
+    "password": "$2b$10$n3cU70L26gasv7qqqHMoOOEn.zhptSBu0t.xhP5xwr3taDsgl3a7a",
+    "createdAt": "2026-02-02T22:06:22.738Z"
   }
 ]

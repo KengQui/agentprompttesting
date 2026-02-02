@@ -58,6 +58,19 @@ export interface ConversationState {
   lastAnswer?: string;
   originalIntent?: string;
   flowComplete?: boolean;
+  currentBatch?: string[];
+  currentBatchIndex?: number;
+  awaitingFinalConfirmation?: boolean;
+  requiredFields?: RequiredField[];
+}
+
+export interface RequiredField {
+  name: string;
+  label: string;
+  type?: 'text' | 'date' | 'choice' | 'number';
+  required?: boolean;
+  choices?: string[];
+  group?: string;
 }
 
 export interface TurnResult {
@@ -65,6 +78,7 @@ export interface TurnResult {
   response: string;
   newState?: Partial<ConversationState>;
   nextAction?: string;
+  confidence?: string;
 }
 
 export interface AgentConfig {

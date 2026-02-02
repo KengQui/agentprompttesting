@@ -1,0 +1,26 @@
+required_fields:
+    - employee_identity:
+        type: string
+        required: true
+    - stated_life_event:
+        type: enum
+        values: [marriage, birth, divorce, adoption, other]
+        required: true
+    - event_date:
+        type: date
+        required: true
+    - desired_changes:
+        type: string
+        required: true
+    - affected_individuals:
+        type: list
+        items:
+          type: object
+          properties:
+            name: { type: string }
+            relation: { type: string }
+        required: true
+    - acknowledgement_of_documentation:
+        type: boolean
+        required: true
+  

@@ -1,5 +1,5 @@
 /**
- * Orchestrator - Pay check - Payroll Assistant
+ * Orchestrator - Life Event Agent
  * 
  * Coordinates all components for this agent.
  * Uses base Orchestrator's dynamic batching for validation-rules fields.
@@ -10,7 +10,7 @@ import {
 } from '../../../server/components/orchestrator';
 import type { AgentConfig } from '../../../server/components/types';
 
-export class PaycheckPayrollAssistantOrchestrator extends BaseOrchestrator {
+export class LifeEventAgentOrchestrator extends BaseOrchestrator {
   constructor(agentConfig: AgentConfig) {
     super({
       agentConfig,
@@ -23,6 +23,6 @@ export class PaycheckPayrollAssistantOrchestrator extends BaseOrchestrator {
   }
 }
 
-export function createOrchestrator(agentConfig: AgentConfig): PaycheckPayrollAssistantOrchestrator {
-  return new PaycheckPayrollAssistantOrchestrator(agentConfig);
+export function createOrchestrator(agentConfig: AgentConfig): LifeEventAgentOrchestrator {
+  return new LifeEventAgentOrchestrator(agentConfig);
 }

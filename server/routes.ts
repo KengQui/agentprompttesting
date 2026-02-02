@@ -625,12 +625,12 @@ export async function registerRoutes(
       let classificationMethod = "standard";
 
       try {
-        // Try to use orchestrator if agent has custom components
-        if (hasCustomComponents(req.params.id)) {
-          classificationMethod = "orchestrator";
-          const { orchestrator } = await loadAgentComponents(req.params.id, agentConfig);
-          const turnResult = await orchestrator.processTurn(req.params.id, userInput);
-          detectedIntent = turnResult.intent;
+        // Always use orchestrator for consistent batching and confirmation behavior
+        classificationMethod = "orchestrator";
+        const { orchestrator } = await loadAgentComponents(req.params.id, agentConfig);
+        const turnResult = await orchestrator.processTurn(req.params.id, userInput);
+        
+        detectedIntent = turnResult.intent;
           
           // Record intent classification trace
           traceEntries.push({
@@ -745,100 +745,6 @@ export async function registerRoutes(
               },
             });
           }
-        } else {
-          // No custom components, use standard Gemini response
-          classificationMethod = "standard";
-          
-          traceEntries.push({
-            id: `entry-${Date.now()}-1`,
-            type: "intent_classification",
-            name: "Standard Classification",
-            timestamp: new Date().toISOString(),
-            metadata: {
-              intent: "answer_question",
-              classificationMethod: "standard",
-            },
-          });
-          
-          const llmStartTime = Date.now();
-          const rawResponse = await generateAgentResponse(
-            agentConfig,
-            userInput,
-            chatHistory
-          );
-          
-          // Validate AI response using shared helper
-          const validation = validateAIResponse(rawResponse);
-          responseContent = validation.recoveryResponse;
-          
-          if (!validation.isValid) {
-            traceEntries.push({
-              id: `entry-${Date.now()}-recovery`,
-              type: "recovery",
-              name: "Response Validation Recovery",
-              timestamp: new Date().toISOString(),
-              metadata: { 
-                reason: "Detected invalid/placeholder response",
-                originalResponse: validation.originalResponse.substring(0, 100),
-              },
-            });
-          }
-          
-          // Check for simulated action in the response (standard path)
-          if (agent.availableActions && agent.availableActions.length > 0) {
-            const parsedAction = parseActionFromResponse(responseContent);
-            
-            if (parsedAction.hasAction && parsedAction.actionName) {
-              if (parsedAction.parseError) {
-                traceEntries.push({
-                  id: `entry-${Date.now()}-action-error`,
-                  type: "action_simulation",
-                  name: `Action Parse Error`,
-                  timestamp: new Date().toISOString(),
-                  metadata: { error: parsedAction.parseError, actionName: parsedAction.actionName },
-                });
-                responseContent = parsedAction.cleanedResponse || 
-                  `I tried to perform "${parsedAction.actionName}" but encountered an error processing the action. Please try again.`;
-              } else {
-                // Execute action with sample data or legacy mockUserState
-                const { result: actionResult } = await executeAgentAction(
-                  { actionName: parsedAction.actionName, actionFields: parsedAction.actionFields },
-                  agent,
-                  req.params.id
-                );
-                
-                traceEntries.push({
-                  id: `entry-${Date.now()}-action`,
-                  type: "action_simulation",
-                  name: `Action: ${actionResult.actionName}`,
-                  timestamp: new Date().toISOString(),
-                  metadata: {
-                    actionName: actionResult.actionName,
-                    fields: actionResult.fields,
-                    success: actionResult.success,
-                    message: actionResult.message
-                  },
-                });
-                
-                responseContent = parsedAction.cleanedResponse;
-                if (!responseContent.trim()) {
-                  responseContent = actionResult.message;
-                } else if (!actionResult.success) {
-                  responseContent += `\n\n(Action failed: ${actionResult.message})`;
-                }
-              }
-            }
-          }
-          
-          traceEntries.push({
-            id: `entry-${Date.now()}-2`,
-            type: "llm_call",
-            name: "Gemini Response Generation",
-            timestamp: new Date().toISOString(),
-            duration: Date.now() - llmStartTime,
-            metadata: { model: "gemini", validated: validation.isValid },
-          });
-        }
       } catch (aiError: any) {
         console.error("AI generation error:", aiError);
         traceSuccess = false;
@@ -972,12 +878,11 @@ export async function registerRoutes(
       let traceSuccess = true;
 
       try {
-        // Try to use orchestrator if agent has custom components
-        if (hasCustomComponents(req.params.id)) {
-          const { orchestrator } = await loadAgentComponents(req.params.id, agentConfig);
-          const turnResult = await orchestrator.processTurn(req.params.id, userInput);
-          
-          traceEntries.push({
+        // Always use orchestrator for consistent batching and confirmation behavior
+        const { orchestrator } = await loadAgentComponents(req.params.id, agentConfig);
+        const turnResult = await orchestrator.processTurn(req.params.id, userInput);
+        
+        traceEntries.push({
             id: `entry-${Date.now()}-1`,
             type: "intent_classification",
             name: "Orchestrator Intent Classification",
@@ -1083,95 +988,6 @@ export async function registerRoutes(
               metadata: { model: "gemini", intent: turnResult.intent, validated: validation.isValid },
             });
           }
-        } else {
-          // No custom components, use standard Gemini response
-          traceEntries.push({
-            id: `entry-${Date.now()}-1`,
-            type: "intent_classification",
-            name: "Standard Classification",
-            timestamp: new Date().toISOString(),
-            metadata: { intent: "answer_question", classificationMethod: "standard" },
-          });
-          
-          const llmStartTime = Date.now();
-          const rawResponse = await generateAgentResponse(
-            agentConfig,
-            userInput,
-            chatHistory
-          );
-          
-          // Validate AI response using shared helper
-          const validation = validateAIResponse(rawResponse);
-          responseContent = validation.recoveryResponse;
-          
-          if (!validation.isValid) {
-            traceEntries.push({
-              id: `entry-${Date.now()}-recovery`,
-              type: "recovery",
-              name: "Response Validation Recovery",
-              timestamp: new Date().toISOString(),
-              metadata: { 
-                reason: "Detected invalid/placeholder response",
-                originalResponse: validation.originalResponse.substring(0, 100),
-              },
-            });
-          }
-          
-          // Check for simulated action in the response (legacy standard path)
-          if (agent.availableActions && agent.availableActions.length > 0) {
-            const parsedAction = parseActionFromResponse(responseContent);
-            
-            if (parsedAction.hasAction && parsedAction.actionName) {
-              if (parsedAction.parseError) {
-                traceEntries.push({
-                  id: `entry-${Date.now()}-action-error`,
-                  type: "action_simulation",
-                  name: `Action Parse Error`,
-                  timestamp: new Date().toISOString(),
-                  metadata: { error: parsedAction.parseError, actionName: parsedAction.actionName },
-                });
-                responseContent = parsedAction.cleanedResponse || 
-                  `I tried to perform "${parsedAction.actionName}" but encountered an error processing the action. Please try again.`;
-              } else {
-                // Execute action with sample data or legacy mockUserState
-                const { result: actionResult } = await executeAgentAction(
-                  { actionName: parsedAction.actionName, actionFields: parsedAction.actionFields },
-                  agent,
-                  req.params.id
-                );
-                
-                traceEntries.push({
-                  id: `entry-${Date.now()}-action`,
-                  type: "action_simulation",
-                  name: `Action: ${actionResult.actionName}`,
-                  timestamp: new Date().toISOString(),
-                  metadata: {
-                    actionName: actionResult.actionName,
-                    fields: actionResult.fields,
-                    success: actionResult.success,
-                    message: actionResult.message
-                  },
-                });
-                
-                responseContent = parsedAction.cleanedResponse;
-                if (!responseContent.trim()) {
-                  responseContent = actionResult.message;
-                } else if (!actionResult.success) {
-                  responseContent += `\n\n(Action failed: ${actionResult.message})`;
-                }
-              }
-            }
-          }
-          
-          traceEntries.push({
-            id: `entry-${Date.now()}-2`,
-            type: "llm_call",
-            name: "Gemini Response Generation",
-            timestamp: new Date().toISOString(),
-            duration: Date.now() - llmStartTime,
-            metadata: { model: "gemini", validated: validation.isValid },
-          });
-        }
       } catch (aiError: any) {
         console.error("AI generation error:", aiError);
         traceSuccess = false;
