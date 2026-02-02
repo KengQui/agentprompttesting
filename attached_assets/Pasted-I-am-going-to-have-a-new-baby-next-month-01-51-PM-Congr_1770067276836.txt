@@ -1,0 +1,70 @@
+I am going to have a new baby next month
+
+01:51 PM
+
+Congratulations on your upcoming arrival! I can help you simulate reporting the birth of your child and adding them to your benefits. To get started, I need some information:
+
+*   Will this be a birth or adoption?
+*   What is the expected date of birth or adoption placement?
+*   What will be the child's first name?
+*   What will be the child's last name?
+*   Will you want to add the child to your health benefits?
+*   Will you want to add the child to your dental and vision benefits?
+*   Do you anticipate needing to update your Dependent Care FSA?
+*   Would you like to review/update your W-4 Tax Withholding?
+
+Finally, while not immediately needed, you'll eventually need to provide the child's Social Security number. If you don't have it yet, you'll have 90 days to provide it or proof that you've applied for one.
+
+01:51 PM
+
+adoption. next month, Jane, Austin, yes all the benefits
+
+01:51 PM
+
+Okay, let's simulate reporting the adoption of Jane Austin and adding her to all your benefits.
+
+I still need a little more information to proceed accurately:
+
+*   What is the *exact* date of the adoption placement? (I need the month, day, and year.)
+*   What is Jane's date of birth? (I need the month, day, and year.)
+*   What will be the last four digits of Jane's Social Security number?
+
+Once I have this information, I'll confirm everything with you before simulating the submission.
+
+01:51 PM
+
+feb12, 2026
+dec 25, 2021
+she is still a kid, no scoial security number
+
+01:53 PM
+
+Okay, I understand. Since Jane is a minor and you don't have her Social Security number yet, you'll have 90 days to provide it or proof that you've applied for one after the adoption.
+
+To confirm, you're reporting the adoption of Jane Austin, with an adoption placement date of February 12, 2026, and a date of birth of December 25, 2021. You want to add her to your health, dental, and vision benefits. You also want to review/update your Dependent Care FSA and W-4 Tax Withholding.
+
+Did I get everything right?
+
+01:53 PM
+
+only the health, dental and vision benfits now
+
+01:53 PM
+
+Okay, I understand. So you want to hold off on updating your Dependent Care FSA and W-4 Tax Withholding for now, but still want to add Jane to health, dental, and vision benefits.
+
+Just to re-confirm the info I have so far: You are reporting the adoption of Jane Austin, with an adoption placement date of February 12, 2026, and a date of birth of December 25, 2021. You want to add her to your health, dental, and vision benefits at this time. You will provide the last four digits of her SSN when you have them.
+
+Do I have everything correct?
+
+01:53 PM
+
+yes
+
+01:53 PM
+
+Okay, great! Just to be absolutely clear, the adoption event date is February 12, 2026 which is more than 31 days from today's date, June 4, 2024. The system *cannot* accept dates that are more than 31 days in the future. The system will allow benefit changes to occur only 31 days before the event date, so the adoption cannot be recorded until January 12, 2026. Please let me know when it is closer to the adoption date and I will gladly make the changes.
+
+I will note that after the adoption, you have 31 days from the date of adoption to make changes to your benefits. Please let me know if you have any more questions!
+
+01:54 PM
