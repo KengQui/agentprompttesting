@@ -1,0 +1,452 @@
+[
+  {
+    "id": "d34c1ead-eea2-4717-b6af-e95870c3a03c",
+    "name": "report_marriage_domestic_partnership",
+    "description": "Reports a marriage or domestic partnership to update HR records, benefits, and payroll.",
+    "category": "Life Event Reporting",
+    "requiredFields": [
+      {
+        "name": "event_date",
+        "type": "date",
+        "label": "Date of Marriage/Partnership",
+        "required": true,
+        "description": "The official date the marriage or domestic partnership occurred."
+      },
+      {
+        "name": "spouse_partner_first_name",
+        "type": "string",
+        "label": "Spouse/Partner First Name",
+        "required": true,
+        "description": "The first name of your spouse or domestic partner."
+      },
+      {
+        "name": "spouse_partner_last_name",
+        "type": "string",
+        "label": "Spouse/Partner Last Name",
+        "required": true,
+        "description": "The last name of your spouse or domestic partner."
+      },
+      {
+        "name": "spouse_partner_date_of_birth",
+        "type": "date",
+        "label": "Spouse/Partner Date of Birth",
+        "required": true,
+        "description": "The date of birth for your spouse or domestic partner."
+      },
+      {
+        "name": "spouse_partner_ssn_last4",
+        "type": "string",
+        "label": "Spouse/Partner SSN (Last 4 digits)",
+        "required": true,
+        "description": "The last four digits of your spouse's/partner's Social Security Number, required for benefit enrollment."
+      },
+      {
+        "name": "add_to_health_benefits",
+        "type": "boolean",
+        "label": "Add spouse/partner to health benefits?",
+        "required": true,
+        "description": "Indicate if you wish to add your spouse/partner to your medical plan."
+      },
+      {
+        "name": "add_to_dental_vision",
+        "type": "boolean",
+        "label": "Add spouse/partner to dental/vision benefits?",
+        "required": true,
+        "description": "Indicate if you wish to add your spouse/partner to your dental and vision plans."
+      },
+      {
+        "name": "update_life_insurance_beneficiary",
+        "type": "boolean",
+        "label": "Review/Update Life Insurance Beneficiary?",
+        "required": true,
+        "description": "Indicate if you want to review or update your life insurance beneficiaries."
+      },
+      {
+        "name": "update_retirement_beneficiary",
+        "type": "boolean",
+        "label": "Review/Update Retirement Plan Beneficiary?",
+        "required": true,
+        "description": "Indicate if you want to review or update your retirement plan beneficiaries."
+      },
+      {
+        "name": "update_w4_withholding",
+        "type": "boolean",
+        "label": "Review/Update W-4 Tax Withholding?",
+        "required": true,
+        "description": "Indicate if you want to review or update your W-4 tax withholding for federal and state taxes."
+      }
+    ],
+    "confirmationMessage": "You are about to report a marriage/domestic partnership with event date {event_date} for {spouse_partner_first_name} {spouse_partner_last_name}. This will initiate updates to your HR records and benefits.",
+    "successMessage": "Successfully reported marriage/domestic partnership. Your HR records and benefit eligibility are being updated. You will receive further instructions via email.",
+    "affectedDataFields": [
+      "employee_status",
+      "dependents",
+      "benefit_enrollments",
+      "w4_information",
+      "beneficiary_designations"
+    ]
+  },
+  {
+    "id": "7230eeff-be7a-4498-a37a-502a1059dfb4",
+    "name": "report_birth_adoption_of_child",
+    "description": "Reports the birth or adoption of a child to add them to your benefits and update HR records.",
+    "category": "Life Event Reporting",
+    "requiredFields": [
+      {
+        "name": "event_type",
+        "type": "select",
+        "label": "Type of Event",
+        "required": true,
+        "options": [
+          "Birth",
+          "Adoption"
+        ],
+        "description": "Specify whether the event is a birth or an adoption."
+      },
+      {
+        "name": "event_date",
+        "type": "date",
+        "label": "Date of Birth/Adoption Placement",
+        "required": true,
+        "description": "The official date of the child's birth or legal adoption placement."
+      },
+      {
+        "name": "child_first_name",
+        "type": "string",
+        "label": "Child's First Name",
+        "required": true,
+        "description": "The first name of the child."
+      },
+      {
+        "name": "child_last_name",
+        "type": "string",
+        "label": "Child's Last Name",
+        "required": true,
+        "description": "The last name of the child."
+      },
+      {
+        "name": "child_date_of_birth",
+        "type": "date",
+        "label": "Child's Date of Birth",
+        "required": true,
+        "description": "The date of birth for the child."
+      },
+      {
+        "name": "child_ssn_last4",
+        "type": "string",
+        "label": "Child's SSN (Last 4 digits)",
+        "required": true,
+        "description": "The last four digits of the child's Social Security Number, required for benefit enrollment."
+      },
+      {
+        "name": "add_to_health_benefits",
+        "type": "boolean",
+        "label": "Add child to health benefits?",
+        "required": true,
+        "description": "Indicate if you wish to add your child to your medical plan."
+      },
+      {
+        "name": "add_to_dental_vision",
+        "type": "boolean",
+        "label": "Add child to dental/vision benefits?",
+        "required": true,
+        "description": "Indicate if you wish to add your child to your dental and vision plans."
+      },
+      {
+        "name": "update_dependent_care_fsa",
+        "type": "boolean",
+        "label": "Review/Update Dependent Care FSA?",
+        "required": true,
+        "description": "Indicate if you want to review or update your Dependent Care Flexible Spending Account contributions."
+      },
+      {
+        "name": "update_w4_withholding",
+        "type": "boolean",
+        "label": "Review/Update W-4 Tax Withholding?",
+        "required": true,
+        "description": "Indicate if you want to review or update your W-4 tax withholding for federal and state taxes, potentially due to child tax credits."
+      }
+    ],
+    "confirmationMessage": "You are about to report the {event_type} of {child_first_name} {child_last_name} with event date {event_date}. This will initiate updates to your HR records and benefit eligibility.",
+    "successMessage": "Successfully reported the {event_type} of your child. Your HR records and benefit eligibility are being updated. You will receive further instructions via email.",
+    "affectedDataFields": [
+      "dependents",
+      "benefit_enrollments",
+      "fsa_contributions",
+      "w4_information"
+    ]
+  },
+  {
+    "id": "6cb1894d-93dd-43bc-bf72-153f21d8a275",
+    "name": "report_divorce_legal_separation",
+    "description": "Reports a divorce or legal separation to remove ex-spouse from benefits and update beneficiaries.",
+    "category": "Life Event Reporting",
+    "requiredFields": [
+      {
+        "name": "event_date",
+        "type": "date",
+        "label": "Date of Divorce/Legal Separation",
+        "required": true,
+        "description": "The official date of your final divorce decree or legal separation."
+      },
+      {
+        "name": "ex_spouse_first_name",
+        "type": "string",
+        "label": "Ex-Spouse First Name",
+        "required": true,
+        "description": "The first name of your ex-spouse or legally separated partner."
+      },
+      {
+        "name": "ex_spouse_last_name",
+        "type": "string",
+        "label": "Ex-Spouse Last Name",
+        "required": true,
+        "description": "The last name of your ex-spouse or legally separated partner."
+      },
+      {
+        "name": "update_life_insurance_beneficiary",
+        "type": "boolean",
+        "label": "Review/Update Life Insurance Beneficiary?",
+        "required": true,
+        "description": "Indicate if you want to review or update your life insurance beneficiaries. (Note: Ex-spouse must be removed from benefits)."
+      },
+      {
+        "name": "update_retirement_beneficiary",
+        "type": "boolean",
+        "label": "Review/Update Retirement Plan Beneficiary?",
+        "required": true,
+        "description": "Indicate if you want to review or update your retirement plan beneficiaries. (Note: Ex-spouse must be removed from benefits)."
+      },
+      {
+        "name": "w4_withholding_review_needed",
+        "type": "boolean",
+        "label": "Review W-4 Tax Withholding?",
+        "required": true,
+        "description": "Indicate if you want to review your W-4 tax withholding due to a change in filing status."
+      }
+    ],
+    "confirmationMessage": "You are about to report a divorce/legal separation with event date {event_date} involving {ex_spouse_first_name} {ex_spouse_last_name}. This will initiate updates to remove your ex-spouse from benefits and prompt beneficiary reviews.",
+    "successMessage": "Successfully reported divorce/legal separation. Ex-spouse will be removed from benefits and COBRA information will be sent to them. Please review your beneficiaries.",
+    "affectedDataFields": [
+      "dependents",
+      "benefit_enrollments",
+      "beneficiary_designations",
+      "w4_information",
+      "cobra_eligibility"
+    ]
+  },
+  {
+    "id": "33d5d7d8-e93c-421d-a580-07ec301d2826",
+    "name": "update_employee_address",
+    "description": "Updates your residential and mailing address in HR records, affecting tax withholding and available benefits.",
+    "category": "Personal Information Update",
+    "requiredFields": [
+      {
+        "name": "effective_date",
+        "type": "date",
+        "label": "Effective Date of Address Change",
+        "required": true,
+        "description": "The date your new address becomes effective."
+      },
+      {
+        "name": "street_address1",
+        "type": "string",
+        "label": "Street Address Line 1",
+        "required": true,
+        "description": "Your new street address."
+      },
+      {
+        "name": "street_address2",
+        "type": "string",
+        "label": "Street Address Line 2 (Optional)",
+        "required": false,
+        "description": "Apartment, unit, or suite number."
+      },
+      {
+        "name": "city",
+        "type": "string",
+        "label": "City",
+        "required": true,
+        "description": "Your new city."
+      },
+      {
+        "name": "state",
+        "type": "string",
+        "label": "State",
+        "required": true,
+        "description": "Your new state (e.g., CA, NY)."
+      },
+      {
+        "name": "zip_code",
+        "type": "string",
+        "label": "Zip Code",
+        "required": true,
+        "description": "Your new postal zip code."
+      }
+    ],
+    "confirmationMessage": "You are about to update your address to {street_address1}, {city}, {state} {zip_code} effective {effective_date}. This may affect your tax withholding and benefit plan eligibility.",
+    "successMessage": "Your address has been successfully updated. We will review if new state tax forms or benefit plan changes are required.",
+    "affectedDataFields": [
+      "employee_contact_info",
+      "w4_information",
+      "benefit_eligibility"
+    ]
+  },
+  {
+    "id": "5bdbb3a0-9d1e-4844-b9f1-af2d1d8a9d8c",
+    "name": "report_dependent_loss_of_coverage",
+    "description": "Reports that a dependent has lost other health coverage, allowing them to be added to your company benefits.",
+    "category": "Life Event Reporting",
+    "requiredFields": [
+      {
+        "name": "dependent_first_name",
+        "type": "string",
+        "label": "Dependent's First Name",
+        "required": true,
+        "description": "The first name of the dependent who lost coverage."
+      },
+      {
+        "name": "dependent_last_name",
+        "type": "string",
+        "label": "Dependent's Last Name",
+        "required": true,
+        "description": "The last name of the dependent who lost coverage."
+      },
+      {
+        "name": "date_of_loss_of_coverage",
+        "type": "date",
+        "label": "Date Coverage Was Lost",
+        "required": true,
+        "description": "The exact date the dependent's previous coverage ended."
+      },
+      {
+        "name": "reason_for_loss",
+        "type": "select",
+        "label": "Reason for Loss of Coverage",
+        "required": true,
+        "options": [
+          "Spouse Job Loss",
+          "Divorce",
+          "Aging Out (Age 26)",
+          "Other"
+        ],
+        "description": "The reason the dependent lost their other health coverage."
+      },
+      {
+        "name": "add_to_health_benefits",
+        "type": "boolean",
+        "label": "Add dependent to health benefits?",
+        "required": true,
+        "description": "Indicate if you wish to add this dependent to your medical plan."
+      },
+      {
+        "name": "add_to_dental_vision",
+        "type": "boolean",
+        "label": "Add dependent to dental/vision benefits?",
+        "required": true,
+        "description": "Indicate if you wish to add this dependent to your dental and vision plans."
+      },
+      {
+        "name": "proof_of_loss_uploaded",
+        "type": "boolean",
+        "label": "Proof of Loss of Coverage Provided?",
+        "required": true,
+        "description": "Confirm that documentation proving loss of prior coverage has been or will be uploaded."
+      }
+    ],
+    "confirmationMessage": "You are about to report loss of other coverage for {dependent_first_name} {dependent_last_name} effective {date_of_loss_of_coverage}. This will initiate adding them to your benefits.",
+    "successMessage": "Successfully reported dependent loss of coverage. Your dependent is being added to your benefits. You will receive confirmation and next steps via email.",
+    "affectedDataFields": [
+      "dependents",
+      "benefit_enrollments"
+    ]
+  },
+  {
+    "id": "29716ed7-57d9-4356-86e8-b681f0fb6260",
+    "name": "update_beneficiary_designations",
+    "description": "Updates primary and contingent beneficiaries for your life insurance and retirement accounts.",
+    "category": "Benefit Management",
+    "requiredFields": [
+      {
+        "name": "account_type",
+        "type": "select",
+        "label": "Account Type to Update",
+        "required": true,
+        "options": [
+          "Life Insurance",
+          "401k/Retirement Plan",
+          "Both"
+        ],
+        "description": "Select whether you are updating beneficiaries for life insurance, retirement plans, or both."
+      },
+      {
+        "name": "primary_beneficiary_first_name",
+        "type": "string",
+        "label": "Primary Beneficiary First Name",
+        "required": true,
+        "description": "The first name of your primary beneficiary."
+      },
+      {
+        "name": "primary_beneficiary_last_name",
+        "type": "string",
+        "label": "Primary Beneficiary Last Name",
+        "required": true,
+        "description": "The last name of your primary beneficiary."
+      },
+      {
+        "name": "primary_beneficiary_relationship",
+        "type": "string",
+        "label": "Primary Beneficiary Relationship",
+        "required": true,
+        "description": "Your relationship to the primary beneficiary (e.g., Spouse, Child, Sibling, Friend)."
+      },
+      {
+        "name": "primary_beneficiary_percentage",
+        "type": "number",
+        "label": "Primary Beneficiary Percentage",
+        "required": true,
+        "description": "The percentage of the benefit/account balance designated for the primary beneficiary (0-100)."
+      },
+      {
+        "name": "has_contingent_beneficiary",
+        "type": "boolean",
+        "label": "Add Contingent Beneficiary?",
+        "required": true,
+        "description": "Indicate if you wish to designate a contingent beneficiary (who receives benefits if the primary beneficiary cannot)."
+      },
+      {
+        "name": "contingent_beneficiary_first_name",
+        "type": "string",
+        "label": "Contingent Beneficiary First Name",
+        "required": false,
+        "description": "The first name of your contingent beneficiary."
+      },
+      {
+        "name": "contingent_beneficiary_last_name",
+        "type": "string",
+        "label": "Contingent Beneficiary Last Name",
+        "required": false,
+        "description": "The last name of your contingent beneficiary."
+      },
+      {
+        "name": "contingent_beneficiary_relationship",
+        "type": "string",
+        "label": "Contingent Beneficiary Relationship",
+        "required": false,
+        "description": "Your relationship to the contingent beneficiary."
+      },
+      {
+        "name": "contingent_beneficiary_percentage",
+        "type": "number",
+        "label": "Contingent Beneficiary Percentage",
+        "required": false,
+        "description": "The percentage of the benefit/account balance designated for the contingent beneficiary (0-100)."
+      }
+    ],
+    "confirmationMessage": "You are about to update your beneficiary designations for {account_type}. Primary beneficiary will be {primary_beneficiary_first_name} {primary_beneficiary_last_name} ({primary_beneficiary_relationship}) with {primary_beneficiary_percentage}%.",
+    "successMessage": "Your beneficiary designations have been successfully updated. A confirmation will be sent to your email. If updating a retirement plan and your spouse is not the primary beneficiary, spousal consent may be required.",
+    "affectedDataFields": [
+      "beneficiary_designations"
+    ]
+  }
+]

@@ -1,0 +1,91 @@
+{
+  "agentId": "97bb6a05-d142-414b-9490-4f2ae7e29b1d",
+  "traces": [
+    {
+      "id": "trace-1770058269876",
+      "sessionId": "11af22c9-47ac-45db-ab19-5ca3a1f669a0",
+      "userInput": "I am going to have a new baby next month",
+      "agentResponse": "Congratulations on your upcoming arrival! I can help you simulate reporting the birth of your child and adding them to your benefits. To get started, I need some information:\n\n*   Will this be a birth or adoption?\n*   What is the expected date of birth or adoption placement?\n*   What will be the child's first name?\n*   What will be the child's last name?\n*   Will you want to add the child to your health benefits?\n*   Will you want to add the child to your dental and vision benefits?\n*   Do you anticipate needing to update your Dependent Care FSA?\n*   Would you like to review/update your W-4 Tax Withholding?\n\nFinally, while not immediately needed, you'll eventually need to provide the child's Social Security number. If you don't have it yet, you'll have 90 days to provide it or proof that you've applied for one.",
+      "startTime": "2026-02-02T18:51:06.898Z",
+      "endTime": "2026-02-02T18:51:09.876Z",
+      "totalDuration": 2978,
+      "entries": [
+        {
+          "id": "entry-1770058268021-1",
+          "type": "intent_classification",
+          "name": "Orchestrator Intent Classification",
+          "timestamp": "2026-02-02T18:51:08.021Z",
+          "metadata": {
+            "intent": "answer_question",
+            "classificationMethod": "orchestrator",
+            "confidence": "high"
+          }
+        },
+        {
+          "id": "entry-1770058269876-3",
+          "type": "llm_call",
+          "name": "Gemini Response Generation",
+          "timestamp": "2026-02-02T18:51:09.876Z",
+          "duration": 1855,
+          "metadata": {
+            "model": "gemini",
+            "intent": "answer_question",
+            "validated": true
+          }
+        }
+      ],
+      "success": true
+    },
+    {
+      "id": "trace-1770058304246",
+      "sessionId": "11af22c9-47ac-45db-ab19-5ca3a1f669a0",
+      "userInput": "adoption. next month, Jane, Austin, yes all the benefits",
+      "agentResponse": "Okay, let's simulate reporting the adoption of Jane Austin and adding her to all your benefits.\n\nI still need a little more information to proceed accurately:\n\n*   What is the *exact* date of the adoption placement? (I need the month, day, and year.)\n*   What is Jane's date of birth? (I need the month, day, and year.)\n*   What will be the last four digits of Jane's Social Security number?\n\nOnce I have this information, I'll confirm everything with you before simulating the submission.",
+      "startTime": "2026-02-02T18:51:41.700Z",
+      "endTime": "2026-02-02T18:51:44.246Z",
+      "totalDuration": 2546,
+      "entries": [
+        {
+          "id": "entry-1770058302915-1",
+          "type": "intent_classification",
+          "name": "Orchestrator Intent Classification",
+          "timestamp": "2026-02-02T18:51:42.915Z",
+          "metadata": {
+            "intent": "answer_question",
+            "classificationMethod": "orchestrator",
+            "confidence": "high"
+          }
+        },
+        {
+          "id": "entry-1770058304246-3",
+          "type": "llm_call",
+          "name": "Gemini Response Generation",
+          "timestamp": "2026-02-02T18:51:44.246Z",
+          "duration": 1331,
+          "metadata": {
+            "model": "gemini",
+            "intent": "answer_question",
+            "validated": true
+          }
+        }
+      ],
+      "success": true
+    }
+  ],
+  "stats": {
+    "hookCalls": {},
+    "signalReads": {},
+    "intentDistribution": {
+      "answer_question": 2
+    },
+    "classificationMethods": {
+      "orchestrator": 2
+    },
+    "avgResponseTime": 2762,
+    "totalLlmCalls": 2,
+    "totalTokensUsed": 0,
+    "errorCount": 0
+  },
+  "createdAt": "2026-02-02T18:51:09.876Z",
+  "updatedAt": "2026-02-02T18:51:44.246Z"
+}
