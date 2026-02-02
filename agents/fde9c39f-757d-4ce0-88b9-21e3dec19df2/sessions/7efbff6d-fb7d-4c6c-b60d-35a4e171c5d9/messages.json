@@ -1,0 +1,18 @@
+[
+  {
+    "id": "655849d2-6c2c-4a3b-8bef-7501447d07cc",
+    "agentId": "fde9c39f-757d-4ce0-88b9-21e3dec19df2",
+    "sessionId": "7efbff6d-fb7d-4c6c-b60d-35a4e171c5d9",
+    "role": "user",
+    "content": "My new baby is coming next month, I want to add her to the health insurance plan",
+    "timestamp": "2026-02-02T18:28:22.982Z"
+  },
+  {
+    "id": "078c165f-361f-4664-b6b0-4d793c93e765",
+    "agentId": "fde9c39f-757d-4ce0-88b9-21e3dec19df2",
+    "sessionId": "7efbff6d-fb7d-4c6c-b60d-35a4e171c5d9",
+    "role": "assistant",
+    "content": "Congratulations on your upcoming baby! I can simulate adding your new baby to your health insurance plan. I will need some information to proceed. Please remember that I am only simulating the process, and no actual changes will be made to your HR records.\n\nFirst, could you please provide the following details?\n\n*   What will be your baby's first and last name?\n*   What is the expected date of birth?\n\nOnce I have this information, I can simulate the process of adding your baby to your health insurance.",
+    "timestamp": "2026-02-02T18:28:25.071Z"
+  }
+]

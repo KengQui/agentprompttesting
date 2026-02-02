@@ -1,0 +1,269 @@
+[
+  {
+    "id": "de8b3b47-7a4e-4792-91e2-516f01709e98",
+    "name": "report_life_event",
+    "description": "Initiates the process for a qualifying life event (QLE) like marriage, birth, or divorce, allowing for changes to benefits and personal information.",
+    "category": "Life Events",
+    "requiredFields": [
+      {
+        "name": "event_type",
+        "type": "select",
+        "label": "Life Event Type",
+        "required": true,
+        "options": [
+          "Marriage/Domestic Partnership",
+          "Divorce/Legal Separation",
+          "Birth/Adoption of a child",
+          "Death of a dependent or spouse",
+          "Loss of other health coverage",
+          "Change in employment status"
+        ],
+        "description": "Select the type of qualifying life event you are reporting."
+      },
+      {
+        "name": "event_date",
+        "type": "date",
+        "label": "Date of Event",
+        "required": true,
+        "description": "The date the event occurred (e.g., date of marriage, date of birth)."
+      }
+    ],
+    "confirmationMessage": "You are about to report a '[event_type]' event that occurred on [event_date]. This will open a 31-day special enrollment period to make eligible benefit changes. Do you want to proceed?",
+    "successMessage": "Your life event has been successfully recorded. Please proceed with any necessary actions, such as adding or removing dependents, before your special enrollment period ends.",
+    "affectedDataFields": [
+      "lifeEvents",
+      "benefitEnrollmentWindow"
+    ]
+  },
+  {
+    "id": "f0c283ca-2fda-46c9-80f9-71b425ed32b6",
+    "name": "add_dependent",
+    "description": "Adds a new dependent (spouse, domestic partner, or child) to your HR record, making them eligible for benefit enrollment.",
+    "category": "Dependents & Beneficiaries",
+    "requiredFields": [
+      {
+        "name": "first_name",
+        "type": "string",
+        "label": "First Name",
+        "required": true,
+        "description": "Dependent's legal first name."
+      },
+      {
+        "name": "last_name",
+        "type": "string",
+        "label": "Last Name",
+        "required": true,
+        "description": "Dependent's legal last name."
+      },
+      {
+        "name": "relationship",
+        "type": "select",
+        "label": "Relationship",
+        "required": true,
+        "options": [
+          "Spouse",
+          "Domestic Partner",
+          "Child"
+        ],
+        "description": "Your relationship to the dependent."
+      },
+      {
+        "name": "date_of_birth",
+        "type": "date",
+        "label": "Date of Birth",
+        "required": true,
+        "description": "Dependent's date of birth."
+      },
+      {
+        "name": "social_security_number",
+        "type": "string",
+        "label": "Social Security Number (SSN)",
+        "required": true,
+        "description": "Dependent's SSN is required for benefit and tax purposes."
+      }
+    ],
+    "confirmationMessage": "You are about to add [first_name] [last_name] as your [relationship]. Please ensure all information is correct before submitting.",
+    "successMessage": "Successfully added [first_name] [last_name] as a dependent. You can now enroll them in eligible benefits during your special enrollment period.",
+    "affectedDataFields": [
+      "dependents",
+      "benefitElections"
+    ]
+  },
+  {
+    "id": "207f7299-e37a-4798-9573-a11a7f04e3f9",
+    "name": "remove_dependent",
+    "description": "Removes a dependent from your benefits due to a qualifying event like divorce, legal separation, or a child reaching the age limit.",
+    "category": "Dependents & Beneficiaries",
+    "requiredFields": [
+      {
+        "name": "dependent_name",
+        "type": "select",
+        "label": "Dependent to Remove",
+        "required": true,
+        "options": [],
+        "description": "Select the dependent you need to remove from your coverage."
+      },
+      {
+        "name": "reason_for_removal",
+        "type": "select",
+        "label": "Reason for Removal",
+        "required": true,
+        "options": [
+          "Divorce/Legal Separation",
+          "Dependent reached age 26",
+          "Death of a dependent"
+        ],
+        "description": "Select the reason for removing this dependent."
+      },
+      {
+        "name": "removal_effective_date",
+        "type": "date",
+        "label": "Coverage End Date",
+        "required": true,
+        "description": "The date coverage for this dependent should end."
+      }
+    ],
+    "confirmationMessage": "This will remove [dependent_name] from all benefit plans effective [removal_effective_date]. This action is generally irreversible. Do you wish to continue?",
+    "successMessage": "Successfully submitted the request to remove the dependent. COBRA continuation information will be sent to their last known address, if applicable.",
+    "affectedDataFields": [
+      "dependents",
+      "benefitElections",
+      "cobraEligibility"
+    ]
+  },
+  {
+    "id": "4deabb60-54d0-4147-803f-bb98c0b5b559",
+    "name": "update_address",
+    "description": "Updates your home address for payroll, tax withholding, and benefit plan eligibility.",
+    "category": "Personal Information",
+    "requiredFields": [
+      {
+        "name": "street_address",
+        "type": "string",
+        "label": "Street Address",
+        "required": true,
+        "description": "Your new street address, including apartment number if applicable."
+      },
+      {
+        "name": "city",
+        "type": "string",
+        "label": "City",
+        "required": true,
+        "description": "The city of your new address."
+      },
+      {
+        "name": "state",
+        "type": "string",
+        "label": "State",
+        "required": true,
+        "description": "The state of your new address."
+      },
+      {
+        "name": "zip_code",
+        "type": "string",
+        "label": "ZIP Code",
+        "required": true,
+        "description": "The ZIP code of your new address."
+      }
+    ],
+    "confirmationMessage": "You are about to change your address to [street_address], [city], [state] [zip_code]. This may impact your tax withholding and available health plans. Proceed?",
+    "successMessage": "Your address has been successfully updated. Please review your tax and benefit information to see if additional changes are required due to your move.",
+    "affectedDataFields": [
+      "address",
+      "taxWithholding",
+      "benefitEligibility"
+    ]
+  },
+  {
+    "id": "1f4c5af9-270f-4fa7-b370-a397061a281e",
+    "name": "change_tax_withholding",
+    "description": "Updates your federal and state tax withholding information (Form W-4) following a life event.",
+    "category": "Payroll & Taxes",
+    "requiredFields": [
+      {
+        "name": "filing_status",
+        "type": "select",
+        "label": "Filing Status",
+        "required": true,
+        "options": [
+          "Single or Married filing separately",
+          "Married filing jointly",
+          "Head of Household"
+        ],
+        "description": "Select your tax filing status as it will appear on your tax return."
+      },
+      {
+        "name": "number_of_dependents",
+        "type": "number",
+        "label": "Number of Dependents Claimed",
+        "required": true,
+        "description": "Enter the total number of dependents you will claim for tax credits."
+      },
+      {
+        "name": "additional_withholding",
+        "type": "number",
+        "label": "Additional Amount to Withhold (per pay period)",
+        "required": false,
+        "description": "Enter any extra dollar amount you want withheld from each paycheck for taxes."
+      }
+    ],
+    "confirmationMessage": "You are updating your W-4 to '[filing_status]' with [number_of_dependents] dependents and an additional withholding of $[additional_withholding]. Do you confirm these changes?",
+    "successMessage": "Your tax withholding information has been updated. The changes will be applied to your next available pay cycle.",
+    "affectedDataFields": [
+      "taxWithholding",
+      "payroll"
+    ]
+  },
+  {
+    "id": "eeafbb8d-ad03-40ce-bc4b-d550ef633774",
+    "name": "update_beneficiaries",
+    "description": "Updates the primary and contingent beneficiaries for your life insurance and retirement plans.",
+    "category": "Dependents & Beneficiaries",
+    "requiredFields": [
+      {
+        "name": "plan_type",
+        "type": "select",
+        "label": "Plan",
+        "required": true,
+        "options": [
+          "Group Term Life Insurance",
+          "401(k) Retirement Plan"
+        ],
+        "description": "Select the plan for which you are updating beneficiaries."
+      },
+      {
+        "name": "primary_beneficiary_name",
+        "type": "string",
+        "label": "Primary Beneficiary Full Name",
+        "required": true,
+        "description": "Full legal name of the person or entity who will receive the benefit first."
+      },
+      {
+        "name": "primary_beneficiary_relationship",
+        "type": "select",
+        "label": "Primary Beneficiary Relationship",
+        "required": true,
+        "options": [
+          "Spouse",
+          "Child",
+          "Parent",
+          "Trust",
+          "Other"
+        ],
+        "description": "Your relationship to the primary beneficiary."
+      },
+      {
+        "name": "primary_allocation_percentage",
+        "type": "number",
+        "label": "Primary Beneficiary Allocation (%)",
+        "required": true,
+        "description": "The percentage of the benefit this person will receive. Enter 100 if there is only one."
+      }
+    ],
+    "confirmationMessage": "You are designating [primary_beneficiary_name] as the beneficiary for [primary_allocation_percentage]% of your [plan_type] plan. Is this correct?",
+    "successMessage": "Your beneficiary designation for the [plan_type] has been successfully updated. Remember to update beneficiaries for your other plans if needed.",
+    "affectedDataFields": [
+      "beneficiaries"
+    ]
+  }
+]

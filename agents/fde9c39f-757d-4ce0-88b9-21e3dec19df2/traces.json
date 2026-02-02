@@ -1,0 +1,56 @@
+{
+  "agentId": "fde9c39f-757d-4ce0-88b9-21e3dec19df2",
+  "traces": [
+    {
+      "id": "trace-1770056905071",
+      "sessionId": "7efbff6d-fb7d-4c6c-b60d-35a4e171c5d9",
+      "userInput": "My new baby is coming next month, I want to add her to the health insurance plan",
+      "agentResponse": "Congratulations on your upcoming baby! I can simulate adding your new baby to your health insurance plan. I will need some information to proceed. Please remember that I am only simulating the process, and no actual changes will be made to your HR records.\n\nFirst, could you please provide the following details?\n\n*   What will be your baby's first and last name?\n*   What is the expected date of birth?\n\nOnce I have this information, I can simulate the process of adding your baby to your health insurance.",
+      "startTime": "2026-02-02T18:28:22.982Z",
+      "endTime": "2026-02-02T18:28:25.071Z",
+      "totalDuration": 2089,
+      "entries": [
+        {
+          "id": "entry-1770056903966-1",
+          "type": "intent_classification",
+          "name": "Orchestrator Intent Classification",
+          "timestamp": "2026-02-02T18:28:23.966Z",
+          "metadata": {
+            "intent": "answer_question",
+            "classificationMethod": "orchestrator",
+            "confidence": "high"
+          }
+        },
+        {
+          "id": "entry-1770056905071-3",
+          "type": "llm_call",
+          "name": "Gemini Response Generation",
+          "timestamp": "2026-02-02T18:28:25.071Z",
+          "duration": 1105,
+          "metadata": {
+            "model": "gemini",
+            "intent": "answer_question",
+            "validated": true
+          }
+        }
+      ],
+      "success": true
+    }
+  ],
+  "stats": {
+    "hookCalls": {},
+    "signalReads": {},
+    "intentDistribution": {
+      "answer_question": 1
+    },
+    "classificationMethods": {
+      "orchestrator": 1
+    },
+    "avgResponseTime": 2089,
+    "totalLlmCalls": 1,
+    "totalTokensUsed": 0,
+    "errorCount": 0
+  },
+  "createdAt": "2026-02-02T18:28:25.071Z",
+  "updatedAt": "2026-02-02T18:28:25.071Z"
+}
