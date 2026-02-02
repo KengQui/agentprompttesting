@@ -31,6 +31,8 @@ import { validationRulesTemplate, guardrailsTemplate } from "@/lib/config-templa
 import type { WizardStepData, Agent, DomainDocument, SampleDataset, PromptStyle, GeminiModel, ClarifyingInsight, AgentAction, MockUserState, ActionField, MockMode } from "@shared/schema";
 import { geminiModelDisplayNames, defaultGenerationModel, mockModeDescriptions } from "@shared/schema";
 import { Switch } from "@/components/ui/switch";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
 import { ClarifyingChatDialog } from "@/components/clarifying-chat-dialog";
 
 const steps = [
@@ -1357,6 +1359,47 @@ function Step6SampleData({
   );
 }
 
+const actionCategories = ["general", "create", "read", "update", "delete", "search", "export", "import", "notify"];
+const fieldTypes = ["string", "number", "boolean", "date", "select"] as const;
+
+function extractFieldsFromSampleData(datasets: SampleDataset[]): { name: string; type: string; source: string }[] {
+  const fields: { name: string; type: string; source: string }[] = [];
+  
+  for (const dataset of datasets) {
+    if (dataset.format === "json") {
+      try {
+        const parsed = JSON.parse(dataset.content);
+        const items = Array.isArray(parsed) ? parsed : [parsed];
+        if (items.length > 0 && typeof items[0] === "object") {
+          for (const key of Object.keys(items[0])) {
+            const value = items[0][key];
+            let type = "string";
+            if (typeof value === "number") type = "number";
+            else if (typeof value === "boolean") type = "boolean";
+            else if (typeof value === "string" && !isNaN(Date.parse(value)) && value.includes("-")) type = "date";
+            
+            if (!fields.find(f => f.name === key)) {
+              fields.push({ name: key, type, source: dataset.name });
+            }
+          }
+        }
+      } catch {}
+    } else if (dataset.format === "csv") {
+      const lines = dataset.content.split("\n");
+      if (lines.length > 0) {
+        const headers = lines[0].split(",").map(h => h.trim().replace(/^"|"$/g, ""));
+        for (const header of headers) {
+          if (header && !fields.find(f => f.name === header)) {
+            fields.push({ name: header, type: "string", source: dataset.name });
+          }
+        }
+      }
+    }
+  }
+  
+  return fields;
+}
+
 function Step7AvailableActions({
   data,
   onUpdate,
@@ -1367,7 +1410,174 @@ function Step7AvailableActions({
   const [isGenerating, setIsGenerating] = useState(false);
   const [selectedModel, setSelectedModel] = useState<GeminiModel>(defaultGenerationModel);
   const [viewingAction, setViewingAction] = useState<AgentAction | null>(null);
+  const [editingAction, setEditingAction] = useState<AgentAction | null>(null);
+  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const [showAvailableFields, setShowAvailableFields] = useState(false);
   const { toast } = useToast();
+
+  const [formData, setFormData] = useState<{
+    name: string;
+    description: string;
+    category: string;
+    confirmationMessage: string;
+    successMessage: string;
+    requiredFields: ActionField[];
+  }>({
+    name: "",
+    description: "",
+    category: "general",
+    confirmationMessage: "",
+    successMessage: "",
+    requiredFields: [],
+  });
+
+  const availableFields = extractFieldsFromSampleData(data.sampleDatasets || []);
+
+  const resetForm = () => {
+    setFormData({
+      name: "",
+      description: "",
+      category: "general",
+      confirmationMessage: "",
+      successMessage: "",
+      requiredFields: [],
+    });
+  };
+
+  const openAddDialog = () => {
+    resetForm();
+    setEditingAction(null);
+    setIsAddDialogOpen(true);
+  };
+
+  const openEditDialog = (action: AgentAction) => {
+    setFormData({
+      name: action.name,
+      description: action.description,
+      category: action.category,
+      confirmationMessage: action.confirmationMessage || "",
+      successMessage: action.successMessage || "",
+      requiredFields: [...action.requiredFields],
+    });
+    setEditingAction(action);
+    setIsAddDialogOpen(true);
+  };
+
+  const handleSaveAction = () => {
+    if (!formData.name.trim()) {
+      toast({
+        title: "Validation error",
+        description: "Action name is required",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const invalidFields = formData.requiredFields.filter(f => !f.name.trim() || !f.label.trim());
+    if (invalidFields.length > 0) {
+      toast({
+        title: "Validation error",
+        description: "All fields must have a name and label",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const validatedFields = formData.requiredFields.map(f => ({
+      ...f,
+      name: f.name.trim(),
+      label: f.label.trim(),
+    }));
+
+    const current = data.availableActions || [];
+    
+    if (editingAction) {
+      const updated = current.map(a => 
+        a.id === editingAction.id 
+          ? { 
+              ...a, 
+              name: formData.name.trim(),
+              description: formData.description,
+              category: formData.category,
+              confirmationMessage: formData.confirmationMessage,
+              successMessage: formData.successMessage,
+              requiredFields: validatedFields, 
+              affectedDataFields: validatedFields.map(f => f.name) 
+            }
+          : a
+      );
+      onUpdate({ availableActions: updated });
+      toast({ title: "Action updated", description: `"${formData.name}" has been updated.` });
+    } else {
+      const newAction: AgentAction = {
+        id: `action_${Date.now()}`,
+        name: formData.name.trim(),
+        description: formData.description,
+        category: formData.category,
+        requiredFields: validatedFields,
+        confirmationMessage: formData.confirmationMessage,
+        successMessage: formData.successMessage,
+        affectedDataFields: validatedFields.map(f => f.name),
+      };
+      onUpdate({ availableActions: [...current, newAction] });
+      toast({ title: "Action added", description: `"${formData.name}" has been added.` });
+    }
+    
+    setIsAddDialogOpen(false);
+    resetForm();
+    setEditingAction(null);
+  };
+
+  const addField = () => {
+    setFormData(prev => ({
+      ...prev,
+      requiredFields: [
+        ...prev.requiredFields,
+        { name: "", type: "string", label: "", required: true },
+      ],
+    }));
+  };
+
+  const updateField = (index: number, updates: Partial<ActionField>) => {
+    setFormData(prev => ({
+      ...prev,
+      requiredFields: prev.requiredFields.map((f, i) => 
+        i === index ? { ...f, ...updates } : f
+      ),
+    }));
+  };
+
+  const removeField = (index: number) => {
+    setFormData(prev => ({
+      ...prev,
+      requiredFields: prev.requiredFields.filter((_, i) => i !== index),
+    }));
+  };
+
+  const addFieldFromSampleData = (field: { name: string; type: string }) => {
+    const existingField = formData.requiredFields.find(f => f.name === field.name);
+    if (existingField) {
+      toast({
+        title: "Field already exists",
+        description: `"${field.name}" is already added to the action.`,
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    setFormData(prev => ({
+      ...prev,
+      requiredFields: [
+        ...prev.requiredFields,
+        { 
+          name: field.name, 
+          type: field.type as ActionField["type"], 
+          label: field.name.charAt(0).toUpperCase() + field.name.slice(1).replace(/([A-Z])/g, ' $1'),
+          required: true 
+        },
+      ],
+    }));
+  };
 
   const handleGenerate = async (model: GeminiModel) => {
     if (!data.businessUseCase) {
@@ -1435,43 +1645,86 @@ function Step7AvailableActions({
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
-        <div className="flex items-center justify-between">
-          <div className="text-sm text-muted-foreground">
-            Generate actions based on your business use case
-          </div>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                type="button"
-                variant="default"
-                disabled={isGenerating}
-                data-testid="button-generate-actions"
-              >
-                {isGenerating ? (
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                ) : (
-                  <Sparkles className="h-4 w-4 mr-2" />
-                )}
-                {isGenerating ? "Generating..." : "Generate Actions"}
-                <ChevronDown className="h-3 w-3 ml-2" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-56">
-              {(Object.keys(geminiModelDisplayNames) as GeminiModel[]).map((model) => (
-                <DropdownMenuItem
-                  key={model}
-                  onClick={() => {
-                    setSelectedModel(model);
-                    handleGenerate(model);
-                  }}
-                  data-testid={`menu-item-actions-model-${model}`}
+        <div className="flex items-center justify-between gap-2 flex-wrap">
+          <div className="flex items-center gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={openAddDialog}
+              data-testid="button-add-action"
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Add Action
+            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  type="button"
+                  variant="default"
+                  disabled={isGenerating}
+                  data-testid="button-generate-actions"
                 >
-                  {geminiModelDisplayNames[model]}
-                </DropdownMenuItem>
-              ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
+                  {isGenerating ? (
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  ) : (
+                    <Sparkles className="h-4 w-4 mr-2" />
+                  )}
+                  {isGenerating ? "Generating..." : "Generate Actions"}
+                  <ChevronDown className="h-3 w-3 ml-2" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56">
+                {(Object.keys(geminiModelDisplayNames) as GeminiModel[]).map((model) => (
+                  <DropdownMenuItem
+                    key={model}
+                    onClick={() => {
+                      setSelectedModel(model);
+                      handleGenerate(model);
+                    }}
+                    data-testid={`menu-item-actions-model-${model}`}
+                  >
+                    {geminiModelDisplayNames[model]}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+          {availableFields.length > 0 && (
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={() => setShowAvailableFields(!showAvailableFields)}
+              data-testid="button-toggle-available-fields"
+            >
+              <Database className="h-4 w-4 mr-2" />
+              {showAvailableFields ? "Hide" : "View"} Available Fields
+              {showAvailableFields ? <ChevronUp className="h-3 w-3 ml-1" /> : <ChevronDown className="h-3 w-3 ml-1" />}
+            </Button>
+          )}
         </div>
+
+        {showAvailableFields && availableFields.length > 0 && (
+          <div className="p-4 rounded-lg border bg-muted/50 space-y-3">
+            <Label className="text-sm font-medium flex items-center gap-2">
+              <Database className="h-4 w-4" />
+              Fields from Sample Data ({availableFields.length})
+            </Label>
+            <div className="flex flex-wrap gap-2">
+              {availableFields.map((field, idx) => (
+                <div
+                  key={`${field.name}-${idx}`}
+                  className="flex items-center gap-2 p-2 rounded-lg border bg-card text-sm"
+                  data-testid={`available-field-${field.name}`}
+                >
+                  <Badge variant="outline" className="text-xs">{field.type}</Badge>
+                  <span className="font-medium">{field.name}</span>
+                  <span className="text-xs text-muted-foreground">({field.source})</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         <div className="p-4 rounded-lg border bg-muted/50 space-y-4">
           <div className="flex items-center justify-between">
@@ -1555,6 +1808,15 @@ function Step7AvailableActions({
                       type="button"
                       variant="ghost"
                       size="icon"
+                      onClick={() => openEditDialog(action)}
+                      data-testid={`button-edit-action-${action.id}`}
+                    >
+                      <Pencil className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
                       onClick={() => handleRemoveAction(action.id)}
                       data-testid={`button-remove-action-${action.id}`}
                     >
@@ -1571,7 +1833,7 @@ function Step7AvailableActions({
           <div className="text-center py-8 text-muted-foreground">
             <Zap className="h-12 w-12 mx-auto mb-3 opacity-50" />
             <p className="text-sm">No actions defined yet</p>
-            <p className="text-xs mt-1">Click "Generate Actions" to create actions based on your use case</p>
+            <p className="text-xs mt-1">Click "Add Action" or "Generate Actions" to create actions</p>
           </div>
         )}
 
@@ -1616,6 +1878,221 @@ function Step7AvailableActions({
                   <p className="text-sm text-muted-foreground mt-1">{viewingAction.successMessage}</p>
                 </div>
               )}
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        <Dialog open={isAddDialogOpen} onOpenChange={(open) => { if (!open) { setIsAddDialogOpen(false); setEditingAction(null); resetForm(); } }}>
+          <DialogContent className="max-w-2xl max-h-[85vh] flex flex-col" data-testid="dialog-action-form">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Zap className="h-5 w-5 text-primary" />
+                {editingAction ? "Edit Action" : "Add New Action"}
+              </DialogTitle>
+              <DialogDescription>
+                {editingAction ? "Modify the action details below." : "Define a new action for your agent."}
+              </DialogDescription>
+            </DialogHeader>
+            <div className="flex-1 overflow-y-auto space-y-4 pr-2">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="action-name">Action Name *</Label>
+                  <Input
+                    id="action-name"
+                    value={formData.name}
+                    onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+                    placeholder="e.g., Update Customer Record"
+                    data-testid="input-action-name"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="action-category">Category</Label>
+                  <Select
+                    value={formData.category}
+                    onValueChange={(value) => setFormData(prev => ({ ...prev, category: value }))}
+                  >
+                    <SelectTrigger data-testid="select-action-category">
+                      <SelectValue placeholder="Select category" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {actionCategories.map(cat => (
+                        <SelectItem key={cat} value={cat}>
+                          {cat.charAt(0).toUpperCase() + cat.slice(1)}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="action-description">Description</Label>
+                <Textarea
+                  id="action-description"
+                  value={formData.description}
+                  onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+                  placeholder="Describe what this action does..."
+                  className="min-h-[80px]"
+                  data-testid="textarea-action-description"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="confirmation-message">Confirmation Message</Label>
+                <Input
+                  id="confirmation-message"
+                  value={formData.confirmationMessage}
+                  onChange={(e) => setFormData(prev => ({ ...prev, confirmationMessage: e.target.value }))}
+                  placeholder="e.g., Are you sure you want to update this record?"
+                  data-testid="input-confirmation-message"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="success-message">Success Message</Label>
+                <Input
+                  id="success-message"
+                  value={formData.successMessage}
+                  onChange={(e) => setFormData(prev => ({ ...prev, successMessage: e.target.value }))}
+                  placeholder="e.g., Record updated successfully!"
+                  data-testid="input-success-message"
+                />
+              </div>
+
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <Label className="text-sm font-medium">Required Fields ({formData.requiredFields.length})</Label>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={addField}
+                    data-testid="button-add-field"
+                  >
+                    <Plus className="h-3 w-3 mr-1" />
+                    Add Field
+                  </Button>
+                </div>
+
+                {availableFields.length > 0 && (
+                  <div className="p-3 rounded-lg border bg-muted/30 space-y-2">
+                    <Label className="text-xs text-muted-foreground">Quick add from sample data:</Label>
+                    <div className="flex flex-wrap gap-1">
+                      {availableFields.slice(0, 10).map((field, idx) => (
+                        <Button
+                          key={`${field.name}-${idx}`}
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className="h-7 text-xs"
+                          onClick={() => addFieldFromSampleData(field)}
+                          data-testid={`button-quick-add-field-${field.name}`}
+                        >
+                          <Plus className="h-3 w-3 mr-1" />
+                          {field.name}
+                        </Button>
+                      ))}
+                      {availableFields.length > 10 && (
+                        <span className="text-xs text-muted-foreground self-center ml-2">
+                          +{availableFields.length - 10} more
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {formData.requiredFields.length > 0 && (
+                  <div className="space-y-2">
+                    {formData.requiredFields.map((field, idx) => (
+                      <div key={idx} className="flex items-start gap-2 p-3 rounded-lg border bg-card" data-testid={`field-row-${idx}`}>
+                        <div className="flex-1 grid grid-cols-4 gap-2">
+                          <div>
+                            <Label className="text-xs">Name</Label>
+                            <Input
+                              value={field.name}
+                              onChange={(e) => updateField(idx, { name: e.target.value })}
+                              placeholder="fieldName"
+                              className="h-8 text-sm"
+                              data-testid={`input-field-name-${idx}`}
+                            />
+                          </div>
+                          <div>
+                            <Label className="text-xs">Label</Label>
+                            <Input
+                              value={field.label}
+                              onChange={(e) => updateField(idx, { label: e.target.value })}
+                              placeholder="Field Label"
+                              className="h-8 text-sm"
+                              data-testid={`input-field-label-${idx}`}
+                            />
+                          </div>
+                          <div>
+                            <Label className="text-xs">Type</Label>
+                            <Select
+                              value={field.type}
+                              onValueChange={(value) => updateField(idx, { type: value as ActionField["type"] })}
+                            >
+                              <SelectTrigger className="h-8" data-testid={`select-field-type-${idx}`}>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {fieldTypes.map(t => (
+                                  <SelectItem key={t} value={t}>{t}</SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div className="flex items-end gap-2">
+                            <div className="flex items-center gap-1.5 pb-2">
+                              <Checkbox
+                                id={`required-${idx}`}
+                                checked={field.required}
+                                onCheckedChange={(checked) => updateField(idx, { required: checked === true })}
+                                data-testid={`checkbox-field-required-${idx}`}
+                              />
+                              <Label htmlFor={`required-${idx}`} className="text-xs cursor-pointer">Req</Label>
+                            </div>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8"
+                              onClick={() => removeField(idx)}
+                              data-testid={`button-remove-field-${idx}`}
+                            >
+                              <Trash2 className="h-3 w-3" />
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {formData.requiredFields.length === 0 && (
+                  <div className="text-center py-4 text-muted-foreground text-sm border rounded-lg">
+                    No fields added yet. Click "Add Field" or use quick add from sample data.
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-2 pt-4 border-t">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => { setIsAddDialogOpen(false); setEditingAction(null); resetForm(); }}
+                data-testid="button-cancel-action"
+              >
+                Cancel
+              </Button>
+              <Button
+                type="button"
+                onClick={handleSaveAction}
+                data-testid="button-save-action"
+              >
+                {editingAction ? "Update Action" : "Add Action"}
+              </Button>
             </div>
           </DialogContent>
         </Dialog>
