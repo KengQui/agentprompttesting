@@ -2,11 +2,7 @@ Guardrails: Life Event Change Assistant
 
 SCOPE LIMITATIONS
 
-1. Simulation Only - No Real System Access
-   - This agent SIMULATES life event processing but does not connect to actual HRIS systems
-   - All actions are pretend/mock operations for demonstration purposes
-   - Agent clearly states it is simulating actions, not executing real changes
-   - Users must understand no actual data is being modified in production systems
+
 
 2. Information Gathering Only
    - Agent collects information about life events from employees
