@@ -30,5 +30,53 @@
     "role": "assistant",
     "content": "Okay, let's simulate reporting the adoption of Jane Austin and adding her to all your benefits.\n\nI still need a little more information to proceed accurately:\n\n*   What is the *exact* date of the adoption placement? (I need the month, day, and year.)\n*   What is Jane's date of birth? (I need the month, day, and year.)\n*   What will be the last four digits of Jane's Social Security number?\n\nOnce I have this information, I'll confirm everything with you before simulating the submission.",
     "timestamp": "2026-02-02T18:51:44.247Z"
+  },
+  {
+    "id": "d63eab2a-177d-4cd7-b363-f64d7556a5ee",
+    "agentId": "97bb6a05-d142-414b-9490-4f2ae7e29b1d",
+    "sessionId": "11af22c9-47ac-45db-ab19-5ca3a1f669a0",
+    "role": "user",
+    "content": "feb12, 2026\ndec 25, 2021\nshe is still a kid, no scoial security number",
+    "timestamp": "2026-02-02T18:53:09.196Z"
+  },
+  {
+    "id": "46064a6a-ceb4-4afe-abcc-63dc8b353456",
+    "agentId": "97bb6a05-d142-414b-9490-4f2ae7e29b1d",
+    "sessionId": "11af22c9-47ac-45db-ab19-5ca3a1f669a0",
+    "role": "assistant",
+    "content": "Okay, I understand. Since Jane is a minor and you don't have her Social Security number yet, you'll have 90 days to provide it or proof that you've applied for one after the adoption.\n\nTo confirm, you're reporting the adoption of Jane Austin, with an adoption placement date of February 12, 2026, and a date of birth of December 25, 2021. You want to add her to your health, dental, and vision benefits. You also want to review/update your Dependent Care FSA and W-4 Tax Withholding.\n\nDid I get everything right?",
+    "timestamp": "2026-02-02T18:53:12.037Z"
+  },
+  {
+    "id": "2922e0d9-28cf-4f0e-9ac1-c0652e06532d",
+    "agentId": "97bb6a05-d142-414b-9490-4f2ae7e29b1d",
+    "sessionId": "11af22c9-47ac-45db-ab19-5ca3a1f669a0",
+    "role": "user",
+    "content": "only the health, dental and vision benfits now",
+    "timestamp": "2026-02-02T18:53:48.028Z"
+  },
+  {
+    "id": "0fa91eb3-5cd5-4122-b15b-4476532717cd",
+    "agentId": "97bb6a05-d142-414b-9490-4f2ae7e29b1d",
+    "sessionId": "11af22c9-47ac-45db-ab19-5ca3a1f669a0",
+    "role": "assistant",
+    "content": "Okay, I understand. So you want to hold off on updating your Dependent Care FSA and W-4 Tax Withholding for now, but still want to add Jane to health, dental, and vision benefits.\n\nJust to re-confirm the info I have so far: You are reporting the adoption of Jane Austin, with an adoption placement date of February 12, 2026, and a date of birth of December 25, 2021. You want to add her to your health, dental, and vision benefits at this time. You will provide the last four digits of her SSN when you have them.\n\nDo I have everything correct?",
+    "timestamp": "2026-02-02T18:53:50.526Z"
+  },
+  {
+    "id": "52cd32ca-2049-4081-9ccc-690ea09568de",
+    "agentId": "97bb6a05-d142-414b-9490-4f2ae7e29b1d",
+    "sessionId": "11af22c9-47ac-45db-ab19-5ca3a1f669a0",
+    "role": "user",
+    "content": "yes",
+    "timestamp": "2026-02-02T18:53:59.084Z"
+  },
+  {
+    "id": "12f7cc2b-0912-4bc4-ba07-067a6237f320",
+    "agentId": "97bb6a05-d142-414b-9490-4f2ae7e29b1d",
+    "sessionId": "11af22c9-47ac-45db-ab19-5ca3a1f669a0",
+    "role": "assistant",
+    "content": "Okay, great! Just to be absolutely clear, the adoption event date is February 12, 2026 which is more than 31 days from today's date, June 4, 2024. The system *cannot* accept dates that are more than 31 days in the future. The system will allow benefit changes to occur only 31 days before the event date, so the adoption cannot be recorded until January 12, 2026. Please let me know when it is closer to the adoption date and I will gladly make the changes.\n\nI will note that after the adoption, you have 31 days from the date of adoption to make changes to your benefits. Please let me know if you have any more questions!",
+    "timestamp": "2026-02-02T18:54:00.837Z"
   }
 ]

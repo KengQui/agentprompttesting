@@ -70,22 +70,127 @@
         }
       ],
       "success": true
+    },
+    {
+      "id": "trace-1770058392037",
+      "sessionId": "11af22c9-47ac-45db-ab19-5ca3a1f669a0",
+      "userInput": "feb12, 2026\ndec 25, 2021\nshe is still a kid, no scoial security number",
+      "agentResponse": "Okay, I understand. Since Jane is a minor and you don't have her Social Security number yet, you'll have 90 days to provide it or proof that you've applied for one after the adoption.\n\nTo confirm, you're reporting the adoption of Jane Austin, with an adoption placement date of February 12, 2026, and a date of birth of December 25, 2021. You want to add her to your health, dental, and vision benefits. You also want to review/update your Dependent Care FSA and W-4 Tax Withholding.\n\nDid I get everything right?",
+      "startTime": "2026-02-02T18:53:09.196Z",
+      "endTime": "2026-02-02T18:53:12.037Z",
+      "totalDuration": 2841,
+      "entries": [
+        {
+          "id": "entry-1770058390539-1",
+          "type": "intent_classification",
+          "name": "Orchestrator Intent Classification",
+          "timestamp": "2026-02-02T18:53:10.539Z",
+          "metadata": {
+            "intent": "answer_question",
+            "classificationMethod": "orchestrator",
+            "confidence": "high"
+          }
+        },
+        {
+          "id": "entry-1770058392036-3",
+          "type": "llm_call",
+          "name": "Gemini Response Generation",
+          "timestamp": "2026-02-02T18:53:12.036Z",
+          "duration": 1498,
+          "metadata": {
+            "model": "gemini",
+            "intent": "answer_question",
+            "validated": true
+          }
+        }
+      ],
+      "success": true
+    },
+    {
+      "id": "trace-1770058430525",
+      "sessionId": "11af22c9-47ac-45db-ab19-5ca3a1f669a0",
+      "userInput": "only the health, dental and vision benfits now",
+      "agentResponse": "Okay, I understand. So you want to hold off on updating your Dependent Care FSA and W-4 Tax Withholding for now, but still want to add Jane to health, dental, and vision benefits.\n\nJust to re-confirm the info I have so far: You are reporting the adoption of Jane Austin, with an adoption placement date of February 12, 2026, and a date of birth of December 25, 2021. You want to add her to your health, dental, and vision benefits at this time. You will provide the last four digits of her SSN when you have them.\n\nDo I have everything correct?",
+      "startTime": "2026-02-02T18:53:48.028Z",
+      "endTime": "2026-02-02T18:53:50.525Z",
+      "totalDuration": 2497,
+      "entries": [
+        {
+          "id": "entry-1770058429044-1",
+          "type": "intent_classification",
+          "name": "Orchestrator Intent Classification",
+          "timestamp": "2026-02-02T18:53:49.044Z",
+          "metadata": {
+            "intent": "answer_question",
+            "classificationMethod": "orchestrator",
+            "confidence": "high"
+          }
+        },
+        {
+          "id": "entry-1770058430525-3",
+          "type": "llm_call",
+          "name": "Gemini Response Generation",
+          "timestamp": "2026-02-02T18:53:50.525Z",
+          "duration": 1481,
+          "metadata": {
+            "model": "gemini",
+            "intent": "answer_question",
+            "validated": true
+          }
+        }
+      ],
+      "success": true
+    },
+    {
+      "id": "trace-1770058440837",
+      "sessionId": "11af22c9-47ac-45db-ab19-5ca3a1f669a0",
+      "userInput": "yes",
+      "agentResponse": "Okay, great! Just to be absolutely clear, the adoption event date is February 12, 2026 which is more than 31 days from today's date, June 4, 2024. The system *cannot* accept dates that are more than 31 days in the future. The system will allow benefit changes to occur only 31 days before the event date, so the adoption cannot be recorded until January 12, 2026. Please let me know when it is closer to the adoption date and I will gladly make the changes.\n\nI will note that after the adoption, you have 31 days from the date of adoption to make changes to your benefits. Please let me know if you have any more questions!",
+      "startTime": "2026-02-02T18:53:59.084Z",
+      "endTime": "2026-02-02T18:54:00.837Z",
+      "totalDuration": 1753,
+      "entries": [
+        {
+          "id": "entry-1770058439085-1",
+          "type": "intent_classification",
+          "name": "Orchestrator Intent Classification",
+          "timestamp": "2026-02-02T18:53:59.085Z",
+          "metadata": {
+            "intent": "answer_question",
+            "classificationMethod": "orchestrator",
+            "confidence": "high"
+          }
+        },
+        {
+          "id": "entry-1770058440837-3",
+          "type": "llm_call",
+          "name": "Gemini Response Generation",
+          "timestamp": "2026-02-02T18:54:00.837Z",
+          "duration": 1752,
+          "metadata": {
+            "model": "gemini",
+            "intent": "answer_question",
+            "validated": true
+          }
+        }
+      ],
+      "success": true
     }
   ],
   "stats": {
     "hookCalls": {},
     "signalReads": {},
     "intentDistribution": {
-      "answer_question": 2
+      "answer_question": 5
     },
     "classificationMethods": {
-      "orchestrator": 2
+      "orchestrator": 5
     },
-    "avgResponseTime": 2762,
-    "totalLlmCalls": 2,
+    "avgResponseTime": 2523,
+    "totalLlmCalls": 5,
     "totalTokensUsed": 0,
     "errorCount": 0
   },
   "createdAt": "2026-02-02T18:51:09.876Z",
-  "updatedAt": "2026-02-02T18:51:44.246Z"
+  "updatedAt": "2026-02-02T18:54:00.837Z"
 }
