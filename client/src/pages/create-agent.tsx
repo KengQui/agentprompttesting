@@ -36,7 +36,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { ClarifyingChatDialog } from "@/components/clarifying-chat-dialog";
 
 const steps = [
-  { id: 1, name: "Business Use Case", icon: Briefcase, description: "Define the problem this agent solves" },
+  { id: 1, name: "Business Use Case", icon: Briefcase, description: "Optional: Define the problem this agent solves" },
   { id: 2, name: "Agent Name", icon: Bot, description: "Name your agent" },
   { id: 3, name: "Domain Knowledge", icon: BookOpen, description: "Add knowledge and documents" },
   { id: 4, name: "Validation Rules", icon: Shield, description: "Set input/output validation rules" },
