@@ -709,7 +709,9 @@ export class Orchestrator {
     const state = this.stateManager.getOrCreateState(conversationId);
     const currentStep = this.flowController.getStep(state.currentStep);
 
-    if (this.stateManager.isFlowComplete(conversationId)) {
+    // If flow is complete OR no flow steps and no dynamic fields, let AI handle it
+    if (this.stateManager.isFlowComplete(conversationId) || 
+        (!this.hasFlowSteps() && this.dynamicFields.length === 0)) {
       return {
         intent: 'unclear',
         response: userInput,
@@ -772,6 +774,14 @@ export class Orchestrator {
           console.log('[Orchestrator] Has missing fields - calling handleDynamicFlow');
           return this.handleDynamicFlow(conversationId, userInput);
         }
+      } else if (!this.hasFlowSteps() && this.dynamicFields.length === 0) {
+        // No flow steps and no dynamic fields - pass directly to AI
+        console.log('[Orchestrator] No flow steps and no dynamic fields - passing to AI directly');
+        return {
+          intent: 'answer_question',
+          response: userInput,
+          nextAction: 'generate_ai_response'
+        };
       } else {
         console.log('[Orchestrator] NOT using dynamic flow path:', {
           hasFlowSteps: this.hasFlowSteps(),

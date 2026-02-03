@@ -30,5 +30,21 @@
     "role": "assistant",
     "content": "I'm not sure I understood that. Could you please rephrase what you'd like to do?\n\nYou can say things like:\n- \"go back\" to return to the previous question\n- \"change [field]\" to update a previous answer\n- \"help\" if you need clarification",
     "timestamp": "2026-02-03T02:02:06.762Z"
+  },
+  {
+    "id": "9339917b-98d8-4261-9b03-5da6b46f34d8",
+    "agentId": "97bb6a05-d142-414b-9490-4f2ae7e29b1d",
+    "sessionId": "5d95d24d-ec68-4107-a656-942000aec0cc",
+    "role": "user",
+    "content": "Our baby is arriving soon",
+    "timestamp": "2026-02-03T02:06:14.603Z"
+  },
+  {
+    "id": "ae98cde5-5104-4dca-80dc-c2be56a881e9",
+    "agentId": "97bb6a05-d142-414b-9490-4f2ae7e29b1d",
+    "sessionId": "5d95d24d-ec68-4107-a656-942000aec0cc",
+    "role": "assistant",
+    "content": "Congratulations on your upcoming arrival! I can help you prepare for the birth or adoption of your child by simulating the process of adding them to your benefits and updating your HR records.\n\nTo get started, let's gather some information:\n\n1.  Will this be a birth or adoption?\n2.  What is the expected or actual date of birth/adoption placement?\n3.  What will be the child's first name?\n4.  What will be the child's last name?\n\nOnce the baby arrives, you'll also need to provide their date of birth and SSN (or proof of application for an SSN). Keep in mind that you'll generally have 31 days from the date of birth or adoption to make changes.",
+    "timestamp": "2026-02-03T02:06:16.280Z"
   }
 ]

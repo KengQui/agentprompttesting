@@ -305,6 +305,41 @@
         }
       ],
       "success": true
+    },
+    {
+      "id": "trace-1770084376279",
+      "sessionId": "5d95d24d-ec68-4107-a656-942000aec0cc",
+      "userInput": "Our baby is arriving soon",
+      "agentResponse": "Congratulations on your upcoming arrival! I can help you prepare for the birth or adoption of your child by simulating the process of adding them to your benefits and updating your HR records.\n\nTo get started, let's gather some information:\n\n1.  Will this be a birth or adoption?\n2.  What is the expected or actual date of birth/adoption placement?\n3.  What will be the child's first name?\n4.  What will be the child's last name?\n\nOnce the baby arrives, you'll also need to provide their date of birth and SSN (or proof of application for an SSN). Keep in mind that you'll generally have 31 days from the date of birth or adoption to make changes.",
+      "startTime": "2026-02-03T02:06:14.603Z",
+      "endTime": "2026-02-03T02:06:16.279Z",
+      "totalDuration": 1676,
+      "entries": [
+        {
+          "id": "entry-1770084374611-1",
+          "type": "intent_classification",
+          "name": "Orchestrator Intent Classification",
+          "timestamp": "2026-02-03T02:06:14.611Z",
+          "metadata": {
+            "intent": "answer_question",
+            "classificationMethod": "orchestrator",
+            "confidence": "high"
+          }
+        },
+        {
+          "id": "entry-1770084376279-3",
+          "type": "llm_call",
+          "name": "Gemini Response Generation",
+          "timestamp": "2026-02-03T02:06:16.279Z",
+          "duration": 1668,
+          "metadata": {
+            "model": "gemini",
+            "intent": "answer_question",
+            "validated": true
+          }
+        }
+      ],
+      "success": true
     }
   ],
   "stats": {
@@ -313,17 +348,17 @@
     },
     "signalReads": {},
     "intentDistribution": {
-      "answer_question": 7,
+      "answer_question": 8,
       "unclear": 2
     },
     "classificationMethods": {
-      "orchestrator": 9
+      "orchestrator": 10
     },
-    "avgResponseTime": 2033.5555555555557,
-    "totalLlmCalls": 7,
+    "avgResponseTime": 1997.8,
+    "totalLlmCalls": 8,
     "totalTokensUsed": 0,
     "errorCount": 0
   },
   "createdAt": "2026-02-02T18:51:09.876Z",
-  "updatedAt": "2026-02-03T02:02:06.761Z"
+  "updatedAt": "2026-02-03T02:06:16.279Z"
 }

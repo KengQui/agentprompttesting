@@ -129,5 +129,11 @@
     "username": "testuser_batch_rubIMB@test.com",
     "password": "$2b$10$n3cU70L26gasv7qqqHMoOOEn.zhptSBu0t.xhP5xwr3taDsgl3a7a",
     "createdAt": "2026-02-02T22:06:22.738Z"
+  },
+  {
+    "id": "56530817-0e23-440b-8307-57ecb3d8237c",
+    "username": "e2e_user_10Ckgr",
+    "password": "$2b$10$S.1QITLk4YsCiwREAjFfM.9D7X3Qdrvv46FB1AvpaaACgwVZDwMpe",
+    "createdAt": "2026-02-03T02:07:40.384Z"
   }
 ]
