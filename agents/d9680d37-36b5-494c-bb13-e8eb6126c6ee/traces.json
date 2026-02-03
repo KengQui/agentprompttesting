@@ -85,22 +85,57 @@
         }
       ],
       "success": true
+    },
+    {
+      "id": "trace-1770143476635",
+      "sessionId": "a0593e2b-4249-4745-8eed-b99a3f3edc10",
+      "userInput": "I want to add my new baby to my healthcare plan",
+      "agentResponse": "Congratulations on your new baby! I can help you with adding them to your healthcare plan.\n\nTo add your child, I'll need a few details:\n- What is your baby's full name?\n- What is their date of birth?\n- What is their Social Security Number (SSN)?\n\nOnce I have that, I can add your baby as a dependent to your health insurance.",
+      "startTime": "2026-02-03T18:31:15.467Z",
+      "endTime": "2026-02-03T18:31:16.635Z",
+      "totalDuration": 1168,
+      "entries": [
+        {
+          "id": "entry-1770143475476-1",
+          "type": "intent_classification",
+          "name": "Orchestrator Intent Classification",
+          "timestamp": "2026-02-03T18:31:15.476Z",
+          "metadata": {
+            "intent": "answer_question",
+            "classificationMethod": "orchestrator",
+            "confidence": "high"
+          }
+        },
+        {
+          "id": "entry-1770143476635-3",
+          "type": "llm_call",
+          "name": "Gemini Response Generation",
+          "timestamp": "2026-02-03T18:31:16.635Z",
+          "duration": 1159,
+          "metadata": {
+            "model": "gemini",
+            "intent": "answer_question",
+            "validated": true
+          }
+        }
+      ],
+      "success": true
     }
   ],
   "stats": {
     "hookCalls": {},
     "signalReads": {},
     "intentDistribution": {
-      "answer_question": 2
+      "answer_question": 3
     },
     "classificationMethods": {
-      "orchestrator": 2
+      "orchestrator": 3
     },
-    "avgResponseTime": 1246.5,
-    "totalLlmCalls": 2,
+    "avgResponseTime": 1220.3333333333333,
+    "totalLlmCalls": 3,
     "totalTokensUsed": 0,
     "errorCount": 0
   },
   "createdAt": "2026-02-03T17:39:57.040Z",
-  "updatedAt": "2026-02-03T18:30:17.208Z"
+  "updatedAt": "2026-02-03T18:31:16.635Z"
 }

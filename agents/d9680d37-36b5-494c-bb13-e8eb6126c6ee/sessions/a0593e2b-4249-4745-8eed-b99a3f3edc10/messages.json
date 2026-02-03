@@ -1,0 +1,18 @@
+[
+  {
+    "id": "304e14c8-f313-4817-bdfd-2eb1d3a192f0",
+    "agentId": "d9680d37-36b5-494c-bb13-e8eb6126c6ee",
+    "sessionId": "a0593e2b-4249-4745-8eed-b99a3f3edc10",
+    "role": "user",
+    "content": "I want to add my new baby to my healthcare plan",
+    "timestamp": "2026-02-03T18:31:15.467Z"
+  },
+  {
+    "id": "ad7ee208-6706-4cfc-bfa2-699ec99dec6b",
+    "agentId": "d9680d37-36b5-494c-bb13-e8eb6126c6ee",
+    "sessionId": "a0593e2b-4249-4745-8eed-b99a3f3edc10",
+    "role": "assistant",
+    "content": "Congratulations on your new baby! I can help you with adding them to your healthcare plan.\n\nTo add your child, I'll need a few details:\n- What is your baby's full name?\n- What is their date of birth?\n- What is their Social Security Number (SSN)?\n\nOnce I have that, I can add your baby as a dependent to your health insurance.",
+    "timestamp": "2026-02-03T18:31:16.635Z"
+  }
+]

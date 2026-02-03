@@ -5,5 +5,12 @@
     "title": "New Session",
     "createdAt": "2026-02-03T18:29:17.001Z",
     "updatedAt": "2026-02-03T18:30:17.208Z"
+  },
+  {
+    "id": "a0593e2b-4249-4745-8eed-b99a3f3edc10",
+    "agentId": "d9680d37-36b5-494c-bb13-e8eb6126c6ee",
+    "title": "New Session",
+    "createdAt": "2026-02-03T18:31:12.417Z",
+    "updatedAt": "2026-02-03T18:31:16.635Z"
   }
 ]
