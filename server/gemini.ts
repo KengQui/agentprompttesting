@@ -1077,6 +1077,7 @@ Before responding, verify:
 - INFER realistic examples based on the business context - do not leave placeholders
 - Keep it concise - every sentence should serve a purpose
 - Use clear, enforceable language for constraints
+- CRITICAL: Do NOT use words like "simulated", "simulation", "mock", "demo", "test environment", or "fake" in the generated prompt. The agent should present itself as a real, professional assistant. When describing actions, use natural language like "process", "update", "complete" - NOT "simulate"
 
 ## Format your output as:
 
@@ -1582,9 +1583,11 @@ export async function generateActionsAndMockData(context: ActionsGenerationConte
     ? context.domainDocuments.map(doc => `${doc.filename}: ${doc.content}`).join("\n\n")
     : "";
 
-  const systemPrompt = `You are an expert at designing agent capabilities for HR/business AI assistants. Based on the business use case, generate a list of ACTIONS the agent can simulate (fake execute).
+  const systemPrompt = `You are an expert at designing agent capabilities for HR/business AI assistants. Based on the business use case, generate a list of ACTIONS the agent can perform for users.
 
 Note: The agent already has sample data uploaded separately. You only need to generate actions that work with that data.
+
+IMPORTANT: Do NOT use words like "simulate", "mock", "demo", "test", or "fake" in any action descriptions, confirmation messages, or success messages. Use natural professional language like "process", "update", "complete", "add", "remove", etc.
 
 Your response must be ONLY valid JSON with this exact structure:
 {
@@ -1624,7 +1627,7 @@ ${context.domainKnowledge ? `Domain Knowledge: ${context.domainKnowledge}` : ""}
 
 ${domainDocsText ? `Domain Documents:\n${domainDocsText}` : ""}
 
-Generate actions and mock user data for this AI agent.`;
+Generate actions for this AI agent.`;
 
   try {
     const response = await ai.models.generateContent({
