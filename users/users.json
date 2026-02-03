@@ -135,5 +135,11 @@
     "username": "e2e_user_10Ckgr",
     "password": "$2b$10$S.1QITLk4YsCiwREAjFfM.9D7X3Qdrvv46FB1AvpaaACgwVZDwMpe",
     "createdAt": "2026-02-03T02:07:40.384Z"
+  },
+  {
+    "id": "b2222377-7b35-4104-a62c-26f0e950be0f",
+    "username": "testuser_tk18zr",
+    "password": "$2b$10$vHB4fRXczxutPk4G4lfo9eEhbKF54HhbhXTfVFEHD/4Cdyi6Fc7zy",
+    "createdAt": "2026-02-03T14:04:19.890Z"
   }
 ]

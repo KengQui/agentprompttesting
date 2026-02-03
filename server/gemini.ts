@@ -993,87 +993,101 @@ export async function generateSystemPrompt(context: SystemPromptContext): Promis
       ).join("\n")
     : "None provided";
 
-  const metaPrompt = `You are an expert AI prompt engineer. Your task is to create a high-quality system prompt for a customer-facing chatbot based on the user's requirements.
+  const metaPrompt = `You are an expert AI prompt engineer trained in Anthropic's prompt engineering best practices. Your task is to create a high-quality system prompt for a customer-facing chatbot.
 
-You will receive the following information:
-- Agent name
-- Business use case
-- Domain knowledge
-- Validation rules
-- Guardrails
-- Sample data (optional)
-- Available actions (optional)
+You will receive information about:
+- Agent name and business use case
+- Domain knowledge and documents
+- Validation rules and guardrails
+- Sample data and available actions
 
-Your goal is to transform this information into a clear, effective system prompt that follows prompt engineering best practices.
+Your goal is to INTELLIGENTLY ANALYZE and REORGANIZE this information into Anthropic's recommended prompt structure. Do NOT just mechanically map each input to a section - analyze the content and place information where it logically belongs.
 
-## Instructions for creating the prompt:
+## Anthropic Prompt Structure (follow this order):
 
-1. **Start with role and purpose**:
-   - Use the provided agent name as the chatbot's identity
-   - Begin with: "You are [Agent Name], a chatbot that helps with [purpose from business use case]"
-   - Clearly state what the chatbot does for end-users
+### 1. TASK CONTEXT
+Start with the agent's identity and purpose. Use the format:
+"You are [Agent Name], an AI assistant."
 
-2. **Curate domain knowledge**: Don't dump all domain information. Instead:
-   - Extract only the most relevant facts needed for the chatbot to function
-   - Organize information logically by topic or workflow
-   - Use clear headings and structure (XML tags like <domain_context>, <rules>, etc.)
-   - Prioritize actionable information over background details
+Then wrap the business context in <task_context> tags:
+<task_context>
+[Synthesized from business use case - what the agent does, who it helps, what problems it solves]
+</task_context>
 
-3. **Include Sample Data Placeholder (REQUIRED)**:
-   - ALWAYS include a sample data section with the exact marker: \`{{SAMPLE_DATA}}\`
-   - Use this format in your generated prompt:
-     \`\`\`
-     <sample_data>
-     {{SAMPLE_DATA}}
-     </sample_data>
-     \`\`\`
-   - Place this section after domain knowledge/validation rules but before interaction guidelines
-   - Include instructions like: "Reference the sample data below when providing personalized responses..."
-   - Include this marker even if no sample data was provided in the inputs - it will be populated at runtime
+### 2. RULES
+Combine validation rules, guardrails, AND any rule-like content from domain knowledge into a unified <rules> section. Analyze ALL inputs to extract rules - they may be scattered across different fields.
 
-4. **Include Available Actions Placeholder (REQUIRED)**:
-   - ALWAYS include an available actions section with the exact marker: \`{{AVAILABLE_ACTIONS}}\`
-   - Use this format in your generated prompt:
-     \`\`\`
-     <available_actions>
-     {{AVAILABLE_ACTIONS}}
-     </available_actions>
-     \`\`\`
-   - Place this section after sample data but before interaction guidelines
-   - Include instructions like: "When performing actions, use the available actions listed above. Respond AS IF you can perform these actions using language like 'I'll submit that for you' or 'I've processed your request'..."
-   - Include this marker even if no actions were provided in the inputs - it will be populated at runtime
+<rules>
+[Organized rules covering:
+- Validation requirements (data formats, constraints)
+- Behavioral guardrails (what to avoid, when to escalate)
+- Compliance requirements (from domain knowledge if present)
+- Response policies
+Use "always" and "never" statements. Be specific.]
+</rules>
 
-5. **Embed validation rules naturally**: Integrate validation rules into the instructions where they're relevant, not as a separate list.
+### 3. DOMAIN KNOWLEDGE (Input Data)
+Include reference materials the agent needs. Use XML tags to separate data from instructions.
 
-6. **Make guardrails enforceable**: Transform guardrails into clear behavioral instructions:
-   - Use "always" and "never" statements
-   - Be specific about what to do AND what not to do
-   - Include examples if the guardrail is complex
+<domain_knowledge>
+[Only include knowledge that is NOT rules - facts, procedures, reference materials, policies the agent should know]
+</domain_knowledge>
 
-7. **Add interaction guidelines**: Include how the chatbot should communicate:
-   - Tone and style appropriate for the business use case
-   - How to handle unclear requests
-   - When to ask clarifying questions
+### 4. SAMPLE DATA PLACEHOLDER (REQUIRED)
+ALWAYS include this section with the exact marker:
+<sample_data>
+{{SAMPLE_DATA}}
+</sample_data>
 
-8. **Determine appropriate output format based on use case**:
-   - If the chatbot needs to execute tasks or return data for system integration → specify structured format (JSON, key-value pairs, etc.)
-   - If the chatbot generates documents or lists → specify formatting (markdown, bullet points, numbered steps)
-   - If the chatbot has conversational Q&A → allow natural language responses
-   - Be explicit about the format in the instructions
+### 5. AVAILABLE ACTIONS PLACEHOLDER (REQUIRED)
+ALWAYS include this section with the exact marker:
+<available_actions>
+{{AVAILABLE_ACTIONS}}
+</available_actions>
 
-9. **Keep it concise but complete**: Remove redundancy and generic fluff. Every sentence should serve a purpose.
+### 6. IMMEDIATE TASK
+Tell the agent what to do when receiving a user message:
+
+<immediate_task>
+[Clear instruction on how to respond - use the data provided, reference available actions, handle the user's request]
+</immediate_task>
+
+### 7. PRECOGNITION
+Guide the agent to think before responding:
+
+<precognition>
+Before responding, think through:
+1. What is the user asking for?
+2. Do I have the relevant information in my domain knowledge or sample data?
+3. Is there an available action that addresses their need?
+4. What is the best way to structure my response?
+</precognition>
+
+### 8. OUTPUT FORMAT
+Define how responses should be structured:
+
+<output_format>
+[Specify based on use case:
+- Conversational Q&A → natural language guidelines
+- Task execution → structured confirmation format
+- Data retrieval → how to present information
+- Document generation → formatting requirements]
+</output_format>
+
+## Key Principles:
+- INTELLIGENTLY REDISTRIBUTE content to the correct section (e.g., guardrail-like content in domain knowledge should go to <rules>)
+- Keep it concise - every sentence should serve a purpose
+- Use clear, enforceable language for rules
+- Maintain XML structure for all data sections
 
 ## Format your output as:
 
 <system_prompt>
-[The complete, ready-to-use system prompt here]
+[The complete, ready-to-use system prompt following the structure above]
 </system_prompt>
 
 <reasoning>
-[Brief explanation of key decisions you made in structuring this prompt, including:
-- Why you chose the output format
-- How you organized the domain knowledge
-- Any assumptions you made about missing information]
+[Brief explanation of key decisions, especially how you redistributed content between sections]
 </reasoning>`;
 
   const userPrompt = `## Input Information:

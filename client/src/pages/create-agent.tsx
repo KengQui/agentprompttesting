@@ -2102,6 +2102,109 @@ function Step7AvailableActions({
   );
 }
 
+// Generate manual template based on Anthropic's prompt engineering best practices
+function generateManualTemplate(data: WizardStepData): string {
+  const agentName = data.name || "[Agent Name]";
+  const businessUseCase = data.businessUseCase || "[Describe the agent's purpose and what problems it solves]";
+  
+  // Build rules section from validation rules and guardrails
+  let rulesSection = "";
+  if (data.validationRules || data.guardrails) {
+    rulesSection = `<rules>
+${data.validationRules ? `## Validation Rules\n${data.validationRules}\n\n` : ""}${data.guardrails ? `## Guardrails\n${data.guardrails}` : ""}
+</rules>`;
+  } else {
+    rulesSection = `<rules>
+## Validation Rules
+- [Add validation rules here - e.g., required formats, data constraints]
+
+## Guardrails
+- [Add guardrails here - e.g., topics to avoid, escalation triggers]
+</rules>`;
+  }
+
+  // Build domain knowledge section
+  let domainSection = "";
+  if (data.domainKnowledge || (data.domainDocuments && data.domainDocuments.length > 0)) {
+    const docsContent = data.domainDocuments?.map(doc => `### ${doc.filename}\n${doc.content}`).join("\n\n") || "";
+    domainSection = `<domain_knowledge>
+${data.domainKnowledge || ""}
+${docsContent}
+</domain_knowledge>`;
+  } else {
+    domainSection = `<domain_knowledge>
+[Add domain-specific knowledge, policies, procedures, or reference materials here]
+</domain_knowledge>`;
+  }
+
+  // Build sample data section
+  let sampleDataSection = "";
+  if (data.sampleDatasets && data.sampleDatasets.length > 0) {
+    const datasetsContent = data.sampleDatasets.map(ds => 
+      `### ${ds.name} (${ds.format})\n${ds.content}`
+    ).join("\n\n");
+    sampleDataSection = `<sample_data>
+${datasetsContent}
+</sample_data>`;
+  } else {
+    sampleDataSection = `<sample_data>
+{{SAMPLE_DATA}}
+</sample_data>`;
+  }
+
+  // Build available actions section
+  let actionsSection = "";
+  if (data.availableActions && data.availableActions.length > 0) {
+    const actionsContent = data.availableActions.map(action => {
+      const fields = action.requiredFields?.length 
+        ? `\n  Required fields: ${action.requiredFields.map(f => f.name).join(", ")}`
+        : "";
+      return `- ${action.name}: ${action.description}${fields}`;
+    }).join("\n");
+    actionsSection = `<available_actions>
+${actionsContent}
+</available_actions>`;
+  } else {
+    actionsSection = `<available_actions>
+{{AVAILABLE_ACTIONS}}
+</available_actions>`;
+  }
+
+  return `You are ${agentName}, an AI assistant.
+
+<task_context>
+${businessUseCase}
+</task_context>
+
+${rulesSection}
+
+${domainSection}
+
+${sampleDataSection}
+
+${actionsSection}
+
+<immediate_task>
+Respond to the user's message. Use the data and knowledge provided above to give accurate, helpful information. If an action is needed and available, guide the user through it or confirm execution.
+</immediate_task>
+
+<precognition>
+Before responding, think through:
+1. What is the user asking for?
+2. Do I have the relevant information in my domain knowledge or sample data?
+3. Is there an available action that addresses their need?
+4. What is the best way to structure my response?
+</precognition>
+
+<output_format>
+- Respond in a conversational, natural tone appropriate to the context
+- Use bullet points or numbered lists for multi-step information
+- Keep responses concise but complete
+- When performing actions, confirm what you're doing before executing
+- If you cannot help with something, explain why and suggest alternatives
+</output_format>`;
+}
+
 function Step8Review({
   data,
   onUpdate,
@@ -2109,12 +2212,18 @@ function Step8Review({
   data: WizardStepData;
   onUpdate: (data: Partial<WizardStepData>) => void;
 }) {
+  // Mode: null = show selection cards, 'manual' = show template, 'ai' = show AI generated
+  // If there's already a custom prompt, default to showing it in manual edit mode
+  const [promptMode, setPromptMode] = useState<'manual' | 'ai' | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [editedPrompt, setEditedPrompt] = useState(data.customPrompt || "");
   const [generatedPrompt, setGeneratedPrompt] = useState(data.customPrompt || "");
   const [isGenerating, setIsGenerating] = useState(false);
   const [generationError, setGenerationError] = useState<string | null>(null);
   const [selectedModel, setSelectedModel] = useState<GeminiModel>(defaultGenerationModel);
+  const { toast } = useToast();
+
+  const hasBusinessUseCase = !!(data.businessUseCase && data.businessUseCase.trim());
 
   const generatePromptFromAPI = async (model?: GeminiModel) => {
     const modelToUse = model || selectedModel;
@@ -2153,18 +2262,34 @@ function Step8Review({
     }
   };
 
-  useEffect(() => {
-    if (data.customPrompt) {
-      setEditedPrompt(data.customPrompt);
-      setGeneratedPrompt(data.customPrompt);
-    } else if (data.name && data.businessUseCase) {
-      generatePromptFromAPI();
-    } else {
-      const fallback = generatePromptPreview("gemini", data);
-      setGeneratedPrompt(fallback);
-      setEditedPrompt(fallback);
-    }
-  }, [data.name, data.businessUseCase, data.domainKnowledge, data.domainDocuments, data.validationRules, data.guardrails]);
+  const handleSelectManual = () => {
+    const template = generateManualTemplate(data);
+    setEditedPrompt(template);
+    setGeneratedPrompt(template);
+    onUpdate({ customPrompt: template });
+    setPromptMode('manual');
+    setIsEditing(true);
+  };
+
+  const handleSelectAI = () => {
+    setPromptMode('ai');
+    generatePromptFromAPI();
+  };
+
+  const handleBackToSelection = () => {
+    setPromptMode(null);
+    setIsEditing(false);
+    onUpdate({ customPrompt: "" });
+  };
+
+  const handleSaveEdit = () => {
+    onUpdate({ customPrompt: editedPrompt });
+    setIsEditing(false);
+    toast({
+      title: "Prompt saved",
+      description: "Your changes have been saved.",
+    });
+  };
 
   const handleEditToggle = () => {
     if (!isEditing) {
@@ -2173,27 +2298,33 @@ function Step8Review({
     setIsEditing(!isEditing);
   };
 
-  const handleSaveEdit = () => {
-    onUpdate({ customPrompt: editedPrompt });
-    setIsEditing(false);
-  };
-
   const handleResetPrompt = () => {
     onUpdate({ customPrompt: "" });
-    generatePromptFromAPI();
+    if (promptMode === 'ai') {
+      generatePromptFromAPI();
+    } else {
+      const template = generateManualTemplate(data);
+      setEditedPrompt(template);
+      setGeneratedPrompt(template);
+      onUpdate({ customPrompt: template });
+    }
     setIsEditing(false);
   };
 
   const displayPrompt = data.customPrompt || generatedPrompt;
 
+  // Configuration summary data for the review section
   const domainDocsCount = data.domainDocuments?.length || 0;
   const domainKnowledgeValue = data.domainKnowledge 
     ? data.domainKnowledge 
     : (domainDocsCount > 0 ? `${domainDocsCount} document(s) uploaded` : "");
-
   const sampleDatasetsCount = data.sampleDatasets?.length || 0;
   const sampleDatasetsValue = sampleDatasetsCount > 0 
     ? `${sampleDatasetsCount} dataset(s) configured` 
+    : "";
+  const actionsCount = data.availableActions?.length || 0;
+  const actionsValue = actionsCount > 0 
+    ? `${actionsCount} action(s) defined` 
     : "";
 
   const sections = [
@@ -2203,98 +2334,205 @@ function Step8Review({
     { label: "Validation Rules", value: data.validationRules, icon: Shield, optional: true },
     { label: "Guardrails", value: data.guardrails, icon: AlertTriangle, optional: true },
     { label: "Sample Data", value: sampleDatasetsValue, icon: Database, optional: true },
+    { label: "Available Actions", value: actionsValue, icon: Zap, optional: true },
   ];
 
+  // Configuration review summary component
+  const ConfigReviewSummary = () => (
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <Eye className="h-5 w-5 text-primary" />
+          Review Configuration
+        </CardTitle>
+        <CardDescription>
+          Review your agent configuration before creating the prompt.
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-3">
+          {sections.map((section) => {
+            const Icon = section.icon;
+            return (
+              <div key={section.label} className="flex items-start gap-2">
+                <Icon className="h-4 w-4 mt-0.5 text-muted-foreground flex-shrink-0" />
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2">
+                    <h4 className="font-medium text-xs">{section.label}</h4>
+                    {section.optional && !section.value && (
+                      <Badge variant="secondary" className="text-xs py-0 h-4">Not set</Badge>
+                    )}
+                  </div>
+                  <p
+                    className="text-xs text-muted-foreground mt-0.5 break-words line-clamp-2"
+                    data-testid={`review-${section.label.toLowerCase().replace(/\s+/g, "-")}`}
+                  >
+                    {section.value ? (
+                      section.value.length > 80 ? section.value.slice(0, 80) + "..." : section.value
+                    ) : (
+                      <span className="italic">Not provided</span>
+                    )}
+                  </p>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </CardContent>
+    </Card>
+  );
+
+  // Selection cards view
+  if (promptMode === null) {
+    return (
+      <div className="space-y-6">
+        <ConfigReviewSummary />
+        
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Code className="h-5 w-5 text-primary" />
+              Create Agent Prompt
+            </CardTitle>
+            <CardDescription>
+              Choose how you want to create your agent's system prompt.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Manual Creation Card */}
+              <Card 
+                className="cursor-pointer hover-elevate transition-all border-2 hover:border-primary/50"
+                onClick={handleSelectManual}
+                data-testid="card-manual-prompt"
+              >
+                <CardHeader className="pb-3">
+                  <CardTitle className="flex items-center gap-2 text-base">
+                    <Pencil className="h-4 w-4 text-primary" />
+                    Create Manually
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="pt-0">
+                  <p className="text-sm text-muted-foreground mb-3">
+                    Start with a structured template based on prompt engineering best practices. Your sample data and available actions will be pre-populated.
+                  </p>
+                  <div className="flex flex-wrap gap-1">
+                    <Badge variant="secondary" className="text-xs">Template-based</Badge>
+                    <Badge variant="secondary" className="text-xs">Full control</Badge>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* AI Generation Card */}
+              <Card 
+                className={`transition-all border-2 ${
+                  hasBusinessUseCase 
+                    ? "cursor-pointer hover-elevate hover:border-primary/50" 
+                    : "opacity-50 cursor-not-allowed"
+                }`}
+                onClick={hasBusinessUseCase ? handleSelectAI : undefined}
+                data-testid="card-ai-prompt"
+              >
+                <CardHeader className="pb-3">
+                  <CardTitle className="flex items-center gap-2 text-base">
+                    <Sparkles className="h-4 w-4 text-primary" />
+                    AI Generate
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="pt-0">
+                  <p className="text-sm text-muted-foreground mb-3">
+                    Let AI create an optimized prompt by intelligently analyzing your business use case and configuration.
+                  </p>
+                  <div className="flex flex-wrap gap-1">
+                    <Badge variant="secondary" className="text-xs">AI-powered</Badge>
+                    <Badge variant="secondary" className="text-xs">Context-aware</Badge>
+                  </div>
+                  {!hasBusinessUseCase && (
+                    <div className="mt-3 flex items-center gap-2 text-xs text-muted-foreground">
+                      <AlertTriangle className="h-3 w-3" />
+                      Requires business use case to be filled in
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  // Prompt editor view (for both manual and AI modes)
   return (
     <div className="space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Eye className="h-5 w-5 text-primary" />
-            Review Configuration
-          </CardTitle>
-          <CardDescription>
-            Review your agent configuration before creating it.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            {sections.map((section) => {
-              const Icon = section.icon;
-              return (
-                <div key={section.label} className="flex items-start gap-3">
-                  <Icon className="h-4 w-4 mt-1 text-muted-foreground flex-shrink-0" />
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <h4 className="font-medium text-sm">{section.label}</h4>
-                      {section.optional && !section.value && (
-                        <Badge variant="secondary" className="text-xs">Not set</Badge>
-                      )}
-                    </div>
-                    <p
-                      className="text-sm text-muted-foreground mt-0.5 break-words"
-                      data-testid={`review-${section.label.toLowerCase().replace(/\s+/g, "-")}`}
-                    >
-                      {section.value ? (
-                        section.value.length > 100 ? section.value.slice(0, 100) + "..." : section.value
-                      ) : (
-                        <span className="italic">Not provided</span>
-                      )}
-                    </p>
-                  </div>
-                </div>
-              );
-            })}
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle className="flex items-center gap-2">
+                <Code className="h-5 w-5 text-primary" />
+                {promptMode === 'manual' ? 'Manual Prompt Template' : 'AI Generated Prompt'}
+              </CardTitle>
+              <CardDescription>
+                {promptMode === 'manual' 
+                  ? 'Edit the template below. Your data has been pre-populated into the appropriate sections.'
+                  : 'AI has generated a prompt based on your configuration. You can edit it if needed.'
+                }
+              </CardDescription>
+            </div>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={handleBackToSelection}
+              className="gap-1"
+              data-testid="button-back-to-selection"
+            >
+              <ArrowLeft className="h-3 w-3" />
+              Change Method
+            </Button>
           </div>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Code className="h-5 w-5 text-primary" />
-            Generated Prompt
-          </CardTitle>
-          <CardDescription>
-            A system prompt has been automatically generated based on your configuration.
-          </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
             <div className="flex items-center justify-between flex-wrap gap-2">
-              <Label>Prompt Preview</Label>
+              <Label>
+                {promptMode === 'manual' ? 'Prompt Template' : 'Prompt Preview'}
+              </Label>
               <div className="flex items-center gap-2">
-                <span className="text-sm text-muted-foreground">AI model</span>
-                {!isGenerating && !isEditing && (
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        className="gap-1 h-7"
-                        data-testid="button-regenerate-prompt"
-                      >
-                        {geminiModelDisplayNames[selectedModel]}
-                        <ChevronDown className="h-3 w-3" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      {(Object.keys(geminiModelDisplayNames) as GeminiModel[]).map((model) => (
-                        <DropdownMenuItem
-                          key={model}
-                          onClick={() => {
-                            setSelectedModel(model);
-                            onUpdate({ customPrompt: "" });
-                            generatePromptFromAPI(model);
-                          }}
-                          data-testid={`menu-item-prompt-model-${model}`}
+                {promptMode === 'ai' && !isGenerating && !isEditing && (
+                  <>
+                    <span className="text-sm text-muted-foreground">AI model</span>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          className="gap-1 h-7"
+                          data-testid="button-regenerate-prompt"
                         >
-                          {geminiModelDisplayNames[model]}
-                        </DropdownMenuItem>
-                      ))}
-                    </DropdownMenuContent>
-                  </DropdownMenu>
+                          {geminiModelDisplayNames[selectedModel]}
+                          <ChevronDown className="h-3 w-3" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        {(Object.keys(geminiModelDisplayNames) as GeminiModel[]).map((model) => (
+                          <DropdownMenuItem
+                            key={model}
+                            onClick={() => {
+                              setSelectedModel(model);
+                              onUpdate({ customPrompt: "" });
+                              generatePromptFromAPI(model);
+                            }}
+                            data-testid={`menu-item-prompt-model-${model}`}
+                          >
+                            {geminiModelDisplayNames[model]}
+                          </DropdownMenuItem>
+                        ))}
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </>
                 )}
                 {isGenerating && (
                   <Button
@@ -2321,26 +2559,37 @@ function Step8Review({
                   data-testid="button-reset-prompt"
                 >
                   <RotateCcw className="h-3 w-3" />
-                  Regenerate
+                  {promptMode === 'ai' ? 'Regenerate' : 'Reset Template'}
                 </Button>
               )}
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                onClick={isEditing ? handleSaveEdit : handleEditToggle}
-                className="gap-1 h-7"
-                disabled={isGenerating}
-                data-testid="button-edit-prompt"
-              >
-                <Pencil className="h-3 w-3" />
-                {isEditing ? "Save" : "Edit"}
-              </Button>
+              {promptMode === 'ai' && (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={isEditing ? handleSaveEdit : handleEditToggle}
+                  className="gap-1 h-7"
+                  disabled={isGenerating}
+                  data-testid="button-edit-prompt"
+                >
+                  <Pencil className="h-3 w-3" />
+                  {isEditing ? "Save" : "Edit"}
+                </Button>
+              )}
+              {promptMode === 'manual' && isEditing && (
+                <Button
+                  type="button"
+                  variant="default"
+                  size="sm"
+                  onClick={handleSaveEdit}
+                  className="gap-1 h-7"
+                  data-testid="button-save-prompt"
+                >
+                  <Check className="h-3 w-3" />
+                  Save Changes
+                </Button>
+              )}
             </div>
-            
-            <p className="text-xs text-muted-foreground">
-              AI generates a custom prompt based on your configuration. You can edit it if needed.
-            </p>
 
             {generationError && (
               <div className="flex items-center gap-2 p-2 rounded-md bg-destructive/10 text-destructive text-xs">
@@ -2351,22 +2600,22 @@ function Step8Review({
             
             {isGenerating ? (
               <div 
-                className="rounded-md bg-muted/50 p-4 min-h-[300px] flex flex-col items-center justify-center gap-3"
+                className="rounded-md bg-muted/50 p-4 min-h-[400px] flex flex-col items-center justify-center gap-3"
                 data-testid="prompt-loading"
               >
                 <Loader2 className="h-6 w-6 animate-spin text-primary" />
-                <p className="text-sm text-muted-foreground">Generating prompt with Gemini...</p>
+                <p className="text-sm text-muted-foreground">Generating prompt with AI...</p>
               </div>
-            ) : isEditing ? (
+            ) : (promptMode === 'manual' || isEditing) ? (
               <Textarea
                 value={editedPrompt}
                 onChange={(e) => setEditedPrompt(e.target.value)}
-                className="min-h-[270px] resize-y font-mono text-xs"
+                className="min-h-[400px] resize-y font-mono text-xs"
                 data-testid="textarea-edit-prompt"
               />
             ) : (
               <div 
-                className="rounded-md bg-muted/50 p-4 text-xs font-mono whitespace-pre-wrap max-h-[300px] overflow-y-auto"
+                className="rounded-md bg-muted/50 p-4 text-xs font-mono whitespace-pre-wrap max-h-[400px] overflow-y-auto"
                 data-testid="prompt-preview"
               >
                 {displayPrompt || "No prompt generated yet."}
