@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useParams, useLocation } from "wouter";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { ArrowLeft, Save, Trash2, Bot, Briefcase, Shield, AlertTriangle, Loader2, BookOpen, Upload, X, FileText, Code, Pencil, RotateCcw, HelpCircle, ExternalLink, Info, Sparkles, ChevronDown, Database, Check, Settings, Activity, FlaskConical, Zap, User, Eye } from "lucide-react";
+import { ArrowLeft, Save, Trash2, Bot, Briefcase, Shield, AlertTriangle, Loader2, BookOpen, Upload, X, FileText, Code, Pencil, RotateCcw, HelpCircle, ExternalLink, Info, Sparkles, ChevronDown, ChevronUp, Database, Check, Settings, Activity, FlaskConical, Zap, User, Eye, Filter, Plus, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -17,6 +17,7 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -42,8 +43,78 @@ import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { validationRulesTemplate, guardrailsTemplate } from "@/lib/config-templates";
 import { TracingDashboard, SimulationPanel, ConfigHistoryPanel } from "@/components/tracing-dashboard";
-import type { Agent, UpdateAgent, AgentStatus, DomainDocument, SampleDataset, GeminiModel, AgentAction, MockUserState, MockMode } from "@shared/schema";
+import type { Agent, UpdateAgent, AgentStatus, DomainDocument, SampleDataset, GeminiModel, AgentAction, MockUserState, MockMode, ActionField, ClarifyingInsight } from "@shared/schema";
 import { geminiModelDisplayNames, defaultGenerationModel, mockModeDescriptions } from "@shared/schema";
+import { ClarifyingChatDialog } from "@/components/clarifying-chat-dialog";
+
+interface ExtractionResult {
+  extractedContent: string;
+  discardedSummary: string[];
+  keepCategories: string[];
+  success: boolean;
+  error?: string;
+}
+
+interface GuardrailConflict {
+  type: string;
+  severity: 'error' | 'warning' | 'info';
+  guardrailRule: string;
+  recoveryRule: string;
+  suggestion: string;
+  topic?: string;
+}
+
+interface ConflictCheckResult {
+  conflicts: GuardrailConflict[];
+  hasErrors: boolean;
+  hasWarnings: boolean;
+  summary: {
+    errors: number;
+    warnings: number;
+    info: number;
+  };
+}
+
+const actionCategories = ["general", "create", "read", "update", "delete", "search", "export", "import", "notify"];
+const fieldTypes = ["string", "number", "boolean", "date", "select"] as const;
+
+function extractFieldsFromSampleData(datasets: SampleDataset[]): { name: string; type: string; source: string }[] {
+  const fields: { name: string; type: string; source: string }[] = [];
+  
+  for (const dataset of datasets) {
+    if (dataset.format === "json") {
+      try {
+        const parsed = JSON.parse(dataset.content);
+        const items = Array.isArray(parsed) ? parsed : [parsed];
+        if (items.length > 0 && typeof items[0] === "object") {
+          for (const key of Object.keys(items[0])) {
+            const value = items[0][key];
+            let type = "string";
+            if (typeof value === "number") type = "number";
+            else if (typeof value === "boolean") type = "boolean";
+            else if (typeof value === "string" && !isNaN(Date.parse(value)) && value.includes("-")) type = "date";
+            
+            if (!fields.find(f => f.name === key)) {
+              fields.push({ name: key, type, source: dataset.name });
+            }
+          }
+        }
+      } catch {}
+    } else if (dataset.format === "csv") {
+      const lines = dataset.content.split("\n");
+      if (lines.length > 0) {
+        const headers = lines[0].split(",").map(h => h.trim().replace(/^"|"$/g, ""));
+        for (const header of headers) {
+          if (header && !fields.find(f => f.name === header)) {
+            fields.push({ name: header, type: "string", source: dataset.name });
+          }
+        }
+      }
+    }
+  }
+  
+  return fields;
+}
 
 const settingsSteps = [
   { id: 1, name: "General", icon: Bot, description: "Name and status" },
@@ -152,6 +223,46 @@ export default function SettingsPage() {
   const [sampleFormat, setSampleFormat] = useState<"json" | "csv" | "text">("json");
   const [viewingAction, setViewingAction] = useState<AgentAction | null>(null);
   const [viewingMockState, setViewingMockState] = useState<MockUserState | null>(null);
+  const [viewingDataset, setViewingDataset] = useState<SampleDataset | null>(null);
+
+  // Business Use Case extraction state
+  const [isExtracting, setIsExtracting] = useState(false);
+  const [extractionResult, setExtractionResult] = useState<ExtractionResult | null>(null);
+  const [showExtractionDetails, setShowExtractionDetails] = useState(false);
+
+  // Guardrails conflict checking state
+  const [isCheckingConflicts, setIsCheckingConflicts] = useState(false);
+  const [conflicts, setConflicts] = useState<GuardrailConflict[]>([]);
+  const [conflictSummary, setConflictSummary] = useState<ConflictCheckResult['summary'] | null>(null);
+  const conflictCheckTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Clarifying chat dialog state
+  const [showValidationChatDialog, setShowValidationChatDialog] = useState(false);
+  const [showGuardrailsChatDialog, setShowGuardrailsChatDialog] = useState(false);
+  const [isEvaluatingValidation, setIsEvaluatingValidation] = useState(false);
+  const [isEvaluatingGuardrails, setIsEvaluatingGuardrails] = useState(false);
+  const [validationInitialQuestion, setValidationInitialQuestion] = useState("");
+  const [guardrailsInitialQuestion, setGuardrailsInitialQuestion] = useState("");
+
+  // Actions editing state
+  const [isAddActionDialogOpen, setIsAddActionDialogOpen] = useState(false);
+  const [editingAction, setEditingAction] = useState<AgentAction | null>(null);
+  const [showAvailableFields, setShowAvailableFields] = useState(false);
+  const [actionFormData, setActionFormData] = useState<{
+    name: string;
+    description: string;
+    category: string;
+    confirmationMessage: string;
+    successMessage: string;
+    requiredFields: ActionField[];
+  }>({
+    name: "",
+    description: "",
+    category: "general",
+    confirmationMessage: "",
+    successMessage: "",
+    requiredFields: [],
+  });
 
   const computeCompletedSteps = (data: Partial<UpdateAgent>): Set<number> => {
     const completed = new Set<number>();
@@ -484,6 +595,409 @@ export default function SettingsPage() {
     updateFormDataAndTrackCompletion({ mockUserState: current.filter(s => s.id !== id) });
   };
 
+  // Business Use Case extraction handler
+  const handleExtractBusinessCase = async () => {
+    if (!formData?.businessUseCase?.trim()) {
+      toast({
+        title: "Nothing to extract",
+        description: "Please enter a business case first.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsExtracting(true);
+    try {
+      const response = await apiRequest("POST", "/api/extract-business-case", {
+        businessCaseText: formData.businessUseCase,
+      });
+      const result: ExtractionResult = await response.json();
+      
+      if (result.success) {
+        setExtractionResult(result);
+        updateFormDataAndTrackCompletion({ businessUseCase: result.extractedContent });
+        toast({
+          title: "Content extracted",
+          description: `Kept ${result.keepCategories.length} categories, removed ${result.discardedSummary.length} sections.`,
+        });
+      } else {
+        toast({
+          title: "Extraction failed",
+          description: result.error || "Could not extract content.",
+          variant: "destructive",
+        });
+      }
+    } catch (error: any) {
+      toast({
+        title: "Extraction failed",
+        description: error?.message || "Failed to extract business case content.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsExtracting(false);
+    }
+  };
+
+  // Guardrails conflict checking
+  const checkForConflicts = async (guardrailsContent: string) => {
+    if (!guardrailsContent || guardrailsContent.trim().length < 20) {
+      setConflicts([]);
+      setConflictSummary(null);
+      return;
+    }
+
+    setIsCheckingConflicts(true);
+    try {
+      const response = await apiRequest("POST", "/api/validate/guardrail-conflicts", {
+        guardrails: guardrailsContent,
+      });
+      const result: ConflictCheckResult = await response.json();
+      setConflicts(result.conflicts);
+      setConflictSummary(result.summary);
+    } catch (error) {
+      console.error("Failed to check conflicts:", error);
+    } finally {
+      setIsCheckingConflicts(false);
+    }
+  };
+
+  const handleGuardrailsChange = (value: string) => {
+    updateFormDataAndTrackCompletion({ guardrails: value });
+    
+    if (conflictCheckTimeoutRef.current) {
+      clearTimeout(conflictCheckTimeoutRef.current);
+    }
+    conflictCheckTimeoutRef.current = setTimeout(() => {
+      checkForConflicts(value);
+    }, 1000);
+  };
+
+  // Update generation handlers to use clarifying chat
+  const handleGenerateValidationRulesWithEval = async (model: GeminiModel) => {
+    if (!formData?.businessUseCase) {
+      toast({
+        title: "Business use case required",
+        description: "Please add a business use case before generating.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsEvaluatingValidation(true);
+    
+    try {
+      const evalResponse = await apiRequest("POST", "/api/generate/evaluate-context", {
+        businessUseCase: formData.businessUseCase,
+        domainKnowledge: formData.domainKnowledge,
+        domainDocuments: formData.domainDocuments,
+        generationType: "validation",
+      });
+      const evalResult = await evalResponse.json();
+
+      if (!evalResult.hasEnoughContext && evalResult.initialQuestion) {
+        setValidationInitialQuestion(evalResult.initialQuestion);
+        setShowValidationChatDialog(true);
+        setIsEvaluatingValidation(false);
+        return;
+      }
+
+      setIsEvaluatingValidation(false);
+      setIsGeneratingValidation(true);
+      
+      const response = await apiRequest("POST", "/api/generate/validation-rules", {
+        businessUseCase: formData.businessUseCase,
+        domainKnowledge: formData.domainKnowledge,
+        domainDocuments: formData.domainDocuments,
+        model,
+      });
+      const result = await response.json();
+      updateFormDataAndTrackCompletion({ validationRules: result.validationRules });
+      toast({
+        title: "Validation rules generated",
+        description: `Generated using ${geminiModelDisplayNames[model]}.`,
+      });
+    } catch (error: any) {
+      toast({
+        title: "Generation failed",
+        description: error?.message || "Failed to generate validation rules.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsGeneratingValidation(false);
+      setIsEvaluatingValidation(false);
+    }
+  };
+
+  const handleValidationChatComplete = (insights: ClarifyingInsight[], generatedContent: string) => {
+    const updatedInsights = [
+      ...(formData?.clarifyingInsights || []),
+      ...insights,
+    ];
+    updateFormDataAndTrackCompletion({ 
+      validationRules: generatedContent,
+      clarifyingInsights: updatedInsights,
+    });
+    toast({
+      title: "Validation rules generated",
+      description: "Generated with your additional context.",
+    });
+  };
+
+  const handleGenerateGuardrailsWithEval = async (model: GeminiModel) => {
+    if (!formData?.businessUseCase) {
+      toast({
+        title: "Business use case required",
+        description: "Please add a business use case before generating.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsEvaluatingGuardrails(true);
+
+    try {
+      const evalResponse = await apiRequest("POST", "/api/generate/evaluate-context", {
+        businessUseCase: formData.businessUseCase,
+        domainKnowledge: formData.domainKnowledge,
+        domainDocuments: formData.domainDocuments,
+        generationType: "guardrails",
+      });
+      const evalResult = await evalResponse.json();
+
+      if (!evalResult.hasEnoughContext && evalResult.initialQuestion) {
+        setGuardrailsInitialQuestion(evalResult.initialQuestion);
+        setShowGuardrailsChatDialog(true);
+        setIsEvaluatingGuardrails(false);
+        return;
+      }
+
+      setIsEvaluatingGuardrails(false);
+      setIsGeneratingGuardrails(true);
+
+      const response = await apiRequest("POST", "/api/generate/guardrails", {
+        businessUseCase: formData.businessUseCase,
+        domainKnowledge: formData.domainKnowledge,
+        domainDocuments: formData.domainDocuments,
+        model,
+      });
+      const result = await response.json();
+      updateFormDataAndTrackCompletion({ guardrails: result.guardrails });
+      toast({
+        title: "Guardrails generated",
+        description: `Generated using ${geminiModelDisplayNames[model]}.`,
+      });
+      setTimeout(() => checkForConflicts(result.guardrails), 100);
+    } catch (error: any) {
+      toast({
+        title: "Generation failed",
+        description: error?.message || "Failed to generate guardrails.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsGeneratingGuardrails(false);
+      setIsEvaluatingGuardrails(false);
+    }
+  };
+
+  const handleGuardrailsChatComplete = (insights: ClarifyingInsight[], generatedContent: string) => {
+    const updatedInsights = [
+      ...(formData?.clarifyingInsights || []),
+      ...insights,
+    ];
+    updateFormDataAndTrackCompletion({ 
+      guardrails: generatedContent,
+      clarifyingInsights: updatedInsights,
+    });
+    toast({
+      title: "Guardrails generated",
+      description: "Generated with your additional context.",
+    });
+    setTimeout(() => checkForConflicts(generatedContent), 100);
+  };
+
+  const getSeverityIcon = (severity: string) => {
+    switch (severity) {
+      case 'error':
+        return <AlertTriangle className="h-4 w-4 text-destructive" />;
+      case 'warning':
+        return <AlertTriangle className="h-4 w-4 text-yellow-500" />;
+      default:
+        return <Info className="h-4 w-4 text-blue-500" />;
+    }
+  };
+
+  const getSeverityBadge = (severity: string) => {
+    switch (severity) {
+      case 'error':
+        return <Badge variant="destructive">Error</Badge>;
+      case 'warning':
+        return <Badge className="bg-yellow-500 hover:bg-yellow-600">Warning</Badge>;
+      default:
+        return <Badge variant="secondary">Info</Badge>;
+    }
+  };
+
+  // Action editing handlers
+  const availableFields = extractFieldsFromSampleData(formData?.sampleDatasets || []);
+
+  const resetActionForm = () => {
+    setActionFormData({
+      name: "",
+      description: "",
+      category: "general",
+      confirmationMessage: "",
+      successMessage: "",
+      requiredFields: [],
+    });
+  };
+
+  const openAddActionDialog = () => {
+    resetActionForm();
+    setEditingAction(null);
+    setIsAddActionDialogOpen(true);
+  };
+
+  const openEditActionDialog = (action: AgentAction) => {
+    setActionFormData({
+      name: action.name,
+      description: action.description,
+      category: action.category,
+      confirmationMessage: action.confirmationMessage || "",
+      successMessage: action.successMessage || "",
+      requiredFields: [...action.requiredFields],
+    });
+    setEditingAction(action);
+    setIsAddActionDialogOpen(true);
+  };
+
+  const handleSaveAction = () => {
+    if (!actionFormData.name.trim()) {
+      toast({
+        title: "Validation error",
+        description: "Action name is required",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const invalidFields = actionFormData.requiredFields.filter(f => !f.name.trim() || !f.label.trim());
+    if (invalidFields.length > 0) {
+      toast({
+        title: "Validation error",
+        description: "All fields must have a name and label",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const validatedFields = actionFormData.requiredFields.map(f => ({
+      ...f,
+      name: f.name.trim(),
+      label: f.label.trim(),
+    }));
+
+    const current = formData?.availableActions || [];
+    
+    if (editingAction) {
+      const updated = current.map(a => 
+        a.id === editingAction.id 
+          ? { 
+              ...a, 
+              name: actionFormData.name.trim(),
+              description: actionFormData.description,
+              category: actionFormData.category,
+              confirmationMessage: actionFormData.confirmationMessage,
+              successMessage: actionFormData.successMessage,
+              requiredFields: validatedFields, 
+              affectedDataFields: validatedFields.map(f => f.name) 
+            }
+          : a
+      );
+      updateFormDataAndTrackCompletion({ availableActions: updated });
+      toast({ title: "Action updated", description: `"${actionFormData.name}" has been updated.` });
+    } else {
+      const newAction: AgentAction = {
+        id: `action_${Date.now()}`,
+        name: actionFormData.name.trim(),
+        description: actionFormData.description,
+        category: actionFormData.category,
+        requiredFields: validatedFields,
+        confirmationMessage: actionFormData.confirmationMessage,
+        successMessage: actionFormData.successMessage,
+        affectedDataFields: validatedFields.map(f => f.name),
+      };
+      updateFormDataAndTrackCompletion({ availableActions: [...current, newAction] });
+      toast({ title: "Action added", description: `"${actionFormData.name}" has been added.` });
+    }
+    
+    setIsAddActionDialogOpen(false);
+    resetActionForm();
+    setEditingAction(null);
+  };
+
+  const addActionField = () => {
+    setActionFormData(prev => ({
+      ...prev,
+      requiredFields: [
+        ...prev.requiredFields,
+        { name: "", type: "string", label: "", required: true },
+      ],
+    }));
+  };
+
+  const updateActionField = (index: number, updates: Partial<ActionField>) => {
+    setActionFormData(prev => ({
+      ...prev,
+      requiredFields: prev.requiredFields.map((f, i) => 
+        i === index ? { ...f, ...updates } : f
+      ),
+    }));
+  };
+
+  const removeActionField = (index: number) => {
+    setActionFormData(prev => ({
+      ...prev,
+      requiredFields: prev.requiredFields.filter((_, i) => i !== index),
+    }));
+  };
+
+  const addFieldFromSampleData = (field: { name: string; type: string }) => {
+    const existingField = actionFormData.requiredFields.find(f => f.name === field.name);
+    if (existingField) {
+      toast({
+        title: "Field already exists",
+        description: `"${field.name}" is already added to the action.`,
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    setActionFormData(prev => ({
+      ...prev,
+      requiredFields: [
+        ...prev.requiredFields,
+        { 
+          name: field.name, 
+          type: field.type as ActionField["type"], 
+          label: field.name.charAt(0).toUpperCase() + field.name.slice(1).replace(/([A-Z])/g, ' $1'),
+          required: true 
+        },
+      ],
+    }));
+  };
+
+  // Check for conflicts when guardrails are loaded
+  useEffect(() => {
+    if (formData?.guardrails && formData.guardrails.trim().length >= 20) {
+      checkForConflicts(formData.guardrails);
+    }
+    return () => {
+      if (conflictCheckTimeoutRef.current) {
+        clearTimeout(conflictCheckTimeoutRef.current);
+      }
+    };
+  }, [formData?.guardrails ? 'loaded' : 'none']);
+
   const updateMutation = useMutation({
     mutationFn: async (data: UpdateAgent) => {
       const response = await apiRequest("PATCH", `/api/agents/${params.id}`, data);
@@ -649,13 +1163,98 @@ export default function SettingsPage() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <Textarea
-                value={formData.businessUseCase || ""}
-                onChange={(e) => updateFormDataAndTrackCompletion({ businessUseCase: e.target.value })}
-                className="min-h-[270px] resize-y"
-                placeholder="e.g., This agent helps customer support teams quickly answer product-related questions by accessing our knowledge base and providing accurate, helpful responses..."
-                data-testid="textarea-business-usecase"
-              />
+              <div className="space-y-4">
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <Label htmlFor="businessUseCase">What problem does this agent solve?</Label>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={handleExtractBusinessCase}
+                      disabled={isExtracting || !formData.businessUseCase?.trim()}
+                      data-testid="settings-button-extract-content"
+                    >
+                      {isExtracting ? (
+                        <>
+                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                          Extracting...
+                        </>
+                      ) : (
+                        <>
+                          <Filter className="h-4 w-4 mr-2" />
+                          Extract Key Info
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                  <Textarea
+                    id="businessUseCase"
+                    value={formData.businessUseCase || ""}
+                    onChange={(e) => {
+                      updateFormDataAndTrackCompletion({ businessUseCase: e.target.value });
+                      setExtractionResult(null);
+                    }}
+                    className="min-h-[270px] resize-y"
+                    placeholder="e.g., This agent helps customer support teams quickly answer product-related questions by accessing our knowledge base and providing accurate, helpful responses..."
+                    data-testid="textarea-business-usecase"
+                  />
+                  
+                  {extractionResult && extractionResult.success && (
+                    <div className="mt-3 p-3 bg-muted rounded-md border">
+                      <button
+                        onClick={() => setShowExtractionDetails(!showExtractionDetails)}
+                        className="flex items-center gap-2 text-sm font-medium w-full text-left"
+                        data-testid="settings-button-toggle-extraction-details"
+                      >
+                        {showExtractionDetails ? (
+                          <ChevronUp className="h-4 w-4" />
+                        ) : (
+                          <ChevronDown className="h-4 w-4" />
+                        )}
+                        Extraction Summary
+                        <Badge variant="secondary" className="ml-auto">
+                          {extractionResult.discardedSummary.length} removed
+                        </Badge>
+                      </button>
+                      
+                      {showExtractionDetails && (
+                        <div className="mt-3 space-y-3 text-sm">
+                          {extractionResult.keepCategories.length > 0 && (
+                            <div>
+                              <span className="text-muted-foreground">Kept:</span>
+                              <div className="flex flex-wrap gap-1 mt-1">
+                                {extractionResult.keepCategories.map((cat, i) => (
+                                  <Badge key={i} variant="outline" className="text-xs">
+                                    {cat}
+                                  </Badge>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                          {extractionResult.discardedSummary.length > 0 && (
+                            <div>
+                              <span className="text-muted-foreground">Removed:</span>
+                              <div className="flex flex-wrap gap-1 mt-1">
+                                {extractionResult.discardedSummary.map((item, i) => (
+                                  <Badge key={i} variant="secondary" className="text-xs">
+                                    {item}
+                                  </Badge>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+                
+                <p className="text-xs text-muted-foreground">
+                  Tip: If you paste a full business case document, click "Extract Key Info" to automatically 
+                  remove ROI calculations, metrics, and implementation details - keeping only what's needed 
+                  for the agent's behavior.
+                </p>
+              </div>
             </CardContent>
           </Card>
         );
@@ -890,10 +1489,10 @@ export default function SettingsPage() {
                               type="button"
                               variant="outline"
                               size="sm"
-                              disabled={isGeneratingGuardrails}
+                              disabled={isGeneratingGuardrails || isEvaluatingGuardrails}
                               data-testid="settings-button-generate-guardrails"
                             >
-                              {isGeneratingGuardrails ? (
+                              {isGeneratingGuardrails || isEvaluatingGuardrails ? (
                                 <Loader2 className="h-4 w-4 mr-1 animate-spin" />
                               ) : (
                                 <Sparkles className="h-4 w-4 mr-1" />
@@ -906,7 +1505,7 @@ export default function SettingsPage() {
                             {(Object.keys(geminiModelDisplayNames) as GeminiModel[]).map((model) => (
                               <DropdownMenuItem
                                 key={model}
-                                onClick={() => handleGenerateGuardrails(model)}
+                                onClick={() => handleGenerateGuardrailsWithEval(model)}
                                 data-testid={`settings-menu-item-guardrails-model-${model}`}
                               >
                                 {geminiModelDisplayNames[model]}
@@ -920,7 +1519,7 @@ export default function SettingsPage() {
                   <Textarea
                     id="guardrails"
                     value={formData.guardrails || ""}
-                    onChange={(e) => updateFormDataAndTrackCompletion({ guardrails: e.target.value })}
+                    onChange={(e) => handleGuardrailsChange(e.target.value)}
                     className="min-h-[270px] resize-y font-mono text-sm"
                     placeholder="Define what your agent should NOT do (Markdown or YAML format)..."
                     data-testid="textarea-guardrails"
@@ -929,6 +1528,75 @@ export default function SettingsPage() {
                     Optional: Define what your agent should NOT do (Markdown or YAML format)
                   </p>
                 </div>
+                
+                {(isCheckingConflicts || conflicts.length > 0) && (
+                  <div className="space-y-3 pt-3 border-t">
+                    <div className="flex items-center gap-2">
+                      <Shield className="h-4 w-4 text-muted-foreground" />
+                      <span className="text-sm font-medium">Conflict Analysis</span>
+                      {isCheckingConflicts && (
+                        <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" />
+                      )}
+                      {conflictSummary && !isCheckingConflicts && (
+                        <div className="flex gap-2 ml-auto">
+                          {conflictSummary.errors > 0 && (
+                            <Badge variant="destructive">{conflictSummary.errors} errors</Badge>
+                          )}
+                          {conflictSummary.warnings > 0 && (
+                            <Badge className="bg-yellow-500">{conflictSummary.warnings} warnings</Badge>
+                          )}
+                          {conflictSummary.info > 0 && (
+                            <Badge variant="secondary">{conflictSummary.info} info</Badge>
+                          )}
+                          {conflictSummary.errors === 0 && conflictSummary.warnings === 0 && conflictSummary.info === 0 && (
+                            <Badge variant="outline" className="text-green-600 border-green-600">
+                              <Check className="h-3 w-3 mr-1" />
+                              No conflicts
+                            </Badge>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                    
+                    {conflicts.length > 0 && (
+                      <div className="space-y-2">
+                        {conflicts.map((conflict, index) => (
+                          <div
+                            key={index}
+                            className="p-3 rounded-md border bg-muted/30 space-y-2"
+                            data-testid={`settings-conflict-item-${index}`}
+                          >
+                            <div className="flex items-start gap-2">
+                              {getSeverityIcon(conflict.severity)}
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-2 flex-wrap">
+                                  {getSeverityBadge(conflict.severity)}
+                                  <span className="text-sm font-medium">{conflict.type}</span>
+                                  {conflict.topic && (
+                                    <Badge variant="outline" className="text-xs">{conflict.topic}</Badge>
+                                  )}
+                                </div>
+                                <p className="text-sm text-muted-foreground mt-1">
+                                  {conflict.suggestion}
+                                </p>
+                              </div>
+                            </div>
+                            <div className="grid grid-cols-2 gap-2 text-xs">
+                              <div className="p-2 bg-background rounded border">
+                                <span className="text-muted-foreground">Guardrail:</span>
+                                <p className="mt-0.5">{conflict.guardrailRule}</p>
+                              </div>
+                              <div className="p-2 bg-background rounded border">
+                                <span className="text-muted-foreground">Related rule:</span>
+                                <p className="mt-0.5">{conflict.recoveryRule}</p>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>
@@ -1103,21 +1771,59 @@ export default function SettingsPage() {
                               {dataset.description || `Added ${new Date(dataset.createdAt).toLocaleDateString()}`}
                             </p>
                           </div>
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => removeSampleDataset(dataset.id)}
-                            className="shrink-0 h-8 w-8"
-                            data-testid={`settings-button-remove-dataset-${dataset.id}`}
-                          >
-                            <X className="h-4 w-4" />
-                          </Button>
+                          <div className="flex items-center gap-1 shrink-0">
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => setViewingDataset(dataset)}
+                              className="h-8 w-8"
+                              data-testid={`settings-button-view-dataset-${dataset.id}`}
+                            >
+                              <Eye className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => removeSampleDataset(dataset.id)}
+                              className="h-8 w-8"
+                              data-testid={`settings-button-remove-dataset-${dataset.id}`}
+                            >
+                              <X className="h-4 w-4" />
+                            </Button>
+                          </div>
                         </div>
                       ))}
                     </div>
                   </div>
                 )}
+                
+                <Dialog open={viewingDataset !== null} onOpenChange={(open) => !open && setViewingDataset(null)}>
+                  <DialogContent className="max-w-3xl max-h-[80vh]" data-testid="settings-dialog-dataset-viewer">
+                    <DialogHeader>
+                      <DialogTitle className="flex items-center gap-2">
+                        <FileText className="h-5 w-5 text-primary" />
+                        {viewingDataset?.name}
+                        <Badge variant="outline">{viewingDataset?.format.toUpperCase()}</Badge>
+                        {viewingDataset?.isGenerated && (
+                          <Badge variant="secondary">
+                            <Sparkles className="h-3 w-3 mr-1" />
+                            AI Generated
+                          </Badge>
+                        )}
+                      </DialogTitle>
+                      <DialogDescription>
+                        {viewingDataset?.description || "Sample data content"}
+                      </DialogDescription>
+                    </DialogHeader>
+                    <div className="overflow-auto max-h-[60vh] rounded-lg border bg-muted/30">
+                      <pre className="p-4 text-sm font-mono whitespace-pre-wrap">
+                        {viewingDataset?.content}
+                      </pre>
+                    </div>
+                  </DialogContent>
+                </Dialog>
               </div>
             </CardContent>
           </Card>
@@ -1136,39 +1842,50 @@ export default function SettingsPage() {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between gap-2 flex-wrap">
                 <div className="text-sm text-muted-foreground">
                   Generate actions based on your business use case
                 </div>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button
-                      type="button"
-                      variant="default"
-                      disabled={isGeneratingActions}
-                      data-testid="settings-button-generate-actions"
-                    >
-                      {isGeneratingActions ? (
-                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      ) : (
-                        <Sparkles className="h-4 w-4 mr-2" />
-                      )}
-                      {isGeneratingActions ? "Generating..." : "Generate Actions"}
-                      <ChevronDown className="h-3 w-3 ml-2" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-56">
-                    {(Object.keys(geminiModelDisplayNames) as GeminiModel[]).map((model) => (
-                      <DropdownMenuItem
-                        key={model}
-                        onClick={() => handleGenerateActions(model)}
-                        data-testid={`settings-menu-item-actions-model-${model}`}
+                <div className="flex items-center gap-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={openAddActionDialog}
+                    data-testid="settings-button-add-action"
+                  >
+                    <Plus className="h-4 w-4 mr-2" />
+                    Add Action
+                  </Button>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        type="button"
+                        variant="default"
+                        disabled={isGeneratingActions}
+                        data-testid="settings-button-generate-actions"
                       >
-                        {geminiModelDisplayNames[model]}
-                      </DropdownMenuItem>
-                    ))}
-                  </DropdownMenuContent>
-                </DropdownMenu>
+                        {isGeneratingActions ? (
+                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        ) : (
+                          <Sparkles className="h-4 w-4 mr-2" />
+                        )}
+                        {isGeneratingActions ? "Generating..." : "Generate Actions"}
+                        <ChevronDown className="h-3 w-3 ml-2" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="w-56">
+                      {(Object.keys(geminiModelDisplayNames) as GeminiModel[]).map((model) => (
+                        <DropdownMenuItem
+                          key={model}
+                          onClick={() => handleGenerateActions(model)}
+                          data-testid={`settings-menu-item-actions-model-${model}`}
+                        >
+                          {geminiModelDisplayNames[model]}
+                        </DropdownMenuItem>
+                      ))}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
               </div>
 
               <div className="p-4 rounded-lg border bg-muted/50 space-y-4">
@@ -1248,6 +1965,15 @@ export default function SettingsPage() {
                             data-testid={`settings-button-view-action-${action.id}`}
                           >
                             <Eye className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => openEditActionDialog(action)}
+                            data-testid={`settings-button-edit-action-${action.id}`}
+                          >
+                            <Pencil className="h-4 w-4" />
                           </Button>
                           <Button
                             type="button"
@@ -1825,6 +2551,208 @@ export default function SettingsPage() {
       </TabsContent>
     </Tabs>
       </main>
+
+      {/* Add/Edit Action Dialog */}
+      <Dialog open={isAddActionDialogOpen} onOpenChange={(open) => {
+        if (!open) {
+          setIsAddActionDialogOpen(false);
+          resetActionForm();
+          setEditingAction(null);
+        }
+      }}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto" data-testid="settings-dialog-add-action">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Zap className="h-5 w-5 text-primary" />
+              {editingAction ? "Edit Action" : "Add New Action"}
+            </DialogTitle>
+            <DialogDescription>
+              {editingAction 
+                ? "Modify the action configuration below." 
+                : "Define a new action that your agent can simulate."}
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="action-name">Action Name *</Label>
+                <Input
+                  id="action-name"
+                  value={actionFormData.name}
+                  onChange={(e) => setActionFormData(prev => ({ ...prev, name: e.target.value }))}
+                  placeholder="e.g., Update Address"
+                  data-testid="settings-input-action-name"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="action-category">Category</Label>
+                <Select
+                  value={actionFormData.category}
+                  onValueChange={(value) => setActionFormData(prev => ({ ...prev, category: value }))}
+                >
+                  <SelectTrigger data-testid="settings-select-action-category">
+                    <SelectValue placeholder="Select category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {actionCategories.map(cat => (
+                      <SelectItem key={cat} value={cat} data-testid={`settings-select-category-${cat}`}>{cat.charAt(0).toUpperCase() + cat.slice(1)}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="action-description">Description</Label>
+              <Textarea
+                id="action-description"
+                value={actionFormData.description}
+                onChange={(e) => setActionFormData(prev => ({ ...prev, description: e.target.value }))}
+                placeholder="What does this action do?"
+                className="min-h-[80px]"
+                data-testid="settings-textarea-action-description"
+              />
+            </div>
+            
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="action-confirmation">Confirmation Message</Label>
+                <Input
+                  id="action-confirmation"
+                  value={actionFormData.confirmationMessage}
+                  onChange={(e) => setActionFormData(prev => ({ ...prev, confirmationMessage: e.target.value }))}
+                  placeholder="Are you sure you want to..."
+                  data-testid="settings-input-action-confirmation"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="action-success">Success Message</Label>
+                <Input
+                  id="action-success"
+                  value={actionFormData.successMessage}
+                  onChange={(e) => setActionFormData(prev => ({ ...prev, successMessage: e.target.value }))}
+                  placeholder="Successfully completed..."
+                  data-testid="settings-input-action-success"
+                />
+              </div>
+            </div>
+            
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <Label>Required Fields ({actionFormData.requiredFields.length})</Label>
+                <div className="flex items-center gap-2">
+                  {availableFields.length > 0 && (
+                    <DropdownMenu open={showAvailableFields} onOpenChange={setShowAvailableFields}>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="outline" size="sm" data-testid="settings-button-from-data">
+                          <Database className="h-4 w-4 mr-1" />
+                          From Data
+                          <ChevronDown className="h-3 w-3 ml-1" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end" className="max-h-60 overflow-y-auto">
+                        {availableFields.map((field, idx) => (
+                          <DropdownMenuItem 
+                            key={idx} 
+                            onClick={() => addFieldFromSampleData(field)}
+                            data-testid={`settings-menu-item-field-${field.name}`}
+                          >
+                            <span className="font-medium">{field.name}</span>
+                            <Badge variant="outline" className="ml-2 text-xs">{field.type}</Badge>
+                          </DropdownMenuItem>
+                        ))}
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  )}
+                  <Button variant="outline" size="sm" onClick={addActionField} data-testid="settings-button-add-field">
+                    <Plus className="h-4 w-4 mr-1" />
+                    Add Field
+                  </Button>
+                </div>
+              </div>
+              
+              {actionFormData.requiredFields.length > 0 && (
+                <div className="space-y-2 border rounded-lg p-3">
+                  {actionFormData.requiredFields.map((field, index) => (
+                    <div key={index} className="flex items-center gap-2" data-testid={`settings-action-field-${index}`}>
+                      <Input
+                        value={field.name}
+                        onChange={(e) => updateActionField(index, { name: e.target.value })}
+                        placeholder="Field name"
+                        className="flex-1"
+                        data-testid={`settings-input-field-name-${index}`}
+                      />
+                      <Input
+                        value={field.label}
+                        onChange={(e) => updateActionField(index, { label: e.target.value })}
+                        placeholder="Label"
+                        className="flex-1"
+                        data-testid={`settings-input-field-label-${index}`}
+                      />
+                      <Select
+                        value={field.type}
+                        onValueChange={(value) => updateActionField(index, { type: value as ActionField["type"] })}
+                      >
+                        <SelectTrigger className="w-28" data-testid={`settings-select-field-type-${index}`}>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {fieldTypes.map(type => (
+                            <SelectItem key={type} value={type} data-testid={`settings-select-fieldtype-${type}`}>{type}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => removeActionField(index)}
+                        data-testid={`settings-button-remove-field-${index}`}
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+          
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsAddActionDialogOpen(false)} data-testid="settings-button-cancel-action">
+              Cancel
+            </Button>
+            <Button onClick={handleSaveAction} data-testid="settings-button-save-action">
+              {editingAction ? "Update Action" : "Add Action"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Clarifying Chat Dialogs */}
+      <ClarifyingChatDialog
+        open={showValidationChatDialog}
+        onOpenChange={setShowValidationChatDialog}
+        generationType="validation"
+        businessUseCase={formData?.businessUseCase || ""}
+        domainKnowledge={formData?.domainKnowledge}
+        domainDocuments={formData?.domainDocuments}
+        existingInsights={formData?.clarifyingInsights || []}
+        initialQuestion={validationInitialQuestion}
+        onComplete={handleValidationChatComplete}
+      />
+
+      <ClarifyingChatDialog
+        open={showGuardrailsChatDialog}
+        onOpenChange={setShowGuardrailsChatDialog}
+        generationType="guardrails"
+        businessUseCase={formData?.businessUseCase || ""}
+        domainKnowledge={formData?.domainKnowledge}
+        domainDocuments={formData?.domainDocuments}
+        existingInsights={formData?.clarifyingInsights || []}
+        initialQuestion={guardrailsInitialQuestion}
+        onComplete={handleGuardrailsChatComplete}
+      />
     </div>
   );
 }

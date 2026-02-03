@@ -1,1 +1,237 @@
-[]
+[
+  {
+    "id": "d48478a7-7f52-4fc8-9368-c1a6d30f80ba",
+    "name": "report_life_event",
+    "description": "Initiate a qualifying life event process by submitting the event type and date to trigger a special enrollment window.",
+    "category": "Life Events",
+    "requiredFields": [
+      {
+        "name": "event_type",
+        "type": "select",
+        "label": "Event Type",
+        "required": true,
+        "options": [
+          "Marriage",
+          "Birth/Adoption",
+          "Divorce",
+          "Loss of Other Coverage",
+          "Death of Dependent"
+        ],
+        "description": "The specific life event being reported."
+      },
+      {
+        "name": "event_date",
+        "type": "date",
+        "label": "Date of Event",
+        "required": true,
+        "description": "The actual date the event occurred."
+      }
+    ],
+    "confirmationMessage": "You are about to report a life event which will open a 31-day window to modify your benefits. Do you wish to proceed?",
+    "successMessage": "Life event successfully reported. Your special enrollment window is now open until 31 days from the event date.",
+    "affectedDataFields": [
+      "enrollment_window_status",
+      "qualifying_event_type",
+      "event_effective_date"
+    ]
+  },
+  {
+    "id": "1c876f3a-2466-4400-a987-e119fef74adf",
+    "name": "add_dependent",
+    "description": "Add a new dependent to your profile for health coverage and tax purposes.",
+    "category": "Benefits",
+    "requiredFields": [
+      {
+        "name": "dependent_name",
+        "type": "string",
+        "label": "Full Name",
+        "required": true,
+        "description": "Full legal name of the dependent."
+      },
+      {
+        "name": "relationship",
+        "type": "select",
+        "label": "Relationship",
+        "required": true,
+        "options": [
+          "Spouse",
+          "Child",
+          "Domestic Partner",
+          "Legal Ward"
+        ],
+        "description": "Legal relationship to the employee."
+      },
+      {
+        "name": "ssn",
+        "type": "string",
+        "label": "Social Security Number",
+        "required": true,
+        "description": "Tax ID for the dependent."
+      },
+      {
+        "name": "dob",
+        "type": "date",
+        "label": "Date of Birth",
+        "required": true,
+        "description": "Dependent's date of birth."
+      }
+    ],
+    "confirmationMessage": "You are about to add a new dependent. You will be required to upload supporting documentation (birth certificate, marriage license) in the next step.",
+    "successMessage": "Dependent successfully added to your profile. Please ensure you also update your benefit elections to include them in coverage.",
+    "affectedDataFields": [
+      "dependents_list",
+      "tax_withholding_dependents"
+    ]
+  },
+  {
+    "id": "91a75e86-a8e4-4c6a-8497-fdac4c003d64",
+    "name": "update_tax_withholding",
+    "description": "Modify federal and state tax withholding status and allowances following a life event change.",
+    "category": "Payroll",
+    "requiredFields": [
+      {
+        "name": "filing_status",
+        "type": "select",
+        "label": "Filing Status",
+        "required": true,
+        "options": [
+          "Single",
+          "Married Filing Jointly",
+          "Married Filing Separately",
+          "Head of Household"
+        ],
+        "description": "Your legal tax filing status."
+      },
+      {
+        "name": "claim_dependents_amount",
+        "type": "number",
+        "label": "Total Dependent Credit Amount",
+        "required": true,
+        "description": "Total dollar amount for child/dependent credits (e.g., $2000 per child)."
+      }
+    ],
+    "confirmationMessage": "You are about to update your W-4 tax withholding information. This will affect your take-home pay on the next available pay cycle.",
+    "successMessage": "Tax withholding information updated successfully. Changes will be reflected starting from the next pay period.",
+    "affectedDataFields": [
+      "w4_filing_status",
+      "w4_dependent_amount",
+      "net_pay_projection"
+    ]
+  },
+  {
+    "id": "63183b0f-91d6-4463-99b2-1ba6a88cda2f",
+    "name": "update_beneficiary",
+    "description": "Update primary or contingent beneficiaries for life insurance and retirement plans.",
+    "category": "Life & Retirement",
+    "requiredFields": [
+      {
+        "name": "plan_type",
+        "type": "select",
+        "label": "Benefit Plan",
+        "required": true,
+        "options": [
+          "Basic Life Insurance",
+          "Voluntary Life Insurance",
+          "401(k) Retirement Plan",
+          "AD&D"
+        ],
+        "description": "The plan you wish to update beneficiaries for."
+      },
+      {
+        "name": "beneficiary_name",
+        "type": "string",
+        "label": "Beneficiary Name",
+        "required": true,
+        "description": "Full name of the individual or entity."
+      },
+      {
+        "name": "allocation_percentage",
+        "type": "number",
+        "label": "Allocation %",
+        "required": true,
+        "description": "Percentage of benefit (must total 100% for all primary beneficiaries)."
+      }
+    ],
+    "confirmationMessage": "You are about to update your legal beneficiaries. Note: Spousal consent may be required if naming a non-spouse as primary for retirement plans.",
+    "successMessage": "Beneficiary designation updated. Your records have been adjusted for the selected plan.",
+    "affectedDataFields": [
+      "beneficiary_records",
+      "plan_designations"
+    ]
+  },
+  {
+    "id": "257eb8b3-2346-451a-8904-576b619357c1",
+    "name": "update_address",
+    "description": "Update your residential address which may trigger tax state changes or health plan network adjustments.",
+    "category": "Profile",
+    "requiredFields": [
+      {
+        "name": "street_address",
+        "type": "string",
+        "label": "Street Address",
+        "required": true,
+        "description": "New home street address."
+      },
+      {
+        "name": "city",
+        "type": "string",
+        "label": "City",
+        "required": true,
+        "description": "New residential city."
+      },
+      {
+        "name": "state",
+        "type": "string",
+        "label": "State",
+        "required": true,
+        "description": "New residential state (2-letter code)."
+      },
+      {
+        "name": "zip_code",
+        "type": "string",
+        "label": "Zip Code",
+        "required": true,
+        "description": "5-digit zip code."
+      }
+    ],
+    "confirmationMessage": "Changing your address to a different state may affect your tax withholding and health plan eligibility. Are you sure you want to update your primary residence?",
+    "successMessage": "Address updated successfully. We are now recalculating your state tax requirements and plan network eligibility.",
+    "affectedDataFields": [
+      "home_address",
+      "tax_state",
+      "benefit_plan_eligibility"
+    ]
+  },
+  {
+    "id": "b315cac7-5512-4b51-94ed-9f2b7cfd8dd2",
+    "name": "modify_fsa_election",
+    "description": "Adjust your Flexible Spending Account (Healthcare or Dependent Care) contribution amounts due to a qualifying life event.",
+    "category": "Benefits",
+    "requiredFields": [
+      {
+        "name": "fsa_type",
+        "type": "select",
+        "label": "FSA Type",
+        "required": true,
+        "options": [
+          "Healthcare FSA",
+          "Dependent Care FSA"
+        ],
+        "description": "Which account you want to adjust."
+      },
+      {
+        "name": "new_annual_contribution",
+        "type": "number",
+        "label": "New Annual Contribution",
+        "required": true,
+        "description": "The total amount you want to contribute for the remainder of the year."
+      }
+    ],
+    "confirmationMessage": "You are about to change your FSA election. Changes must be consistent with the life event reported (e.g., increasing Dependent Care FSA after a birth).",
+    "successMessage": "FSA election modified. Your per-paycheck deduction will be adjusted automatically for the remainder of the plan year.",
+    "affectedDataFields": [
+      "fsa_annual_election",
+      "paycheck_deductions"
+    ]
+  }
+]
