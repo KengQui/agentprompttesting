@@ -642,19 +642,19 @@ FIELDS: {"field_name": "value", "other_field": "value"}
 
 5. **Confirm completion** - After the action block, provide a friendly confirmation of what was done and any next steps
 
-### Example Conversation Flow:
+### Example Conversation Flow (Progressive Questioning):
 
 User: "I need to add my new baby to my health insurance"
 
-Good response: "Congratulations on your new baby! I can add them to your health insurance right now.
+First response: "Congratulations on your new baby! I can add them to your health insurance. What is your baby's date of birth?"
 
-I'll need a few details:
-- What is your baby's name?
-- What is their date of birth?
+[After user provides date]
 
-[After user provides info]
+Second response: "Thank you! And what is your baby's full name?"
 
-Great! I'll add [baby's name] (born [date]) as a dependent child to your health insurance. Should I proceed?
+[After user provides name]
+
+Third response: "Great! I'll add [baby's name] (born [date]) as a dependent child to your health insurance. Should I proceed?"
 
 [After user confirms]
 
@@ -663,9 +663,9 @@ ACTION: add_dependent
 FIELDS: {"name": "Baby Name", "relationship": "child", "dob": "2024-01-15"}
 \`\`\`
 
-Done! I've added [baby's name] to your health insurance. The changes will be effective as of their birth date. You should receive a confirmation email shortly, and new insurance cards will be mailed within 7-10 business days.
+Done! I've added [baby's name] to your health insurance. The changes will be effective as of their birth date. You should receive a confirmation email shortly, and new insurance cards will be mailed within 7-10 business days."
 
-Is there anything else you'd like me to help you with?"
+**IMPORTANT**: Notice how each response asks only ONE question. Never combine multiple questions or use bullet points to list what you need.
 
 ### Available Actions:\n`;
 
@@ -728,6 +728,53 @@ function getSystemPrompt(agent: AgentContext): string {
   });
   const currentDateSection = `\n\n## Current Date\nToday is: ${currentDate}`;
   
+  // Conversational flow guidelines - prevent overwhelming users with multiple questions
+  // These are marked as HIGHEST PRIORITY to override other gathering instructions
+  const conversationalFlowGuidelines = `
+
+## HIGHEST PRIORITY: Conversational Flow Guidelines
+**THIS SECTION OVERRIDES ANY OTHER INSTRUCTIONS ABOUT GATHERING INFORMATION.**
+
+When you need to collect information from users, you MUST follow these rules:
+
+### RULE 1: MAXIMUM 2 QUESTIONS PER RESPONSE (MANDATORY)
+- Count the question marks in your response before sending
+- If you have more than 2 question marks, you are violating this rule
+- Rewrite your response to ask only 1-2 questions maximum
+- This applies even if you need 5, 6, or 10 pieces of information - spread them across multiple turns
+
+### RULE 2: Progressive Information Gathering
+- First response: Acknowledge the request + ask for the SINGLE most essential piece of info
+- Second response: Acknowledge their answer + ask for the next 1-2 pieces
+- Continue this pattern until you have everything needed
+- NEVER list out all required fields in one message
+
+### RULE 3: What to NEVER Do
+- NEVER use bullet points to list multiple questions
+- NEVER say "I'll need a few details:" followed by a list of questions
+- NEVER ask about optional items (like "would you also like...") in the same message as required questions
+- NEVER front-load all your questions in the first response
+
+### Example of CORRECT flow:
+User: "I want to add my newborn to my health plan"
+Assistant: "Congratulations on your new baby! To add them to your health benefits, what is your child's date of birth?"
+User: "January 23, 2026"  
+Assistant: "Thank you! And what is your child's full name?"
+User: "Maggie Smith"
+Assistant: "Got it. What are the last 4 digits of Maggie's Social Security number? If she doesn't have one yet, just let me know."
+
+### Example of INCORRECT flow (DO NOT DO THIS):
+User: "I want to add my newborn to my health plan"
+Assistant: "Congratulations! I'll need a few details:
+* Is this for a birth or adoption?
+* What is the date of the event?
+* What is your child's first name?
+* What is your child's last name?
+* What is your child's date of birth?
+* What are the last 4 digits of the SSN?"
+
+The second example overwhelms the user and must be avoided.`;
+  
   // Use custom prompt if the user has edited it
   if (agent.customPrompt && agent.customPrompt.trim()) {
     const customPrompt = agent.customPrompt.trim();
@@ -782,6 +829,8 @@ function getSystemPrompt(agent: AgentContext): string {
       if (!hasCurrentDatePlaceholder) {
         fullPrompt += currentDateSection;
       }
+      // Add conversational flow guidelines
+      fullPrompt += conversationalFlowGuidelines;
       return fullPrompt;
     }
     
@@ -793,6 +842,8 @@ function getSystemPrompt(agent: AgentContext): string {
       if (!hasCurrentDatePlaceholder) {
         fullPrompt += currentDateSection;
       }
+      // Add conversational flow guidelines
+      fullPrompt += conversationalFlowGuidelines;
       return fullPrompt;
     }
     
@@ -837,6 +888,9 @@ function getSystemPrompt(agent: AgentContext): string {
       fullPrompt += `\n\n${mockStateText}`;
     }
     
+    // Add conversational flow guidelines
+    fullPrompt += conversationalFlowGuidelines;
+    
     return fullPrompt;
   }
   
@@ -852,7 +906,8 @@ function getSystemPrompt(agent: AgentContext): string {
     guardrails: agent.guardrails,
   };
   
-  return generatePrompt(style, context);
+  // Add conversational flow guidelines to generated prompts too
+  return generatePrompt(style, context) + conversationalFlowGuidelines;
 }
 
 // Export for use in UI hints
