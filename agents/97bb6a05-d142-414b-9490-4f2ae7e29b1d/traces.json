@@ -585,6 +585,76 @@
         }
       ],
       "success": true
+    },
+    {
+      "id": "trace-1770087796725",
+      "sessionId": "18b7fa95-4a04-4198-8ed5-cf19e4c56cd2",
+      "userInput": "I want to add my newborn to my health plan",
+      "agentResponse": "Congratulations on your new baby! I can help you with that.\n\nTo get started, could you please tell me your baby's first name?",
+      "startTime": "2026-02-03T03:03:16.028Z",
+      "endTime": "2026-02-03T03:03:16.725Z",
+      "totalDuration": 697,
+      "entries": [
+        {
+          "id": "entry-1770087796037-1",
+          "type": "intent_classification",
+          "name": "Orchestrator Intent Classification",
+          "timestamp": "2026-02-03T03:03:16.037Z",
+          "metadata": {
+            "intent": "answer_question",
+            "classificationMethod": "orchestrator",
+            "confidence": "high"
+          }
+        },
+        {
+          "id": "entry-1770087796725-3",
+          "type": "llm_call",
+          "name": "Gemini Response Generation",
+          "timestamp": "2026-02-03T03:03:16.725Z",
+          "duration": 688,
+          "metadata": {
+            "model": "gemini",
+            "intent": "answer_question",
+            "validated": true
+          }
+        }
+      ],
+      "success": true
+    },
+    {
+      "id": "trace-1770087823314",
+      "sessionId": "18b7fa95-4a04-4198-8ed5-cf19e4c56cd2",
+      "userInput": "January 23, 2026",
+      "agentResponse": "I need your baby's first name to proceed. Please provide that.",
+      "startTime": "2026-02-03T03:03:42.724Z",
+      "endTime": "2026-02-03T03:03:43.314Z",
+      "totalDuration": 590,
+      "entries": [
+        {
+          "id": "entry-1770087822725-1",
+          "type": "intent_classification",
+          "name": "Orchestrator Intent Classification",
+          "timestamp": "2026-02-03T03:03:42.725Z",
+          "metadata": {
+            "intent": "answer_question",
+            "classificationMethod": "orchestrator",
+            "confidence": "high"
+          }
+        },
+        {
+          "id": "entry-1770087823314-3",
+          "type": "llm_call",
+          "name": "Gemini Response Generation",
+          "timestamp": "2026-02-03T03:03:43.314Z",
+          "duration": 589,
+          "metadata": {
+            "model": "gemini",
+            "intent": "answer_question",
+            "validated": true
+          }
+        }
+      ],
+      "success": true
     }
   ],
   "stats": {
@@ -593,17 +663,17 @@
     },
     "signalReads": {},
     "intentDistribution": {
-      "answer_question": 15,
+      "answer_question": 17,
       "unclear": 2
     },
     "classificationMethods": {
-      "orchestrator": 17
+      "orchestrator": 19
     },
-    "avgResponseTime": 1748.8235294117646,
-    "totalLlmCalls": 15,
+    "avgResponseTime": 1632.4736842105262,
+    "totalLlmCalls": 17,
     "totalTokensUsed": 0,
     "errorCount": 0
   },
   "createdAt": "2026-02-02T18:51:09.876Z",
-  "updatedAt": "2026-02-03T02:56:28.646Z"
+  "updatedAt": "2026-02-03T03:03:43.314Z"
 }
