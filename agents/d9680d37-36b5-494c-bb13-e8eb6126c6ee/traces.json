@@ -1,0 +1,91 @@
+{
+  "agentId": "d9680d37-36b5-494c-bb13-e8eb6126c6ee",
+  "traces": [
+    {
+      "id": "trace-1770140397040",
+      "sessionId": "9eac3c17-4174-4925-9b14-8bc4e91af538",
+      "userInput": "i want to add my new baby to my healthcare plan",
+      "agentResponse": "Congratulations on your new baby! I can guide you through the process of adding your child to your healthcare plan.\n\nAs the birth of a child is a qualifying life event, you have 31 days from the date of birth to add your newborn to your health plan. Coverage for newborns is typically retroactive to the date of birth. You can add your child to medical, dental, and vision plans, and also increase your Flexible Spending Account (FSA) contributions for medical or dependent care if applicable.\n\nTo proceed, I'll need some information:\n- What is your baby's full name?\n- What is your baby's date of birth?\n- What is your baby's Social Security Number (SSN)?\n\nPlease remember, I am demonstrating how these changes would be processed in a real HR system. No actual changes are being made to your live HR records or benefits accounts at this time.",
+      "startTime": "2026-02-03T17:39:55.253Z",
+      "endTime": "2026-02-03T17:39:57.040Z",
+      "totalDuration": 1787,
+      "entries": [
+        {
+          "id": "entry-1770140395267-1",
+          "type": "intent_classification",
+          "name": "Orchestrator Intent Classification",
+          "timestamp": "2026-02-03T17:39:55.267Z",
+          "metadata": {
+            "intent": "answer_question",
+            "classificationMethod": "orchestrator",
+            "confidence": "high"
+          }
+        },
+        {
+          "id": "entry-1770140397040-3",
+          "type": "llm_call",
+          "name": "Gemini Response Generation",
+          "timestamp": "2026-02-03T17:39:57.040Z",
+          "duration": 1773,
+          "metadata": {
+            "model": "gemini",
+            "intent": "answer_question",
+            "validated": true
+          }
+        }
+      ],
+      "success": true
+    },
+    {
+      "id": "trace-1770140522381",
+      "sessionId": "9eac3c17-4174-4925-9b14-8bc4e91af538",
+      "userInput": "Alice Smith, jan 14.2026 no SSN",
+      "agentResponse": "Okay, I have the following information for your new baby:\n\n*   Full Name: Alice Smith\n*   Date of Birth: January 14, 2026\n*   Social Security Number: Not provided (please note that the SSN will be required within 90 days).\n\nTo proceed with adding Alice to your health plan, I will add her as a dependent to your profile. You'll also need to provide supporting documentation, such as a birth certificate.\n\nAre you ready for me to add Alice to your profile as a dependent?",
+      "startTime": "2026-02-03T17:42:01.058Z",
+      "endTime": "2026-02-03T17:42:02.381Z",
+      "totalDuration": 1323,
+      "entries": [
+        {
+          "id": "entry-1770140521059-1",
+          "type": "intent_classification",
+          "name": "Orchestrator Intent Classification",
+          "timestamp": "2026-02-03T17:42:01.059Z",
+          "metadata": {
+            "intent": "answer_question",
+            "classificationMethod": "orchestrator",
+            "confidence": "high"
+          }
+        },
+        {
+          "id": "entry-1770140522381-3",
+          "type": "llm_call",
+          "name": "Gemini Response Generation",
+          "timestamp": "2026-02-03T17:42:02.381Z",
+          "duration": 1322,
+          "metadata": {
+            "model": "gemini",
+            "intent": "answer_question",
+            "validated": true
+          }
+        }
+      ],
+      "success": true
+    }
+  ],
+  "stats": {
+    "hookCalls": {},
+    "signalReads": {},
+    "intentDistribution": {
+      "answer_question": 2
+    },
+    "classificationMethods": {
+      "orchestrator": 2
+    },
+    "avgResponseTime": 1555,
+    "totalLlmCalls": 2,
+    "totalTokensUsed": 0,
+    "errorCount": 0
+  },
+  "createdAt": "2026-02-03T17:39:57.040Z",
+  "updatedAt": "2026-02-03T17:42:02.381Z"
+}
