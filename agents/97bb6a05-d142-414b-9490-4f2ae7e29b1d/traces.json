@@ -245,22 +245,85 @@
         }
       ],
       "success": true
+    },
+    {
+      "id": "trace-1770084066670",
+      "sessionId": "5d95d24d-ec68-4107-a656-942000aec0cc",
+      "userInput": "Our baby is arriving soon",
+      "agentResponse": "I'm not sure I understood that. Could you please rephrase what you'd like to do?\n\nYou can say things like:\n- \"go back\" to return to the previous question\n- \"change [field]\" to update a previous answer\n- \"help\" if you need clarification",
+      "startTime": "2026-02-03T02:01:05.562Z",
+      "endTime": "2026-02-03T02:01:06.670Z",
+      "totalDuration": 1108,
+      "entries": [
+        {
+          "id": "entry-1770084066670-1",
+          "type": "intent_classification",
+          "name": "Orchestrator Intent Classification",
+          "timestamp": "2026-02-03T02:01:06.670Z",
+          "metadata": {
+            "intent": "unclear",
+            "classificationMethod": "orchestrator",
+            "confidence": "high"
+          }
+        },
+        {
+          "id": "entry-1770084066670-2",
+          "type": "hook_call",
+          "name": "Orchestrator Direct Response",
+          "timestamp": "2026-02-03T02:01:06.670Z",
+          "metadata": {}
+        }
+      ],
+      "success": true
+    },
+    {
+      "id": "trace-1770084126761",
+      "sessionId": "5d95d24d-ec68-4107-a656-942000aec0cc",
+      "userInput": "I am going to have a new baby",
+      "agentResponse": "I'm not sure I understood that. Could you please rephrase what you'd like to do?\n\nYou can say things like:\n- \"go back\" to return to the previous question\n- \"change [field]\" to update a previous answer\n- \"help\" if you need clarification",
+      "startTime": "2026-02-03T02:02:05.305Z",
+      "endTime": "2026-02-03T02:02:06.761Z",
+      "totalDuration": 1456,
+      "entries": [
+        {
+          "id": "entry-1770084126761-1",
+          "type": "intent_classification",
+          "name": "Orchestrator Intent Classification",
+          "timestamp": "2026-02-03T02:02:06.761Z",
+          "metadata": {
+            "intent": "unclear",
+            "classificationMethod": "orchestrator",
+            "confidence": "high"
+          }
+        },
+        {
+          "id": "entry-1770084126761-2",
+          "type": "hook_call",
+          "name": "Orchestrator Direct Response",
+          "timestamp": "2026-02-03T02:02:06.761Z",
+          "metadata": {}
+        }
+      ],
+      "success": true
     }
   ],
   "stats": {
-    "hookCalls": {},
+    "hookCalls": {
+      "Orchestrator Direct Response": 2
+    },
     "signalReads": {},
     "intentDistribution": {
-      "answer_question": 7
+      "answer_question": 7,
+      "unclear": 2
     },
     "classificationMethods": {
-      "orchestrator": 7
+      "orchestrator": 9
     },
-    "avgResponseTime": 2248.285714285714,
+    "avgResponseTime": 2033.5555555555557,
     "totalLlmCalls": 7,
     "totalTokensUsed": 0,
     "errorCount": 0
   },
   "createdAt": "2026-02-02T18:51:09.876Z",
-  "updatedAt": "2026-02-02T21:18:25.270Z"
+  "updatedAt": "2026-02-03T02:02:06.761Z"
 }
