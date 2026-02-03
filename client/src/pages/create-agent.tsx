@@ -2429,7 +2429,7 @@ export default function CreateAgent() {
   const canProceed = () => {
     switch (currentStep) {
       case 1:
-        return formData.businessUseCase.trim().length > 0;
+        return true; // Business use case is optional
       case 2:
         return formData.name.trim().length > 0;
       case 3:
