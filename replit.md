@@ -61,7 +61,7 @@ Agent Studio utilizes a modern web application architecture with a clear separat
         5. Guardrails - Define safety boundaries
         6. Sample Data - Upload or generate sample data
         7. Available Actions - Define actions agent can simulate
-        8. Review - Preview and create your agent
+        8. Review - Define your agent's prompt
     - **Chat Interface**: For testing and interacting with configured agents, with the following features:
         - **Session Management**: Multiple renamable sessions per agent for organizing test scenarios
         - **Session Sidebar**: Collapsible sidebar showing all sessions with previews, message counts, and inline renaming

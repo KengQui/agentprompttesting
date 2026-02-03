@@ -116,7 +116,7 @@ export const agentSchema = z.object({
   id: z.string(),
   userId: z.string(), // Owner of this agent
   name: z.string().min(1, "Name is required"),
-  businessUseCase: z.string().min(1, "Business use case is required"),
+  businessUseCase: z.string().default(""),
   description: z.string().default(""),
   domainKnowledge: z.string().default(""),
   domainDocuments: z.array(domainDocumentSchema).default([]),

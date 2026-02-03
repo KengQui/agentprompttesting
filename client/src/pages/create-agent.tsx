@@ -43,7 +43,7 @@ const steps = [
   { id: 5, name: "Guardrails", icon: AlertTriangle, description: "Define safety boundaries" },
   { id: 6, name: "Sample Data", icon: Database, description: "Upload or generate sample data" },
   { id: 7, name: "Available Actions", icon: Zap, description: "Define actions agent can simulate" },
-  { id: 8, name: "Review", icon: Eye, description: "Preview and create your agent" },
+  { id: 8, name: "Review", icon: Eye, description: "Define your agent's prompt" },
 ];
 
 function StepIndicator({ currentStep }: { currentStep: number }) {
