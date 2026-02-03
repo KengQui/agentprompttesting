@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "wouter";
-import { Plus, MessageSquare, Settings, Bot, Sparkles, LogOut } from "lucide-react";
+import { Plus, MessageSquare, Settings, Bot, Sparkles, LogOut, PlayCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -56,17 +56,31 @@ function AgentCard({ agent }: { agent: Agent }) {
         </div>
       </CardHeader>
       <CardFooter className="gap-2 pt-3 border-t">
-        <Link href={`/chat/${agent.id}`} className="flex-1">
-          <Button
-            variant="default"
-            size="sm"
-            className="w-full gap-2"
-            data-testid={`button-chat-${agent.id}`}
-          >
-            <MessageSquare className="h-4 w-4" />
-            Chat
-          </Button>
-        </Link>
+        {agent.status === "draft" ? (
+          <Link href={`/create/${agent.id}`} className="flex-1">
+            <Button
+              variant="default"
+              size="sm"
+              className="w-full gap-2"
+              data-testid={`button-continue-${agent.id}`}
+            >
+              <PlayCircle className="h-4 w-4" />
+              Continue
+            </Button>
+          </Link>
+        ) : (
+          <Link href={`/chat/${agent.id}`} className="flex-1">
+            <Button
+              variant="default"
+              size="sm"
+              className="w-full gap-2"
+              data-testid={`button-chat-${agent.id}`}
+            >
+              <MessageSquare className="h-4 w-4" />
+              Chat
+            </Button>
+          </Link>
+        )}
         <Link href={`/settings/${agent.id}`}>
           <Button
             variant="outline"

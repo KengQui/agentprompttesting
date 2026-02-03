@@ -609,10 +609,9 @@ export class MemStorage implements IStorage {
     const id = randomUUID();
     const now = new Date().toISOString();
     
-    // Agent is "configured" when created through wizard (has name and business use case)
-    // Status is "draft" only if explicitly set, otherwise defaults to "configured"
-    const hasRequiredFields = insertAgent.name && insertAgent.businessUseCase;
-    const status = insertAgent.status === "draft" && hasRequiredFields ? "configured" : (insertAgent.status || "configured");
+    // Status defaults to "configured" if not explicitly set
+    // If status is explicitly set to "draft", respect that value (for save draft functionality)
+    const status = insertAgent.status || "configured";
     
     const agent: Agent = {
       id,
@@ -632,6 +631,7 @@ export class MemStorage implements IStorage {
       mockUserState: insertAgent.mockUserState || [],
       mockMode: insertAgent.mockMode || "full",
       status,
+      configurationStep: insertAgent.configurationStep || 1,
       createdAt: now,
       updatedAt: now,
     };

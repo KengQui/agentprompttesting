@@ -147,5 +147,11 @@
     "username": "testuser_QO-ZL9",
     "password": "$2b$10$Wdwa9dG9qGPxtll7U/Ye4OOk9W9a9rdrZt7x/TjncHRVGiLT864Fm",
     "createdAt": "2026-02-03T14:33:15.723Z"
+  },
+  {
+    "id": "54054dc4-9002-443e-b4cb-87bf4c375778",
+    "username": "testuser-qvJUhz",
+    "password": "$2b$10$xkbVnINZsZoK0mbqYW3o2eCEEgztpLC7GA/7WVWaM5DZHqA/aNke.",
+    "createdAt": "2026-02-03T14:45:30.051Z"
   }
 ]
