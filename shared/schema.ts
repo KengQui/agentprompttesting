@@ -130,6 +130,7 @@ export const agentSchema = z.object({
   mockUserState: z.array(mockUserStateSchema).default([]),
   mockMode: mockModeEnum.default("full"), // Default to full mock for usability testing
   status: agentStatusEnum.default("draft"),
+  configurationStep: z.number().default(1), // Track wizard progress for draft agents
   createdAt: z.string(),
   updatedAt: z.string(),
 });

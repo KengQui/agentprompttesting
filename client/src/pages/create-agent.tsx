@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from "react";
-import { useLocation } from "wouter";
-import { useMutation } from "@tanstack/react-query";
-import { ArrowLeft, ArrowRight, Check, Briefcase, Shield, AlertTriangle, Eye, Bot, BookOpen, Upload, X, FileText, Code, Pencil, RotateCcw, HelpCircle, ExternalLink, Info, Sparkles, Loader2, ChevronDown, Database, Zap, Plus, Trash2, User, Filter, ChevronUp } from "lucide-react";
+import { useLocation, useParams } from "wouter";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { ArrowLeft, ArrowRight, Check, Briefcase, Shield, AlertTriangle, Eye, Bot, BookOpen, Upload, X, FileText, Code, Pencil, RotateCcw, HelpCircle, ExternalLink, Info, Sparkles, Loader2, ChevronDown, Database, Zap, Plus, Trash2, User, Filter, ChevronUp, Save } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -2645,8 +2645,11 @@ function Step8Review({
 
 export default function CreateAgent() {
   const [, navigate] = useLocation();
+  const params = useParams<{ id?: string }>();
+  const draftId = params.id;
   const { toast } = useToast();
   const [currentStep, setCurrentStep] = useState(1);
+  const [isInitialized, setIsInitialized] = useState(false);
   const [formData, setFormData] = useState<WizardStepData>({
     businessUseCase: "",
     name: "",
@@ -2664,8 +2667,45 @@ export default function CreateAgent() {
     mockMode: "full",
   });
 
+  // Fetch existing draft if editing
+  const { data: existingAgent, isLoading: isLoadingDraft } = useQuery<Agent>({
+    queryKey: ["/api/agents", draftId],
+    enabled: !!draftId,
+  });
+
+  // Load draft data when fetched
+  useEffect(() => {
+    if (existingAgent && !isInitialized) {
+      setFormData({
+        businessUseCase: existingAgent.businessUseCase || "",
+        name: existingAgent.name || "",
+        description: existingAgent.description || "",
+        domainKnowledge: existingAgent.domainKnowledge || "",
+        domainDocuments: existingAgent.domainDocuments || [],
+        sampleDatasets: existingAgent.sampleDatasets || [],
+        validationRules: existingAgent.validationRules || "",
+        guardrails: existingAgent.guardrails || "",
+        promptStyle: existingAgent.promptStyle || "gemini",
+        customPrompt: existingAgent.customPrompt || "",
+        clarifyingInsights: existingAgent.clarifyingInsights || [],
+        availableActions: existingAgent.availableActions || [],
+        mockUserState: existingAgent.mockUserState || [],
+        mockMode: existingAgent.mockMode || "full",
+      });
+      setCurrentStep(existingAgent.configurationStep || 1);
+      setIsInitialized(true);
+    }
+  }, [existingAgent, isInitialized]);
+
+  // Mark as initialized for new agents
+  useEffect(() => {
+    if (!draftId) {
+      setIsInitialized(true);
+    }
+  }, [draftId]);
+
   const createMutation = useMutation({
-    mutationFn: async (data: WizardStepData) => {
+    mutationFn: async (data: WizardStepData & { status?: string; configurationStep?: number }) => {
       const response = await apiRequest("POST", "/api/agents", data);
       return await response.json() as Agent;
     },
@@ -2685,6 +2725,77 @@ export default function CreateAgent() {
       });
     },
   });
+
+  // Save draft mutation (update existing or create new)
+  const saveDraftMutation = useMutation({
+    mutationFn: async (data: { formData: WizardStepData; step: number }) => {
+      if (draftId) {
+        // Update existing draft
+        const response = await apiRequest("PATCH", `/api/agents/${draftId}`, {
+          ...data.formData,
+          status: "draft",
+          configurationStep: data.step,
+        });
+        return await response.json() as Agent;
+      } else {
+        // Create new draft
+        const response = await apiRequest("POST", "/api/agents", {
+          ...data.formData,
+          status: "draft",
+          configurationStep: data.step,
+        });
+        return await response.json() as Agent;
+      }
+    },
+    onSuccess: (agent) => {
+      queryClient.invalidateQueries({ queryKey: ["/api/agents"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/agents", agent.id] });
+      toast({
+        title: "Draft saved!",
+        description: "Your progress has been saved. You can continue later.",
+      });
+      navigate("/");
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to save draft",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Update mutation for completing a draft
+  const updateMutation = useMutation({
+    mutationFn: async (data: WizardStepData) => {
+      const response = await apiRequest("PATCH", `/api/agents/${draftId}`, {
+        ...data,
+        status: "configured",
+        configurationStep: 8,
+      });
+      return await response.json() as Agent;
+    },
+    onSuccess: (agent) => {
+      queryClient.invalidateQueries({ queryKey: ["/api/agents"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/agents", agent.id] });
+      toast({
+        title: "Agent updated!",
+        description: `${agent.name} has been successfully configured.`,
+      });
+      navigate(`/chat/${agent.id}`);
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to update agent",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleSaveDraft = () => {
+    saveDraftMutation.mutate({ formData, step: currentStep });
+  };
 
   const updateFormData = (updates: Partial<WizardStepData>) => {
     setFormData((prev) => ({ ...prev, ...updates }));
@@ -2713,9 +2824,16 @@ export default function CreateAgent() {
     if (currentStep < 8) {
       setCurrentStep(currentStep + 1);
     } else {
-      createMutation.mutate(formData);
+      // Final step - create or update based on whether we're editing a draft
+      if (draftId) {
+        updateMutation.mutate(formData);
+      } else {
+        createMutation.mutate({ ...formData, status: "configured", configurationStep: 8 });
+      }
     }
   };
+
+  const isSubmitting = createMutation.isPending || updateMutation.isPending || saveDraftMutation.isPending;
 
   const handleBack = () => {
     if (currentStep > 1) {
@@ -2766,17 +2884,41 @@ export default function CreateAgent() {
                 <Bot className="h-5 w-5" />
               </div>
               <div>
-                <h1 className="text-lg font-bold">Create New Agent</h1>
+                <h1 className="text-lg font-bold">
+                  {draftId ? "Continue Configuration" : "Create New Agent"}
+                </h1>
                 <p className="text-sm text-muted-foreground">
                   Step {currentStep} of {steps.length}: {steps[currentStep - 1].name}
                 </p>
               </div>
             </div>
+            <Button
+              variant="outline"
+              onClick={handleSaveDraft}
+              disabled={isSubmitting}
+              className="gap-2 ml-auto"
+              data-testid="button-save-draft"
+            >
+              {saveDraftMutation.isPending ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Save className="h-4 w-4" />
+              )}
+              Save Draft
+            </Button>
           </div>
         </div>
       </header>
 
       <main className="container mx-auto max-w-5xl px-4 py-8">
+        {isLoadingDraft ? (
+          <div className="flex items-center justify-center py-16">
+            <div className="flex flex-col items-center gap-3">
+              <Loader2 className="h-8 w-8 animate-spin text-primary" />
+              <p className="text-muted-foreground">Loading draft...</p>
+            </div>
+          </div>
+        ) : (
         <div className="flex gap-8">
           <aside className="hidden md:block w-64 shrink-0">
             <div className="sticky top-24 p-4 rounded-lg border bg-card">
@@ -2788,40 +2930,44 @@ export default function CreateAgent() {
             {renderStep()}
 
             <div className="mt-6 flex items-center justify-between gap-4">
-          <Button
-            variant="outline"
-            onClick={handleBack}
-            className="gap-2"
-            data-testid="button-back"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            {currentStep === 1 ? "Cancel" : "Back"}
-          </Button>
-          <Button
-            onClick={handleNext}
-            disabled={!canProceed() || createMutation.isPending}
-            className="gap-2"
-            data-testid="button-next"
-          >
-            {currentStep === 8 ? (
-              createMutation.isPending ? (
-                "Creating..."
-              ) : (
-                <>
-                  <Check className="h-4 w-4" />
-                  Create Agent
-                </>
-              )
-            ) : (
-              <>
-                Next
-                <ArrowRight className="h-4 w-4" />
-              </>
-            )}
-          </Button>
+              <Button
+                variant="outline"
+                onClick={handleBack}
+                className="gap-2"
+                data-testid="button-back"
+              >
+                <ArrowLeft className="h-4 w-4" />
+                {currentStep === 1 ? "Cancel" : "Back"}
+              </Button>
+              <Button
+                onClick={handleNext}
+                disabled={!canProceed() || isSubmitting}
+                className="gap-2"
+                data-testid="button-next"
+              >
+                {currentStep === 8 ? (
+                  isSubmitting ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      {draftId ? "Saving..." : "Creating..."}
+                    </>
+                  ) : (
+                    <>
+                      <Check className="h-4 w-4" />
+                      {draftId ? "Finish & Save" : "Create Agent"}
+                    </>
+                  )
+                ) : (
+                  <>
+                    Next
+                    <ArrowRight className="h-4 w-4" />
+                  </>
+                )}
+              </Button>
             </div>
           </div>
         </div>
+        )}
       </main>
     </div>
   );

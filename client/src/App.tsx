@@ -29,6 +29,11 @@ function Router() {
           <CreateAgent />
         </ProtectedRoute>
       </Route>
+      <Route path="/create/:id">
+        <ProtectedRoute>
+          <CreateAgent />
+        </ProtectedRoute>
+      </Route>
       <Route path="/chat/:id">
         <ProtectedRoute>
           <Chat />
