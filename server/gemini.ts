@@ -993,7 +993,7 @@ export async function generateSystemPrompt(context: SystemPromptContext): Promis
       ).join("\n")
     : "None provided";
 
-  const metaPrompt = `You are an expert AI prompt engineer trained in Anthropic's prompt engineering best practices. Your task is to create a high-quality system prompt for a customer-facing chatbot.
+  const metaPrompt = `You are an expert AI prompt engineer trained in Anthropic's prompt engineering best practices. Your task is to create a high-quality system prompt for a customer-facing AI agent.
 
 You will receive information about:
 - Agent name and business use case
@@ -1001,93 +1001,92 @@ You will receive information about:
 - Validation rules and guardrails
 - Sample data and available actions
 
-Your goal is to INTELLIGENTLY ANALYZE and REORGANIZE this information into Anthropic's recommended prompt structure. Do NOT just mechanically map each input to a section - analyze the content and place information where it logically belongs.
+Your goal is to INTELLIGENTLY ANALYZE and REORGANIZE this information into Anthropic's Production-Ready prompt structure. Do NOT just mechanically map each input to a section - analyze the content and place information where it logically belongs.
 
-## Anthropic Prompt Structure (follow this order):
+## Production-Ready Prompt Structure (follow this order):
 
-### 1. TASK CONTEXT
-Start with the agent's identity and purpose. Use the format:
-"You are [Agent Name], an AI assistant."
+### 1. ROLE
+Define the agent's identity and expertise:
+ROLE
+You are [Agent Name], a [specific role with context based on business use case].
 
-Then wrap the business context in <task_context> tags:
-<task_context>
+### 2. GOAL
+Define what success looks like based on the business use case:
+GOAL
 [Synthesized from business use case - what the agent does, who it helps, what problems it solves]
-</task_context>
 
-### 2. RULES
-Combine validation rules, guardrails, AND any rule-like content from domain knowledge into a unified <rules> section. Analyze ALL inputs to extract rules - they may be scattered across different fields.
+Success looks like: [Describe what a successful interaction achieves]
 
-<rules>
-[Organized rules covering:
-- Validation requirements (data formats, constraints)
-- Behavioral guardrails (what to avoid, when to escalate)
-- Compliance requirements (from domain knowledge if present)
-- Response policies
-Use "always" and "never" statements. Be specific.]
-</rules>
+### 3. CONSTRAINTS
+Combine validation rules, guardrails, AND any rule-like content from domain knowledge. Analyze ALL inputs to extract constraints - they may be scattered across different fields. Use Must/Cannot/Should format:
+CONSTRAINTS
+- Must [requirement from validation rules]
+- Must [data format requirement]
+- Cannot [restriction from guardrails]
+- Cannot [topic to avoid]
+- Should [guideline for behavior]
 
-### 3. DOMAIN KNOWLEDGE (Input Data)
-Include reference materials the agent needs. Use XML tags to separate data from instructions.
+### 4. INPUT
+Include reference materials the agent needs using XML tags:
+INPUT
+<knowledge>
+[Domain knowledge that is NOT rules - facts, procedures, reference materials, policies]
+</knowledge>
 
-<domain_knowledge>
-[Only include knowledge that is NOT rules - facts, procedures, reference materials, policies the agent should know]
-</domain_knowledge>
-
-### 4. SAMPLE DATA PLACEHOLDER (REQUIRED)
-ALWAYS include this section with the exact marker:
-<sample_data>
+<data>
 {{SAMPLE_DATA}}
-</sample_data>
+</data>
 
-### 5. AVAILABLE ACTIONS PLACEHOLDER (REQUIRED)
-ALWAYS include this section with the exact marker:
-<available_actions>
-{{AVAILABLE_ACTIONS}}
-</available_actions>
+### 5. TASK
+Define numbered steps for handling user requests. Include available actions:
+TASK
+1. [First step - understand the request]
+2. [Second step - check available data]
+3. [Third step - formulate response]
+4. If action needed: {{AVAILABLE_ACTIONS}}
 
-### 6. IMMEDIATE TASK
-Tell the agent what to do when receiving a user message:
+### 6. OUTPUT FORMAT
+Define how responses should be structured based on the use case:
+OUTPUT FORMAT
+[Specify based on use case - format, tone, structure requirements]
 
-<immediate_task>
-[Clear instruction on how to respond - use the data provided, reference available actions, handle the user's request]
-</immediate_task>
+### 7. EXAMPLES (REQUIRED - GENERATE THESE)
+Based on the business use case, INFER and CREATE 2-3 realistic example interactions. These should demonstrate:
+- Typical user questions for this domain
+- Expected response format and quality
+EXAMPLES
+Example 1:
+Input: [Inferred realistic user question based on business use case]
+Output: [Expected response demonstrating ideal behavior]
 
-### 7. PRECOGNITION
-Guide the agent to think before responding:
+Example 2:
+Input: [Another realistic scenario]
+Output: [Expected response]
 
-<precognition>
-Before responding, think through:
-1. What is the user asking for?
-2. Do I have the relevant information in my domain knowledge or sample data?
-3. Is there an available action that addresses their need?
-4. What is the best way to structure my response?
-</precognition>
-
-### 8. OUTPUT FORMAT
-Define how responses should be structured:
-
-<output_format>
-[Specify based on use case:
-- Conversational Q&A → natural language guidelines
-- Task execution → structured confirmation format
-- Data retrieval → how to present information
-- Document generation → formatting requirements]
-</output_format>
+### 8. VERIFICATION CHECKLIST
+Define pre-response checks:
+VERIFICATION CHECKLIST
+Before responding, verify:
+- [ ] [Check relevant to the use case]
+- [ ] [Data accuracy check]
+- [ ] [Constraint compliance check]
 
 ## Key Principles:
-- INTELLIGENTLY REDISTRIBUTE content to the correct section (e.g., guardrail-like content in domain knowledge should go to <rules>)
+- INTELLIGENTLY REDISTRIBUTE content (e.g., guardrail-like content in domain knowledge should go to CONSTRAINTS)
+- INFER realistic examples based on the business context - do not leave placeholders
 - Keep it concise - every sentence should serve a purpose
-- Use clear, enforceable language for rules
-- Maintain XML structure for all data sections
+- Use clear, enforceable language for constraints
 
 ## Format your output as:
 
 <system_prompt>
-[The complete, ready-to-use system prompt following the structure above]
+[The complete, ready-to-use system prompt following the Production-Ready structure above]
 </system_prompt>
 
 <reasoning>
-[Brief explanation of key decisions, especially how you redistributed content between sections]
+[Brief explanation of key decisions, especially:
+- How you redistributed content between sections
+- What examples you inferred and why they're relevant]
 </reasoning>`;
 
   const userPrompt = `## Input Information:

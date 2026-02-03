@@ -2107,102 +2107,117 @@ function generateManualTemplate(data: WizardStepData): string {
   const agentName = data.name || "[Agent Name]";
   const businessUseCase = data.businessUseCase || "[Describe the agent's purpose and what problems it solves]";
   
-  // Build rules section from validation rules and guardrails
-  let rulesSection = "";
+  // Build CONSTRAINTS section from validation rules and guardrails
+  let constraintsContent = "";
   if (data.validationRules || data.guardrails) {
-    rulesSection = `<rules>
-${data.validationRules ? `## Validation Rules\n${data.validationRules}\n\n` : ""}${data.guardrails ? `## Guardrails\n${data.guardrails}` : ""}
-</rules>`;
+    const validationLines = data.validationRules?.split('\n').filter(l => l.trim()).map(l => {
+      const trimmed = l.trim();
+      if (trimmed.startsWith('-') || trimmed.startsWith('•')) return `- Must ${trimmed.slice(1).trim()}`;
+      return `- Must ${trimmed}`;
+    }).join('\n') || "";
+    
+    const guardrailLines = data.guardrails?.split('\n').filter(l => l.trim()).map(l => {
+      const trimmed = l.trim();
+      if (trimmed.startsWith('-') || trimmed.startsWith('•')) return `- Cannot ${trimmed.slice(1).trim()}`;
+      return `- Cannot ${trimmed}`;
+    }).join('\n') || "";
+    
+    constraintsContent = [validationLines, guardrailLines].filter(Boolean).join('\n');
   } else {
-    rulesSection = `<rules>
-## Validation Rules
-- [Add validation rules here - e.g., required formats, data constraints]
-
-## Guardrails
-- [Add guardrails here - e.g., topics to avoid, escalation triggers]
-</rules>`;
+    constraintsContent = `- Must [add validation requirement here]
+- Must [add required format here]
+- Cannot [add restriction here]
+- Cannot [add topic to avoid here]
+- Should [add guideline here]`;
   }
 
-  // Build domain knowledge section
-  let domainSection = "";
+  // Build INPUT section with domain knowledge and sample data
+  let inputContent = "";
+  
+  // Domain knowledge part
   if (data.domainKnowledge || (data.domainDocuments && data.domainDocuments.length > 0)) {
-    const docsContent = data.domainDocuments?.map(doc => `### ${doc.filename}\n${doc.content}`).join("\n\n") || "";
-    domainSection = `<domain_knowledge>
+    const docsContent = data.domainDocuments?.map(doc => doc.content).join("\n\n") || "";
+    inputContent = `<knowledge>
 ${data.domainKnowledge || ""}
 ${docsContent}
-</domain_knowledge>`;
-  } else {
-    domainSection = `<domain_knowledge>
-[Add domain-specific knowledge, policies, procedures, or reference materials here]
-</domain_knowledge>`;
+</knowledge>`;
   }
-
-  // Build sample data section
-  let sampleDataSection = "";
+  
+  // Sample data part - use placeholder or actual data
   if (data.sampleDatasets && data.sampleDatasets.length > 0) {
-    const datasetsContent = data.sampleDatasets.map(ds => 
-      `### ${ds.name} (${ds.format})\n${ds.content}`
-    ).join("\n\n");
-    sampleDataSection = `<sample_data>
+    const datasetsContent = data.sampleDatasets.map(ds => ds.content).join("\n\n");
+    inputContent += `\n\n<data>
 ${datasetsContent}
-</sample_data>`;
+</data>`;
   } else {
-    sampleDataSection = `<sample_data>
+    inputContent += `\n\n<data>
 {{SAMPLE_DATA}}
-</sample_data>`;
+</data>`;
+  }
+  
+  if (!inputContent.includes('<knowledge>')) {
+    inputContent = `<knowledge>
+[Add domain-specific knowledge, policies, or reference materials here]
+</knowledge>` + inputContent;
   }
 
-  // Build available actions section
-  let actionsSection = "";
+  // Build TASK section with available actions
+  let taskContent = `1. Read and understand the user's request
+2. Check if relevant information exists in the INPUT data
+3. Formulate a helpful, accurate response`;
+  
   if (data.availableActions && data.availableActions.length > 0) {
-    const actionsContent = data.availableActions.map(action => {
+    const actionsContent = data.availableActions.map((action, i) => {
       const fields = action.requiredFields?.length 
-        ? `\n  Required fields: ${action.requiredFields.map(f => f.name).join(", ")}`
+        ? ` (requires: ${action.requiredFields.map(f => f.name).join(", ")})`
         : "";
-      return `- ${action.name}: ${action.description}${fields}`;
-    }).join("\n");
-    actionsSection = `<available_actions>
-${actionsContent}
-</available_actions>`;
+      return `${i + 4}. If applicable, execute action: ${action.name}${fields}`;
+    }).join('\n');
+    taskContent += `\n${actionsContent}`;
   } else {
-    actionsSection = `<available_actions>
-{{AVAILABLE_ACTIONS}}
-</available_actions>`;
+    taskContent += `\n4. If an action is needed: {{AVAILABLE_ACTIONS}}`;
   }
 
-  return `You are ${agentName}, an AI assistant.
+  return `ROLE
+You are ${agentName}, a specialized AI assistant designed to help users with their requests.
 
-<task_context>
+GOAL
 ${businessUseCase}
-</task_context>
 
-${rulesSection}
+Success looks like: Users receive accurate, helpful responses that address their needs efficiently.
 
-${domainSection}
+CONSTRAINTS
+${constraintsContent}
 
-${sampleDataSection}
+INPUT
+${inputContent}
 
-${actionsSection}
+TASK
+${taskContent}
 
-<immediate_task>
-Respond to the user's message. Use the data and knowledge provided above to give accurate, helpful information. If an action is needed and available, guide the user through it or confirm execution.
-</immediate_task>
-
-<precognition>
-Before responding, think through:
-1. What is the user asking for?
-2. Do I have the relevant information in my domain knowledge or sample data?
-3. Is there an available action that addresses their need?
-4. What is the best way to structure my response?
-</precognition>
-
-<output_format>
-- Respond in a conversational, natural tone appropriate to the context
-- Use bullet points or numbered lists for multi-step information
+OUTPUT FORMAT
+- Use clear, conversational language appropriate to the context
+- Structure complex information with bullet points or numbered lists
 - Keep responses concise but complete
-- When performing actions, confirm what you're doing before executing
-- If you cannot help with something, explain why and suggest alternatives
-</output_format>`;
+- When executing actions, confirm what you are doing before proceeding
+- If you cannot help, explain why and suggest alternatives
+
+EXAMPLES
+Example 1:
+Input: [Sample user question relevant to your use case]
+Output: [Expected response format and content]
+
+Example 2:
+Input: [Another sample user question]
+Output: [Expected response format and content]
+
+VERIFICATION CHECKLIST
+Before responding, verify:
+- [ ] Response directly addresses the user's question
+- [ ] Information is accurate based on the provided INPUT data
+- [ ] Response follows the CONSTRAINTS
+- [ ] Format is appropriate for the content
+- [ ] Any actions are properly confirmed before execution`;
 }
 
 function Step8Review({
