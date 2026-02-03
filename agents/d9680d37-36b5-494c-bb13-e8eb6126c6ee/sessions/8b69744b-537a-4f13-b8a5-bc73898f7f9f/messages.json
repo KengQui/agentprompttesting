@@ -1,0 +1,34 @@
+[
+  {
+    "id": "cac78ce1-eb69-4558-8737-66c9562e6dab",
+    "agentId": "d9680d37-36b5-494c-bb13-e8eb6126c6ee",
+    "sessionId": "8b69744b-537a-4f13-b8a5-bc73898f7f9f",
+    "role": "user",
+    "content": "I want to add my new baby to my healthcare plan",
+    "timestamp": "2026-02-03T18:29:33.276Z"
+  },
+  {
+    "id": "1acf0acc-537c-4af7-91d9-554eb4b0d3a3",
+    "agentId": "d9680d37-36b5-494c-bb13-e8eb6126c6ee",
+    "sessionId": "8b69744b-537a-4f13-b8a5-bc73898f7f9f",
+    "role": "assistant",
+    "content": "Congratulations on your new baby! I can help you with adding your child to your health plan.\n\nFirst, I need to report the birth as a life event. I will need the date of birth. Then, I can add your baby as a dependent. I'll need a few more details for that:\n\n- What is your baby's full name?\n- What is their date of birth?\n- What is their Social Security Number (SSN)?",
+    "timestamp": "2026-02-03T18:29:34.666Z"
+  },
+  {
+    "id": "e72a313c-bf32-4ef1-b43f-9aee8ce0f6bf",
+    "agentId": "d9680d37-36b5-494c-bb13-e8eb6126c6ee",
+    "sessionId": "8b69744b-537a-4f13-b8a5-bc73898f7f9f",
+    "role": "user",
+    "content": "Alice Smith, born January 20 2026, no SSN yet",
+    "timestamp": "2026-02-03T18:30:16.105Z"
+  },
+  {
+    "id": "21c0d27a-05ed-4b0f-97a4-dd19cc510e1f",
+    "agentId": "d9680d37-36b5-494c-bb13-e8eb6126c6ee",
+    "sessionId": "8b69744b-537a-4f13-b8a5-bc73898f7f9f",
+    "role": "assistant",
+    "content": "Okay, I will report the birth of your baby as a life event with the date of birth as January 20, 2026, and then I will add Alice Smith (born January 20, 2026) as a dependent child to your profile. Please note that you'll need to provide Alice's SSN as soon as you have it.\n\nShould I proceed?",
+    "timestamp": "2026-02-03T18:30:17.208Z"
+  }
+]
