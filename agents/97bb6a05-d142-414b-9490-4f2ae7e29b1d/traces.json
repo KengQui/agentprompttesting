@@ -445,6 +445,76 @@
         }
       ],
       "success": true
+    },
+    {
+      "id": "trace-1770084912915",
+      "sessionId": "f096bf4f-68aa-4849-80e2-b199bca2f302",
+      "userInput": "I like to add my newborn in the health care plan",
+      "agentResponse": "Congratulations on your new baby! I can help you add them to your health benefits. I'll need a few details:\n\n*   Is this for a birth or adoption?\n*   What is the date of the event (birth or adoption placement)?\n*   What is your child's first name?\n*   What is your child's last name?\n*   What is your child's date of birth?\n*   What are the last 4 digits of your child's Social Security number?\n\nI also need to know if you'd like to add your child to your dental and vision plans, and if you'd like to review/update your Dependent Care FSA and W-4 tax withholding.",
+      "startTime": "2026-02-03T02:15:11.331Z",
+      "endTime": "2026-02-03T02:15:12.915Z",
+      "totalDuration": 1584,
+      "entries": [
+        {
+          "id": "entry-1770084911340-1",
+          "type": "intent_classification",
+          "name": "Orchestrator Intent Classification",
+          "timestamp": "2026-02-03T02:15:11.340Z",
+          "metadata": {
+            "intent": "answer_question",
+            "classificationMethod": "orchestrator",
+            "confidence": "high"
+          }
+        },
+        {
+          "id": "entry-1770084912915-3",
+          "type": "llm_call",
+          "name": "Gemini Response Generation",
+          "timestamp": "2026-02-03T02:15:12.915Z",
+          "duration": 1575,
+          "metadata": {
+            "model": "gemini",
+            "intent": "answer_question",
+            "validated": true
+          }
+        }
+      ],
+      "success": true
+    },
+    {
+      "id": "trace-1770084961463",
+      "sessionId": "f096bf4f-68aa-4849-80e2-b199bca2f302",
+      "userInput": "birth, jan 23 2026, Maggie Smith, \nThe kid doesn't have ssn",
+      "agentResponse": "Okay, I understand. So, to confirm:\n\n*   Event Type: Birth\n*   Event Date: January 23, 2026\n*   Child's First Name: Maggie\n*   Child's Last Name: Smith\n*   Child's Date of Birth: January 23, 2026\n*   Child's SSN: Not yet available\n\nI'll also need to know if you want to add Maggie to your health, dental, and vision plans, and if you'd like to review/update your Dependent Care FSA and W-4 tax withholding. Also, please remember that you will need to provide the full SSN or proof of application within 90 days.\n\nWould you like to add Maggie to your health benefits?\nWould you like to add Maggie to your dental/vision benefits?\nWould you like to review/update your Dependent Care FSA?\nWould you like to review/update your W-4 tax withholding?",
+      "startTime": "2026-02-03T02:15:59.532Z",
+      "endTime": "2026-02-03T02:16:01.463Z",
+      "totalDuration": 1931,
+      "entries": [
+        {
+          "id": "entry-1770084959533-1",
+          "type": "intent_classification",
+          "name": "Orchestrator Intent Classification",
+          "timestamp": "2026-02-03T02:15:59.533Z",
+          "metadata": {
+            "intent": "answer_question",
+            "classificationMethod": "orchestrator",
+            "confidence": "high"
+          }
+        },
+        {
+          "id": "entry-1770084961463-3",
+          "type": "llm_call",
+          "name": "Gemini Response Generation",
+          "timestamp": "2026-02-03T02:16:01.463Z",
+          "duration": 1930,
+          "metadata": {
+            "model": "gemini",
+            "intent": "answer_question",
+            "validated": true
+          }
+        }
+      ],
+      "success": true
     }
   ],
   "stats": {
@@ -453,17 +523,17 @@
     },
     "signalReads": {},
     "intentDistribution": {
-      "answer_question": 11,
+      "answer_question": 13,
       "unclear": 2
     },
     "classificationMethods": {
-      "orchestrator": 13
+      "orchestrator": 15
     },
-    "avgResponseTime": 1923.6923076923076,
-    "totalLlmCalls": 11,
+    "avgResponseTime": 1901.5333333333333,
+    "totalLlmCalls": 13,
     "totalTokensUsed": 0,
     "errorCount": 0
   },
   "createdAt": "2026-02-02T18:51:09.876Z",
-  "updatedAt": "2026-02-03T02:13:01.587Z"
+  "updatedAt": "2026-02-03T02:16:01.463Z"
 }
