@@ -340,6 +340,111 @@
         }
       ],
       "success": true
+    },
+    {
+      "id": "trace-1770084679320",
+      "sessionId": "c62b1990-30a8-4eb2-b7f4-0e18e87bafb1",
+      "userInput": "My baby is going to arrive soon",
+      "agentResponse": "Congratulations on your upcoming arrival! I can help you understand the steps for adding your new baby to your benefits once they are born. I can simulate the process of reporting the birth and enrolling your child in your health, dental, and vision plans, as well as updating your W-4 tax withholding and dependent care FSA, if applicable.\n\nHere's a general overview of what we can do:\n\n*   **Report the Birth:** Once your baby is born, you'll want to report the birth to HR within 31 days. This qualifies you for a special enrollment period to make changes to your benefits.\n*   **Enroll in Benefits:** You can add your baby to your medical, dental, and vision plans. Coverage is typically effective as of the date of birth.\n*   **Update FSA:** If you participate in the Dependent Care FSA, you can increase your contributions to cover childcare expenses.\n*   **Update W-4:** You can update your W-4 form to reflect the new dependent, which may affect your tax withholding.\n\nWould you like me to walk you through the specific steps and information needed to prepare for this process?",
+      "startTime": "2026-02-03T02:11:17.287Z",
+      "endTime": "2026-02-03T02:11:19.320Z",
+      "totalDuration": 2033,
+      "entries": [
+        {
+          "id": "entry-1770084677296-1",
+          "type": "intent_classification",
+          "name": "Orchestrator Intent Classification",
+          "timestamp": "2026-02-03T02:11:17.296Z",
+          "metadata": {
+            "intent": "answer_question",
+            "classificationMethod": "orchestrator",
+            "confidence": "high"
+          }
+        },
+        {
+          "id": "entry-1770084679320-3",
+          "type": "llm_call",
+          "name": "Gemini Response Generation",
+          "timestamp": "2026-02-03T02:11:19.320Z",
+          "duration": 2024,
+          "metadata": {
+            "model": "gemini",
+            "intent": "answer_question",
+            "validated": true
+          }
+        }
+      ],
+      "success": true
+    },
+    {
+      "id": "trace-1770084761717",
+      "sessionId": "c62b1990-30a8-4eb2-b7f4-0e18e87bafb1",
+      "userInput": "okie, my baby is actually here",
+      "agentResponse": "Congratulations on the arrival of your baby! I can simulate the process of reporting the birth and adding your child to your benefits. To get started, I'll need some information:\n\n*   What is the baby's first name?\n*   What is the baby's last name?\n*   What is the baby's date of birth?\n*   Can you provide the last 4 digits of the baby's Social Security Number? (If you haven't received an SSN yet, that's okay. We can proceed and update it later. Typically, you have 90 days to provide the SSN.)\n*   Was this a birth or adoption?\n*   What was the date of the birth or adoption placement?",
+      "startTime": "2026-02-03T02:12:40.324Z",
+      "endTime": "2026-02-03T02:12:41.717Z",
+      "totalDuration": 1393,
+      "entries": [
+        {
+          "id": "entry-1770084760325-1",
+          "type": "intent_classification",
+          "name": "Orchestrator Intent Classification",
+          "timestamp": "2026-02-03T02:12:40.325Z",
+          "metadata": {
+            "intent": "answer_question",
+            "classificationMethod": "orchestrator",
+            "confidence": "high"
+          }
+        },
+        {
+          "id": "entry-1770084761717-3",
+          "type": "llm_call",
+          "name": "Gemini Response Generation",
+          "timestamp": "2026-02-03T02:12:41.717Z",
+          "duration": 1392,
+          "metadata": {
+            "model": "gemini",
+            "intent": "answer_question",
+            "validated": true
+          }
+        }
+      ],
+      "success": true
+    },
+    {
+      "id": "trace-1770084781587",
+      "sessionId": "c62b1990-30a8-4eb2-b7f4-0e18e87bafb1",
+      "userInput": "a baby doesn't need a SSN?",
+      "agentResponse": "You are absolutely correct! A newborn typically doesn't have a Social Security number immediately. My apologies for the confusion.\n\nWhile a Social Security number is eventually needed for tax and benefit purposes, you have some time to obtain it. You usually have 90 days to provide the SSN. We can proceed with the enrollment process without it for now.\n\nI'll still need to collect the following information to report the birth of your child:\n\n*   What is the baby's first name?\n*   What is the baby's last name?\n*   What is the baby's date of birth?\n*   Was this a birth or adoption?\n*   What was the date of the birth or adoption placement?",
+      "startTime": "2026-02-03T02:12:59.983Z",
+      "endTime": "2026-02-03T02:13:01.587Z",
+      "totalDuration": 1604,
+      "entries": [
+        {
+          "id": "entry-1770084779984-1",
+          "type": "intent_classification",
+          "name": "Orchestrator Intent Classification",
+          "timestamp": "2026-02-03T02:12:59.984Z",
+          "metadata": {
+            "intent": "answer_question",
+            "classificationMethod": "orchestrator",
+            "confidence": "high"
+          }
+        },
+        {
+          "id": "entry-1770084781587-3",
+          "type": "llm_call",
+          "name": "Gemini Response Generation",
+          "timestamp": "2026-02-03T02:13:01.587Z",
+          "duration": 1603,
+          "metadata": {
+            "model": "gemini",
+            "intent": "answer_question",
+            "validated": true
+          }
+        }
+      ],
+      "success": true
     }
   ],
   "stats": {
@@ -348,17 +453,17 @@
     },
     "signalReads": {},
     "intentDistribution": {
-      "answer_question": 8,
+      "answer_question": 11,
       "unclear": 2
     },
     "classificationMethods": {
-      "orchestrator": 10
+      "orchestrator": 13
     },
-    "avgResponseTime": 1997.8,
-    "totalLlmCalls": 8,
+    "avgResponseTime": 1923.6923076923076,
+    "totalLlmCalls": 11,
     "totalTokensUsed": 0,
     "errorCount": 0
   },
   "createdAt": "2026-02-02T18:51:09.876Z",
-  "updatedAt": "2026-02-03T02:06:16.279Z"
+  "updatedAt": "2026-02-03T02:13:01.587Z"
 }

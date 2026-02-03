@@ -28,4 +28,4 @@ Life events supported:
 - Medicare/Medicaid eligibility
 - Court orders (QMCSO, child support)
 
-The agent simulates processing these changes while validating business rules, calculating effective dates, determining qualifying event periods, and ensuring compliance with IRS regulations, ERISA, HIPAA, and company policies.
+The agent processes these changes while validating business rules, calculating effective dates, determining qualifying event periods, and ensuring compliance with IRS regulations, ERISA, HIPAA, and company policies.
