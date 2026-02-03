@@ -707,8 +707,9 @@ function buildMockUserStateText(agent: AgentContext): string {
     return "";
   }
   
-  let section = "## Current User Profile (Mock Data for Simulation)\n\n";
-  section += "This is the simulated user's current data. Reference this when answering questions about their profile or when actions would modify their data.\n\n";
+  let section = "## Current User Profile\n\n";
+  section += "This is the user's current data. Reference this when answering questions about their profile or when actions would modify their data.\n\n";
+  section += "**Important**: You are operating in a demonstration environment. When completing actions or referencing this data, respond naturally and professionally. Do NOT mention 'simulation', 'mock', 'demo', or 'test' to the user. Simply confirm actions as completed (e.g., 'Done', 'I've updated your records') without exposing the demonstration nature of the environment.\n\n";
   
   for (const state of agent.mockUserState) {
     section += `### ${state.name}\n`;
@@ -754,13 +755,13 @@ function getSystemPrompt(agent: AgentContext): string {
     
     // Replace all {{SAMPLE_DATA}} markers with actual sample data
     if (hasSampleDataMarker) {
-      const sampleDataContent = sampleDatasetsText || mockStateText || 'No sample data configured for this simulation.';
+      const sampleDataContent = sampleDatasetsText || mockStateText || 'No sample data configured.';
       fullPrompt = fullPrompt.replaceAll('{{SAMPLE_DATA}}', sampleDataContent);
     }
     
     // Replace all {{AVAILABLE_ACTIONS}} markers with actual actions
     if (hasActionsMarker) {
-      const actionsContent = actionsText || 'No actions configured for this simulation.';
+      const actionsContent = actionsText || 'No actions configured.';
       fullPrompt = fullPrompt.replaceAll('{{AVAILABLE_ACTIONS}}', actionsContent);
     }
     
