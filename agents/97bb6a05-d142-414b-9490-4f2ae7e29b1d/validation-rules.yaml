@@ -124,6 +124,10 @@ FSA/HSA VALIDATIONS
     - Cannot exceed $5,000 annual limit
     - Married filing separately limited to $2,500
     - Birth of child allows increase; child turning 13 requires decrease
+    - CRITICAL: Before offering FSA updates, check current contribution against maximum
+    - If employee is already at $5,000 (or $2,500 for married filing separately), inform them proactively that they cannot increase further
+    - Do NOT ask "would you like to update your FSA" if they are already at maximum - instead state the fact and offer to keep it the same
+    - If below maximum, always ask for the specific new contribution amount when updating
 
 EMPLOYMENT STATUS VALIDATIONS
 

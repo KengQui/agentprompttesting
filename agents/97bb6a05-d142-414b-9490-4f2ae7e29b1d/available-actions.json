@@ -160,6 +160,13 @@
         "description": "Indicate if you want to review or update your Dependent Care Flexible Spending Account contributions."
       },
       {
+        "name": "new_dependent_care_fsa_amount",
+        "type": "number",
+        "label": "New Annual Dependent Care FSA Contribution",
+        "required": false,
+        "description": "The new annual contribution amount for Dependent Care FSA. Must be between $0 and $5,000 ($2,500 if married filing separately). Required if update_dependent_care_fsa is true."
+      },
+      {
         "name": "update_w4_withholding",
         "type": "boolean",
         "label": "Review/Update W-4 Tax Withholding?",
