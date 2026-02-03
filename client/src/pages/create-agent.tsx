@@ -36,14 +36,14 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { ClarifyingChatDialog } from "@/components/clarifying-chat-dialog";
 
 const steps = [
-  { id: 1, name: "Business Use Case", icon: Briefcase, description: "Optional: Define the problem this agent solves" },
+  { id: 1, name: "Business Use Case", icon: Briefcase, description: "Define the problem this agent solves" },
   { id: 2, name: "Agent Name", icon: Bot, description: "Name your agent" },
   { id: 3, name: "Domain Knowledge", icon: BookOpen, description: "Add knowledge and documents" },
   { id: 4, name: "Validation Rules", icon: Shield, description: "Set input/output validation rules" },
   { id: 5, name: "Guardrails", icon: AlertTriangle, description: "Define safety boundaries" },
   { id: 6, name: "Sample Data", icon: Database, description: "Upload or generate sample data" },
   { id: 7, name: "Available Actions", icon: Zap, description: "Define actions agent can simulate" },
-  { id: 8, name: "Review", icon: Eye, description: "Define your agent's prompt" },
+  { id: 8, name: "Agent Prompt", icon: Eye, description: "Define your agent's prompt" },
 ];
 
 function StepIndicator({ currentStep }: { currentStep: number }) {

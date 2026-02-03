@@ -54,14 +54,14 @@ Agent Studio utilizes a modern web application architecture with a clear separat
 - **UI/UX**: Features a professional tech theme with dark mode support. Uses Inter for sans-serif fonts and JetBrains Mono for code. The primary color scheme is purple (#8B5CF6).
 - **Core Features**:
     - **Agent Creation Wizard**: An 8-step process guiding users through defining agent parameters:
-        1. Business Use Case - Optional: Define the problem this agent solves
+        1. Business Use Case - Define the problem this agent solves
         2. Agent Name - Name your agent
         3. Domain Knowledge - Add knowledge and documents
         4. Validation Rules - Set input/output validation rules
         5. Guardrails - Define safety boundaries
         6. Sample Data - Upload or generate sample data
         7. Available Actions - Define actions agent can simulate
-        8. Review - Define your agent's prompt
+        8. Agent Prompt - Define your agent's prompt
     - **Chat Interface**: For testing and interacting with configured agents, with the following features:
         - **Session Management**: Multiple renamable sessions per agent for organizing test scenarios
         - **Session Sidebar**: Collapsible sidebar showing all sessions with previews, message counts, and inline renaming
