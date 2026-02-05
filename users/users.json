@@ -177,5 +177,11 @@
     "username": "testuser_ZGZmqa",
     "password": "$2b$10$FGhxLxWS8vJeCw4ECmbh9OoJsB0aRXyZGmLkq4hfv.7u5Wt8IDdk6",
     "createdAt": "2026-02-05T23:18:07.872Z"
+  },
+  {
+    "id": "b0ac71c7-30d5-4410-9223-dc0b95e6b8a3",
+    "username": "testval_rBFRkk",
+    "password": "$2b$10$tix6cIbAa62gjagihu2DNeubp0k7.OTv493Wp.rrvcExPmJHFpybm",
+    "createdAt": "2026-02-05T23:34:43.719Z"
   }
 ]
