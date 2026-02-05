@@ -27,7 +27,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { generatePromptPreview } from "@/lib/prompt-preview";
-import { businessUseCaseTemplate, validationRulesTemplate, guardrailsTemplate } from "@/lib/config-templates";
+import { businessUseCaseTemplate, domainKnowledgeTemplate, validationRulesTemplate, guardrailsTemplate, sampleDataTemplate } from "@/lib/config-templates";
 import type { WizardStepData, Agent, DomainDocument, SampleDataset, PromptStyle, GeminiModel, ClarifyingInsight, AgentAction, MockUserState, ActionField, MockMode } from "@shared/schema";
 import { geminiModelDisplayNames, defaultGenerationModel, mockModeDescriptions } from "@shared/schema";
 import { Switch } from "@/components/ui/switch";
@@ -406,7 +406,17 @@ function Step3DomainKnowledge({
       <CardContent>
         <div className="space-y-6">
           <div>
-            <Label htmlFor="domainKnowledge">Knowledge Base (Type here)</Label>
+            <div className="flex items-center justify-between mb-2 flex-wrap gap-2">
+              <Label htmlFor="domainKnowledge">Knowledge Base (Type here)</Label>
+              <button
+                type="button"
+                onClick={() => onUpdate({ domainKnowledge: domainKnowledgeTemplate })}
+                className="text-sm text-primary hover:underline"
+                data-testid="button-use-template-domain-knowledge"
+              >
+                Use Template
+              </button>
+            </div>
             <Textarea
               id="domainKnowledge"
               placeholder="e.g., 
@@ -416,7 +426,7 @@ function Step3DomainKnowledge({
 - Product returns are accepted within 30 days..."
               value={data.domainKnowledge}
               onChange={(e) => onUpdate({ domainKnowledge: e.target.value })}
-              className="mt-2 min-h-[270px] resize-y"
+              className="min-h-[270px] resize-y"
               data-testid="textarea-domain-knowledge"
             />
           </div>
@@ -1202,7 +1212,17 @@ function Step6SampleData({
                 </p>
               </div>
               <div>
-                <Label htmlFor="dataDescription" className="text-xs">Describe the data you need</Label>
+                <div className="flex items-center justify-between flex-wrap gap-2">
+                  <Label htmlFor="dataDescription" className="text-xs">Describe the data you need</Label>
+                  <button
+                    type="button"
+                    onClick={() => setDataType(sampleDataTemplate)}
+                    className="text-sm text-primary hover:underline"
+                    data-testid="button-use-template-sample-data"
+                  >
+                    Use Template
+                  </button>
+                </div>
                 <Textarea
                   id="dataDescription"
                   value={dataType}
