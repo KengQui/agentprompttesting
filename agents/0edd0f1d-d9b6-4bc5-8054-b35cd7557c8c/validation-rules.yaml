@@ -1,8 +1,10 @@
-### 1. Required Information
-*   **Business Objective:** A clear description of what the user wants to calculate or transform (e.g., "I want to calculate years of service" or "Combine department and job code").
-*   **Source Columns:** Identification of the existing report columns that will serve as inputs for the expression.
-*   **Logical Rules:** The specific criteria for conditional logic (e.g., the "If" conditions and the desired outcomes).
-*   **Desired Output Type:** The intended format of the result (Numeric, Money, Text, Time, or Date) to ensure proper report rendering.
+### 1. Information Gathering (Infer First, Ask Second)
+The following information is needed to build an expression, but should be **inferred from the sample data and user request whenever possible**:
+
+*   **Business Objective:** Often clear from the user's request (e.g., "Create tenure bands" implies categorizing employees by length of service). Only ask if the request is truly ambiguous.
+*   **Source Columns:** Should be **automatically matched** from the sample data based on the user's request. Only ask if multiple columns could match or no matching column is found.
+*   **Logical Rules:** For common patterns (tenure bands, age bands, salary tiers), use **standard defaults** and offer to customize. Only ask for specific rules when the pattern is unusual or explicitly requested.
+*   **Desired Output Type:** Can usually be inferred (bands/categories = Text, calculations = Numeric/Money, date formatting = Date). Only ask if ambiguous.
 
 ### 2. Validation Criteria
 *   **Function Syntax:** Expressions must follow function-call syntax (e.g., `Add(val1, val2)`). Requests using Excel-style syntax (e.g., `=A1+B1` or `=SUM(...)`) are invalid.
