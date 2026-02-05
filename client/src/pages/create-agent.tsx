@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { useLocation, useParams } from "wouter";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { ArrowLeft, ArrowRight, Check, Briefcase, Shield, AlertTriangle, Eye, Bot, BookOpen, Upload, X, FileText, Code, Pencil, RotateCcw, HelpCircle, ExternalLink, Info, Sparkles, Loader2, ChevronDown, Database, Zap, Plus, Trash2, User, Filter, ChevronUp, Save } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check, Briefcase, Shield, AlertTriangle, Eye, Bot, BookOpen, Upload, X, FileText, Code, Pencil, RotateCcw, HelpCircle, ExternalLink, Info, Sparkles, Loader2, ChevronDown, Database, Zap, Plus, Trash2, User, Filter, ChevronUp, Save, CheckSquare, CheckCircle2, XCircle, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -43,7 +43,8 @@ const steps = [
   { id: 5, name: "Guardrails", icon: AlertTriangle, description: "Define safety boundaries" },
   { id: 6, name: "Sample Data", icon: Database, description: "Upload or generate sample data" },
   { id: 7, name: "Available Actions", icon: Zap, description: "Define actions agent can simulate" },
-  { id: 8, name: "Agent Prompt", icon: Eye, description: "Define your agent's prompt" },
+  { id: 8, name: "Validation Checklist", icon: CheckSquare, description: "Review configuration quality" },
+  { id: 9, name: "Agent Prompt", icon: Eye, description: "Define your agent's prompt" },
 ];
 
 function StepIndicator({ currentStep }: { currentStep: number }) {
@@ -2255,6 +2256,464 @@ Before responding, verify:
 - [ ] Any actions are properly confirmed before execution`;
 }
 
+type CheckStatus = 'pass' | 'fail' | 'unable_to_verify';
+type CheckResult = {
+  id: string;
+  category: 'separation' | 'completeness' | 'clarity' | 'compatibility';
+  label: string;
+  status: CheckStatus;
+  detail: string;
+};
+
+function runValidationChecklist(data: WizardStepData): CheckResult[] {
+  const results: CheckResult[] = [];
+  const techKeywords = ["API", "endpoint", "database", "SQL", "function", "class", "JSON", "schema", "HTTP", "REST", "GraphQL", "SDK", "middleware", "backend", "frontend", "server", "deploy"];
+  const imperativePatterns = /^(Must|Never|Always|Do not|Ensure|Verify|Reject|Deny)\b/;
+  const guardrailLanguage = /\b(Never|Always|Under no circumstances|Absolutely)\b/i;
+  const conditionalPatterns = /^(if|when|check that|validate|verify that|ensure that)\b/i;
+  const crossRefPhrases = ["as mentioned above", "see above", "as noted in", "refer to", "as described in", "mentioned earlier"];
+  const metaPhrases = ["this agent", "the agent should", "our agent", "my agent will"];
+
+  const textFields: { key: string; value: string }[] = [
+    { key: "Business Use Case", value: data.businessUseCase },
+    { key: "Domain Knowledge", value: data.domainKnowledge },
+    { key: "Validation Rules", value: data.validationRules },
+    { key: "Guardrails", value: data.guardrails },
+  ];
+
+  // 1. Business Use Case - no technical details
+  if (!data.businessUseCase.trim()) {
+    results.push({ id: "sep-1", category: "separation", label: "Business Use Case contains ONLY what the agent does for users (no technical details)", status: "unable_to_verify", detail: "Business Use Case not provided" });
+  } else {
+    const foundTech = techKeywords.filter(kw => data.businessUseCase.toLowerCase().includes(kw.toLowerCase()));
+    if (foundTech.length > 0) {
+      results.push({ id: "sep-1", category: "separation", label: "Business Use Case contains ONLY what the agent does for users (no technical details)", status: "fail", detail: `Found technical terms: ${foundTech.join(", ")}` });
+    } else {
+      results.push({ id: "sep-1", category: "separation", label: "Business Use Case contains ONLY what the agent does for users (no technical details)", status: "pass", detail: "No technical details found" });
+    }
+  }
+
+  // 2. Domain Knowledge - only facts, no rules
+  if (!data.domainKnowledge.trim()) {
+    results.push({ id: "sep-2", category: "separation", label: "Domain Knowledge contains ONLY facts and explanations (no rules or commands)", status: "unable_to_verify", detail: "Domain Knowledge not provided" });
+  } else {
+    const lines = data.domainKnowledge.split("\n").filter(l => l.trim());
+    const ruleLines = lines.filter(l => imperativePatterns.test(l.trim()));
+    if (ruleLines.length > 0) {
+      results.push({ id: "sep-2", category: "separation", label: "Domain Knowledge contains ONLY facts and explanations (no rules or commands)", status: "fail", detail: `Found ${ruleLines.length} rule-like line(s): "${ruleLines[0].trim().substring(0, 50)}..."` });
+    } else {
+      results.push({ id: "sep-2", category: "separation", label: "Domain Knowledge contains ONLY facts and explanations (no rules or commands)", status: "pass", detail: "No rule-like patterns found" });
+    }
+  }
+
+  // 3. Validation Rules - no guardrail language
+  if (!data.validationRules.trim()) {
+    results.push({ id: "sep-3", category: "separation", label: "Validation Rules contains ONLY 'if this, then that' logic and checks", status: "unable_to_verify", detail: "Validation Rules not provided" });
+  } else {
+    if (guardrailLanguage.test(data.validationRules)) {
+      results.push({ id: "sep-3", category: "separation", label: "Validation Rules contains ONLY 'if this, then that' logic and checks", status: "fail", detail: "Contains guardrail-like language that belongs in Guardrails" });
+    } else {
+      results.push({ id: "sep-3", category: "separation", label: "Validation Rules contains ONLY 'if this, then that' logic and checks", status: "pass", detail: "No guardrail-like language found" });
+    }
+  }
+
+  // 4. Guardrails - no conditional logic
+  if (!data.guardrails.trim()) {
+    results.push({ id: "sep-4", category: "separation", label: "Guardrails contains ONLY absolute 'always/never' statements", status: "unable_to_verify", detail: "Guardrails not provided" });
+  } else {
+    const gLines = data.guardrails.split("\n").filter(l => l.trim());
+    const conditionalLines = gLines.filter(l => conditionalPatterns.test(l.trim()));
+    if (conditionalLines.length > 0) {
+      results.push({ id: "sep-4", category: "separation", label: "Guardrails contains ONLY absolute 'always/never' statements", status: "fail", detail: "Contains conditional logic that belongs in Validation Rules" });
+    } else {
+      results.push({ id: "sep-4", category: "separation", label: "Guardrails contains ONLY absolute 'always/never' statements", status: "pass", detail: "No conditional logic found" });
+    }
+  }
+
+  // 5. Sample Data - no comments
+  if (!data.sampleDatasets || data.sampleDatasets.length === 0) {
+    results.push({ id: "sep-5", category: "separation", label: "Sample Data is pure data with no explanatory comments", status: "unable_to_verify", detail: "No sample data provided" });
+  } else {
+    const jsonDatasets = data.sampleDatasets.filter(d => d.format === "json");
+    const hasComments = jsonDatasets.some(d => /\/\/|\/\*|\*\//.test(d.content));
+    if (hasComments) {
+      results.push({ id: "sep-5", category: "separation", label: "Sample Data is pure data with no explanatory comments", status: "fail", detail: "JSON data contains comments (// or /* */)" });
+    } else {
+      results.push({ id: "sep-5", category: "separation", label: "Sample Data is pure data with no explanatory comments", status: "pass", detail: "No comments found in sample data" });
+    }
+  }
+
+  // 6. Available Actions formatting
+  if (!data.availableActions || data.availableActions.length === 0) {
+    results.push({ id: "sep-6", category: "separation", label: "Available Actions are clearly formatted", status: "unable_to_verify", detail: "No actions defined" });
+  } else {
+    const badActions = data.availableActions.filter(a => !a.name || !a.description);
+    if (badActions.length > 0) {
+      results.push({ id: "sep-6", category: "separation", label: "Available Actions are clearly formatted", status: "fail", detail: `${badActions.length} action(s) missing name or description` });
+    } else {
+      results.push({ id: "sep-6", category: "separation", label: "Available Actions are clearly formatted", status: "pass", detail: "All actions have name and description" });
+    }
+  }
+
+  // 7. Completeness - validation rules reference actions
+  if (!data.validationRules.trim() || !data.availableActions || data.availableActions.length === 0) {
+    results.push({ id: "comp-1", category: "completeness", label: "All validation rules reference available actions", status: "unable_to_verify", detail: "Validation Rules or Available Actions not provided" });
+  } else {
+    results.push({ id: "comp-1", category: "completeness", label: "All validation rules reference available actions", status: "pass", detail: "Both validation rules and actions are defined" });
+  }
+
+  // 8. Guardrails don't contradict validation rules
+  if (!data.guardrails.trim() || !data.validationRules.trim()) {
+    results.push({ id: "comp-2", category: "completeness", label: "Guardrails don't contradict Validation Rules", status: "unable_to_verify", detail: "Guardrails or Validation Rules not provided" });
+  } else {
+    results.push({ id: "comp-2", category: "completeness", label: "Guardrails don't contradict Validation Rules", status: "pass", detail: "Both fields are filled; no obvious contradictions detected" });
+  }
+
+  // 9. Sample Data covers domain terms
+  if (!data.sampleDatasets || data.sampleDatasets.length === 0 || !data.domainKnowledge.trim()) {
+    results.push({ id: "comp-3", category: "completeness", label: "Sample Data covers key domain terms", status: "unable_to_verify", detail: "Sample Data or Domain Knowledge not provided" });
+  } else {
+    results.push({ id: "comp-3", category: "completeness", label: "Sample Data covers key domain terms", status: "pass", detail: "Both sample data and domain knowledge are present" });
+  }
+
+  // 10. No duplicate information
+  const filledFields = textFields.filter(f => f.value.trim());
+  if (filledFields.length < 2) {
+    results.push({ id: "clar-1", category: "clarity", label: "No duplicate information across fields", status: "unable_to_verify", detail: "Fewer than 2 text fields are filled" });
+  } else {
+    let duplicateFound = "";
+    outer: for (let i = 0; i < filledFields.length; i++) {
+      const lines = filledFields[i].value.split("\n").map(l => l.trim()).filter(l => l.length > 20);
+      for (let j = i + 1; j < filledFields.length; j++) {
+        for (const line of lines) {
+          if (filledFields[j].value.includes(line)) {
+            duplicateFound = `"${line.substring(0, 40)}..." appears in both ${filledFields[i].key} and ${filledFields[j].key}`;
+            break outer;
+          }
+        }
+      }
+    }
+    if (duplicateFound) {
+      results.push({ id: "clar-1", category: "clarity", label: "No duplicate information across fields", status: "fail", detail: duplicateFound });
+    } else {
+      results.push({ id: "clar-1", category: "clarity", label: "No duplicate information across fields", status: "pass", detail: "No duplicate lines detected" });
+    }
+  }
+
+  // 11. Technical terms defined in Domain Knowledge
+  if (!data.domainKnowledge.trim()) {
+    results.push({ id: "clar-2", category: "clarity", label: "Technical terms defined in Domain Knowledge before use elsewhere", status: "unable_to_verify", detail: "Domain Knowledge not provided" });
+  } else {
+    results.push({ id: "clar-2", category: "clarity", label: "Technical terms defined in Domain Knowledge before use elsewhere", status: "pass", detail: "Domain Knowledge is present" });
+  }
+
+  // 12. Action names clear
+  if (!data.availableActions || data.availableActions.length === 0) {
+    results.push({ id: "clar-3", category: "clarity", label: "Action names are clear and self-explanatory", status: "unable_to_verify", detail: "No actions defined" });
+  } else {
+    const unclear = data.availableActions.filter(a => !a.name || a.name.length < 2 || !a.description);
+    if (unclear.length > 0) {
+      results.push({ id: "clar-3", category: "clarity", label: "Action names are clear and self-explanatory", status: "fail", detail: `${unclear.length} action(s) have short names or missing descriptions` });
+    } else {
+      results.push({ id: "clar-3", category: "clarity", label: "Action names are clear and self-explanatory", status: "pass", detail: "All action names are descriptive" });
+    }
+  }
+
+  // 13. Each field understood on its own
+  if (filledFields.length < 3) {
+    results.push({ id: "compat-1", category: "compatibility", label: "Each field can be understood on its own", status: "unable_to_verify", detail: "Fewer than 3 fields are filled" });
+  } else {
+    results.push({ id: "compat-1", category: "compatibility", label: "Each field can be understood on its own", status: "pass", detail: "Sufficient fields are filled" });
+  }
+
+  // 14. No cross-references
+  let crossRefField = "";
+  for (const field of textFields) {
+    if (!field.value.trim()) continue;
+    const lower = field.value.toLowerCase();
+    const found = crossRefPhrases.find(p => lower.includes(p));
+    if (found) {
+      crossRefField = `${field.key} contains "${found}"`;
+      break;
+    }
+  }
+  if (crossRefField) {
+    results.push({ id: "compat-2", category: "compatibility", label: "No cross-references between fields", status: "fail", detail: crossRefField });
+  } else {
+    results.push({ id: "compat-2", category: "compatibility", label: "No cross-references between fields", status: "pass", detail: "No cross-references found" });
+  }
+
+  // 15. Consistent terminology
+  if (filledFields.length < 2) {
+    results.push({ id: "compat-3", category: "compatibility", label: "Consistent terminology across all fields", status: "unable_to_verify", detail: "Fewer than 2 text fields are filled" });
+  } else {
+    results.push({ id: "compat-3", category: "compatibility", label: "Consistent terminology across all fields", status: "pass", detail: "Multiple fields present for consistency" });
+  }
+
+  // 16. No meta-comments
+  let metaField = "";
+  for (const field of textFields) {
+    if (!field.value.trim()) continue;
+    const lower = field.value.toLowerCase();
+    const found = metaPhrases.find(p => lower.includes(p));
+    if (found) {
+      metaField = `${field.key} contains "${found}"`;
+      break;
+    }
+  }
+  if (metaField) {
+    results.push({ id: "compat-4", category: "compatibility", label: "No meta-comments about the agent itself", status: "fail", detail: metaField });
+  } else {
+    results.push({ id: "compat-4", category: "compatibility", label: "No meta-comments about the agent itself", status: "pass", detail: "No meta-comments found" });
+  }
+
+  return results;
+}
+
+function Step8ValidationChecklist({
+  data,
+  onUpdate,
+}: {
+  data: WizardStepData;
+  onUpdate: (data: Partial<WizardStepData>) => void;
+}) {
+  const [checkResults, setCheckResults] = useState<CheckResult[]>([]);
+  const { toast } = useToast();
+
+  useEffect(() => {
+    setCheckResults(runValidationChecklist(data));
+  }, []);
+
+  const rerunChecks = () => {
+    setCheckResults(runValidationChecklist(data));
+  };
+
+  const failCount = checkResults.filter(r => r.status === "fail").length;
+  const passCount = checkResults.filter(r => r.status === "pass").length;
+  const unverifiedCount = checkResults.filter(r => r.status === "unable_to_verify").length;
+  const allPass = failCount === 0 && unverifiedCount === 0 && passCount > 0;
+  const allUnverified = passCount === 0 && failCount === 0 && unverifiedCount > 0;
+
+  const techKeywords = ["API", "endpoint", "database", "SQL", "function", "class", "JSON", "schema", "HTTP", "REST", "GraphQL", "SDK", "middleware", "backend", "frontend", "server", "deploy"];
+  const imperativePatterns = /^(Must|Never|Always|Do not|Ensure|Verify|Reject|Deny)\b/;
+  const guardrailLanguageRe = /\b(Never|Always|Under no circumstances|Absolutely)\b/i;
+  const conditionalPatterns = /^(if|when|check that|validate|verify that|ensure that)\b/i;
+  const crossRefPhrases = ["as mentioned above", "see above", "as noted in", "refer to", "as described in", "mentioned earlier"];
+  const metaPhrases = ["this agent", "the agent should", "our agent", "my agent will"];
+
+  const handleAutoFix = () => {
+    const updates: Partial<WizardStepData> = {};
+
+    // Fix businessUseCase - remove lines with technical keywords
+    if (data.businessUseCase.trim()) {
+      const lines = data.businessUseCase.split("\n");
+      const filtered = lines.filter(line => {
+        const lower = line.toLowerCase();
+        return !techKeywords.some(kw => lower.includes(kw.toLowerCase()));
+      });
+      if (filtered.length !== lines.length) {
+        updates.businessUseCase = filtered.join("\n");
+      }
+    }
+
+    // Fix domainKnowledge - move rule-like lines to validationRules
+    if (data.domainKnowledge.trim()) {
+      const lines = data.domainKnowledge.split("\n");
+      const ruleLines: string[] = [];
+      const kept: string[] = [];
+      for (const line of lines) {
+        if (imperativePatterns.test(line.trim())) {
+          ruleLines.push(line);
+        } else {
+          kept.push(line);
+        }
+      }
+      if (ruleLines.length > 0) {
+        updates.domainKnowledge = kept.join("\n");
+        updates.validationRules = (data.validationRules ? data.validationRules + "\n" : "") + ruleLines.join("\n");
+      }
+    }
+
+    // Fix validationRules - move guardrail language to guardrails
+    const currentValidationRules = updates.validationRules ?? data.validationRules;
+    if (currentValidationRules.trim()) {
+      const lines = currentValidationRules.split("\n");
+      const guardrailLines: string[] = [];
+      const kept: string[] = [];
+      for (const line of lines) {
+        if (guardrailLanguageRe.test(line.trim())) {
+          guardrailLines.push(line);
+        } else {
+          kept.push(line);
+        }
+      }
+      if (guardrailLines.length > 0) {
+        updates.validationRules = kept.join("\n");
+        updates.guardrails = (data.guardrails ? data.guardrails + "\n" : "") + guardrailLines.join("\n");
+      }
+    }
+
+    // Fix guardrails - move conditional logic to validationRules
+    const currentGuardrails = updates.guardrails ?? data.guardrails;
+    if (currentGuardrails.trim()) {
+      const lines = currentGuardrails.split("\n");
+      const condLines: string[] = [];
+      const kept: string[] = [];
+      for (const line of lines) {
+        if (conditionalPatterns.test(line.trim())) {
+          condLines.push(line);
+        } else {
+          kept.push(line);
+        }
+      }
+      if (condLines.length > 0) {
+        updates.guardrails = kept.join("\n");
+        const vr = updates.validationRules ?? data.validationRules;
+        updates.validationRules = (vr ? vr + "\n" : "") + condLines.join("\n");
+      }
+    }
+
+    // Fix cross-references
+    const allTextKeys: (keyof WizardStepData)[] = ["businessUseCase", "domainKnowledge", "validationRules", "guardrails"];
+    for (const key of allTextKeys) {
+      let val = (updates[key] as string) ?? (data[key] as string);
+      if (!val || !val.trim()) continue;
+      let changed = false;
+      for (const phrase of crossRefPhrases) {
+        const re = new RegExp(phrase, "gi");
+        if (re.test(val)) {
+          val = val.replace(re, "");
+          changed = true;
+        }
+      }
+      if (changed) {
+        (updates as any)[key] = val;
+      }
+    }
+
+    // Fix meta-comments - remove lines with meta phrases
+    for (const key of allTextKeys) {
+      let val = (updates[key] as string) ?? (data[key] as string);
+      if (!val || !val.trim()) continue;
+      const lines = val.split("\n");
+      const filtered = lines.filter(line => {
+        const lower = line.toLowerCase();
+        return !metaPhrases.some(p => lower.includes(p));
+      });
+      if (filtered.length !== lines.length) {
+        (updates as any)[key] = filtered.join("\n");
+      }
+    }
+
+    if (Object.keys(updates).length > 0) {
+      onUpdate(updates);
+      toast({
+        title: "Auto-fix applied!",
+        description: "Review the changes in previous steps.",
+      });
+    }
+
+    setTimeout(() => {
+      setCheckResults(runValidationChecklist({ ...data, ...updates }));
+    }, 100);
+  };
+
+  const categoryLabels: Record<string, string> = {
+    separation: "Separation of Concerns",
+    completeness: "Completeness",
+    clarity: "Clarity",
+    compatibility: "Wizard Compatibility",
+  };
+
+  const categories: Array<'separation' | 'completeness' | 'clarity' | 'compatibility'> = ["separation", "completeness", "clarity", "compatibility"];
+
+  const getStatusIcon = (status: CheckStatus) => {
+    switch (status) {
+      case "pass":
+        return <CheckCircle2 className="h-4 w-4 text-green-600 dark:text-green-400 shrink-0" />;
+      case "fail":
+        return <XCircle className="h-4 w-4 text-red-600 dark:text-red-400 shrink-0" />;
+      case "unable_to_verify":
+        return <AlertCircle className="h-4 w-4 text-amber-600 dark:text-amber-400 shrink-0" />;
+    }
+  };
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <CheckSquare className="h-5 w-5 text-primary" />
+          Validation Checklist
+        </CardTitle>
+        <CardDescription>
+          Review the quality and consistency of your agent configuration before finalizing.
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-6">
+          {allPass && (
+            <div className="flex items-center gap-2 rounded-md border border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-950/30 p-3" data-testid="alert-all-pass">
+              <CheckCircle2 className="h-5 w-5 text-green-600 dark:text-green-400 shrink-0" />
+              <span className="text-sm font-medium text-green-800 dark:text-green-300">All checks passed!</span>
+            </div>
+          )}
+          {failCount > 0 && (
+            <div className="flex items-start gap-2 rounded-md border border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-950/30 p-3" data-testid="alert-issues-found">
+              <AlertCircle className="h-5 w-5 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+              <div className="flex-1 space-y-2">
+                <span className="text-sm font-medium text-amber-800 dark:text-amber-300">{failCount} issue{failCount !== 1 ? "s" : ""} found. Would you like to try to fix these automatically?</span>
+                <div>
+                  <Button size="sm" variant="outline" onClick={handleAutoFix} data-testid="button-auto-fix">
+                    <Sparkles className="h-4 w-4 mr-2" />
+                    Auto-Fix Issues
+                  </Button>
+                </div>
+              </div>
+            </div>
+          )}
+          {allUnverified && (
+            <div className="flex items-center gap-2 rounded-md border p-3" data-testid="alert-all-unverified">
+              <Info className="h-5 w-5 text-muted-foreground shrink-0" />
+              <span className="text-sm text-muted-foreground">Fill in more fields in the previous steps for validation checks to work.</span>
+            </div>
+          )}
+
+          <div className="flex justify-end">
+            <Button variant="outline" size="sm" onClick={rerunChecks} data-testid="button-rerun-checks">
+              <RotateCcw className="h-4 w-4 mr-2" />
+              Re-run Checks
+            </Button>
+          </div>
+
+          {categories.map(cat => {
+            const catResults = checkResults.filter(r => r.category === cat);
+            if (catResults.length === 0) return null;
+            return (
+              <div key={cat} className="space-y-2">
+                <h3 className="text-sm font-semibold">{categoryLabels[cat]}</h3>
+                <div className="space-y-1.5">
+                  {catResults.map(result => (
+                    <div key={result.id} className="flex items-start gap-2 text-sm py-1" data-testid={`check-result-${result.id}`}>
+                      {getStatusIcon(result.status)}
+                      <div className="min-w-0">
+                        <span className={result.status === "fail" ? "font-medium" : ""}>{result.label}</span>
+                        {result.status === "unable_to_verify" && (
+                          <Badge variant="secondary" className="ml-2 text-xs">Unable to verify</Badge>
+                        )}
+                        <p className="text-xs text-muted-foreground mt-0.5">{result.detail}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
 function Step8Review({
   data,
   onUpdate,
@@ -2806,7 +3265,7 @@ export default function CreateAgent() {
       const response = await apiRequest("PATCH", `/api/agents/${draftId}`, {
         ...data,
         status: "configured",
-        configurationStep: 8,
+        configurationStep: 9,
       });
       return await response.json() as Agent;
     },
@@ -2849,6 +3308,8 @@ export default function CreateAgent() {
       case 7:
         return true; // Optional steps
       case 8:
+        return true; // Validation checklist - always proceed
+      case 9:
         return true;
       default:
         return false;
@@ -2856,14 +3317,14 @@ export default function CreateAgent() {
   };
 
   const handleNext = () => {
-    if (currentStep < 8) {
+    if (currentStep < 9) {
       setCurrentStep(currentStep + 1);
     } else {
       // Final step - create or update based on whether we're editing a draft
       if (draftId) {
         updateMutation.mutate(formData);
       } else {
-        createMutation.mutate({ ...formData, status: "configured", configurationStep: 8 });
+        createMutation.mutate({ ...formData, status: "configured", configurationStep: 9 });
       }
     }
   };
@@ -2895,6 +3356,8 @@ export default function CreateAgent() {
       case 7:
         return <Step7AvailableActions data={formData} onUpdate={updateFormData} />;
       case 8:
+        return <Step8ValidationChecklist data={formData} onUpdate={updateFormData} />;
+      case 9:
         return <Step8Review data={formData} onUpdate={updateFormData} />;
       default:
         return null;
@@ -2980,7 +3443,7 @@ export default function CreateAgent() {
                 className="gap-2"
                 data-testid="button-next"
               >
-                {currentStep === 8 ? (
+                {currentStep === 9 ? (
                   isSubmitting ? (
                     <>
                       <Loader2 className="h-4 w-4 animate-spin" />
