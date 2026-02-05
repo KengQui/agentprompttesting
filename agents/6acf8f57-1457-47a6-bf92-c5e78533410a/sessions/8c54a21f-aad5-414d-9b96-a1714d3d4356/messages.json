@@ -1,0 +1,18 @@
+[
+  {
+    "id": "fb8dac28-aa7a-4b27-b023-cfaa545213d9",
+    "agentId": "6acf8f57-1457-47a6-bf92-c5e78533410a",
+    "sessionId": "8c54a21f-aad5-414d-9b96-a1714d3d4356",
+    "role": "user",
+    "content": "Susanne",
+    "timestamp": "2026-02-05T21:00:23.323Z"
+  },
+  {
+    "id": "90047dc6-cea8-411b-acd2-2352f77c18c6",
+    "agentId": "6acf8f57-1457-47a6-bf92-c5e78533410a",
+    "sessionId": "8c54a21f-aad5-414d-9b96-a1714d3d4356",
+    "role": "assistant",
+    "content": "Thanks! I need a few details:\n\n1. Shift Details\n2. PTO type\n\nPlease provide your answers in order (you can number them like \"1. answer, 2. answer\" or separate with commas).",
+    "timestamp": "2026-02-05T21:00:23.325Z"
+  }
+]

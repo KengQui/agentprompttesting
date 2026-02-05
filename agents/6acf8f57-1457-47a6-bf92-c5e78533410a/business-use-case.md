@@ -107,7 +107,7 @@ Example: “Susie” → “Do you mean Susan Jones?”
 
 The agent must never assume which employee is meant.
 
-Absence Classification
+PTO type:
 
 The agent must ask how the call-in should be handled:
 

@@ -1078,6 +1078,7 @@ Before responding, verify:
 - Keep it concise - every sentence should serve a purpose
 - Use clear, enforceable language for constraints
 - CRITICAL: Do NOT use words like "simulated", "simulation", "mock", "demo", "test environment", or "fake" in the generated prompt. The agent should present itself as a real, professional assistant. When describing actions, use natural language like "process", "update", "complete" - NOT "simulate"
+- ALWAYS ask only ONE question at a time. Never ask multiple questions in a single response. Wait for the user to answer before asking the next question.
 
 ## Format your output as:
 

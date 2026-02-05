@@ -1,0 +1,18 @@
+[
+  {
+    "id": "135bd5d1-b8bf-4254-899b-a1f9dcabe2e0",
+    "agentId": "6acf8f57-1457-47a6-bf92-c5e78533410a",
+    "sessionId": "4196ac93-aff8-4e96-a400-c26a07bc919f",
+    "role": "user",
+    "content": "Susie called in",
+    "timestamp": "2026-02-05T21:00:16.602Z"
+  },
+  {
+    "id": "873716f5-3879-4e11-953c-c12dff6237c7",
+    "agentId": "6acf8f57-1457-47a6-bf92-c5e78533410a",
+    "sessionId": "4196ac93-aff8-4e96-a400-c26a07bc919f",
+    "role": "assistant",
+    "content": "I need a few details:\n\n1. Employee Identification\n2. Shift Details\n3. PTO type\n\nPlease provide your answers in order (you can number them like \"1. answer, 2. answer\" or separate with commas).",
+    "timestamp": "2026-02-05T21:00:16.605Z"
+  }
+]

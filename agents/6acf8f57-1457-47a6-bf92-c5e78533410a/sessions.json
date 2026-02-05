@@ -5,5 +5,26 @@
     "title": "New Session",
     "createdAt": "2026-02-05T20:48:11.252Z",
     "updatedAt": "2026-02-05T20:48:26.888Z"
+  },
+  {
+    "id": "2078fe89-129a-4177-a6d4-b6bc89b92de5",
+    "agentId": "6acf8f57-1457-47a6-bf92-c5e78533410a",
+    "title": "New Session",
+    "createdAt": "2026-02-05T20:53:39.941Z",
+    "updatedAt": "2026-02-05T20:53:49.012Z"
+  },
+  {
+    "id": "4196ac93-aff8-4e96-a400-c26a07bc919f",
+    "agentId": "6acf8f57-1457-47a6-bf92-c5e78533410a",
+    "title": "New Session",
+    "createdAt": "2026-02-05T21:00:11.959Z",
+    "updatedAt": "2026-02-05T21:00:16.605Z"
+  },
+  {
+    "id": "8c54a21f-aad5-414d-9b96-a1714d3d4356",
+    "agentId": "6acf8f57-1457-47a6-bf92-c5e78533410a",
+    "title": "New Session",
+    "createdAt": "2026-02-05T21:00:20.311Z",
+    "updatedAt": "2026-02-05T21:00:23.325Z"
   }
 ]

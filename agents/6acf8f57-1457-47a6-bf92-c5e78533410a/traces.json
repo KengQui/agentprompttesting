@@ -30,24 +30,114 @@
         }
       ],
       "success": true
+    },
+    {
+      "id": "trace-1770324829012",
+      "sessionId": "2078fe89-129a-4177-a6d4-b6bc89b92de5",
+      "userInput": "Susanne called in",
+      "agentResponse": "Thanks! I need a few details:\n\n1. Shift Details\n2. Absence Classification\n\nPlease provide your answers in order (you can number them like \"1. answer, 2. answer\" or separate with commas).",
+      "startTime": "2026-02-05T20:53:49.010Z",
+      "endTime": "2026-02-05T20:53:49.012Z",
+      "totalDuration": 2,
+      "entries": [
+        {
+          "id": "entry-1770324829012-1",
+          "type": "intent_classification",
+          "name": "Orchestrator Intent Classification",
+          "timestamp": "2026-02-05T20:53:49.012Z",
+          "metadata": {
+            "intent": "answer_question",
+            "classificationMethod": "orchestrator",
+            "confidence": "high"
+          }
+        },
+        {
+          "id": "entry-1770324829012-2",
+          "type": "hook_call",
+          "name": "Orchestrator Direct Response",
+          "timestamp": "2026-02-05T20:53:49.012Z",
+          "metadata": {}
+        }
+      ],
+      "success": true
+    },
+    {
+      "id": "trace-1770325216604",
+      "sessionId": "4196ac93-aff8-4e96-a400-c26a07bc919f",
+      "userInput": "Susie called in",
+      "agentResponse": "I need a few details:\n\n1. Employee Identification\n2. Shift Details\n3. PTO type\n\nPlease provide your answers in order (you can number them like \"1. answer, 2. answer\" or separate with commas).",
+      "startTime": "2026-02-05T21:00:16.602Z",
+      "endTime": "2026-02-05T21:00:16.604Z",
+      "totalDuration": 2,
+      "entries": [
+        {
+          "id": "entry-1770325216604-1",
+          "type": "intent_classification",
+          "name": "Orchestrator Intent Classification",
+          "timestamp": "2026-02-05T21:00:16.604Z",
+          "metadata": {
+            "intent": "answer_question",
+            "classificationMethod": "orchestrator",
+            "confidence": "high"
+          }
+        },
+        {
+          "id": "entry-1770325216604-2",
+          "type": "hook_call",
+          "name": "Orchestrator Direct Response",
+          "timestamp": "2026-02-05T21:00:16.604Z",
+          "metadata": {}
+        }
+      ],
+      "success": true
+    },
+    {
+      "id": "trace-1770325223324",
+      "sessionId": "8c54a21f-aad5-414d-9b96-a1714d3d4356",
+      "userInput": "Susanne",
+      "agentResponse": "Thanks! I need a few details:\n\n1. Shift Details\n2. PTO type\n\nPlease provide your answers in order (you can number them like \"1. answer, 2. answer\" or separate with commas).",
+      "startTime": "2026-02-05T21:00:23.323Z",
+      "endTime": "2026-02-05T21:00:23.324Z",
+      "totalDuration": 1,
+      "entries": [
+        {
+          "id": "entry-1770325223324-1",
+          "type": "intent_classification",
+          "name": "Orchestrator Intent Classification",
+          "timestamp": "2026-02-05T21:00:23.324Z",
+          "metadata": {
+            "intent": "answer_question",
+            "classificationMethod": "orchestrator",
+            "confidence": "high"
+          }
+        },
+        {
+          "id": "entry-1770325223324-2",
+          "type": "hook_call",
+          "name": "Orchestrator Direct Response",
+          "timestamp": "2026-02-05T21:00:23.324Z",
+          "metadata": {}
+        }
+      ],
+      "success": true
     }
   ],
   "stats": {
     "hookCalls": {
-      "Orchestrator Direct Response": 1
+      "Orchestrator Direct Response": 4
     },
     "signalReads": {},
     "intentDistribution": {
-      "answer_question": 1
+      "answer_question": 4
     },
     "classificationMethods": {
-      "orchestrator": 1
+      "orchestrator": 4
     },
-    "avgResponseTime": 26,
+    "avgResponseTime": 7.75,
     "totalLlmCalls": 0,
     "totalTokensUsed": 0,
     "errorCount": 0
   },
   "createdAt": "2026-02-05T20:48:26.888Z",
-  "updatedAt": "2026-02-05T20:48:26.888Z"
+  "updatedAt": "2026-02-05T21:00:23.324Z"
 }

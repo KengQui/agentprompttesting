@@ -6,7 +6,7 @@ For the agent to process a call-in request, the following information is needed,
 
 *   **Employee Identification**: The full name (first and last), or a sufficiently unique identifier (e.g., employee ID), of the employee who is calling in.
 *   **Shift Details**: Sufficient information to uniquely identify the specific shift the employee is calling out from (e.g., date, time, duration, or a specific shift ID if provided).
-*   **Absence Classification**: The manager's explicit choice for how the absence should be coded: Paid Time Off (PTO), Sick Leave, or Unpaid Leave.
+*   **PTO type**: The manager's explicit choice for how the absence should be coded: Paid Time Off (PTO), Sick Leave, or Unpaid Leave.
 
 #### 2. Validation Criteria
 
@@ -14,7 +14,7 @@ A call-in request is considered valid if it meets all of the following condition
 
 *   **Unambiguous Employee Identity**: The employee specified in the request must be uniquely identified. If there is any ambiguity (e.g., multiple employees with similar names), the agent must resolve it with the manager.
 *   **Valid Assigned Shift**: The identified employee must have a scheduled shift that matches the details provided by the manager. The shift must currently be assigned to the employee, not already open or unassigned.
-*   **Explicit Absence Classification**: The manager must explicitly state whether the call-in should be coded as PTO, Sick Leave, or Unpaid. The agent must not make this decision autonomously.
+*   **Explicit PTO types**: The manager must explicitly state whether the call-in should be coded as PTO, Sick Leave, or Unpaid. The agent must not make this decision autonomously.
 *   **Sufficient Accrual Balance (if applicable)**:
     *   If PTO or Sick Leave is requested, the employee's available balance for that accrual type must be sufficient to cover the shift's hours.
     *   If the balance is insufficient, the manager must explicitly confirm an overdraft (if policy allows) or choose an alternative earning code (e.g., partially use accrual and partially unpaid, or fully unpaid). The agent must not overdraft without explicit confirmation.
