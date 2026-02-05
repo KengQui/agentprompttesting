@@ -33,5 +33,12 @@
     "title": "New Session",
     "createdAt": "2026-02-05T17:45:12.621Z",
     "updatedAt": "2026-02-05T17:45:56.319Z"
+  },
+  {
+    "id": "a2e18702-e502-4b27-846f-f5d3368a565a",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "title": "Test infer-first mode",
+    "createdAt": "2026-02-05T17:51:09.016Z",
+    "updatedAt": "2026-02-05T17:51:36.332Z"
   }
 ]

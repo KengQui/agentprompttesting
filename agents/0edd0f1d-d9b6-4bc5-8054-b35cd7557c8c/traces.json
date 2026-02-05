@@ -240,6 +240,41 @@
         }
       ],
       "success": true
+    },
+    {
+      "id": "trace-1770313896331",
+      "sessionId": "a2e18702-e502-4b27-846f-f5d3368a565a",
+      "userInput": "Create a tenure band column",
+      "agentResponse": "Okay! I can create a tenure band column for you. Based on the sample data, I see a \"Days Employed\" column and \"Hire Date\" column.\n\nI'll create a new column using the \"Days Employed\" column, and I'll use these standard tenure bands:\n\n*   0-90 days = \"New Hire\"\n*   91-365 days = \"< 1 Year\"\n*   366-1095 days = \"1-3 Years\"\n*   1096+ days = \"3+ Years\"\n\nHere is the expression:\n\n```\nIf(Days Employed <= 90, \"New Hire\", If(And(Days Employed > 90, Days Employed <= 365), \"< 1 Year\", If(And(Days Employed > 365, Days Employed <= 1095), \"1-3 Years\", \"3+ Years\")))\n```\n\nThe output type will be Text.\n\nWould you like me to create this column with these default values, or do you want to define your own custom ranges?",
+      "startTime": "2026-02-05T17:51:34.292Z",
+      "endTime": "2026-02-05T17:51:36.331Z",
+      "totalDuration": 2039,
+      "entries": [
+        {
+          "id": "entry-1770313894301-1",
+          "type": "intent_classification",
+          "name": "Orchestrator Intent Classification",
+          "timestamp": "2026-02-05T17:51:34.301Z",
+          "metadata": {
+            "intent": "answer_question",
+            "classificationMethod": "orchestrator",
+            "confidence": "high"
+          }
+        },
+        {
+          "id": "entry-1770313896331-3",
+          "type": "llm_call",
+          "name": "Gemini Response Generation",
+          "timestamp": "2026-02-05T17:51:36.331Z",
+          "duration": 2030,
+          "metadata": {
+            "model": "gemini",
+            "intent": "answer_question",
+            "validated": true
+          }
+        }
+      ],
+      "success": true
     }
   ],
   "stats": {
@@ -248,18 +283,18 @@
     },
     "signalReads": {},
     "intentDistribution": {
-      "answer_question": 6,
+      "answer_question": 7,
       "unclear": 1,
       "reject": 1
     },
     "classificationMethods": {
-      "orchestrator": 8
+      "orchestrator": 9
     },
-    "avgResponseTime": 4,
-    "totalLlmCalls": 0,
+    "avgResponseTime": 230.11111111111111,
+    "totalLlmCalls": 1,
     "totalTokensUsed": 0,
     "errorCount": 0
   },
   "createdAt": "2026-02-05T16:40:15.025Z",
-  "updatedAt": "2026-02-05T17:45:56.318Z"
+  "updatedAt": "2026-02-05T17:51:36.331Z"
 }
