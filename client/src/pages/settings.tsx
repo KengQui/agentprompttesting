@@ -41,7 +41,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest } from "@/lib/queryClient";
-import { validationRulesTemplate, guardrailsTemplate } from "@/lib/config-templates";
+import { businessUseCaseTemplate, validationRulesTemplate, guardrailsTemplate } from "@/lib/config-templates";
 import { TracingDashboard, SimulationPanel, ConfigHistoryPanel } from "@/components/tracing-dashboard";
 import type { Agent, UpdateAgent, AgentStatus, DomainDocument, SampleDataset, GeminiModel, AgentAction, MockUserState, MockMode, ActionField, ClarifyingInsight } from "@shared/schema";
 import { geminiModelDisplayNames, defaultGenerationModel, mockModeDescriptions } from "@shared/schema";
@@ -1165,27 +1165,45 @@ export default function SettingsPage() {
             <CardContent>
               <div className="space-y-4">
                 <div>
-                  <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center justify-between mb-2 flex-wrap gap-2">
                     <Label htmlFor="businessUseCase">What problem does this agent solve?</Label>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={handleExtractBusinessCase}
-                      disabled={isExtracting || !formData.businessUseCase?.trim()}
-                      data-testid="settings-button-extract-content"
-                    >
-                      {isExtracting ? (
-                        <>
-                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                          Extracting...
-                        </>
-                      ) : (
-                        <>
-                          <Filter className="h-4 w-4 mr-2" />
-                          Extract Key Info
-                        </>
-                      )}
-                    </Button>
+                    <div className="flex items-center gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          updateFormDataAndTrackCompletion({ businessUseCase: businessUseCaseTemplate });
+                          setExtractionResult(null);
+                          toast({
+                            title: "Template loaded",
+                            description: "Fill in the bracketed placeholders with your specific details.",
+                          });
+                        }}
+                        data-testid="settings-button-use-template-usecase"
+                      >
+                        <FileText className="h-4 w-4 mr-2" />
+                        Use Template
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={handleExtractBusinessCase}
+                        disabled={isExtracting || !formData.businessUseCase?.trim()}
+                        data-testid="settings-button-extract-content"
+                      >
+                        {isExtracting ? (
+                          <>
+                            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                            Extracting...
+                          </>
+                        ) : (
+                          <>
+                            <Filter className="h-4 w-4 mr-2" />
+                            Extract Key Info
+                          </>
+                        )}
+                      </Button>
+                    </div>
                   </div>
                   <Textarea
                     id="businessUseCase"

@@ -27,7 +27,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { generatePromptPreview } from "@/lib/prompt-preview";
-import { validationRulesTemplate, guardrailsTemplate } from "@/lib/config-templates";
+import { businessUseCaseTemplate, validationRulesTemplate, guardrailsTemplate } from "@/lib/config-templates";
 import type { WizardStepData, Agent, DomainDocument, SampleDataset, PromptStyle, GeminiModel, ClarifyingInsight, AgentAction, MockUserState, ActionField, MockMode } from "@shared/schema";
 import { geminiModelDisplayNames, defaultGenerationModel, mockModeDescriptions } from "@shared/schema";
 import { Switch } from "@/components/ui/switch";
@@ -126,6 +126,15 @@ function Step1BusinessUseCase({
   const [showDetails, setShowDetails] = useState(false);
   const { toast } = useToast();
 
+  const handleUseTemplate = () => {
+    onUpdate({ businessUseCase: businessUseCaseTemplate });
+    setExtractionResult(null);
+    toast({
+      title: "Template loaded",
+      description: "Fill in the bracketed placeholders with your specific details.",
+    });
+  };
+
   const handleExtract = async () => {
     if (!data.businessUseCase.trim()) {
       toast({
@@ -182,27 +191,38 @@ function Step1BusinessUseCase({
       <CardContent>
         <div className="space-y-4">
           <div>
-            <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center justify-between mb-2 flex-wrap gap-2">
               <Label htmlFor="businessUseCase">What problem does this agent solve?</Label>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleExtract}
-                disabled={isExtracting || !data.businessUseCase.trim()}
-                data-testid="button-extract-content"
-              >
-                {isExtracting ? (
-                  <>
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    Extracting...
-                  </>
-                ) : (
-                  <>
-                    <Filter className="h-4 w-4 mr-2" />
-                    Extract Key Info
-                  </>
-                )}
-              </Button>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleUseTemplate}
+                  data-testid="button-use-template-usecase"
+                >
+                  <FileText className="h-4 w-4 mr-2" />
+                  Use Template
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleExtract}
+                  disabled={isExtracting || !data.businessUseCase.trim()}
+                  data-testid="button-extract-content"
+                >
+                  {isExtracting ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      Extracting...
+                    </>
+                  ) : (
+                    <>
+                      <Filter className="h-4 w-4 mr-2" />
+                      Extract Key Info
+                    </>
+                  )}
+                </Button>
+              </div>
             </div>
             <Textarea
               id="businessUseCase"
