@@ -25,7 +25,8 @@ import type {
   AgentConfig,
   ChatHistoryItem,
   RequiredField,
-  ConversationState
+  ConversationState,
+  FlowMode
 } from './types';
 
 export interface OrchestratorConfig {
@@ -49,6 +50,7 @@ export class Orchestrator {
   protected agentConfig: AgentConfig;
   protected batchSize: number;
   protected dynamicFields: RequiredField[];
+  protected flowMode: FlowMode;
 
   constructor(config: OrchestratorConfig = {}) {
     this.turnManager = new TurnManager(config.turnManager);
@@ -72,6 +74,49 @@ export class Orchestrator {
     if (this.agentConfig.validationRules) {
       this.dynamicFields = this.parseValidationRules(this.agentConfig.validationRules);
     }
+
+    this.flowMode = this.detectFlowMode(this.agentConfig.customPrompt);
+    console.log('[Orchestrator] Detected flow mode:', this.flowMode);
+  }
+
+  protected detectFlowMode(customPrompt?: string): FlowMode {
+    if (!customPrompt) {
+      return 'ask-first';
+    }
+
+    const promptLower = customPrompt.toLowerCase();
+
+    const inferFirstPhrases = [
+      'analyze sample data first',
+      'analyze data first',
+      'infer first',
+      'infer-first',
+      'only ask when ambiguous',
+      'only ask when genuinely ambiguous',
+      'infer and propose',
+      'propose first',
+      'examine the data first',
+      'look at the data first',
+      'check the data first',
+      'review the data first',
+      'before asking any questions',
+      'before asking questions',
+      'do not ask upfront',
+      'don\'t ask upfront',
+      'avoid asking upfront',
+      'minimize questions',
+      'propose a complete solution',
+      'propose sensible defaults'
+    ];
+
+    for (const phrase of inferFirstPhrases) {
+      if (promptLower.includes(phrase)) {
+        console.log('[Orchestrator] Found infer-first phrase:', phrase);
+        return 'infer-first';
+      }
+    }
+
+    return 'ask-first';
   }
 
   protected parseValidationRules(validationRules: string): RequiredField[] {
@@ -762,7 +807,17 @@ export class Orchestrator {
       }
 
       if (!this.hasFlowSteps() && this.dynamicFields.length > 0) {
-        console.log('[Orchestrator] Dynamic flow path - checking conditions');
+        console.log('[Orchestrator] Dynamic flow path - checking conditions, flowMode:', this.flowMode);
+        
+        if (this.flowMode === 'infer-first') {
+          console.log('[Orchestrator] Infer-first mode - passing to AI to analyze and infer');
+          return {
+            intent: 'answer_question',
+            response: userInput,
+            nextAction: 'generate_ai_response'
+          };
+        }
+        
         if (state.awaitingFinalConfirmation) {
           console.log('[Orchestrator] Awaiting final confirmation - calling handleDynamicFlow');
           return this.handleDynamicFlow(conversationId, userInput);
@@ -775,7 +830,6 @@ export class Orchestrator {
           return this.handleDynamicFlow(conversationId, userInput);
         }
       } else if (!this.hasFlowSteps() && this.dynamicFields.length === 0) {
-        // No flow steps and no dynamic fields - pass directly to AI
         console.log('[Orchestrator] No flow steps and no dynamic fields - passing to AI directly');
         return {
           intent: 'answer_question',
@@ -829,6 +883,10 @@ export class Orchestrator {
     const state = this.stateManager.getOrCreateState(conversationId);
     
     if (!this.hasFlowSteps() && this.dynamicFields.length > 0) {
+      if (this.flowMode === 'infer-first') {
+        return `Hello! I'm ${this.agentConfig.name}. ${this.agentConfig.description} How can I help you today?`;
+      }
+      
       const batch = this.getNextBatch(state);
       if (batch) {
         this.stateManager.updateState(conversationId, {

@@ -81,12 +81,15 @@ export interface TurnResult {
   confidence?: string;
 }
 
+export type FlowMode = 'ask-first' | 'infer-first';
+
 export interface AgentConfig {
   name: string;
   businessUseCase: string;
   description: string;
   validationRules?: string;
   guardrails?: string;
+  customPrompt?: string;
 }
 
 // Recovery Manager Types
