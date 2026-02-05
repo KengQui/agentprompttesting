@@ -1,18 +1,1 @@
-[
-  {
-    "id": "8183af00-0c9d-4139-860c-357d9a5f5494",
-    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
-    "sessionId": "c6416287-756c-4565-81a3-d99cc823d952",
-    "role": "user",
-    "content": "i want a column that has the sum of regular hours and overtime hours together",
-    "timestamp": "2026-02-05T18:09:37.166Z"
-  },
-  {
-    "id": "69977906-8e4a-4fa8-a23e-21850c2207f3",
-    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
-    "sessionId": "c6416287-756c-4565-81a3-d99cc823d952",
-    "role": "assistant",
-    "content": "I can help you create a calculated column that sums regular hours and overtime hours. However, I need to know the names of the columns that contain regular hours and overtime hours. Could you please provide those?",
-    "timestamp": "2026-02-05T18:09:37.988Z"
-  }
-]
+[]
