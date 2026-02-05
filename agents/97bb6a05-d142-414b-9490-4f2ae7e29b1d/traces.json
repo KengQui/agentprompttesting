@@ -1168,6 +1168,41 @@
         }
       ],
       "success": true
+    },
+    {
+      "id": "trace-1770314218107",
+      "sessionId": "864f5547-1ec4-4d87-bf30-ce7fbb468de2",
+      "userInput": "I got married",
+      "agentResponse": "Congratulations on your marriage! I can help you update your HR records and benefits. To get started, could you please provide the date of your marriage?",
+      "startTime": "2026-02-05T17:56:57.419Z",
+      "endTime": "2026-02-05T17:56:58.107Z",
+      "totalDuration": 688,
+      "entries": [
+        {
+          "id": "entry-1770314217443-1",
+          "type": "intent_classification",
+          "name": "Orchestrator Intent Classification",
+          "timestamp": "2026-02-05T17:56:57.443Z",
+          "metadata": {
+            "intent": "answer_question",
+            "classificationMethod": "orchestrator",
+            "confidence": "high"
+          }
+        },
+        {
+          "id": "entry-1770314218107-3",
+          "type": "llm_call",
+          "name": "Gemini Response Generation",
+          "timestamp": "2026-02-05T17:56:58.107Z",
+          "duration": 664,
+          "metadata": {
+            "model": "gemini",
+            "intent": "answer_question",
+            "validated": true
+          }
+        }
+      ],
+      "success": true
     }
   ],
   "stats": {
@@ -1176,17 +1211,17 @@
     },
     "signalReads": {},
     "intentDistribution": {
-      "answer_question": 31,
+      "answer_question": 32,
       "unclear": 2
     },
     "classificationMethods": {
-      "orchestrator": 33
+      "orchestrator": 34
     },
-    "avgResponseTime": 1338.5151515151515,
-    "totalLlmCalls": 31,
+    "avgResponseTime": 1319.3823529411766,
+    "totalLlmCalls": 32,
     "totalTokensUsed": 0,
     "errorCount": 0
   },
   "createdAt": "2026-02-02T18:51:09.876Z",
-  "updatedAt": "2026-02-03T03:23:32.081Z"
+  "updatedAt": "2026-02-05T17:56:58.107Z"
 }

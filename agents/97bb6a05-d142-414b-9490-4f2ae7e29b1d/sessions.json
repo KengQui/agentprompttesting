@@ -47,5 +47,12 @@
     "title": "New Session",
     "createdAt": "2026-02-03T03:19:28.559Z",
     "updatedAt": "2026-02-03T03:23:32.082Z"
+  },
+  {
+    "id": "864f5547-1ec4-4d87-bf30-ce7fbb468de2",
+    "agentId": "97bb6a05-d142-414b-9490-4f2ae7e29b1d",
+    "title": "Test ask-first backward compatibility",
+    "createdAt": "2026-02-05T17:56:37.085Z",
+    "updatedAt": "2026-02-05T17:56:58.110Z"
   }
 ]

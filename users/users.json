@@ -153,5 +153,11 @@
     "username": "testuser-qvJUhz",
     "password": "$2b$10$xkbVnINZsZoK0mbqYW3o2eCEEgztpLC7GA/7WVWaM5DZHqA/aNke.",
     "createdAt": "2026-02-03T14:45:30.051Z"
+  },
+  {
+    "id": "39a69f3c-9374-4fc5-ac03-7e2f0f51cc05",
+    "username": "testuser_uwpcby",
+    "password": "$2b$10$rGMuiRx8k0zeSPeOopBqzOTVYUfd04jiWmgWW5gxpR1HxfuKDFTYS",
+    "createdAt": "2026-02-05T17:53:27.585Z"
   }
 ]
