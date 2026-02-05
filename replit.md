@@ -4,6 +4,7 @@
 Agent Studio is a web application designed for the end-to-end creation, configuration, and management of AI agents. It provides an intuitive 8-step wizard interface for users to define essential AI agent parameters such as business use cases, domain knowledge, validation rules, guardrails, sample datasets, and simulated actions. The platform aims to streamline the development and deployment of tailored AI agents for various business needs.
 
 ## Recent Changes (Since Jan 29, 2026)
+- **Automatic Flow Mode Detection**: Orchestrator now automatically detects from agent's custom prompt whether to use "infer-first" (analyze data before asking) or "ask-first" (collect information upfront) mode - no manual configuration required
 - **Direct Action Execution**: Agents now execute actions directly instead of narrating navigation steps to users
 - **Prompt Style Standardization**: Simplified to use only Google Gemini style (removed other prompt styles)
 - **Enhanced Prompt Markers**: New placeholder marker replacement system (`{{MARKER_NAME}}`) for dynamic prompt generation
@@ -11,6 +12,30 @@ Agent Studio is a web application designed for the end-to-end creation, configur
 - **Mock Mode Toggle**: Added ability to toggle mock mode for testing agent configurations
 - **Trace Logging**: Added `traces.json` for tracking agent interactions and debugging
 - **Clarifying Insights**: Added `clarifying-insights.json` to store AI clarification flow data
+
+## Flow Mode Detection
+The orchestrator automatically determines conversation flow style by analyzing the agent's custom prompt for natural language phrases:
+
+### Infer-First Mode
+Triggered when the custom prompt contains phrases like:
+- "analyze data first", "infer first", "analyze sample data"
+- "only ask when ambiguous", "don't ask upfront"
+- "propose solution first", "examine data before asking"
+
+In this mode, the agent:
+- Skips the dynamic field collection phase
+- Provides a simple welcome greeting
+- Lets the AI analyze available data before asking questions
+
+### Ask-First Mode (Default)
+Used when no infer-first phrases are detected. This is the traditional behavior where:
+- The orchestrator extracts required fields from validation rules
+- Welcome message includes questions about required fields
+- Information is collected upfront in batches
+
+### Key Files
+- `server/components/orchestrator.ts`: Contains `detectFlowMode()` function and flow-aware `processTurn()`/`getWelcomeMessage()` methods
+- `server/components/types.ts`: Defines `FlowMode` type
 
 ## Action Simulation Feature
 Agent Studio supports action simulation, allowing AI agents to execute actions directly (e.g., adding dependents to health policies, updating employee records) without connecting to real APIs. This enables realistic testing of agent workflows.
