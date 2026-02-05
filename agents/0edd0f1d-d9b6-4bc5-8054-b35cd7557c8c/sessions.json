@@ -39,6 +39,27 @@
     "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
     "title": "Test infer-first mode",
     "createdAt": "2026-02-05T17:51:09.016Z",
-    "updatedAt": "2026-02-05T17:51:36.332Z"
+    "updatedAt": "2026-02-05T18:05:57.350Z"
+  },
+  {
+    "id": "1c972b4a-779d-4aa0-9637-32a0b8bc6233",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "title": "New Session",
+    "createdAt": "2026-02-05T18:01:05.017Z",
+    "updatedAt": "2026-02-05T18:01:05.017Z"
+  },
+  {
+    "id": "d2980cd8-3fe7-405b-87c8-194d3e0fac3c",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "title": "New Session",
+    "createdAt": "2026-02-05T18:06:15.578Z",
+    "updatedAt": "2026-02-05T18:06:15.578Z"
+  },
+  {
+    "id": "c6416287-756c-4565-81a3-d99cc823d952",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "title": "New Session",
+    "createdAt": "2026-02-05T18:09:14.994Z",
+    "updatedAt": "2026-02-05T18:09:37.988Z"
   }
 ]
