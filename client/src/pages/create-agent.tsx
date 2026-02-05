@@ -190,15 +190,14 @@ function Step1BusinessUseCase({
             <div className="flex items-center justify-between mb-2 flex-wrap gap-2">
               <Label htmlFor="businessUseCase">What problem does this agent solve?</Label>
               <div className="flex items-center gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
+                <button
+                  type="button"
                   onClick={handleUseTemplate}
+                  className="text-sm text-primary hover:underline"
                   data-testid="button-use-template-usecase"
                 >
-                  <FileText className="h-4 w-4 mr-2" />
                   Use Template
-                </Button>
+                </button>
                 <Button
                   variant="outline"
                   size="sm"
