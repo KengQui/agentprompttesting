@@ -189,5 +189,11 @@
     "username": "testmist_IJStC5",
     "password": "$2b$10$ksJWMFNyPCSUP.7w0cNdtewmFxkfQn.PU7ncJf1DpeWRAJpIqxFpi",
     "createdAt": "2026-02-05T23:39:48.804Z"
+  },
+  {
+    "id": "2a928846-d043-4a7b-b343-3b154f4ff7c0",
+    "username": "testsettings_JaCdJW",
+    "password": "$2b$10$iPLoF01oxO9mo9L4EOsocu7j7yXyVSebHImbO.byL2uxIN69IIVGy",
+    "createdAt": "2026-02-05T23:53:16.031Z"
   }
 ]

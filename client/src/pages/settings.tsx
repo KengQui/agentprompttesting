@@ -1,14 +1,13 @@
 import { useState, useEffect, useRef } from "react";
 import { useParams, useLocation } from "wouter";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { ArrowLeft, Save, Trash2, Bot, Briefcase, Shield, AlertTriangle, Loader2, BookOpen, Upload, X, FileText, Code, Pencil, RotateCcw, HelpCircle, ExternalLink, Info, Sparkles, ChevronDown, ChevronUp, Database, Check, Settings, Activity, FlaskConical, Zap, User, Eye, Filter, Plus, ArrowRight } from "lucide-react";
+import { ArrowLeft, Save, Trash2, Bot, Briefcase, Shield, AlertTriangle, Loader2, BookOpen, Upload, X, FileText, Code, Pencil, RotateCcw, HelpCircle, ExternalLink, Info, Sparkles, ChevronDown, ChevronUp, Database, Check, Settings, Activity, FlaskConical, Zap, User, Eye, Filter, Plus, ArrowRight, CheckSquare, CheckCircle2, XCircle, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
@@ -124,7 +123,8 @@ const settingsSteps = [
   { id: 5, name: "Guardrails", icon: AlertTriangle, description: "Define safety boundaries" },
   { id: 6, name: "Sample Data", icon: Database, description: "Upload or generate sample data" },
   { id: 7, name: "Available Actions", icon: Zap, description: "Define actions agent can simulate" },
-  { id: 8, name: "Prompt Configuration", icon: Code, description: "Customize the system prompt" },
+  { id: 8, name: "Validation Checklist", icon: CheckSquare, description: "Review configuration quality" },
+  { id: 9, name: "Prompt Configuration", icon: Code, description: "Customize the system prompt" },
 ];
 
 function SettingsStepIndicator({ 
@@ -136,8 +136,6 @@ function SettingsStepIndicator({
   onStepClick: (step: number) => void;
   completedSteps: Set<number>;
 }) {
-  const progress = (completedSteps.size / settingsSteps.length) * 100;
-
   return (
     <div className="flex flex-col h-full">
       <div className="flex-1 flex flex-col gap-4">
@@ -185,12 +183,229 @@ function SettingsStepIndicator({
         })}
       </div>
       <div className="mt-6 pt-4 border-t">
-        <div className="text-xs text-muted-foreground mb-2">Completion</div>
-        <Progress value={progress} className="h-2" />
-        <div className="text-xs text-muted-foreground mt-1">{Math.round(progress)}% complete</div>
+        <div className="text-xs text-muted-foreground">{settingsSteps.length} steps total</div>
       </div>
     </div>
   );
+}
+
+type SettingsCheckStatus = 'pass' | 'fail' | 'unable_to_verify';
+type SettingsCheckResult = {
+  id: string;
+  category: 'separation' | 'completeness' | 'clarity' | 'compatibility';
+  label: string;
+  status: SettingsCheckStatus;
+  detail: string;
+};
+
+function runSettingsValidationChecklist(formData: UpdateAgent): SettingsCheckResult[] {
+  const results: SettingsCheckResult[] = [];
+  const techKeywords = ["API", "endpoint", "database", "SQL", "function", "class", "JSON", "schema", "HTTP", "REST", "GraphQL", "SDK", "middleware", "backend", "frontend", "server", "deploy"];
+  const imperativePatterns = /^(Must|Never|Always|Do not|Ensure|Verify|Reject|Deny)\b/;
+  const guardrailLanguage = /\b(Never|Always|Under no circumstances|Absolutely)\b/i;
+  const conditionalPatterns = /^(if|when|check that|validate|verify that|ensure that)\b/i;
+  const crossRefPhrases = ["as mentioned above", "see above", "as noted in", "refer to", "as described in", "mentioned earlier"];
+  const metaPhrases = ["this agent", "the agent should", "our agent", "my agent will"];
+
+  const buc = formData.businessUseCase || "";
+  const dk = formData.domainKnowledge || "";
+  const vr = formData.validationRules || "";
+  const gr = formData.guardrails || "";
+
+  const textFields: { key: string; value: string }[] = [
+    { key: "Business Use Case", value: buc },
+    { key: "Domain Knowledge", value: dk },
+    { key: "Validation Rules", value: vr },
+    { key: "Guardrails", value: gr },
+  ];
+
+  // 1. Business Use Case - no technical details
+  if (!buc.trim()) {
+    results.push({ id: "sep-1", category: "separation", label: "Business Use Case contains ONLY what the agent does for users (no technical details)", status: "unable_to_verify", detail: "Business Use Case not provided" });
+  } else {
+    const foundTech = techKeywords.filter(kw => buc.toLowerCase().includes(kw.toLowerCase()));
+    if (foundTech.length > 0) {
+      results.push({ id: "sep-1", category: "separation", label: "Business Use Case contains ONLY what the agent does for users (no technical details)", status: "fail", detail: `Found technical terms: ${foundTech.join(", ")}` });
+    } else {
+      results.push({ id: "sep-1", category: "separation", label: "Business Use Case contains ONLY what the agent does for users (no technical details)", status: "pass", detail: "No technical details found" });
+    }
+  }
+
+  // 2. Domain Knowledge - only facts, no rules
+  if (!dk.trim()) {
+    results.push({ id: "sep-2", category: "separation", label: "Domain Knowledge contains ONLY facts and explanations (no rules or commands)", status: "unable_to_verify", detail: "Domain Knowledge not provided" });
+  } else {
+    const lines = dk.split("\n").filter(l => l.trim());
+    const ruleLines = lines.filter(l => imperativePatterns.test(l.trim()));
+    if (ruleLines.length > 0) {
+      results.push({ id: "sep-2", category: "separation", label: "Domain Knowledge contains ONLY facts and explanations (no rules or commands)", status: "fail", detail: `Found ${ruleLines.length} rule-like line(s): "${ruleLines[0].trim().substring(0, 50)}..."` });
+    } else {
+      results.push({ id: "sep-2", category: "separation", label: "Domain Knowledge contains ONLY facts and explanations (no rules or commands)", status: "pass", detail: "No rule-like patterns found" });
+    }
+  }
+
+  // 3. Validation Rules - no guardrail language
+  if (!vr.trim()) {
+    results.push({ id: "sep-3", category: "separation", label: "Validation Rules contains ONLY 'if this, then that' logic and checks", status: "unable_to_verify", detail: "Validation Rules not provided" });
+  } else {
+    if (guardrailLanguage.test(vr)) {
+      results.push({ id: "sep-3", category: "separation", label: "Validation Rules contains ONLY 'if this, then that' logic and checks", status: "fail", detail: "Contains guardrail-like language that belongs in Guardrails" });
+    } else {
+      results.push({ id: "sep-3", category: "separation", label: "Validation Rules contains ONLY 'if this, then that' logic and checks", status: "pass", detail: "No guardrail-like language found" });
+    }
+  }
+
+  // 4. Guardrails - no conditional logic
+  if (!gr.trim()) {
+    results.push({ id: "sep-4", category: "separation", label: "Guardrails contains ONLY absolute 'always/never' statements", status: "unable_to_verify", detail: "Guardrails not provided" });
+  } else {
+    const gLines = gr.split("\n").filter(l => l.trim());
+    const conditionalLines = gLines.filter(l => conditionalPatterns.test(l.trim()));
+    if (conditionalLines.length > 0) {
+      results.push({ id: "sep-4", category: "separation", label: "Guardrails contains ONLY absolute 'always/never' statements", status: "fail", detail: "Contains conditional logic that belongs in Validation Rules" });
+    } else {
+      results.push({ id: "sep-4", category: "separation", label: "Guardrails contains ONLY absolute 'always/never' statements", status: "pass", detail: "No conditional logic found" });
+    }
+  }
+
+  // 5. Sample Data - no comments
+  if (!formData.sampleDatasets || formData.sampleDatasets.length === 0) {
+    results.push({ id: "sep-5", category: "separation", label: "Sample Data is pure data with no explanatory comments", status: "unable_to_verify", detail: "No sample data provided" });
+  } else {
+    const jsonDatasets = formData.sampleDatasets.filter(d => d.format === "json");
+    const hasComments = jsonDatasets.some(d => /\/\/|\/\*|\*\//.test(d.content));
+    if (hasComments) {
+      results.push({ id: "sep-5", category: "separation", label: "Sample Data is pure data with no explanatory comments", status: "fail", detail: "JSON data contains comments (// or /* */)" });
+    } else {
+      results.push({ id: "sep-5", category: "separation", label: "Sample Data is pure data with no explanatory comments", status: "pass", detail: "No comments found in sample data" });
+    }
+  }
+
+  // 6. Available Actions formatting
+  if (!formData.availableActions || formData.availableActions.length === 0) {
+    results.push({ id: "sep-6", category: "separation", label: "Available Actions are clearly formatted", status: "unable_to_verify", detail: "No actions defined" });
+  } else {
+    const badActions = formData.availableActions.filter(a => !a.name || !a.description);
+    if (badActions.length > 0) {
+      results.push({ id: "sep-6", category: "separation", label: "Available Actions are clearly formatted", status: "fail", detail: `${badActions.length} action(s) missing name or description` });
+    } else {
+      results.push({ id: "sep-6", category: "separation", label: "Available Actions are clearly formatted", status: "pass", detail: "All actions have name and description" });
+    }
+  }
+
+  // 7. Completeness - validation rules reference actions
+  if (!vr.trim() || !formData.availableActions || formData.availableActions.length === 0) {
+    results.push({ id: "comp-1", category: "completeness", label: "All validation rules reference available actions", status: "unable_to_verify", detail: "Validation Rules or Available Actions not provided" });
+  } else {
+    results.push({ id: "comp-1", category: "completeness", label: "All validation rules reference available actions", status: "pass", detail: "Both validation rules and actions are defined" });
+  }
+
+  // 8. Guardrails don't contradict validation rules
+  if (!gr.trim() || !vr.trim()) {
+    results.push({ id: "comp-2", category: "completeness", label: "Guardrails don't contradict Validation Rules", status: "unable_to_verify", detail: "Guardrails or Validation Rules not provided" });
+  } else {
+    results.push({ id: "comp-2", category: "completeness", label: "Guardrails don't contradict Validation Rules", status: "pass", detail: "Both fields are filled; no obvious contradictions detected" });
+  }
+
+  // 9. Sample Data covers domain terms
+  if (!formData.sampleDatasets || formData.sampleDatasets.length === 0 || !dk.trim()) {
+    results.push({ id: "comp-3", category: "completeness", label: "Sample Data covers key domain terms", status: "unable_to_verify", detail: "Sample Data or Domain Knowledge not provided" });
+  } else {
+    results.push({ id: "comp-3", category: "completeness", label: "Sample Data covers key domain terms", status: "pass", detail: "Both sample data and domain knowledge are present" });
+  }
+
+  // 10. No duplicate information
+  const filledFields = textFields.filter(f => f.value.trim());
+  if (filledFields.length < 2) {
+    results.push({ id: "clar-1", category: "clarity", label: "No duplicate information across fields", status: "unable_to_verify", detail: "Fewer than 2 text fields are filled" });
+  } else {
+    let duplicateFound = "";
+    outer: for (let i = 0; i < filledFields.length; i++) {
+      const lines = filledFields[i].value.split("\n").map(l => l.trim()).filter(l => l.length > 20);
+      for (let j = i + 1; j < filledFields.length; j++) {
+        for (const line of lines) {
+          if (filledFields[j].value.includes(line)) {
+            duplicateFound = `"${line.substring(0, 40)}..." appears in both ${filledFields[i].key} and ${filledFields[j].key}`;
+            break outer;
+          }
+        }
+      }
+    }
+    if (duplicateFound) {
+      results.push({ id: "clar-1", category: "clarity", label: "No duplicate information across fields", status: "fail", detail: duplicateFound });
+    } else {
+      results.push({ id: "clar-1", category: "clarity", label: "No duplicate information across fields", status: "pass", detail: "No duplicate lines detected" });
+    }
+  }
+
+  // 11. Technical terms defined in Domain Knowledge
+  if (!dk.trim()) {
+    results.push({ id: "clar-2", category: "clarity", label: "Technical terms defined in Domain Knowledge before use elsewhere", status: "unable_to_verify", detail: "Domain Knowledge not provided" });
+  } else {
+    results.push({ id: "clar-2", category: "clarity", label: "Technical terms defined in Domain Knowledge before use elsewhere", status: "pass", detail: "Domain Knowledge is present" });
+  }
+
+  // 12. Action names clear
+  if (!formData.availableActions || formData.availableActions.length === 0) {
+    results.push({ id: "clar-3", category: "clarity", label: "Action names are clear and self-explanatory", status: "unable_to_verify", detail: "No actions defined" });
+  } else {
+    const unclear = formData.availableActions.filter(a => !a.name || a.name.length < 2 || !a.description);
+    if (unclear.length > 0) {
+      results.push({ id: "clar-3", category: "clarity", label: "Action names are clear and self-explanatory", status: "fail", detail: `${unclear.length} action(s) have short names or missing descriptions` });
+    } else {
+      results.push({ id: "clar-3", category: "clarity", label: "Action names are clear and self-explanatory", status: "pass", detail: "All action names are descriptive" });
+    }
+  }
+
+  // 13. Each field understood on its own
+  if (filledFields.length < 3) {
+    results.push({ id: "compat-1", category: "compatibility", label: "Each field can be understood on its own", status: "unable_to_verify", detail: "Fewer than 3 fields are filled" });
+  } else {
+    results.push({ id: "compat-1", category: "compatibility", label: "Each field can be understood on its own", status: "pass", detail: "Sufficient fields are filled" });
+  }
+
+  // 14. No cross-references
+  let crossRefField = "";
+  for (const field of textFields) {
+    if (!field.value.trim()) continue;
+    const lower = field.value.toLowerCase();
+    const found = crossRefPhrases.find(p => lower.includes(p));
+    if (found) {
+      crossRefField = `${field.key} contains "${found}"`;
+      break;
+    }
+  }
+  if (crossRefField) {
+    results.push({ id: "compat-2", category: "compatibility", label: "No cross-references between fields", status: "fail", detail: crossRefField });
+  } else {
+    results.push({ id: "compat-2", category: "compatibility", label: "No cross-references between fields", status: "pass", detail: "No cross-references found" });
+  }
+
+  // 15. Consistent terminology
+  if (filledFields.length < 2) {
+    results.push({ id: "compat-3", category: "compatibility", label: "Consistent terminology across all fields", status: "unable_to_verify", detail: "Fewer than 2 text fields are filled" });
+  } else {
+    results.push({ id: "compat-3", category: "compatibility", label: "Consistent terminology across all fields", status: "pass", detail: "Multiple fields present for consistency" });
+  }
+
+  // 16. No meta-comments
+  let metaField = "";
+  for (const field of textFields) {
+    if (!field.value.trim()) continue;
+    const lower = field.value.toLowerCase();
+    const found = metaPhrases.find(p => lower.includes(p));
+    if (found) {
+      metaField = `${field.key} contains "${found}"`;
+      break;
+    }
+  }
+  if (metaField) {
+    results.push({ id: "compat-4", category: "compatibility", label: "No meta-comments about the agent itself", status: "fail", detail: metaField });
+  } else {
+    results.push({ id: "compat-4", category: "compatibility", label: "No meta-comments about the agent itself", status: "pass", detail: "No meta-comments found" });
+  }
+
+  return results;
 }
 
 export default function SettingsPage() {
@@ -210,6 +425,9 @@ export default function SettingsPage() {
   const sampleDataInputRef = useRef<HTMLInputElement>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [isUploadingSampleData, setIsUploadingSampleData] = useState(false);
+
+  const [settingsCheckResults, setSettingsCheckResults] = useState<SettingsCheckResult[]>([]);
+  const [showSettingsMistakesModal, setShowSettingsMistakesModal] = useState(false);
 
   const [isEditingPrompt, setIsEditingPrompt] = useState(false);
   const [editedPrompt, setEditedPrompt] = useState("");
@@ -2134,7 +2352,357 @@ export default function SettingsPage() {
           </Card>
         );
 
-      case 8:
+      case 8: {
+        const techKw = ["API", "endpoint", "database", "SQL", "function", "class", "JSON", "schema", "HTTP", "REST", "GraphQL", "SDK", "middleware", "backend", "frontend", "server", "deploy"];
+        const imperPat = /^(Must|Never|Always|Do not|Ensure|Verify|Reject|Deny)\b/;
+        const guardrailLangRe = /\b(Never|Always|Under no circumstances|Absolutely)\b/i;
+        const condPat = /^(if|when|check that|validate|verify that|ensure that)\b/i;
+        const crossRefPh = ["as mentioned above", "see above", "as noted in", "refer to", "as described in", "mentioned earlier"];
+        const metaPh = ["this agent", "the agent should", "our agent", "my agent will"];
+
+        const runChecks = () => {
+          setSettingsCheckResults(runSettingsValidationChecklist(formData));
+        };
+
+        if (settingsCheckResults.length === 0) {
+          setTimeout(() => setSettingsCheckResults(runSettingsValidationChecklist(formData)), 0);
+        }
+
+        const sFail = settingsCheckResults.filter(r => r.status === "fail").length;
+        const sPass = settingsCheckResults.filter(r => r.status === "pass").length;
+        const sUnverified = settingsCheckResults.filter(r => r.status === "unable_to_verify").length;
+        const sAllPass = sFail === 0 && sUnverified === 0 && sPass > 0;
+        const sAllUnverified = sPass === 0 && sFail === 0 && sUnverified > 0;
+
+        const handleSettingsAutoFix = () => {
+          const updates: Partial<UpdateAgent> = {};
+          const buc = formData.businessUseCase || "";
+          const dk = formData.domainKnowledge || "";
+          const vrVal = formData.validationRules || "";
+          const grVal = formData.guardrails || "";
+
+          if (buc.trim()) {
+            const lines = buc.split("\n");
+            const filtered = lines.filter(line => {
+              const lower = line.toLowerCase();
+              return !techKw.some(kw => lower.includes(kw.toLowerCase()));
+            });
+            if (filtered.length !== lines.length) {
+              updates.businessUseCase = filtered.join("\n");
+            }
+          }
+
+          if (dk.trim()) {
+            const lines = dk.split("\n");
+            const ruleLines: string[] = [];
+            const kept: string[] = [];
+            for (const line of lines) {
+              if (imperPat.test(line.trim())) {
+                ruleLines.push(line);
+              } else {
+                kept.push(line);
+              }
+            }
+            if (ruleLines.length > 0) {
+              updates.domainKnowledge = kept.join("\n");
+              updates.validationRules = (vrVal ? vrVal + "\n" : "") + ruleLines.join("\n");
+            }
+          }
+
+          const currentVR = updates.validationRules ?? vrVal;
+          if (currentVR.trim()) {
+            const lines = currentVR.split("\n");
+            const guardrailLines: string[] = [];
+            const kept: string[] = [];
+            for (const line of lines) {
+              if (guardrailLangRe.test(line.trim())) {
+                guardrailLines.push(line);
+              } else {
+                kept.push(line);
+              }
+            }
+            if (guardrailLines.length > 0) {
+              updates.validationRules = kept.join("\n");
+              updates.guardrails = (grVal ? grVal + "\n" : "") + guardrailLines.join("\n");
+            }
+          }
+
+          const currentGR = updates.guardrails ?? grVal;
+          if (currentGR.trim()) {
+            const lines = currentGR.split("\n");
+            const condLines: string[] = [];
+            const kept: string[] = [];
+            for (const line of lines) {
+              if (condPat.test(line.trim())) {
+                condLines.push(line);
+              } else {
+                kept.push(line);
+              }
+            }
+            if (condLines.length > 0) {
+              updates.guardrails = kept.join("\n");
+              const vr2 = updates.validationRules ?? vrVal;
+              updates.validationRules = (vr2 ? vr2 + "\n" : "") + condLines.join("\n");
+            }
+          }
+
+          const allTextKeys: (keyof UpdateAgent)[] = ["businessUseCase", "domainKnowledge", "validationRules", "guardrails"];
+          for (const key of allTextKeys) {
+            let val = (updates[key] as string) ?? (formData[key] as string) ?? "";
+            if (!val.trim()) continue;
+            let changed = false;
+            for (const phrase of crossRefPh) {
+              const re = new RegExp(phrase, "gi");
+              if (re.test(val)) {
+                val = val.replace(re, "");
+                changed = true;
+              }
+            }
+            if (changed) {
+              (updates as any)[key] = val;
+            }
+          }
+
+          for (const key of allTextKeys) {
+            let val = (updates[key] as string) ?? (formData[key] as string) ?? "";
+            if (!val.trim()) continue;
+            const lines = val.split("\n");
+            const filtered = lines.filter(line => {
+              const lower = line.toLowerCase();
+              return !metaPh.some(p => lower.includes(p));
+            });
+            if (filtered.length !== lines.length) {
+              (updates as any)[key] = filtered.join("\n");
+            }
+          }
+
+          if (Object.keys(updates).length > 0) {
+            updateFormDataAndTrackCompletion(updates);
+            toast({
+              title: "Auto-fix applied!",
+              description: "Review the changes in previous steps.",
+            });
+          }
+
+          setTimeout(() => {
+            setSettingsCheckResults(runSettingsValidationChecklist({ ...formData, ...updates }));
+          }, 100);
+        };
+
+        const sCategoryLabels: Record<string, string> = {
+          separation: "Separation of Concerns",
+          completeness: "Completeness",
+          clarity: "Clarity",
+          compatibility: "Wizard Compatibility",
+        };
+
+        const sCategories: Array<'separation' | 'completeness' | 'clarity' | 'compatibility'> = ["separation", "completeness", "clarity", "compatibility"];
+
+        const getSettingsStatusIcon = (status: SettingsCheckStatus) => {
+          switch (status) {
+            case "pass":
+              return <CheckCircle2 className="h-4 w-4 text-green-600 dark:text-green-400 shrink-0" />;
+            case "fail":
+              return <XCircle className="h-4 w-4 text-red-600 dark:text-red-400 shrink-0" />;
+            case "unable_to_verify":
+              return <AlertCircle className="h-4 w-4 text-amber-600 dark:text-amber-400 shrink-0" />;
+          }
+        };
+
+        return (
+          <>
+          <Card>
+            <CardHeader>
+              <div className="flex items-start justify-between gap-4 flex-wrap">
+                <div>
+                  <CardTitle className="flex items-center gap-2">
+                    <CheckSquare className="h-5 w-5 text-primary" />
+                    Validation Checklist
+                  </CardTitle>
+                  <CardDescription className="mt-1">
+                    Review the quality and consistency of your agent configuration before finalizing.
+                  </CardDescription>
+                </div>
+                <Button variant="outline" size="sm" onClick={() => setShowSettingsMistakesModal(true)} data-testid="settings-button-common-mistakes">
+                  <AlertTriangle className="h-4 w-4 mr-2" />
+                  Common Mistakes to Avoid
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-6">
+                {sAllPass && (
+                  <div className="flex items-center gap-2 rounded-md border border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-950/30 p-3" data-testid="settings-alert-all-pass">
+                    <CheckCircle2 className="h-5 w-5 text-green-600 dark:text-green-400 shrink-0" />
+                    <span className="text-sm font-medium text-green-800 dark:text-green-300">All checks passed!</span>
+                  </div>
+                )}
+                {sFail > 0 && (
+                  <div className="flex items-start gap-2 rounded-md border border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-950/30 p-3" data-testid="settings-alert-issues-found">
+                    <AlertCircle className="h-5 w-5 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+                    <div className="flex-1 space-y-2">
+                      <span className="text-sm font-medium text-amber-800 dark:text-amber-300">{sFail} issue{sFail !== 1 ? "s" : ""} found. Would you like to try to fix these automatically?</span>
+                      <div>
+                        <Button size="sm" variant="outline" onClick={handleSettingsAutoFix} data-testid="settings-button-auto-fix">
+                          <Sparkles className="h-4 w-4 mr-2" />
+                          Auto-Fix Issues
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+                {sAllUnverified && (
+                  <div className="flex items-center gap-2 rounded-md border p-3" data-testid="settings-alert-all-unverified">
+                    <Info className="h-5 w-5 text-muted-foreground shrink-0" />
+                    <span className="text-sm text-muted-foreground">Fill in more fields in the previous steps for validation checks to work.</span>
+                  </div>
+                )}
+
+                <div className="flex justify-end">
+                  <Button variant="outline" size="sm" onClick={runChecks} data-testid="settings-button-rerun-checks">
+                    <RotateCcw className="h-4 w-4 mr-2" />
+                    Re-run Checks
+                  </Button>
+                </div>
+
+                {sCategories.map(cat => {
+                  const catResults = settingsCheckResults.filter(r => r.category === cat);
+                  if (catResults.length === 0) return null;
+                  return (
+                    <div key={cat} className="space-y-2">
+                      <h3 className="text-sm font-semibold">{sCategoryLabels[cat]}</h3>
+                      <div className="space-y-1.5">
+                        {catResults.map(result => (
+                          <div key={result.id} className="flex items-start gap-2 text-sm py-1" data-testid={`settings-check-result-${result.id}`}>
+                            {getSettingsStatusIcon(result.status)}
+                            <div className="min-w-0">
+                              <span className={result.status === "fail" ? "font-medium" : ""}>{result.label}</span>
+                              {result.status === "unable_to_verify" && (
+                                <Badge variant="secondary" className="ml-2 text-xs">Unable to verify</Badge>
+                              )}
+                              <p className="text-xs text-muted-foreground mt-0.5">{result.detail}</p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </CardContent>
+          </Card>
+
+          <Dialog open={showSettingsMistakesModal} onOpenChange={setShowSettingsMistakesModal}>
+            <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+              <DialogHeader>
+                <DialogTitle className="flex items-center gap-2">
+                  <AlertTriangle className="h-5 w-5 text-amber-500" />
+                  Common Mistakes to Avoid
+                </DialogTitle>
+                <DialogDescription>
+                  Learn how to structure your agent configuration correctly by avoiding these common pitfalls.
+                </DialogDescription>
+              </DialogHeader>
+              <div className="space-y-6 mt-4 text-sm">
+                <div className="space-y-3">
+                  <h3 className="font-semibold text-destructive">Mistake 1: Mixing Strategy with Function</h3>
+                  <div className="space-y-2">
+                    <div className="rounded-md border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950/30 p-3">
+                      <p className="text-xs font-medium text-red-700 dark:text-red-400 mb-1">Bad (in Business Use Case):</p>
+                      <p className="text-xs text-muted-foreground italic">"This agent is valuable as a proof point for our platform. It demonstrates multi-system orchestration."</p>
+                    </div>
+                    <div className="rounded-md border border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-950/30 p-3">
+                      <p className="text-xs font-medium text-green-700 dark:text-green-400 mb-1">Good:</p>
+                      <p className="text-xs text-muted-foreground italic">"Help frontline managers handle employee call-ins through coordinated updates across scheduling, payroll, and accrual systems."</p>
+                    </div>
+                    <p className="text-xs text-muted-foreground"><span className="font-medium">Why:</span> Users care about what the agent does, not why you built it.</p>
+                  </div>
+                </div>
+
+                <hr />
+
+                <div className="space-y-3">
+                  <h3 className="font-semibold text-destructive">Mistake 2: Putting Rules in Domain Knowledge</h3>
+                  <div className="space-y-2">
+                    <div className="rounded-md border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950/30 p-3">
+                      <p className="text-xs font-medium text-red-700 dark:text-red-400 mb-1">Bad (in Domain Knowledge):</p>
+                      <p className="text-xs text-muted-foreground italic">"Accrual balances can never go negative without manager approval."</p>
+                    </div>
+                    <div className="rounded-md border border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-950/30 p-3">
+                      <p className="text-xs font-medium text-green-700 dark:text-green-400 mb-1">Good (in Guardrails):</p>
+                      <p className="text-xs text-muted-foreground italic"><span className="font-medium">Never:</span> Overdraft accrual balances without explicit manager confirmation</p>
+                    </div>
+                    <p className="text-xs text-muted-foreground"><span className="font-medium">Why:</span> Domain Knowledge explains concepts; Guardrails set boundaries.</p>
+                  </div>
+                </div>
+
+                <hr />
+
+                <div className="space-y-3">
+                  <h3 className="font-semibold text-destructive">Mistake 3: Putting Definitions in Validation Rules</h3>
+                  <div className="space-y-2">
+                    <div className="rounded-md border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950/30 p-3">
+                      <p className="text-xs font-medium text-red-700 dark:text-red-400 mb-1">Bad (in Validation Rules):</p>
+                      <p className="text-xs text-muted-foreground italic">"Employees have PTO and sick leave balances tracked separately."</p>
+                    </div>
+                    <div className="rounded-md border border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-950/30 p-3">
+                      <p className="text-xs font-medium text-green-700 dark:text-green-400 mb-1">Good (in Domain Knowledge):</p>
+                      <p className="text-xs text-muted-foreground italic">"PTO and sick leave are tracked separately with independent balances."</p>
+                    </div>
+                    <p className="text-xs text-muted-foreground"><span className="font-medium">Why:</span> Validation Rules check conditions; Domain Knowledge explains how things work.</p>
+                  </div>
+                </div>
+
+                <hr />
+
+                <div className="space-y-3">
+                  <h3 className="font-semibold text-destructive">Mistake 4: Conditional Logic in Guardrails</h3>
+                  <div className="space-y-2">
+                    <div className="rounded-md border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950/30 p-3">
+                      <p className="text-xs font-medium text-red-700 dark:text-red-400 mb-1">Bad (in Guardrails):</p>
+                      <p className="text-xs text-muted-foreground italic">"If the employee name is ambiguous, ask a clarifying question."</p>
+                    </div>
+                    <div className="rounded-md border border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-950/30 p-3">
+                      <p className="text-xs font-medium text-green-700 dark:text-green-400 mb-1">Good (in Validation Rules):</p>
+                      <p className="text-xs text-muted-foreground italic"><span className="font-medium">Employee Identity Verification:</span> If the employee name provided does not exactly match one employee record, ask a clarifying question...</p>
+                    </div>
+                    <p className="text-xs text-muted-foreground"><span className="font-medium">Why:</span> Guardrails are absolute rules; Validation Rules handle conditional logic.</p>
+                  </div>
+                </div>
+
+                <hr />
+
+                <div className="space-y-3">
+                  <h3 className="font-semibold text-destructive">Mistake 5: Comments in Sample Data</h3>
+                  <div className="space-y-2">
+                    <div className="rounded-md border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950/30 p-3">
+                      <p className="text-xs font-medium text-red-700 dark:text-red-400 mb-1">Bad:</p>
+                      <pre className="text-xs text-muted-foreground mt-1 whitespace-pre-wrap font-mono">{`{
+  "employees": [
+    // This employee has low PTO
+    {"employee_id": "12345", "pto_hours": 2.0}
+  ]
+}`}</pre>
+                    </div>
+                    <div className="rounded-md border border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-950/30 p-3">
+                      <p className="text-xs font-medium text-green-700 dark:text-green-400 mb-1">Good:</p>
+                      <pre className="text-xs text-muted-foreground mt-1 whitespace-pre-wrap font-mono">{`{
+  "employees": [
+    {"employee_id": "12345", "pto_hours": 2.0, "sick_hours": 16.5}
+  ]
+}`}</pre>
+                    </div>
+                    <p className="text-xs text-muted-foreground"><span className="font-medium">Why:</span> Sample data should be clean JSON without comments.</p>
+                  </div>
+                </div>
+              </div>
+            </DialogContent>
+          </Dialog>
+          </>
+        );
+      }
+
+      case 9:
         return (
           <Card>
             <CardHeader>
