@@ -1174,10 +1174,6 @@ export default function SettingsPage() {
                         onClick={() => {
                           updateFormDataAndTrackCompletion({ businessUseCase: businessUseCaseTemplate });
                           setExtractionResult(null);
-                          toast({
-                            title: "Template loaded",
-                            description: "Fill in the bracketed placeholders with your specific details.",
-                          });
                         }}
                         data-testid="settings-button-use-template-usecase"
                       >

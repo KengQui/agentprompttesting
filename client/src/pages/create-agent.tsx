@@ -129,10 +129,6 @@ function Step1BusinessUseCase({
   const handleUseTemplate = () => {
     onUpdate({ businessUseCase: businessUseCaseTemplate });
     setExtractionResult(null);
-    toast({
-      title: "Template loaded",
-      description: "Fill in the bracketed placeholders with your specific details.",
-    });
   };
 
   const handleExtract = async () => {
