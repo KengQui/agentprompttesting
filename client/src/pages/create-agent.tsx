@@ -99,9 +99,7 @@ function StepIndicator({ currentStep }: { currentStep: number }) {
         })}
       </div>
       <div className="mt-6 pt-4 border-t">
-        <div className="text-xs text-muted-foreground mb-2">Progress</div>
-        <Progress value={progress} className="h-2" />
-        <div className="text-xs text-muted-foreground mt-1">{Math.round(progress)}% complete</div>
+        <div className="text-xs text-muted-foreground">{steps.length} steps total</div>
       </div>
     </div>
   );
@@ -2478,6 +2476,7 @@ function Step8ValidationChecklist({
   onUpdate: (data: Partial<WizardStepData>) => void;
 }) {
   const [checkResults, setCheckResults] = useState<CheckResult[]>([]);
+  const [showMistakesModal, setShowMistakesModal] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -2639,15 +2638,24 @@ function Step8ValidationChecklist({
   };
 
   return (
+    <>
     <Card>
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <CheckSquare className="h-5 w-5 text-primary" />
-          Validation Checklist
-        </CardTitle>
-        <CardDescription>
-          Review the quality and consistency of your agent configuration before finalizing.
-        </CardDescription>
+        <div className="flex items-start justify-between gap-4 flex-wrap">
+          <div>
+            <CardTitle className="flex items-center gap-2">
+              <CheckSquare className="h-5 w-5 text-primary" />
+              Validation Checklist
+            </CardTitle>
+            <CardDescription className="mt-1">
+              Review the quality and consistency of your agent configuration before finalizing.
+            </CardDescription>
+          </div>
+          <Button variant="outline" size="sm" onClick={() => setShowMistakesModal(true)} data-testid="button-common-mistakes">
+            <AlertTriangle className="h-4 w-4 mr-2" />
+            Common Mistakes to Avoid
+          </Button>
+        </div>
       </CardHeader>
       <CardContent>
         <div className="space-y-6">
@@ -2711,6 +2719,114 @@ function Step8ValidationChecklist({
         </div>
       </CardContent>
     </Card>
+
+    <Dialog open={showMistakesModal} onOpenChange={setShowMistakesModal}>
+      <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <AlertTriangle className="h-5 w-5 text-amber-500" />
+            Common Mistakes to Avoid
+          </DialogTitle>
+          <DialogDescription>
+            Learn how to structure your agent configuration correctly by avoiding these common pitfalls.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="space-y-6 mt-4 text-sm">
+          <div className="space-y-3">
+            <h3 className="font-semibold text-destructive">Mistake 1: Mixing Strategy with Function</h3>
+            <div className="space-y-2">
+              <div className="rounded-md border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950/30 p-3">
+                <p className="text-xs font-medium text-red-700 dark:text-red-400 mb-1">Bad (in Business Use Case):</p>
+                <p className="text-xs text-muted-foreground italic">"This agent is valuable as a proof point for our platform. It demonstrates multi-system orchestration."</p>
+              </div>
+              <div className="rounded-md border border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-950/30 p-3">
+                <p className="text-xs font-medium text-green-700 dark:text-green-400 mb-1">Good:</p>
+                <p className="text-xs text-muted-foreground italic">"Help frontline managers handle employee call-ins through coordinated updates across scheduling, payroll, and accrual systems."</p>
+              </div>
+              <p className="text-xs text-muted-foreground"><span className="font-medium">Why:</span> Users care about what the agent does, not why you built it.</p>
+            </div>
+          </div>
+
+          <hr />
+
+          <div className="space-y-3">
+            <h3 className="font-semibold text-destructive">Mistake 2: Putting Rules in Domain Knowledge</h3>
+            <div className="space-y-2">
+              <div className="rounded-md border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950/30 p-3">
+                <p className="text-xs font-medium text-red-700 dark:text-red-400 mb-1">Bad (in Domain Knowledge):</p>
+                <p className="text-xs text-muted-foreground italic">"Accrual balances can never go negative without manager approval."</p>
+              </div>
+              <div className="rounded-md border border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-950/30 p-3">
+                <p className="text-xs font-medium text-green-700 dark:text-green-400 mb-1">Good (in Guardrails):</p>
+                <p className="text-xs text-muted-foreground italic"><span className="font-medium">Never:</span> Overdraft accrual balances without explicit manager confirmation</p>
+              </div>
+              <p className="text-xs text-muted-foreground"><span className="font-medium">Why:</span> Domain Knowledge explains concepts; Guardrails set boundaries.</p>
+            </div>
+          </div>
+
+          <hr />
+
+          <div className="space-y-3">
+            <h3 className="font-semibold text-destructive">Mistake 3: Putting Definitions in Validation Rules</h3>
+            <div className="space-y-2">
+              <div className="rounded-md border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950/30 p-3">
+                <p className="text-xs font-medium text-red-700 dark:text-red-400 mb-1">Bad (in Validation Rules):</p>
+                <p className="text-xs text-muted-foreground italic">"Employees have PTO and sick leave balances tracked separately."</p>
+              </div>
+              <div className="rounded-md border border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-950/30 p-3">
+                <p className="text-xs font-medium text-green-700 dark:text-green-400 mb-1">Good (in Domain Knowledge):</p>
+                <p className="text-xs text-muted-foreground italic">"PTO and sick leave are tracked separately with independent balances."</p>
+              </div>
+              <p className="text-xs text-muted-foreground"><span className="font-medium">Why:</span> Validation Rules check conditions; Domain Knowledge explains how things work.</p>
+            </div>
+          </div>
+
+          <hr />
+
+          <div className="space-y-3">
+            <h3 className="font-semibold text-destructive">Mistake 4: Conditional Logic in Guardrails</h3>
+            <div className="space-y-2">
+              <div className="rounded-md border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950/30 p-3">
+                <p className="text-xs font-medium text-red-700 dark:text-red-400 mb-1">Bad (in Guardrails):</p>
+                <p className="text-xs text-muted-foreground italic">"If the employee name is ambiguous, ask a clarifying question."</p>
+              </div>
+              <div className="rounded-md border border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-950/30 p-3">
+                <p className="text-xs font-medium text-green-700 dark:text-green-400 mb-1">Good (in Validation Rules):</p>
+                <p className="text-xs text-muted-foreground italic"><span className="font-medium">Employee Identity Verification:</span> If the employee name provided does not exactly match one employee record, ask a clarifying question...</p>
+              </div>
+              <p className="text-xs text-muted-foreground"><span className="font-medium">Why:</span> Guardrails are absolute rules; Validation Rules handle conditional logic.</p>
+            </div>
+          </div>
+
+          <hr />
+
+          <div className="space-y-3">
+            <h3 className="font-semibold text-destructive">Mistake 5: Comments in Sample Data</h3>
+            <div className="space-y-2">
+              <div className="rounded-md border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950/30 p-3">
+                <p className="text-xs font-medium text-red-700 dark:text-red-400 mb-1">Bad:</p>
+                <pre className="text-xs text-muted-foreground mt-1 whitespace-pre-wrap font-mono">{`{
+  "employees": [
+    // This employee has low PTO
+    {"employee_id": "12345", "pto_hours": 2.0}
+  ]
+}`}</pre>
+              </div>
+              <div className="rounded-md border border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-950/30 p-3">
+                <p className="text-xs font-medium text-green-700 dark:text-green-400 mb-1">Good:</p>
+                <pre className="text-xs text-muted-foreground mt-1 whitespace-pre-wrap font-mono">{`{
+  "employees": [
+    {"employee_id": "12345", "pto_hours": 2.0, "sick_hours": 16.5}
+  ]
+}`}</pre>
+              </div>
+              <p className="text-xs text-muted-foreground"><span className="font-medium">Why:</span> Sample data should be clean JSON without comments.</p>
+            </div>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+    </>
   );
 }
 
