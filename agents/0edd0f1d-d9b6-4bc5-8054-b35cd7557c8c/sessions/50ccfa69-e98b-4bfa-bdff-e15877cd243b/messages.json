@@ -1,0 +1,34 @@
+[
+  {
+    "id": "6464d6f0-01f6-4e71-bdfd-750cfab52334",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "sessionId": "50ccfa69-e98b-4bfa-bdff-e15877cd243b",
+    "role": "user",
+    "content": "I want a column that display average salary per department",
+    "timestamp": "2026-02-05T17:44:35.775Z"
+  },
+  {
+    "id": "54af2e36-5db5-47e0-a05d-6c640482f8bb",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "sessionId": "50ccfa69-e98b-4bfa-bdff-e15877cd243b",
+    "role": "assistant",
+    "content": "Thanks! I just need one more detail: Desired Output Type:?",
+    "timestamp": "2026-02-05T17:44:35.777Z"
+  },
+  {
+    "id": "515480e4-4ee4-44fc-9364-d92f2dbec976",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "sessionId": "50ccfa69-e98b-4bfa-bdff-e15877cd243b",
+    "role": "user",
+    "content": "what do you mean by desired output type?",
+    "timestamp": "2026-02-05T17:44:50.252Z"
+  },
+  {
+    "id": "fa575caa-5094-4c92-9f9e-5c7fa8ad2ebf",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "sessionId": "50ccfa69-e98b-4bfa-bdff-e15877cd243b",
+    "role": "assistant",
+    "content": "Here's a summary of what you've provided:\n\n- **Business Objective:**: Create tenure bands based on Days Employed\n- **Source Columns:**: Create tenure bands based on Days Employed\n- **Logical Rules:**: I want a column that display average salary per department\n- **Desired Output Type:**: what do you mean by desired output type?\n\nIs this correct? (yes/no)",
+    "timestamp": "2026-02-05T17:44:50.253Z"
+  }
+]
