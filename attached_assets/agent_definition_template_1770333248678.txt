@@ -1,0 +1,569 @@
+AGENT DEFINITION TEMPLATE - USER GUIDE
+=======================================
+
+This template helps you create clean, complete agent definitions for your HCM Agent Configuration Hub.
+Use this as a guide when filling out the 7-step wizard.
+
+=======================================
+
+## Quick Reference
+- **Agent Name**: [Short, descriptive name]
+- **Primary Intent**: [1 sentence: what does the user want to accomplish?]
+- **Complexity**: [Simple/Medium/Complex]
+- **Systems Involved**: [List of HCM modules this touches]
+
+=======================================
+
+## FIELD 1: Agent Name
+
+[Exact name to display to users]
+
+**Guidelines:**
+- Keep it clear and descriptive
+- Use action words (e.g., "Assistant", "Manager", "Helper")
+- Examples: "Call-In Shift Management Assistant", "Benefits Enrollment Helper", "Timecard Correction Manager"
+
+=======================================
+
+## FIELD 2: Business Use Case
+
+[2-4 sentences: What problem does this solve? What does the agent do? What's the outcome?]
+
+**Template:**
+Help [user role] [accomplish what] through [how they interact]. When [trigger situation], the agent [what actions it takes]—all with [key benefit like transparency/speed/accuracy].
+
+**Example:**
+Help frontline managers handle employee call-ins through a single natural-language command. When an employee calls in sick or absent, orchestrate all required actions: verify employee identity, classify the absence type, check accrual balances, update schedules, and convert the shift to an open shift—all with full transparency and confirmation before making any changes.
+
+**What to Include:**
+- ✅ Who uses this agent (e.g., managers, employees, HR admins)
+- ✅ What problem it solves (e.g., time-consuming manual processes)
+- ✅ What the agent does (e.g., coordinates updates across multiple systems)
+- ✅ Key benefit (e.g., saves time, reduces errors, ensures compliance)
+
+**What NOT to Include:**
+- ❌ Strategic context (e.g., "valuable proof point for our platform")
+- ❌ Technical architecture details
+- ❌ Implementation notes
+
+=======================================
+
+## FIELD 3: Domain Knowledge
+
+Explain the key concepts, definitions, and how things work in this area of your business.
+
+### Structure Guidelines:
+
+1. **Key Terms** - Define the important things the agent needs to know about
+2. **How Things Connect** - Explain how these concepts relate to each other
+3. **Business Process** - Describe the workflow this agent fits into
+4. **System Context** - Which parts of your HCM system are involved?
+5. **User Context** - Who uses this and when?
+
+### Suggested Outline:
+
+```
+**Key Terms**
+- [Term 1]: [Clear definition]
+- [Term 2]: [Clear definition]
+
+**How Things Connect**
+[Explain relationships - e.g., "Employees are assigned to shifts"]
+
+**Business Process**
+[Explain the normal workflow and where this agent helps]
+
+**System Context**
+[Which HCM modules are involved - e.g., Time & Attendance, Payroll, Scheduling]
+
+**User Context**
+[Who uses this, when, and in what situations]
+```
+
+### What to Include:
+- ✅ Definitions of key terms and concepts
+- ✅ How different parts of the system work together
+- ✅ Business process explanations
+- ✅ How data connects (e.g., employee IDs link employees to their shifts)
+- ✅ Industry-specific context your users need to understand
+
+### What NOT to Include:
+- ❌ Validation logic like "check if balance is sufficient" (goes in Field 4)
+- ❌ "Always/never" statements (goes in Field 5)
+- ❌ Step-by-step confirmation processes (goes in Field 4)
+- ❌ Error handling procedures (goes in Field 4)
+- ❌ Specific example data (goes in Field 6)
+
+### Example:
+```
+**Key Terms**
+- Employee: A worker in your organization with an ID, name, position, and location
+- Shift: A scheduled work period with a start time, end time, and assigned employee
+- Accrual Balance: The amount of paid time off (like PTO or sick leave) an employee has available
+
+**How Things Connect**
+Employees are assigned to shifts. Each employee has accrual balances that track their available time off. When an employee can't work, their shift needs to be converted to an "open shift" so someone else can cover it.
+
+**Business Process**
+When an employee calls in, managers need to: verify who called in, decide how to classify the absence (PTO, sick, unpaid), check if they have enough accrued time, update the schedule, and make the shift available for coverage.
+
+**System Context**
+This process touches three HCM modules: Time & Attendance (for accrual tracking), Workforce Management (for scheduling), and Payroll (for pay calculation).
+
+**User Context**
+Frontline managers handle call-ins in real-time during shift start times and need quick resolution.
+```
+
+=======================================
+
+## FIELD 4: Validation Rules
+
+What should the agent check before taking action? How should it handle different situations?
+
+### Structure Guidelines:
+
+For each validation rule, specify:
+1. **What to check** (the condition)
+2. **What to do** (the action/response)
+3. **Example** (show what the user sees)
+
+### Template:
+
+```
+**[Validation Category Name]**
+[When to check]: [What to verify]
+[What to do if validation fails]: [Specific action]
+
+Example: "[Show exact message the user would see]"
+```
+
+### What to Include:
+- ✅ Data verification steps (e.g., verify employee identity)
+- ✅ Business rule checks (e.g., check if balance is sufficient)
+- ✅ "If this, then that" logic (e.g., if balance is low, suggest alternatives)
+- ✅ Error handling (e.g., what to do if a shift isn't found)
+- ✅ Confirmation steps (e.g., show summary before finalizing)
+- ✅ Multi-step processes (e.g., gather info, then confirm, then execute)
+
+### What NOT to Include:
+- ❌ Absolute rules like "never do X" (goes in Field 5: Guardrails)
+- ❌ Definitions and explanations (goes in Field 3: Domain Knowledge)
+- ❌ Specific example data (goes in Field 6: Sample Data)
+
+### Example:
+```
+**Employee Identity Verification**
+If the name provided doesn't exactly match one employee record, ask for clarification listing possible matches with their employee IDs.
+
+Example: "Which person did you mean: Susan Jones (E12345) or Susanne Jones (E67890)?"
+
+**Balance Check**
+Before using accrued time off, check if the employee has enough hours. If not, warn them and present options.
+
+Example: "Susan's PTO balance is 2.0 hours; the shift is 6.0 hours. Would you like to: (A) apply 2.0 hours PTO and 4.0 hours unpaid, (B) apply 6.0 hours unpaid, or (C) cancel?"
+```
+
+=======================================
+
+## FIELD 5: Guardrails
+
+Clear rules about what the agent must always do and must never do.
+
+### Structure Guidelines:
+
+Two sections: **Always** and **Never**
+
+### Always Section:
+List things the agent MUST do every time
+- Start each with an action word
+- Be specific and clear
+- Include the reason if it's not obvious
+
+### Never Section:
+List things the agent MUST NOT do under any circumstance
+- State clearly what's forbidden
+- Include what's out of scope for this version
+
+### Template:
+
+```
+**Always:**
+- [Action verb] [specific requirement] [optional: when/why]
+- [Action verb] [specific requirement] [optional: when/why]
+
+**Never:**
+- [Prohibited action] [optional: reason]
+- [Prohibited action] [optional: what to do instead]
+- [Out of scope feature] (out of scope for [version/reason])
+```
+
+### What to Include:
+- ✅ Mandatory behaviors (e.g., "Always verify identity")
+- ✅ Absolute prohibitions (e.g., "Never overdraft balances")
+- ✅ Scope boundaries (e.g., "out of scope")
+- ✅ Safety requirements (e.g., "Always confirm before changes")
+- ✅ Privacy/security rules
+
+### What NOT to Include:
+- ❌ "If this, then that" statements (goes in Field 4: Validation Rules)
+- ❌ Examples of correct behavior (goes in Field 4: Validation Rules)
+- ❌ Explanations of concepts (goes in Field 3: Domain Knowledge)
+
+### Example:
+```
+**Always:**
+- Verify employee identity when there is any name ambiguity
+- Ask which type of absence to apply (PTO, sick, unpaid)—never choose automatically
+- Check balance before using accrued time off
+- Show a confirmation summary before making any changes
+- Create an audit log entry for every change
+
+**Never:**
+- Assume which employee is meant when names are ambiguous
+- Overdraft accrual balances without explicit manager approval
+- Make changes without showing a confirmation first
+- Update one system but fail to update related systems (all-or-nothing)
+- Automatically assign someone else to cover the shift (out of scope)
+- Modify disciplinary records or attendance points (out of scope)
+```
+
+=======================================
+
+## FIELD 6: Sample Data
+
+Provide realistic example data in JSON format that represents your HCM system.
+
+### Format: JSON
+
+```json
+{
+  "[data_type_plural]": [
+    {
+      "id_field": "unique_id",
+      "field1": "value",
+      "field2": 123
+    }
+  ]
+}
+```
+
+### What to Include:
+- ✅ All major data types from Domain Knowledge (e.g., employees, shifts, balances)
+- ✅ Multiple examples showing different scenarios (e.g., high balance, low balance, zero balance)
+- ✅ Edge cases (e.g., duplicate names, missing data)
+- ✅ Realistic values and ID formats
+- ✅ Connected data (use matching IDs across different data types)
+
+### Data Design Principles:
+
+1. **Cover validation scenarios**: Include data that triggers your validation rules
+   - Example: Include an employee with low balance to test the "insufficient balance" validation
+
+2. **Show connections**: Use consistent IDs across related data
+   - Example: If employee E12345 is assigned to shift SFT1001, make sure the shift has assigned_employee_id: "E12345"
+
+3. **Include edge cases**: 
+   - Zero balances
+   - Duplicate names
+   - Already-open shifts
+   - Missing data
+
+4. **Keep it minimal**: 2-4 examples per data type is usually enough
+
+5. **Use realistic formats**: 
+   - Dates as YYYY-MM-DD
+   - Times as HH:MM
+   - Proper decimal precision for numbers
+
+### Example:
+```json
+{
+  "employees": [
+    {
+      "employee_id": "E12345",
+      "first_name": "Susan",
+      "last_name": "Jones",
+      "location": "Store 101",
+      "job_title": "Cashier"
+    },
+    {
+      "employee_id": "E67890",
+      "first_name": "Susanne",
+      "last_name": "Jones",
+      "location": "Store 101",
+      "job_title": "Cashier"
+    }
+  ],
+  "accrual_balances": [
+    {
+      "employee_id": "E12345",
+      "accrual_type": "PTO",
+      "balance_hours": 44.3
+    },
+    {
+      "employee_id": "E67890",
+      "accrual_type": "PTO",
+      "balance_hours": 3.5
+    }
+  ],
+  "shifts": [
+    {
+      "shift_id": "SFT1001",
+      "date": "2026-02-03",
+      "start_time": "09:00",
+      "end_time": "15:00",
+      "duration_hours": 6.0,
+      "assigned_employee_id": "E12345",
+      "status": "assigned"
+    }
+  ]
+}
+```
+
+### Important Notes:
+- This is example data for the agent to reference during simulations
+- Customize this to match YOUR company's data structure
+- If your company uses different codes or terms, update the sample data accordingly
+- The agent will use this data to provide realistic responses
+
+=======================================
+
+## FIELD 7: Available Actions
+
+List what the agent can simulate doing, formatted as function calls.
+
+### Format:
+```
+- action_name(parameter1, parameter2) → Returns description of what comes back
+- action_name(parameter) → Returns description | Error condition description
+```
+
+### Structure Guidelines:
+
+1. Start each line with a dash (-)
+2. Use lowercase_with_underscores for action names
+3. Show required information in parentheses
+4. Use → to show what comes back
+5. Keep descriptions concise and clear
+
+### What to Include:
+
+**1. Lookup Actions** - Finding and verifying things
+```
+- verify_employee_identity(name_input) → Returns list of matching employees with IDs
+- get_employee_details(employee_id) → Returns employee record
+```
+
+**2. Read Actions** - Getting current information
+```
+- check_accrual_balance(employee_id, accrual_type) → Returns current balance in hours
+- get_shift_details(shift_id) → Returns shift information
+```
+
+**3. Calculation Actions** - Computing values
+```
+- calculate_remaining_balance(current_balance, hours_to_deduct) → Returns new balance
+```
+
+**4. Update Actions** - Making changes
+```
+- record_accrual_usage(employee_id, accrual_type, hours) → Deducts hours from balance
+- convert_shift_to_open(shift_id) → Changes shift status to "open"
+```
+
+**5. Logging Actions** - Recording what happened
+```
+- create_audit_log(manager_id, employee_id, details, timestamp) → Logs the transaction
+```
+
+### Example:
+```
+- verify_employee_identity(name_input) → Returns list of matching employees with employee IDs and names
+- get_employee_shift(employee_id, date) → Returns shift details if assigned | Returns null if no shift found
+- check_accrual_balance(employee_id, accrual_type) → Returns current balance in hours
+- record_accrual_usage(employee_id, accrual_type, hours, shift_id) → Deducts hours from balance | Returns error if insufficient balance
+- convert_shift_to_open(shift_id) → Removes employee assignment and changes status to "open"
+- create_audit_log(manager_id, employee_id, shift_id, action_type, details) → Logs the change
+```
+
+### Important Notes:
+- These are simulated actions - the agent pretends to perform them
+- List ALL actions the agent might need, even if they seem obvious
+- Include both successful outcomes AND error conditions
+
+=======================================
+
+## VALIDATION CHECKLIST
+
+Before submitting to the wizard, verify:
+
+**Separation of Concerns:**
+- [ ] Business Use Case contains ONLY what the agent does for users (no technical details)
+- [ ] Domain Knowledge contains ONLY facts and explanations (no rules or commands)
+- [ ] Validation Rules contains ONLY "if this, then that" logic and checks
+- [ ] Guardrails contains ONLY absolute "always/never" statements
+- [ ] Sample Data is pure JSON with no explanatory comments
+- [ ] Available Actions are clearly formatted function signatures
+
+**Completeness:**
+- [ ] All key terms in Domain Knowledge appear in Sample Data
+- [ ] All validation rules reference actions from Available Actions
+- [ ] Guardrails don't contradict Validation Rules
+- [ ] Sample Data covers edge cases mentioned in Validation Rules
+
+**Clarity:**
+- [ ] No duplicate information across fields
+- [ ] Technical terms are defined in Domain Knowledge before use elsewhere
+- [ ] Examples provided for complex validation rules
+- [ ] Action names are clear and self-explanatory
+
+**Wizard Compatibility:**
+- [ ] Each field can be understood on its own
+- [ ] No cross-references between fields (e.g., "as mentioned above...")
+- [ ] Consistent terminology across all fields
+- [ ] No comments about the agent itself (just what it does)
+
+=======================================
+
+## COMMON MISTAKES TO AVOID
+
+### ❌ Mistake 1: Mixing Strategy with Function
+**Bad (in Business Use Case):**
+"This agent is valuable as a proof point for our platform. It demonstrates multi-system orchestration."
+
+**Good:**
+"Help frontline managers handle employee call-ins through coordinated updates across scheduling, payroll, and accrual systems."
+
+**Why:** Users care about what the agent does, not why you built it.
+
+---
+
+### ❌ Mistake 2: Putting Rules in Domain Knowledge
+**Bad (in Domain Knowledge):**
+"Accrual balances can never go negative without manager approval."
+
+**Good (in Guardrails):**
+**Never:** Overdraft accrual balances without explicit manager confirmation
+
+**Why:** Domain Knowledge explains concepts; Guardrails set boundaries.
+
+---
+
+### ❌ Mistake 3: Putting Definitions in Validation Rules
+**Bad (in Validation Rules):**
+"Employees have PTO and sick leave balances tracked separately."
+
+**Good (in Domain Knowledge):**
+"PTO and sick leave are tracked separately with independent balances."
+
+**Why:** Validation Rules check conditions; Domain Knowledge explains how things work.
+
+---
+
+### ❌ Mistake 4: Conditional Logic in Guardrails
+**Bad (in Guardrails):**
+"If the employee name is ambiguous, ask a clarifying question."
+
+**Good (in Validation Rules):**
+**Employee Identity Verification**: If the employee name provided does not exactly match one employee record, ask a clarifying question...
+
+**Why:** Guardrails are absolute rules; Validation Rules handle conditional logic.
+
+---
+
+### ❌ Mistake 5: Comments in Sample Data
+**Bad:**
+```json
+{
+  "employees": [
+    // This employee has low PTO to test insufficient balance scenarios
+    {"employee_id": "12345", "pto_hours": 2.0}
+  ]
+}
+```
+
+**Good:**
+```json
+{
+  "employees": [
+    {"employee_id": "12345", "pto_hours": 2.0, "sick_hours": 16.5}
+  ]
+}
+```
+
+**Why:** Sample data should be clean JSON without comments.
+
+=======================================
+
+## QUICK START TEMPLATE
+
+Copy this structure and fill in the blanks:
+
+```
+FIELD 1: Agent Name
+--------------------
+[Agent Name]
+
+
+FIELD 2: Business Use Case
+---------------------------
+Help [user role] [do what] through [how]. When [trigger], the agent [actions]—with [benefit].
+
+
+FIELD 3: Domain Knowledge
+--------------------------
+**Key Terms**
+- [Term]: [Definition]
+
+**How Things Connect**
+[Explanation]
+
+**Business Process**
+[Workflow description]
+
+
+FIELD 4: Validation Rules
+--------------------------
+**[Validation Category]**
+[When to check]: [What to verify]
+[What to do]: [Action]
+
+Example: "[User-facing message]"
+
+
+FIELD 5: Guardrails
+--------------------
+**Always:**
+- [Required behavior]
+
+**Never:**
+- [Prohibited action]
+
+
+FIELD 6: Sample Data
+---------------------
+{
+  "data_type": [
+    {"id": "123", "field": "value"}
+  ]
+}
+
+
+FIELD 7: Available Actions
+---------------------------
+- action_name(params) → Returns description
+```
+
+=======================================
+
+## NEED HELP?
+
+If you're unsure about:
+- **What goes where?** → Check the "What to Include / What NOT to Include" sections
+- **How to format?** → Use the examples provided in each section
+- **Is this right?** → Use the Validation Checklist before submitting
+
+=======================================
+
+END OF TEMPLATE
+=======================================
