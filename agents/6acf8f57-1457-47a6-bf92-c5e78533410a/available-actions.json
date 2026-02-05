@@ -1,0 +1,133 @@
+[
+  {
+    "id": "e4705366-3b1d-47d4-8c81-ab507db1c461",
+    "name": "mark_employee_call_in",
+    "description": "Mark a scheduled employee shift as a call-in, classify the absence, update accruals, and convert the shift to an open shift.",
+    "category": "Shift Management",
+    "requiredFields": [
+      {
+        "name": "employee_name",
+        "type": "string",
+        "label": "Employee Name",
+        "required": true,
+        "description": "The full name or ID of the employee who called in."
+      },
+      {
+        "name": "shift_date",
+        "type": "date",
+        "label": "Shift Date",
+        "required": true,
+        "description": "The date of the shift the employee is calling in for."
+      },
+      {
+        "name": "shift_start_time",
+        "type": "string",
+        "label": "Shift Start Time",
+        "required": false,
+        "description": "Optional: The start time of the specific shift (e.g., '09:00 AM'), if the employee has multiple shifts on the same day."
+      },
+      {
+        "name": "absence_type",
+        "type": "select",
+        "label": "Absence Type",
+        "required": true,
+        "options": [
+          "PTO",
+          "Sick Leave",
+          "Unpaid"
+        ],
+        "description": "How the call-in absence should be coded."
+      }
+    ],
+    "confirmationMessage": "You are about to process a call-in for {employee_name} for a shift on {shift_date}. The absence will be coded as {absence_type}. This action will convert the assigned shift to an open shift and update accrual and payroll records. Are you sure you want to proceed?",
+    "successMessage": "Successfully processed {employee_name}'s call-in for {shift_date}. The shift has been converted to an open shift, and accrual and payroll records have been updated.",
+    "affectedDataFields": [
+      "employee_schedules",
+      "employee_accruals",
+      "audit_logs",
+      "payroll_system"
+    ]
+  },
+  {
+    "id": "000b40b9-0547-4fa4-b4f5-5f2f2ea15ede",
+    "name": "view_employee_accrual_balances",
+    "description": "Retrieve and display the current accrual balances (e.g., PTO, Sick Leave) for a specified employee.",
+    "category": "Employee Information",
+    "requiredFields": [
+      {
+        "name": "employee_name",
+        "type": "string",
+        "label": "Employee Name",
+        "required": true,
+        "description": "The full name or ID of the employee to view balances for."
+      }
+    ],
+    "confirmationMessage": "You are about to retrieve the accrual balances for {employee_name}. Proceed?",
+    "successMessage": "Successfully retrieved accrual balances for {employee_name}.",
+    "affectedDataFields": []
+  },
+  {
+    "id": "3a168ea3-3a30-46e6-b66a-b6d00a17556f",
+    "name": "view_employee_scheduled_shifts",
+    "description": "Display the upcoming scheduled shifts for a specified employee.",
+    "category": "Schedule Management",
+    "requiredFields": [
+      {
+        "name": "employee_name",
+        "type": "string",
+        "label": "Employee Name",
+        "required": true,
+        "description": "The full name or ID of the employee to view scheduled shifts for."
+      },
+      {
+        "name": "start_date",
+        "type": "date",
+        "label": "Start Date",
+        "required": false,
+        "description": "Optional: The start date for the period to view shifts. Defaults to today."
+      },
+      {
+        "name": "end_date",
+        "type": "date",
+        "label": "End Date",
+        "required": false,
+        "description": "Optional: The end date for the period to view shifts. Defaults to 7 days from the start date."
+      }
+    ],
+    "confirmationMessage": "You are about to view scheduled shifts for {employee_name}. Proceed?",
+    "successMessage": "Successfully retrieved scheduled shifts for {employee_name}.",
+    "affectedDataFields": []
+  },
+  {
+    "id": "b662c291-c36c-41da-bc0a-d36acdc77c6a",
+    "name": "view_call_in_history",
+    "description": "Retrieve a historical record of call-ins, filtered by employee or date range.",
+    "category": "Audit & Reporting",
+    "requiredFields": [
+      {
+        "name": "employee_name",
+        "type": "string",
+        "label": "Employee Name",
+        "required": false,
+        "description": "Optional: Full name or ID of a specific employee to view call-ins for."
+      },
+      {
+        "name": "start_date",
+        "type": "date",
+        "label": "Start Date",
+        "required": false,
+        "description": "Optional: The start date for the period to view call-ins. Defaults to 30 days ago."
+      },
+      {
+        "name": "end_date",
+        "type": "date",
+        "label": "End Date",
+        "required": false,
+        "description": "Optional: The end date for the period to view call-ins. Defaults to today."
+      }
+    ],
+    "confirmationMessage": "You are about to retrieve the call-in history. Proceed?",
+    "successMessage": "Successfully retrieved call-in history.",
+    "affectedDataFields": []
+  }
+]

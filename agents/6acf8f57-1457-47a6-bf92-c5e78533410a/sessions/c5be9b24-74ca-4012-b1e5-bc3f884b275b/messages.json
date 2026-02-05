@@ -1,0 +1,18 @@
+[
+  {
+    "id": "027f3fe2-5bfc-428c-b013-81801ffd3411",
+    "agentId": "6acf8f57-1457-47a6-bf92-c5e78533410a",
+    "sessionId": "c5be9b24-74ca-4012-b1e5-bc3f884b275b",
+    "role": "user",
+    "content": "Susanne called in",
+    "timestamp": "2026-02-05T20:48:26.862Z"
+  },
+  {
+    "id": "47bcf06d-bc75-42b4-8143-7423b4314c7a",
+    "agentId": "6acf8f57-1457-47a6-bf92-c5e78533410a",
+    "sessionId": "c5be9b24-74ca-4012-b1e5-bc3f884b275b",
+    "role": "assistant",
+    "content": "I need a few details:\n\n1. Employee Identification\n2. Shift Details\n3. Absence Classification\n\nPlease provide your answers in order (you can number them like \"1. answer, 2. answer\" or separate with commas).",
+    "timestamp": "2026-02-05T20:48:26.888Z"
+  }
+]

@@ -1,0 +1,53 @@
+{
+  "agentId": "6acf8f57-1457-47a6-bf92-c5e78533410a",
+  "traces": [
+    {
+      "id": "trace-1770324506888",
+      "sessionId": "c5be9b24-74ca-4012-b1e5-bc3f884b275b",
+      "userInput": "Susanne called in",
+      "agentResponse": "I need a few details:\n\n1. Employee Identification\n2. Shift Details\n3. Absence Classification\n\nPlease provide your answers in order (you can number them like \"1. answer, 2. answer\" or separate with commas).",
+      "startTime": "2026-02-05T20:48:26.862Z",
+      "endTime": "2026-02-05T20:48:26.888Z",
+      "totalDuration": 26,
+      "entries": [
+        {
+          "id": "entry-1770324506888-1",
+          "type": "intent_classification",
+          "name": "Orchestrator Intent Classification",
+          "timestamp": "2026-02-05T20:48:26.888Z",
+          "metadata": {
+            "intent": "answer_question",
+            "classificationMethod": "orchestrator",
+            "confidence": "high"
+          }
+        },
+        {
+          "id": "entry-1770324506888-2",
+          "type": "hook_call",
+          "name": "Orchestrator Direct Response",
+          "timestamp": "2026-02-05T20:48:26.888Z",
+          "metadata": {}
+        }
+      ],
+      "success": true
+    }
+  ],
+  "stats": {
+    "hookCalls": {
+      "Orchestrator Direct Response": 1
+    },
+    "signalReads": {},
+    "intentDistribution": {
+      "answer_question": 1
+    },
+    "classificationMethods": {
+      "orchestrator": 1
+    },
+    "avgResponseTime": 26,
+    "totalLlmCalls": 0,
+    "totalTokensUsed": 0,
+    "errorCount": 0
+  },
+  "createdAt": "2026-02-05T20:48:26.888Z",
+  "updatedAt": "2026-02-05T20:48:26.888Z"
+}

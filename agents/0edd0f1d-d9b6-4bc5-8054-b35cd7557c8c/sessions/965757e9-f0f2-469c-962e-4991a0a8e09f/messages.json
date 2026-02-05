@@ -126,5 +126,21 @@
     "role": "assistant",
     "content": "The expression to convert annual salary to an hourly rate based on 2080 hours per year is:\n\n`Divide(value(Annual Salary), 2080)`\n\nThis expression divides the annual salary by 2080 to get the hourly rate. The `value()` function is used to ensure \"Annual Salary\" is treated as a number, even if it's stored as text.\n\nReady to create the \"Hourly Rate Equivalent\" column with this expression?",
     "timestamp": "2026-02-05T18:29:53.377Z"
+  },
+  {
+    "id": "82badded-5c34-4d37-8b49-d0e5f2ab2861",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "sessionId": "965757e9-f0f2-469c-962e-4991a0a8e09f",
+    "role": "user",
+    "content": "I want one column that shows the department name and their job title together with a dash in between",
+    "timestamp": "2026-02-05T19:59:48.683Z"
+  },
+  {
+    "id": "dc0d8c58-ed00-496c-a766-f942d721d6ee",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "sessionId": "965757e9-f0f2-469c-962e-4991a0a8e09f",
+    "role": "assistant",
+    "content": "Okay, I can create a column that combines the department name and job title with a dash in between.\n\nI see \"Department\" and \"Job Title\" columns in your data. I'll concatenate those together with a \" - \" in between.\n\nI'll name the new column \"Department - Job Title\". The output type will be Text.\n\nHere is the expression:\n`Concat(Department, \" - \", Job Title)`\n\nThis expression uses the `Concat` function to combine the values from the \"Department\" column, a \" - \" string, and the \"Job Title\" column into a single text string.\n\nShall I proceed with creating this column?",
+    "timestamp": "2026-02-05T19:59:50.012Z"
   }
 ]

@@ -1,0 +1,8 @@
+name: "Call-In Shift Management Agent"
+userId: "22e95869-718c-428a-a9ae-a4694723ac19"
+status: "configured"
+createdAt: "2026-02-05T20:47:59.223Z"
+updatedAt: "2026-02-05T20:47:59.223Z"
+promptStyle: "gemini"
+mockMode: "full"
+description: ""
