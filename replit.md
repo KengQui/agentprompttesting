@@ -4,6 +4,7 @@
 Agent Studio is a web application designed for the end-to-end creation, configuration, and management of AI agents. It provides an intuitive 8-step wizard interface for users to define essential AI agent parameters such as business use cases, domain knowledge, validation rules, guardrails, sample datasets, and simulated actions. The platform aims to streamline the development and deployment of tailored AI agents for various business needs.
 
 ## Recent Changes (Since Jan 29, 2026)
+- **Validation Checklist Step**: Added a new Step 8 "Validation Checklist" to the 9-step wizard (Agent Prompt moved to Step 9). Runs 16 automated checks across 4 categories (Separation of Concerns, Completeness, Clarity, Wizard Compatibility) before prompt generation. Shows pass/fail/unable-to-verify for each check, with optional auto-fix for common issues. Users can always proceed regardless of results.
 - **Automatic Flow Mode Detection**: Orchestrator now automatically detects from agent's custom prompt whether to use "infer-first" (analyze data before asking) or "ask-first" (collect information upfront) mode - no manual configuration required
 - **Direct Action Execution**: Agents now execute actions directly instead of narrating navigation steps to users
 - **Prompt Style Standardization**: Simplified to use only Google Gemini style (removed other prompt styles)
@@ -78,7 +79,7 @@ Agent Studio utilizes a modern web application architecture with a clear separat
 - **Tech Stack**: React, TypeScript, TanStack Query, Wouter, Tailwind CSS, Shadcn UI.
 - **UI/UX**: Features a professional tech theme with dark mode support. Uses Inter for sans-serif fonts and JetBrains Mono for code. The primary color scheme is purple (#8B5CF6).
 - **Core Features**:
-    - **Agent Creation Wizard**: An 8-step process guiding users through defining agent parameters:
+    - **Agent Creation Wizard**: A 9-step process guiding users through defining agent parameters:
         1. Business Use Case - Define the problem this agent solves
         2. Agent Name - Name your agent
         3. Domain Knowledge - Add knowledge and documents
@@ -86,7 +87,8 @@ Agent Studio utilizes a modern web application architecture with a clear separat
         5. Guardrails - Define safety boundaries
         6. Sample Data - Upload or generate sample data
         7. Available Actions - Define actions agent can simulate
-        8. Agent Prompt - Define your agent's prompt
+        8. Validation Checklist - Review configuration quality (16 checks, auto-fix option)
+        9. Agent Prompt - Define your agent's prompt
     - **Chat Interface**: For testing and interacting with configured agents, with the following features:
         - **Session Management**: Multiple renamable sessions per agent for organizing test scenarios
         - **Session Sidebar**: Collapsible sidebar showing all sessions with previews, message counts, and inline renaming
