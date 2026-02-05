@@ -154,6 +154,7 @@ export interface IStorage {
   createAgent(agent: InsertAgent, userId?: string): Promise<Agent>;
   updateAgent(id: string, updates: UpdateAgent): Promise<Agent | undefined>;
   deleteAgent(id: string): Promise<boolean>;
+  cloneAgent(id: string, userId: string): Promise<Agent | undefined>;
   
   // Session operations
   getSessions(agentId: string): Promise<ChatSessionWithPreview[]>;
@@ -673,6 +674,32 @@ export class MemStorage implements IStorage {
     this.sessions.delete(id);
     this.deleteAgentFromDisk(id);
     return true;
+  }
+
+  async cloneAgent(id: string, userId: string): Promise<Agent | undefined> {
+    const source = this.agents.get(id);
+    if (!source) return undefined;
+
+    const clonedAgent: InsertAgent = {
+      name: `Copy of ${source.name}`,
+      businessUseCase: source.businessUseCase,
+      description: source.description,
+      domainKnowledge: source.domainKnowledge,
+      domainDocuments: JSON.parse(JSON.stringify(source.domainDocuments)),
+      sampleDatasets: JSON.parse(JSON.stringify(source.sampleDatasets)),
+      validationRules: source.validationRules,
+      guardrails: source.guardrails,
+      promptStyle: source.promptStyle,
+      customPrompt: source.customPrompt,
+      clarifyingInsights: JSON.parse(JSON.stringify(source.clarifyingInsights)),
+      availableActions: JSON.parse(JSON.stringify(source.availableActions)),
+      mockUserState: JSON.parse(JSON.stringify(source.mockUserState)),
+      mockMode: source.mockMode,
+      status: source.status === "draft" ? "draft" : "configured",
+      configurationStep: source.configurationStep,
+    };
+
+    return this.createAgent(clonedAgent, userId);
   }
 
   // Session operations

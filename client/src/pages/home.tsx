@@ -1,11 +1,13 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { Link } from "wouter";
-import { Plus, MessageSquare, Settings, Bot, Sparkles, LogOut, PlayCircle } from "lucide-react";
+import { Plus, MessageSquare, Settings, Bot, Sparkles, LogOut, PlayCircle, Copy } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/hooks/use-auth";
+import { useToast } from "@/hooks/use-toast";
+import { apiRequest, queryClient } from "@/lib/queryClient";
 import type { Agent } from "@shared/schema";
 
 function getStatusColor(status: string) {
@@ -29,6 +31,21 @@ function formatDate(dateString: string) {
 }
 
 function AgentCard({ agent }: { agent: Agent }) {
+  const { toast } = useToast();
+  const cloneMutation = useMutation({
+    mutationFn: async () => {
+      const res = await apiRequest("POST", `/api/agents/${agent.id}/clone`);
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/agents"] });
+      toast({ title: "Agent cloned", description: `"Copy of ${agent.name}" has been created.` });
+    },
+    onError: (error: Error) => {
+      toast({ title: "Clone failed", description: error.message, variant: "destructive" });
+    },
+  });
+
   return (
     <Card className="group hover-elevate flex flex-col">
       <CardHeader className="pb-3">
@@ -81,6 +98,16 @@ function AgentCard({ agent }: { agent: Agent }) {
             </Button>
           </Link>
         )}
+        <Button
+          variant="outline"
+          size="icon"
+          className="shrink-0"
+          onClick={() => cloneMutation.mutate()}
+          disabled={cloneMutation.isPending}
+          data-testid={`button-clone-${agent.id}`}
+        >
+          <Copy className="h-4 w-4" />
+        </Button>
         <Link href={`/settings/${agent.id}`}>
           <Button
             variant="outline"

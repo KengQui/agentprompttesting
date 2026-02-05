@@ -423,6 +423,35 @@ export async function registerRoutes(
     }
   });
 
+  // Clone agent (verify ownership)
+  app.post("/api/agents/:id/clone", async (req: AuthenticatedRequest, res) => {
+    try {
+      const user = await getUserFromSession(req);
+      if (!user) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+
+      const existingAgent = await storage.getAgent(req.params.id);
+      if (!existingAgent) {
+        return res.status(404).json({ message: "Agent not found" });
+      }
+
+      if (existingAgent.userId && existingAgent.userId !== user.id) {
+        return res.status(403).json({ message: "Access denied" });
+      }
+
+      const clonedAgent = await storage.cloneAgent(req.params.id, user.id);
+      if (!clonedAgent) {
+        return res.status(500).json({ message: "Failed to clone agent" });
+      }
+
+      res.status(201).json(clonedAgent);
+    } catch (error) {
+      console.error("Error cloning agent:", error);
+      res.status(500).json({ message: "Failed to clone agent" });
+    }
+  });
+
   // Helper to verify agent ownership for nested routes
   async function verifyAgentOwnership(req: AuthenticatedRequest, res: any, agentId: string): Promise<Agent | null> {
     const user = await getUserFromSession(req);

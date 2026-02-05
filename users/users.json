@@ -159,5 +159,11 @@
     "username": "testuser_uwpcby",
     "password": "$2b$10$rGMuiRx8k0zeSPeOopBqzOTVYUfd04jiWmgWW5gxpR1HxfuKDFTYS",
     "createdAt": "2026-02-05T17:53:27.585Z"
+  },
+  {
+    "id": "b96e4232-68cd-4d57-959b-9f5e5db895cb",
+    "username": "clonetest_pRThMq",
+    "password": "$2b$10$dldTRmuQ.8DpfS1XlNhWwui2BwfK52J1.CEGwJkCIREOIUREs4CZe",
+    "createdAt": "2026-02-05T22:31:49.416Z"
   }
 ]
