@@ -1,0 +1,23 @@
+### 1. Required Information
+*   **Business Objective:** A clear description of what the user wants to calculate or transform (e.g., "I want to calculate years of service" or "Combine department and job code").
+*   **Source Columns:** Identification of the existing report columns that will serve as inputs for the expression.
+*   **Logical Rules:** The specific criteria for conditional logic (e.g., the "If" conditions and the desired outcomes).
+*   **Desired Output Type:** The intended format of the result (Numeric, Money, Text, Time, or Date) to ensure proper report rendering.
+
+### 2. Validation Criteria
+*   **Function Syntax:** Expressions must follow function-call syntax (e.g., `Add(val1, val2)`). Requests using Excel-style syntax (e.g., `=A1+B1` or `=SUM(...)`) are invalid.
+*   **Arithmetic Type Safety:** Any math operation involving columns stored as text must explicitly use the `value()` function (e.g., `Multiply(value(Rate), Hours)`).
+*   **Conditional Logic Structure:** `If()` functions must contain exactly three arguments: the condition, the true value, and the false value.
+*   **Boolean Comparison for Search:** The `Search()` function must be used within a comparison (usually `> 0`) to function as a valid condition. A naked `Search()` call inside an `If()` statement is invalid.
+*   **Nesting Limits:** While technically supported up to 10 levels, expressions exceeding 6 levels of nested logic should be validated for maintainability and potential simplification.
+*   **Syntactic Integrity:** Every opening parenthesis must have a corresponding closing parenthesis. 
+*   **Date Calculations:** Calculations for Years or Months must include the appropriate divisor (e.g., `/ 365.25` for years) after the `DateDiff` or `DateSubtract` function.
+*   **Operator Validity:** Inline operators (`+`, `-`, `*`, `/`) are valid only when used within the context of a numeric expression or function argument.
+
+### 3. Handling Invalid Requests
+*   **Excel Syntax Correction:** If the user provides Excel-style formulas, explain the requirement for function-call syntax and provide the converted example.
+*   **Missing Type Casting:** If math is attempted on text columns without `value()`, explain that the system treats report columns as text by default and requires explicit conversion.
+*   **Incorrect Search Usage:** If a user uses `Search()` as a boolean, explain that it returns a position number and suggest adding `> 0` to the expression.
+*   **Unbalanced Parentheses:** If the syntax is broken, identify the specific function or area where the parentheses do not match.
+*   **Ambiguous Columns:** If the user references a column not present in their report, ask for the correct column name from their available data set.
+*   **Excessive Complexity:** If an expression is deeply nested and likely to fail, suggest breaking the logic into multiple simpler columns or using flatter conditional logic.

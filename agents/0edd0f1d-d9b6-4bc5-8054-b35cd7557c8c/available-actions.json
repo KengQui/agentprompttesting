@@ -1,0 +1,181 @@
+[
+  {
+    "id": "e831bde4-75e4-4b07-9073-71320e4a1710",
+    "name": "create_calculated_column",
+    "description": "Create a new calculated column in the report using a custom expression and define its output type.",
+    "category": "Report Management",
+    "requiredFields": [
+      {
+        "name": "columnName",
+        "type": "string",
+        "label": "Column Name",
+        "required": true,
+        "description": "The name of the new column to be added to the report."
+      },
+      {
+        "name": "expression",
+        "type": "string",
+        "label": "Expression",
+        "required": true,
+        "description": "The syntax-compliant expression (e.g., If(value(Salary)>100000, 'High', 'Standard'))"
+      },
+      {
+        "name": "outputType",
+        "type": "select",
+        "label": "Output Type",
+        "required": true,
+        "options": [
+          "Numeric",
+          "Money",
+          "Text",
+          "Time",
+          "Date"
+        ],
+        "description": "The data type of the result produced by the expression."
+      }
+    ],
+    "confirmationMessage": "You are about to create a new calculated column named '{{columnName}}' using the expression: {{expression}}.",
+    "successMessage": "Successfully created the calculated column '{{columnName}}' and added it to your report.",
+    "affectedDataFields": [
+      "reportColumns",
+      "customExpressions"
+    ]
+  },
+  {
+    "id": "bb81a2f0-585a-45ec-bfbf-541fd634bda2",
+    "name": "validate_expression_syntax",
+    "description": "Validate the syntax of an expression to ensure balanced parentheses, correct function usage, and proper data casting.",
+    "category": "Validation",
+    "requiredFields": [
+      {
+        "name": "expression",
+        "type": "string",
+        "label": "Expression to Validate",
+        "required": true,
+        "description": "The expression logic to check for errors."
+      }
+    ],
+    "confirmationMessage": "You are about to validate the syntax for: {{expression}}.",
+    "successMessage": "Successfully validated the expression. No syntax errors were found and parentheses are balanced.",
+    "affectedDataFields": [
+      "syntaxStatus"
+    ]
+  },
+  {
+    "id": "67b422b9-8a13-4b76-b6cc-b0e0b716a941",
+    "name": "add_tenure_calculation",
+    "description": "Add a tenure calculation column that determines the years or days of service between two date fields.",
+    "category": "Date Functions",
+    "requiredFields": [
+      {
+        "name": "columnName",
+        "type": "string",
+        "label": "Tenure Column Name",
+        "required": true,
+        "description": "Label for the new tenure column."
+      },
+      {
+        "name": "hireDateField",
+        "type": "string",
+        "label": "Hire Date Field",
+        "required": true,
+        "description": "The report column containing the start date."
+      },
+      {
+        "name": "unit",
+        "type": "select",
+        "label": "Calculation Unit",
+        "required": true,
+        "options": [
+          "Years",
+          "Months",
+          "Days"
+        ],
+        "description": "The time unit for the tenure result."
+      }
+    ],
+    "confirmationMessage": "You are about to calculate tenure in {{unit}} based on the field {{hireDateField}}.",
+    "successMessage": "Successfully added tenure calculation column '{{columnName}}' to the report.",
+    "affectedDataFields": [
+      "reportColumns",
+      "dateLogic"
+    ]
+  },
+  {
+    "id": "9e3c7c65-8b63-4456-a12b-2c297d5065f5",
+    "name": "update_salary_logic",
+    "description": "Update an existing salary-related expression, such as total compensation or bonus calculations.",
+    "category": "Math Operations",
+    "requiredFields": [
+      {
+        "name": "columnName",
+        "type": "string",
+        "label": "Existing Column Name",
+        "required": true,
+        "description": "The name of the column you want to update."
+      },
+      {
+        "name": "newExpression",
+        "type": "string",
+        "label": "New Expression",
+        "required": true,
+        "description": "The updated math expression using Add(), Multiply(), or value() casting."
+      }
+    ],
+    "confirmationMessage": "You are about to update the logic for '{{columnName}}' with the new expression: {{newExpression}}.",
+    "successMessage": "Successfully updated the salary calculation for '{{columnName}}'.",
+    "affectedDataFields": [
+      "customExpressions",
+      "numericCalculations"
+    ]
+  },
+  {
+    "id": "d9268e80-7ff7-46e1-b71e-5a3a57a43ce9",
+    "name": "format_text_concatenation",
+    "description": "Combine multiple text columns and static text into a single formatted column.",
+    "category": "String Functions",
+    "requiredFields": [
+      {
+        "name": "columnName",
+        "type": "string",
+        "label": "New Label Column",
+        "required": true,
+        "description": "The name for the concatenated text column."
+      },
+      {
+        "name": "expression",
+        "type": "string",
+        "label": "Concat Expression",
+        "required": true,
+        "description": "The Concat() function combining fields (e.g., Concat(FirstName, ' ', LastName))."
+      }
+    ],
+    "confirmationMessage": "You are about to create a combined text column using the following logic: {{expression}}.",
+    "successMessage": "Successfully generated the concatenated column '{{columnName}}'.",
+    "affectedDataFields": [
+      "reportColumns",
+      "textFormatting"
+    ]
+  },
+  {
+    "id": "74bb37cc-58dd-47fe-b099-d50c6f0a3d58",
+    "name": "remove_calculated_column",
+    "description": "Remove a custom calculated column from the report.",
+    "category": "Report Management",
+    "requiredFields": [
+      {
+        "name": "columnName",
+        "type": "string",
+        "label": "Column to Remove",
+        "required": true,
+        "description": "The name of the calculated column to delete."
+      }
+    ],
+    "confirmationMessage": "You are about to permanently remove the calculated column '{{columnName}}' from this report.",
+    "successMessage": "Successfully removed '{{columnName}}' from the report definition.",
+    "affectedDataFields": [
+      "reportColumns",
+      "customExpressions"
+    ]
+  }
+]

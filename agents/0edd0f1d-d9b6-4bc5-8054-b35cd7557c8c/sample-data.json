@@ -1,0 +1,11 @@
+[
+  {
+    "id": "a08d2007-a879-471a-97e6-757bfd74a109",
+    "name": "HCM_Sample_Data_employee report.csv",
+    "description": "Uploaded file: HCM_Sample_Data_employee report.csv",
+    "content": "Employee ID,Employee Name,Department,Job Title,Pay Type,Age,Days Employed,Hire Date,Hourly Pay,Annual Salary,Scheduled EE Amount,Scheduled ER Amount,Benefit Plan Coverage,Credential Expires,Training Profile\r\nEMP001,Sarah Johnson,Engineering,Senior Developer,Salaried,34,1825,2021-01-15,,\"$95,000.00\",$285.50,$142.75,EE + Spouse,2026-06-30,Full Time - LOTO Authorized\r\nEMP002,Michael Chen,Sales,Sales Coordinator,Hourly,28,420,2024-11-05,$32.50,,$195.00,$97.50,EE Only,2025-12-15,Part Time\r\nEMP003,Emily Rodriguez,HR,HR Manager,Salaried,41,3650,2016-02-20,,\"$110,000.00\",$450.00,$225.00,EE + Family,2027-03-10,Full Time - LOTO Authorized\r\nEMP004,James Williams,Engineering,Help Desk Technician,Hourly,25,180,2025-07-05,$24.75,,$150.00,$75.00,EE Only,2025-09-01,New Hire\r\nEMP005,Lisa Park,Finance,Data Services Manager,Salaried,52,7300,2016-02-02,,\"$135,000.00\",$520.00,$260.00,EE + Children,2028-01-22,Full Time",
+    "format": "csv",
+    "isGenerated": false,
+    "createdAt": "2026-02-05T16:37:29.403Z"
+  }
+]
