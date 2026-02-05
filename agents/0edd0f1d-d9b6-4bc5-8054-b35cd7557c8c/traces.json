@@ -30,24 +30,84 @@
         }
       ],
       "success": true
+    },
+    {
+      "id": "trace-1770310327196",
+      "sessionId": "92776c61-0d24-4078-90e0-1c203cfcb16d",
+      "userInput": "Create tenure bands based on Days Employed",
+      "agentResponse": "Thanks! I need a few details:\n\n1. Source Columns:\n2. Logical Rules:\n3. Desired Output Type:\n\nPlease provide your answers in order (you can number them like \"1. answer, 2. answer\" or separate with commas).",
+      "startTime": "2026-02-05T16:52:07.194Z",
+      "endTime": "2026-02-05T16:52:07.196Z",
+      "totalDuration": 2,
+      "entries": [
+        {
+          "id": "entry-1770310327196-1",
+          "type": "intent_classification",
+          "name": "Orchestrator Intent Classification",
+          "timestamp": "2026-02-05T16:52:07.196Z",
+          "metadata": {
+            "intent": "answer_question",
+            "classificationMethod": "orchestrator",
+            "confidence": "high"
+          }
+        },
+        {
+          "id": "entry-1770310327196-2",
+          "type": "hook_call",
+          "name": "Orchestrator Direct Response",
+          "timestamp": "2026-02-05T16:52:07.196Z",
+          "metadata": {}
+        }
+      ],
+      "success": true
+    },
+    {
+      "id": "trace-1770310335396",
+      "sessionId": "f2d34b57-5946-444c-82e2-7c473ad2b23a",
+      "userInput": "Create tenure bands based on Days Employed",
+      "agentResponse": "Thanks! I need a few details:\n\n1. Logical Rules:\n2. Desired Output Type:\n\nPlease provide your answers in order (you can number them like \"1. answer, 2. answer\" or separate with commas).",
+      "startTime": "2026-02-05T16:52:15.394Z",
+      "endTime": "2026-02-05T16:52:15.396Z",
+      "totalDuration": 2,
+      "entries": [
+        {
+          "id": "entry-1770310335396-1",
+          "type": "intent_classification",
+          "name": "Orchestrator Intent Classification",
+          "timestamp": "2026-02-05T16:52:15.396Z",
+          "metadata": {
+            "intent": "answer_question",
+            "classificationMethod": "orchestrator",
+            "confidence": "high"
+          }
+        },
+        {
+          "id": "entry-1770310335396-2",
+          "type": "hook_call",
+          "name": "Orchestrator Direct Response",
+          "timestamp": "2026-02-05T16:52:15.396Z",
+          "metadata": {}
+        }
+      ],
+      "success": true
     }
   ],
   "stats": {
     "hookCalls": {
-      "Orchestrator Direct Response": 1
+      "Orchestrator Direct Response": 3
     },
     "signalReads": {},
     "intentDistribution": {
-      "answer_question": 1
+      "answer_question": 3
     },
     "classificationMethods": {
-      "orchestrator": 1
+      "orchestrator": 3
     },
-    "avgResponseTime": 21,
+    "avgResponseTime": 8.333333333333334,
     "totalLlmCalls": 0,
     "totalTokensUsed": 0,
     "errorCount": 0
   },
   "createdAt": "2026-02-05T16:40:15.025Z",
-  "updatedAt": "2026-02-05T16:40:15.025Z"
+  "updatedAt": "2026-02-05T16:52:15.396Z"
 }
