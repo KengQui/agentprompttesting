@@ -33,7 +33,8 @@ export interface ClarifyingChatResponse {
 }
 
 // Google AI Studio SDK integration for Gemini
-// Requires GEMINI_API_KEY secret to be set
+// Uses GEMINI_API_KEY for Google AI Studio API access
+// GOOGLE_CLOUD_PROJECT and GOOGLE_CLOUD_LOCATION are available as environment secrets
 const ai = new GoogleGenAI({
   apiKey: process.env.GEMINI_API_KEY || "",
 });
