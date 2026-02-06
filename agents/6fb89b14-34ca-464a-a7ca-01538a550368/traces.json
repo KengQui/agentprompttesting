@@ -901,6 +901,76 @@
         }
       ],
       "success": true
+    },
+    {
+      "id": "trace-1770406109373",
+      "sessionId": "ad97d9c6-ec6c-4fb0-a0a4-557063dce3b2",
+      "userInput": "Maria has called in",
+      "agentResponse": "Okay. To process Maria's call-in, could you please provide Maria's last name or employee ID?",
+      "startTime": "2026-02-06T19:28:28.711Z",
+      "endTime": "2026-02-06T19:28:29.373Z",
+      "totalDuration": 662,
+      "entries": [
+        {
+          "id": "entry-1770406108713-1",
+          "type": "intent_classification",
+          "name": "Orchestrator Intent Classification",
+          "timestamp": "2026-02-06T19:28:28.713Z",
+          "metadata": {
+            "intent": "answer_question",
+            "classificationMethod": "orchestrator",
+            "confidence": "high"
+          }
+        },
+        {
+          "id": "entry-1770406109373-3",
+          "type": "llm_call",
+          "name": "Gemini Response Generation",
+          "timestamp": "2026-02-06T19:28:29.373Z",
+          "duration": 660,
+          "metadata": {
+            "model": "gemini",
+            "intent": "answer_question",
+            "validated": true
+          }
+        }
+      ],
+      "success": true
+    },
+    {
+      "id": "trace-1770406139654",
+      "sessionId": "ad97d9c6-ec6c-4fb0-a0a4-557063dce3b2",
+      "userInput": "I have no idea",
+      "agentResponse": "I understand. There are two employees with the first name Maria. They are:\n\n1.  Maria Garcia (Employee ID: E99887)\n\nCould you please confirm which Maria called in, by providing the last name or employee ID?",
+      "startTime": "2026-02-06T19:28:58.578Z",
+      "endTime": "2026-02-06T19:28:59.654Z",
+      "totalDuration": 1076,
+      "entries": [
+        {
+          "id": "entry-1770406138579-1",
+          "type": "intent_classification",
+          "name": "Orchestrator Intent Classification",
+          "timestamp": "2026-02-06T19:28:58.579Z",
+          "metadata": {
+            "intent": "answer_question",
+            "classificationMethod": "orchestrator",
+            "confidence": "high"
+          }
+        },
+        {
+          "id": "entry-1770406139654-3",
+          "type": "llm_call",
+          "name": "Gemini Response Generation",
+          "timestamp": "2026-02-06T19:28:59.654Z",
+          "duration": 1075,
+          "metadata": {
+            "model": "gemini",
+            "intent": "answer_question",
+            "validated": true
+          }
+        }
+      ],
+      "success": true
     }
   ],
   "stats": {
@@ -909,16 +979,16 @@
     },
     "signalReads": {},
     "intentDistribution": {
-      "answer_question": 26
+      "answer_question": 28
     },
     "classificationMethods": {
-      "orchestrator": 26
+      "orchestrator": 28
     },
-    "avgResponseTime": 1069.6923076923076,
-    "totalLlmCalls": 19,
+    "avgResponseTime": 1055.357142857143,
+    "totalLlmCalls": 21,
     "totalTokensUsed": 0,
     "errorCount": 4
   },
   "createdAt": "2026-02-06T01:22:58.868Z",
-  "updatedAt": "2026-02-06T18:19:21.198Z"
+  "updatedAt": "2026-02-06T19:28:59.654Z"
 }
