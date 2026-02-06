@@ -1,0 +1,83 @@
+{
+  "agentId": "6fb89b14-34ca-464a-a7ca-01538a550368",
+  "traces": [
+    {
+      "id": "trace-1770340978868",
+      "sessionId": "f09834d1-f345-471c-99db-e6d91cdd976f",
+      "userInput": "Susan is not coming in and taking time off",
+      "agentResponse": "I need a few details:\n\n1. Employee Identity\n2. Date of Absence\n3. Earning Code Classification\n\nPlease provide your answers in order (you can number them like \"1. answer, 2. answer\" or separate with commas).",
+      "startTime": "2026-02-06T01:22:58.840Z",
+      "endTime": "2026-02-06T01:22:58.868Z",
+      "totalDuration": 28,
+      "entries": [
+        {
+          "id": "entry-1770340978868-1",
+          "type": "intent_classification",
+          "name": "Orchestrator Intent Classification",
+          "timestamp": "2026-02-06T01:22:58.868Z",
+          "metadata": {
+            "intent": "answer_question",
+            "classificationMethod": "orchestrator",
+            "confidence": "high"
+          }
+        },
+        {
+          "id": "entry-1770340978868-2",
+          "type": "hook_call",
+          "name": "Orchestrator Direct Response",
+          "timestamp": "2026-02-06T01:22:58.868Z",
+          "metadata": {}
+        }
+      ],
+      "success": true
+    },
+    {
+      "id": "trace-1770340993676",
+      "sessionId": "f09834d1-f345-471c-99db-e6d91cdd976f",
+      "userInput": "I said susan",
+      "agentResponse": "Thanks! I need a few details:\n\n1. Date of Absence\n2. Earning Code Classification\n3. Manager Confirmation\n\nPlease provide your answers in order (you can number them like \"1. answer, 2. answer\" or separate with commas).",
+      "startTime": "2026-02-06T01:23:13.674Z",
+      "endTime": "2026-02-06T01:23:13.676Z",
+      "totalDuration": 2,
+      "entries": [
+        {
+          "id": "entry-1770340993676-1",
+          "type": "intent_classification",
+          "name": "Orchestrator Intent Classification",
+          "timestamp": "2026-02-06T01:23:13.676Z",
+          "metadata": {
+            "intent": "answer_question",
+            "classificationMethod": "orchestrator",
+            "confidence": "high"
+          }
+        },
+        {
+          "id": "entry-1770340993676-2",
+          "type": "hook_call",
+          "name": "Orchestrator Direct Response",
+          "timestamp": "2026-02-06T01:23:13.676Z",
+          "metadata": {}
+        }
+      ],
+      "success": true
+    }
+  ],
+  "stats": {
+    "hookCalls": {
+      "Orchestrator Direct Response": 2
+    },
+    "signalReads": {},
+    "intentDistribution": {
+      "answer_question": 2
+    },
+    "classificationMethods": {
+      "orchestrator": 2
+    },
+    "avgResponseTime": 15,
+    "totalLlmCalls": 0,
+    "totalTokensUsed": 0,
+    "errorCount": 0
+  },
+  "createdAt": "2026-02-06T01:22:58.868Z",
+  "updatedAt": "2026-02-06T01:23:13.676Z"
+}

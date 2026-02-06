@@ -1,0 +1,34 @@
+[
+  {
+    "id": "6e852813-00dc-415b-8096-39df4143b819",
+    "agentId": "6fb89b14-34ca-464a-a7ca-01538a550368",
+    "sessionId": "f09834d1-f345-471c-99db-e6d91cdd976f",
+    "role": "user",
+    "content": "Susan is not coming in and taking time off",
+    "timestamp": "2026-02-06T01:22:58.840Z"
+  },
+  {
+    "id": "237d9380-43d0-4928-a36e-09a004aa1116",
+    "agentId": "6fb89b14-34ca-464a-a7ca-01538a550368",
+    "sessionId": "f09834d1-f345-471c-99db-e6d91cdd976f",
+    "role": "assistant",
+    "content": "I need a few details:\n\n1. Employee Identity\n2. Date of Absence\n3. Earning Code Classification\n\nPlease provide your answers in order (you can number them like \"1. answer, 2. answer\" or separate with commas).",
+    "timestamp": "2026-02-06T01:22:58.868Z"
+  },
+  {
+    "id": "3edcaec6-b897-4784-ac25-4715f4697a08",
+    "agentId": "6fb89b14-34ca-464a-a7ca-01538a550368",
+    "sessionId": "f09834d1-f345-471c-99db-e6d91cdd976f",
+    "role": "user",
+    "content": "I said susan",
+    "timestamp": "2026-02-06T01:23:13.674Z"
+  },
+  {
+    "id": "2c0724ed-5120-4443-8300-47ac7559c3b4",
+    "agentId": "6fb89b14-34ca-464a-a7ca-01538a550368",
+    "sessionId": "f09834d1-f345-471c-99db-e6d91cdd976f",
+    "role": "assistant",
+    "content": "Thanks! I need a few details:\n\n1. Date of Absence\n2. Earning Code Classification\n3. Manager Confirmation\n\nPlease provide your answers in order (you can number them like \"1. answer, 2. answer\" or separate with commas).",
+    "timestamp": "2026-02-06T01:23:13.677Z"
+  }
+]

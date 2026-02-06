@@ -40,4 +40,3 @@ A single call-in triggers updates across multiple systems:
 
 **Manager Context**
 Frontline managers handle call-ins in real-time, often during shift start times. They need quick resolution without navigating multiple HCM screens. Manual errors in earning code selection or balance checking create payroll discrepancies and compliance issues. The agent must present options clearly and execute changes safely after confirmation.
-
