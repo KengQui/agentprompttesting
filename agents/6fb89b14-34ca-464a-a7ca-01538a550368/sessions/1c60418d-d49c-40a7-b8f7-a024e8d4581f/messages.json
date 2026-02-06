@@ -1,0 +1,18 @@
+[
+  {
+    "id": "c2381a9e-288c-4269-8026-6dc9af5f12ba",
+    "agentId": "6fb89b14-34ca-464a-a7ca-01538a550368",
+    "sessionId": "1c60418d-d49c-40a7-b8f7-a024e8d4581f",
+    "role": "user",
+    "content": "Susan called in",
+    "timestamp": "2026-02-06T18:04:19.737Z"
+  },
+  {
+    "id": "f91d4dd3-8e75-4a9a-ad42-d469ded1baf1",
+    "agentId": "6fb89b14-34ca-464a-a7ca-01538a550368",
+    "sessionId": "1c60418d-d49c-40a7-b8f7-a024e8d4581f",
+    "role": "assistant",
+    "content": "I apologize, but I'm having trouble generating a response. Please try again.",
+    "timestamp": "2026-02-06T18:04:21.846Z"
+  }
+]

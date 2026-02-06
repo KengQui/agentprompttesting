@@ -26,5 +26,33 @@
     "title": "New Session",
     "createdAt": "2026-02-06T02:05:57.129Z",
     "updatedAt": "2026-02-06T02:39:31.599Z"
+  },
+  {
+    "id": "c71e9917-2f8a-43e9-867c-a63f71c41f3a",
+    "agentId": "6fb89b14-34ca-464a-a7ca-01538a550368",
+    "title": "New Session",
+    "createdAt": "2026-02-06T17:59:25.314Z",
+    "updatedAt": "2026-02-06T18:04:00.283Z"
+  },
+  {
+    "id": "1c60418d-d49c-40a7-b8f7-a024e8d4581f",
+    "agentId": "6fb89b14-34ca-464a-a7ca-01538a550368",
+    "title": "New Session",
+    "createdAt": "2026-02-06T18:04:04.936Z",
+    "updatedAt": "2026-02-06T18:04:21.846Z"
+  },
+  {
+    "id": "69d2ea03-8d97-4ec8-8cf7-6457babc5e58",
+    "agentId": "6fb89b14-34ca-464a-a7ca-01538a550368",
+    "title": "New Session",
+    "createdAt": "2026-02-06T18:05:12.359Z",
+    "updatedAt": "2026-02-06T18:05:20.953Z"
+  },
+  {
+    "id": "fe5ee57c-fbc0-47d2-982c-eda018162df2",
+    "agentId": "6fb89b14-34ca-464a-a7ca-01538a550368",
+    "title": "New Session",
+    "createdAt": "2026-02-06T18:07:40.141Z",
+    "updatedAt": "2026-02-06T18:07:50.677Z"
   }
 ]

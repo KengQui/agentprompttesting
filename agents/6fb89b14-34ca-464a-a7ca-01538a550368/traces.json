@@ -633,6 +633,134 @@
         }
       ],
       "success": true
+    },
+    {
+      "id": "trace-1770401040282",
+      "sessionId": "c71e9917-2f8a-43e9-867c-a63f71c41f3a",
+      "userInput": "Maria called in",
+      "agentResponse": "I apologize, but I'm having trouble generating a response. Please try again.",
+      "startTime": "2026-02-06T18:03:58.170Z",
+      "endTime": "2026-02-06T18:04:00.282Z",
+      "totalDuration": 2112,
+      "entries": [
+        {
+          "id": "entry-1770401038171-1",
+          "type": "intent_classification",
+          "name": "Orchestrator Intent Classification",
+          "timestamp": "2026-02-06T18:03:58.171Z",
+          "metadata": {
+            "intent": "answer_question",
+            "classificationMethod": "orchestrator",
+            "confidence": "high"
+          }
+        },
+        {
+          "id": "entry-1770401040282-err",
+          "type": "error",
+          "name": "AI Generation Error",
+          "timestamp": "2026-02-06T18:04:00.282Z",
+          "metadata": {
+            "error": "Failed to generate response: Could not refresh access token: request to http://169.254.169.254/computeMetadata/v1/instance/service-accounts/default/token?scopes=https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fcloud-platform failed, reason: connect ECONNREFUSED 169.254.169.254:80"
+          }
+        }
+      ],
+      "success": false
+    },
+    {
+      "id": "trace-1770401061846",
+      "sessionId": "1c60418d-d49c-40a7-b8f7-a024e8d4581f",
+      "userInput": "Susan called in",
+      "agentResponse": "I apologize, but I'm having trouble generating a response. Please try again.",
+      "startTime": "2026-02-06T18:04:19.737Z",
+      "endTime": "2026-02-06T18:04:21.846Z",
+      "totalDuration": 2109,
+      "entries": [
+        {
+          "id": "entry-1770401059738-1",
+          "type": "intent_classification",
+          "name": "Orchestrator Intent Classification",
+          "timestamp": "2026-02-06T18:04:19.738Z",
+          "metadata": {
+            "intent": "answer_question",
+            "classificationMethod": "orchestrator",
+            "confidence": "high"
+          }
+        },
+        {
+          "id": "entry-1770401061846-err",
+          "type": "error",
+          "name": "AI Generation Error",
+          "timestamp": "2026-02-06T18:04:21.846Z",
+          "metadata": {
+            "error": "Failed to generate response: Could not refresh access token: request to http://169.254.169.254/computeMetadata/v1/instance/service-accounts/default/token?scopes=https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fcloud-platform failed, reason: connect ECONNREFUSED 169.254.169.254:80"
+          }
+        }
+      ],
+      "success": false
+    },
+    {
+      "id": "trace-1770401120953",
+      "sessionId": "69d2ea03-8d97-4ec8-8cf7-6457babc5e58",
+      "userInput": "Maria called in",
+      "agentResponse": "I apologize, but I'm having trouble generating a response. Please try again.",
+      "startTime": "2026-02-06T18:05:18.844Z",
+      "endTime": "2026-02-06T18:05:20.953Z",
+      "totalDuration": 2109,
+      "entries": [
+        {
+          "id": "entry-1770401118844-1",
+          "type": "intent_classification",
+          "name": "Orchestrator Intent Classification",
+          "timestamp": "2026-02-06T18:05:18.844Z",
+          "metadata": {
+            "intent": "answer_question",
+            "classificationMethod": "orchestrator",
+            "confidence": "high"
+          }
+        },
+        {
+          "id": "entry-1770401120953-err",
+          "type": "error",
+          "name": "AI Generation Error",
+          "timestamp": "2026-02-06T18:05:20.953Z",
+          "metadata": {
+            "error": "Failed to generate response: Could not refresh access token: request to http://169.254.169.254/computeMetadata/v1/instance/service-accounts/default/token?scopes=https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fcloud-platform failed, reason: connect ECONNREFUSED 169.254.169.254:80"
+          }
+        }
+      ],
+      "success": false
+    },
+    {
+      "id": "trace-1770401270677",
+      "sessionId": "fe5ee57c-fbc0-47d2-982c-eda018162df2",
+      "userInput": "Maria has called in",
+      "agentResponse": "I apologize, but I'm having trouble generating a response. Please try again.",
+      "startTime": "2026-02-06T18:07:48.569Z",
+      "endTime": "2026-02-06T18:07:50.677Z",
+      "totalDuration": 2108,
+      "entries": [
+        {
+          "id": "entry-1770401268570-1",
+          "type": "intent_classification",
+          "name": "Orchestrator Intent Classification",
+          "timestamp": "2026-02-06T18:07:48.570Z",
+          "metadata": {
+            "intent": "answer_question",
+            "classificationMethod": "orchestrator",
+            "confidence": "high"
+          }
+        },
+        {
+          "id": "entry-1770401270677-err",
+          "type": "error",
+          "name": "AI Generation Error",
+          "timestamp": "2026-02-06T18:07:50.677Z",
+          "metadata": {
+            "error": "Failed to generate response: Could not refresh access token: request to http://169.254.169.254/computeMetadata/v1/instance/service-accounts/default/token?scopes=https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fcloud-platform failed, reason: connect ECONNREFUSED 169.254.169.254:80"
+          }
+        }
+      ],
+      "success": false
     }
   ],
   "stats": {
@@ -641,16 +769,16 @@
     },
     "signalReads": {},
     "intentDistribution": {
-      "answer_question": 18
+      "answer_question": 22
     },
     "classificationMethods": {
-      "orchestrator": 18
+      "orchestrator": 22
     },
-    "avgResponseTime": 908.6111111111111,
+    "avgResponseTime": 1126.9545454545455,
     "totalLlmCalls": 15,
     "totalTokensUsed": 0,
-    "errorCount": 0
+    "errorCount": 4
   },
   "createdAt": "2026-02-06T01:22:58.868Z",
-  "updatedAt": "2026-02-06T02:39:31.597Z"
+  "updatedAt": "2026-02-06T18:07:50.677Z"
 }

@@ -1,0 +1,18 @@
+[
+  {
+    "id": "bb90317c-a5b3-4dac-91b9-657c9da7f64f",
+    "agentId": "6fb89b14-34ca-464a-a7ca-01538a550368",
+    "sessionId": "c71e9917-2f8a-43e9-867c-a63f71c41f3a",
+    "role": "user",
+    "content": "Maria called in",
+    "timestamp": "2026-02-06T18:03:58.170Z"
+  },
+  {
+    "id": "5e514173-74c0-453d-95c9-9b302919d7d4",
+    "agentId": "6fb89b14-34ca-464a-a7ca-01538a550368",
+    "sessionId": "c71e9917-2f8a-43e9-867c-a63f71c41f3a",
+    "role": "assistant",
+    "content": "I apologize, but I'm having trouble generating a response. Please try again.",
+    "timestamp": "2026-02-06T18:04:00.283Z"
+  }
+]

@@ -255,5 +255,11 @@
     "username": "testuser_QlQEi2",
     "password": "$2b$10$dUoR4EWdzOVx8.MkBto28OY7XaF1YYAcrIg92N0YgcoXrNMdyD4om",
     "createdAt": "2026-02-06T02:50:49.638Z"
+  },
+  {
+    "id": "6a88d589-39a4-4305-a475-9e53db962f6c",
+    "username": "testuser_apikey",
+    "password": "$2b$10$Oj0p8dByyuu62vW2D9v0mOwO1OezEJNjc6CH6eWj/HbuV4gGnvjRa",
+    "createdAt": "2026-02-06T18:13:36.947Z"
   }
 ]
