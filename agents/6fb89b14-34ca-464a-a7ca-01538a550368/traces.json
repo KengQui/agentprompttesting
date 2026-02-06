@@ -761,6 +761,146 @@
         }
       ],
       "success": false
+    },
+    {
+      "id": "trace-1770401855998",
+      "sessionId": "dff95087-19f5-4156-ad91-16198a823533",
+      "userInput": "Maria has called in",
+      "agentResponse": "Okay. To process Maria's call-in, could you please provide Maria's last name or employee ID?",
+      "startTime": "2026-02-06T18:17:35.363Z",
+      "endTime": "2026-02-06T18:17:35.998Z",
+      "totalDuration": 635,
+      "entries": [
+        {
+          "id": "entry-1770401855364-1",
+          "type": "intent_classification",
+          "name": "Orchestrator Intent Classification",
+          "timestamp": "2026-02-06T18:17:35.364Z",
+          "metadata": {
+            "intent": "answer_question",
+            "classificationMethod": "orchestrator",
+            "confidence": "high"
+          }
+        },
+        {
+          "id": "entry-1770401855998-3",
+          "type": "llm_call",
+          "name": "Gemini Response Generation",
+          "timestamp": "2026-02-06T18:17:35.998Z",
+          "duration": 634,
+          "metadata": {
+            "model": "gemini",
+            "intent": "answer_question",
+            "validated": true
+          }
+        }
+      ],
+      "success": true
+    },
+    {
+      "id": "trace-1770401875373",
+      "sessionId": "dff95087-19f5-4156-ad91-16198a823533",
+      "userInput": "I don't know her last name, i thot we only have one Maria",
+      "agentResponse": "I understand. I see two employees with the first name Maria:\n\n1.  Maria Garcia (Employee ID: E99887)\n\nCould you please confirm if Maria Garcia (Employee ID: E99887) is the correct employee?",
+      "startTime": "2026-02-06T18:17:54.510Z",
+      "endTime": "2026-02-06T18:17:55.373Z",
+      "totalDuration": 863,
+      "entries": [
+        {
+          "id": "entry-1770401874511-1",
+          "type": "intent_classification",
+          "name": "Orchestrator Intent Classification",
+          "timestamp": "2026-02-06T18:17:54.511Z",
+          "metadata": {
+            "intent": "answer_question",
+            "classificationMethod": "orchestrator",
+            "confidence": "high"
+          }
+        },
+        {
+          "id": "entry-1770401875373-3",
+          "type": "llm_call",
+          "name": "Gemini Response Generation",
+          "timestamp": "2026-02-06T18:17:55.373Z",
+          "duration": 862,
+          "metadata": {
+            "model": "gemini",
+            "intent": "answer_question",
+            "validated": true
+          }
+        }
+      ],
+      "success": true
+    },
+    {
+      "id": "trace-1770401948281",
+      "sessionId": "dff95087-19f5-4156-ad91-16198a823533",
+      "userInput": "if there are two, who is the second one?",
+      "agentResponse": "My apologies, there is only one employee named Maria in the system: Maria Garcia (Employee ID: E99887).\n\nTo continue processing the call-in, what date is Maria absent?",
+      "startTime": "2026-02-06T18:19:07.464Z",
+      "endTime": "2026-02-06T18:19:08.281Z",
+      "totalDuration": 817,
+      "entries": [
+        {
+          "id": "entry-1770401947465-1",
+          "type": "intent_classification",
+          "name": "Orchestrator Intent Classification",
+          "timestamp": "2026-02-06T18:19:07.465Z",
+          "metadata": {
+            "intent": "answer_question",
+            "classificationMethod": "orchestrator",
+            "confidence": "high"
+          }
+        },
+        {
+          "id": "entry-1770401948281-3",
+          "type": "llm_call",
+          "name": "Gemini Response Generation",
+          "timestamp": "2026-02-06T18:19:08.281Z",
+          "duration": 816,
+          "metadata": {
+            "model": "gemini",
+            "intent": "answer_question",
+            "validated": true
+          }
+        }
+      ],
+      "success": true
+    },
+    {
+      "id": "trace-1770401961198",
+      "sessionId": "dff95087-19f5-4156-ad91-16198a823533",
+      "userInput": "u are silly",
+      "agentResponse": "I apologize for the error. I am still under development and learning to perform my duties accurately.\n\nTo continue processing the call-in for Maria Garcia (Employee ID: E99887), what date is Maria absent?",
+      "startTime": "2026-02-06T18:19:20.494Z",
+      "endTime": "2026-02-06T18:19:21.198Z",
+      "totalDuration": 704,
+      "entries": [
+        {
+          "id": "entry-1770401960495-1",
+          "type": "intent_classification",
+          "name": "Orchestrator Intent Classification",
+          "timestamp": "2026-02-06T18:19:20.495Z",
+          "metadata": {
+            "intent": "answer_question",
+            "classificationMethod": "orchestrator",
+            "confidence": "high"
+          }
+        },
+        {
+          "id": "entry-1770401961198-3",
+          "type": "llm_call",
+          "name": "Gemini Response Generation",
+          "timestamp": "2026-02-06T18:19:21.198Z",
+          "duration": 703,
+          "metadata": {
+            "model": "gemini",
+            "intent": "answer_question",
+            "validated": true
+          }
+        }
+      ],
+      "success": true
     }
   ],
   "stats": {
@@ -769,16 +909,16 @@
     },
     "signalReads": {},
     "intentDistribution": {
-      "answer_question": 22
+      "answer_question": 26
     },
     "classificationMethods": {
-      "orchestrator": 22
+      "orchestrator": 26
     },
-    "avgResponseTime": 1126.9545454545455,
-    "totalLlmCalls": 15,
+    "avgResponseTime": 1069.6923076923076,
+    "totalLlmCalls": 19,
     "totalTokensUsed": 0,
     "errorCount": 4
   },
   "createdAt": "2026-02-06T01:22:58.868Z",
-  "updatedAt": "2026-02-06T18:07:50.677Z"
+  "updatedAt": "2026-02-06T18:19:21.198Z"
 }

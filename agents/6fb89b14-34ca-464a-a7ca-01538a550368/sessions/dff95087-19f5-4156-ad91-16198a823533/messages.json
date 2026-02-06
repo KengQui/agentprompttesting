@@ -1,0 +1,66 @@
+[
+  {
+    "id": "07e60f4d-c57c-44f0-84a6-be2373d3e5f5",
+    "agentId": "6fb89b14-34ca-464a-a7ca-01538a550368",
+    "sessionId": "dff95087-19f5-4156-ad91-16198a823533",
+    "role": "user",
+    "content": "Maria has called in",
+    "timestamp": "2026-02-06T18:17:35.363Z"
+  },
+  {
+    "id": "03506ae3-4677-4a0a-a2ce-3615d7f62c9c",
+    "agentId": "6fb89b14-34ca-464a-a7ca-01538a550368",
+    "sessionId": "dff95087-19f5-4156-ad91-16198a823533",
+    "role": "assistant",
+    "content": "Okay. To process Maria's call-in, could you please provide Maria's last name or employee ID?",
+    "timestamp": "2026-02-06T18:17:35.999Z"
+  },
+  {
+    "id": "461e0b61-232c-4962-8f1f-7ad492df713c",
+    "agentId": "6fb89b14-34ca-464a-a7ca-01538a550368",
+    "sessionId": "dff95087-19f5-4156-ad91-16198a823533",
+    "role": "user",
+    "content": "I don't know her last name, i thot we only have one Maria",
+    "timestamp": "2026-02-06T18:17:54.510Z"
+  },
+  {
+    "id": "67fe6747-e9ec-4606-ad99-c2e13a68ba1c",
+    "agentId": "6fb89b14-34ca-464a-a7ca-01538a550368",
+    "sessionId": "dff95087-19f5-4156-ad91-16198a823533",
+    "role": "assistant",
+    "content": "I understand. I see two employees with the first name Maria:\n\n1.  Maria Garcia (Employee ID: E99887)\n\nCould you please confirm if Maria Garcia (Employee ID: E99887) is the correct employee?",
+    "timestamp": "2026-02-06T18:17:55.373Z"
+  },
+  {
+    "id": "6e2248aa-87d8-4926-acb4-ca25734a0421",
+    "agentId": "6fb89b14-34ca-464a-a7ca-01538a550368",
+    "sessionId": "dff95087-19f5-4156-ad91-16198a823533",
+    "role": "user",
+    "content": "if there are two, who is the second one?",
+    "timestamp": "2026-02-06T18:19:07.464Z"
+  },
+  {
+    "id": "369d8d50-4c3d-42a5-b2ab-37e6d4f39f47",
+    "agentId": "6fb89b14-34ca-464a-a7ca-01538a550368",
+    "sessionId": "dff95087-19f5-4156-ad91-16198a823533",
+    "role": "assistant",
+    "content": "My apologies, there is only one employee named Maria in the system: Maria Garcia (Employee ID: E99887).\n\nTo continue processing the call-in, what date is Maria absent?",
+    "timestamp": "2026-02-06T18:19:08.282Z"
+  },
+  {
+    "id": "4bea6d0e-9616-45dc-8435-b99bab4acc0e",
+    "agentId": "6fb89b14-34ca-464a-a7ca-01538a550368",
+    "sessionId": "dff95087-19f5-4156-ad91-16198a823533",
+    "role": "user",
+    "content": "u are silly",
+    "timestamp": "2026-02-06T18:19:20.494Z"
+  },
+  {
+    "id": "19808e78-39b7-4218-b822-2a775f5afe63",
+    "agentId": "6fb89b14-34ca-464a-a7ca-01538a550368",
+    "sessionId": "dff95087-19f5-4156-ad91-16198a823533",
+    "role": "assistant",
+    "content": "I apologize for the error. I am still under development and learning to perform my duties accurately.\n\nTo continue processing the call-in for Maria Garcia (Employee ID: E99887), what date is Maria absent?",
+    "timestamp": "2026-02-06T18:19:21.198Z"
+  }
+]
