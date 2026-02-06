@@ -1,0 +1,18 @@
+[
+  {
+    "id": "65b9175f-3115-4b61-965e-10d7478bdf83",
+    "agentId": "6fb89b14-34ca-464a-a7ca-01538a550368",
+    "sessionId": "4d67e592-4d3d-474f-ab35-9e420fef8c14",
+    "role": "user",
+    "content": "SUsan called in sick",
+    "timestamp": "2026-02-06T01:37:00.512Z"
+  },
+  {
+    "id": "2aaa0138-53a7-4ba1-80d2-61dbd13fdfd6",
+    "agentId": "6fb89b14-34ca-464a-a7ca-01538a550368",
+    "sessionId": "4d67e592-4d3d-474f-ab35-9e420fef8c14",
+    "role": "assistant",
+    "content": "I need a few details:\n\n1. Employee Identity\n2. Date of Absence\n3. Earning Code Classification\n\nPlease provide your answers in order (you can number them like \"1. answer, 2. answer\" or separate with commas).",
+    "timestamp": "2026-02-06T01:37:01.816Z"
+  }
+]

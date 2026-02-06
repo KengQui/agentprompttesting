@@ -60,24 +60,54 @@
         }
       ],
       "success": true
+    },
+    {
+      "id": "trace-1770341821815",
+      "sessionId": "4d67e592-4d3d-474f-ab35-9e420fef8c14",
+      "userInput": "SUsan called in sick",
+      "agentResponse": "I need a few details:\n\n1. Employee Identity\n2. Date of Absence\n3. Earning Code Classification\n\nPlease provide your answers in order (you can number them like \"1. answer, 2. answer\" or separate with commas).",
+      "startTime": "2026-02-06T01:37:00.512Z",
+      "endTime": "2026-02-06T01:37:01.815Z",
+      "totalDuration": 1303,
+      "entries": [
+        {
+          "id": "entry-1770341821815-1",
+          "type": "intent_classification",
+          "name": "Orchestrator Intent Classification",
+          "timestamp": "2026-02-06T01:37:01.815Z",
+          "metadata": {
+            "intent": "answer_question",
+            "classificationMethod": "orchestrator",
+            "confidence": "high"
+          }
+        },
+        {
+          "id": "entry-1770341821815-2",
+          "type": "hook_call",
+          "name": "Orchestrator Direct Response",
+          "timestamp": "2026-02-06T01:37:01.815Z",
+          "metadata": {}
+        }
+      ],
+      "success": true
     }
   ],
   "stats": {
     "hookCalls": {
-      "Orchestrator Direct Response": 2
+      "Orchestrator Direct Response": 3
     },
     "signalReads": {},
     "intentDistribution": {
-      "answer_question": 2
+      "answer_question": 3
     },
     "classificationMethods": {
-      "orchestrator": 2
+      "orchestrator": 3
     },
-    "avgResponseTime": 15,
+    "avgResponseTime": 444.3333333333333,
     "totalLlmCalls": 0,
     "totalTokensUsed": 0,
     "errorCount": 0
   },
   "createdAt": "2026-02-06T01:22:58.868Z",
-  "updatedAt": "2026-02-06T01:23:13.676Z"
+  "updatedAt": "2026-02-06T01:37:01.815Z"
 }
