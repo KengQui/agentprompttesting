@@ -106,17 +106,21 @@ export class Orchestrator {
 
 There are two conversation modes:
 
-**INFER-FIRST**: The agent should extract as much information as possible from the user's initial natural-language message, then only ask about what's genuinely missing. This is appropriate when:
-- The prompt describes understanding natural-language requests
-- The prompt shows examples where users provide information naturally in their first message
+**INFER-FIRST**: The agent should extract as much information as possible from the user's initial natural-language message, then only ask about what's genuinely missing. Choose this when ANY of the following are true:
+- The prompt describes understanding or interpreting natural-language requests
+- The prompt shows examples where users provide information naturally (e.g. "Susan called in sick", "Mark John as absent")
 - The prompt instructs the agent to identify/extract entities from what the user says
-- The prompt emphasizes a conversational, request-driven flow
+- The TASK section describes steps like "Understand the request", "Identify the employee", "Interpret the input"
+- The prompt emphasizes a conversational, request-driven flow where users describe situations in their own words
+- The prompt has validation rules AND also describes understanding natural language — the validation rules are for checking data, NOT for collecting it via forms
 
-**ASK-FIRST**: The agent should proactively ask for all required fields upfront in a structured way before proceeding. This is appropriate when:
-- The prompt describes a form-filling or data-collection workflow
-- The prompt requires gathering specific fields in a specific order
-- The prompt does NOT show examples of users providing info naturally
-- The agent's job is primarily survey-like or intake-form-like
+**ASK-FIRST**: The agent should proactively ask for all required fields upfront in a structured way before proceeding. Choose this ONLY when ALL of the following are true:
+- The prompt describes a pure form-filling, survey, or data-collection workflow
+- The prompt does NOT show examples of users providing info naturally in their messages
+- The agent's primary job is intake-form-like where users are NOT expected to describe situations naturally
+- There are NO examples of extracting information from natural language input
+
+IMPORTANT: Many agents have formal validation rules AND also expect natural-language input. If the prompt has examples like "Input: Susan called in sick → Output: I'll process that for Susan", that is INFER-FIRST even if there are also validation sections.
 
 Based on the agent prompt below, which mode is more appropriate?
 
@@ -199,15 +203,40 @@ Include a brief "reasoning" field explaining why.`;
     
     console.log('[Orchestrator] parseValidationRules called, input length:', validationRules?.length || 0);
     
-    const requiredInfoMatch = validationRules.match(/### 1\. Required Information[\s\S]*?(?=###|$)/i);
+    const requiredInfoMatch = validationRules.match(/###\s*(?:\d+\.\s*)?Required Information[\s\S]*?(?=###|$)/i);
     console.log('[Orchestrator] Section match found:', !!requiredInfoMatch);
     
-    if (!requiredInfoMatch) {
-      console.log('[Orchestrator] Using fallback regex (no section header)');
-      const bulletMatches = validationRules.matchAll(/\*\*([^*]+)\*\*:?\s*([^*\n]+)?/g);
+    if (requiredInfoMatch) {
+      const section = requiredInfoMatch[0];
+      console.log('[Orchestrator] Parsing Required Information section, length:', section.length);
+      const bulletMatches = section.matchAll(/\*\s*\*\*([^*]+)\*\*:?\s*([^*\n]+)?/g);
+      
       for (const match of bulletMatches) {
         const name = match[1].trim().toLowerCase().replace(/\s+/g, '_');
         const label = match[1].trim();
+        const description = match[2]?.trim() || '';
+        
+        if (!this.isNonInputField(name)) {
+          fields.push({
+            name,
+            label,
+            type: this.inferFieldType(name, description),
+            required: true
+          });
+        }
+      }
+
+      console.log('[Orchestrator] Extracted fields from section:', fields.length, fields.map(f => f.name));
+      return fields;
+    }
+
+    console.log('[Orchestrator] Using fallback regex (no section header)');
+    const bulletMatches = validationRules.matchAll(/\*\*([^*]+)\*\*:?\s*([^*\n]+)?/g);
+    for (const match of bulletMatches) {
+      const name = match[1].trim().toLowerCase().replace(/\s+/g, '_');
+      const label = match[1].trim();
+      
+      if (!this.isNonInputField(name)) {
         fields.push({
           name,
           label,
@@ -215,29 +244,21 @@ Include a brief "reasoning" field explaining why.`;
           required: true
         });
       }
-      console.log('[Orchestrator] Fallback extracted fields:', fields.length);
-      return fields;
     }
-
-    const section = requiredInfoMatch[0];
-    console.log('[Orchestrator] Parsing section, length:', section.length);
-    const bulletMatches = section.matchAll(/\*\s*\*\*([^*]+)\*\*:?\s*([^*\n]+)?/g);
-    
-    for (const match of bulletMatches) {
-      const name = match[1].trim().toLowerCase().replace(/\s+/g, '_');
-      const label = match[1].trim();
-      const description = match[2]?.trim() || '';
-      
-      fields.push({
-        name,
-        label,
-        type: this.inferFieldType(name, description),
-        required: true
-      });
-    }
-
-    console.log('[Orchestrator] Extracted fields:', fields.length, fields.map(f => f.name));
+    console.log('[Orchestrator] Fallback extracted fields:', fields.length);
     return fields;
+  }
+
+  protected isNonInputField(fieldName: string): boolean {
+    const nonInputPatterns = [
+      'system_error', 'error', 'failure', 'invalid',
+      'insufficient', 'missing_information', 'no_scheduled',
+      'pre-commitment', 'pre_commitment', 'inapplicable',
+      'existence', 'presence', 'validity', 'sufficiency',
+      'permissions', 'context', 'review_failure'
+    ];
+    const lower = fieldName.toLowerCase();
+    return nonInputPatterns.some(pattern => lower.includes(pattern));
   }
 
   protected inferFieldType(name: string, context: string): 'text' | 'date' | 'choice' | 'number' {
@@ -423,6 +444,64 @@ Include a brief "reasoning" field explaining why.`;
     }
 
     return answers;
+  }
+
+  protected async extractFieldsFromNaturalInput(
+    userInput: string,
+    fields: RequiredField[]
+  ): Promise<Record<string, string>> {
+    const apiKey = process.env.GEMINI_API_KEY;
+    if (!apiKey) {
+      return {};
+    }
+
+    try {
+      const ai = new GoogleGenAI({ apiKey });
+      const fieldDescriptions = fields.map(f => 
+        `- "${f.name}" (${f.label}): type=${f.type}${f.choices ? `, options: ${f.choices.join(', ')}` : ''}`
+      ).join('\n');
+
+      const extractionPrompt = `Given the user's natural language message, extract any information that matches the fields below.
+
+FIELDS TO EXTRACT:
+${fieldDescriptions}
+
+USER MESSAGE: "${userInput}"
+
+Return a JSON object where keys are field names and values are the extracted information. Only include fields where you can clearly identify a value from the message. If a field's value cannot be determined, do NOT include it.
+
+Example: If the fields are "employee_identity", "date_of_absence", "earning_code_classification" and the user says "Susan called in sick today", return:
+{"employee_identity": "Susan", "earning_code_classification": "Sick"}
+(date_of_absence omitted because "today" is relative and needs confirmation)
+
+Return ONLY the JSON object, no other text.`;
+
+      const response = await ai.models.generateContent({
+        model: 'gemini-2.0-flash',
+        contents: extractionPrompt,
+        config: {
+          responseMimeType: 'application/json',
+          temperature: 0.1
+        }
+      });
+
+      const text = response.text;
+      if (text) {
+        const parsed = JSON.parse(text);
+        const validFields = new Set(fields.map(f => f.name));
+        const result: Record<string, string> = {};
+        for (const [key, value] of Object.entries(parsed)) {
+          if (validFields.has(key) && typeof value === 'string' && value.trim()) {
+            result[key] = value.trim();
+          }
+        }
+        console.log('[Orchestrator] AI extracted fields from natural input:', result);
+        return result;
+      }
+    } catch (error) {
+      console.error('[Orchestrator] Failed to extract fields from natural input:', error);
+    }
+    return {};
   }
 
   protected buildContext(conversationId: string): ConversationContext {
@@ -898,7 +977,19 @@ Include a brief "reasoning" field explaining why.`;
           return this.handleDynamicFlow(conversationId, userInput);
         }
         
-        const missing = this.getMissingFields(state);
+        const isFirstTurn = Object.keys(state.answers).length === 0 && !state.currentBatch;
+        if (isFirstTurn && this.dynamicFields.length > 0) {
+          console.log('[Orchestrator] First turn in ask-first mode - extracting info from user message before asking');
+          const extracted = await this.extractFieldsFromNaturalInput(userInput, this.dynamicFields);
+          if (Object.keys(extracted).length > 0) {
+            console.log('[Orchestrator] Pre-extracted fields from first message:', Object.keys(extracted));
+            for (const [field, value] of Object.entries(extracted)) {
+              this.stateManager.setAnswer(conversationId, field, value);
+            }
+          }
+        }
+        
+        const missing = this.getMissingFields(this.stateManager.getOrCreateState(conversationId));
         console.log('[Orchestrator] Missing fields:', missing.length, missing.map(f => f.name));
         if (missing.length > 0) {
           console.log('[Orchestrator] Has missing fields - calling handleDynamicFlow');
