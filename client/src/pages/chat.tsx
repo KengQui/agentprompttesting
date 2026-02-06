@@ -18,8 +18,15 @@ import type { Agent, ChatMessage, ChatSession, ChatSessionWithPreview } from "@s
 const MAX_MESSAGE_LENGTH = 2000;
 const RATE_LIMIT_COOLDOWN = 2000;
 
+function stripActionBlocks(text: string): string {
+  let cleaned = text.replace(/```action\s*\n?[\s\S]*?```/gi, '');
+  cleaned = cleaned.replace(/```action\s*\n?[\s\S]*$/gi, '');
+  return cleaned.trim();
+}
+
 function MessageBubble({ message }: { message: ChatMessage }) {
   const isUser = message.role === "user";
+  const displayContent = isUser ? message.content : stripActionBlocks(message.content);
 
   return (
     <div
@@ -40,7 +47,7 @@ function MessageBubble({ message }: { message: ChatMessage }) {
             : "bg-muted"
         }`}
       >
-        <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+        <p className="text-sm whitespace-pre-wrap">{displayContent}</p>
         <p
           className={`text-xs mt-1 ${
             isUser ? "text-primary-foreground/70" : "text-muted-foreground"

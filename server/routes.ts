@@ -29,7 +29,7 @@ async function requireAuth(req: AuthenticatedRequest, res: Response, next: NextF
   req.user = user;
   next();
 }
-import { generateAgentResponse, generateValidationRules, generateGuardrails, generateSystemPrompt, generateSampleData, evaluateContextSufficiency, processClarifyingChat, generateValidationRulesWithInsights, generateGuardrailsWithInsights, generateActionsAndMockData, parseActionFromResponse, executeSimulatedAction, executeActionWithSampleData, extractBusinessCaseContent, sampleDatasetsToWorkingData, workingDataToSampleDatasets, type GenerationContext, type SystemPromptContext, type SampleDataGenerationContext, type ClarifyingChatContext, type ActionsGenerationContext, type ExtractionResult } from "./gemini";
+import { generateAgentResponse, generateValidationRules, generateGuardrails, generateSystemPrompt, generateSampleData, evaluateContextSufficiency, processClarifyingChat, generateValidationRulesWithInsights, generateGuardrailsWithInsights, generateActionsAndMockData, parseActionFromResponse, stripActionBlocks, executeSimulatedAction, executeActionWithSampleData, extractBusinessCaseContent, sampleDatasetsToWorkingData, workingDataToSampleDatasets, type GenerationContext, type SystemPromptContext, type SampleDataGenerationContext, type ClarifyingChatContext, type ActionsGenerationContext, type ExtractionResult } from "./gemini";
 import { loadAgentComponents, clearAgentCache, hasCustomComponents } from "./agent-loader";
 import { createRecoveryManager } from "./components/recovery-manager";
 import multer from "multer";
@@ -853,6 +853,9 @@ export async function registerRoutes(
         console.error("Failed to save trace:", err);
       });
 
+      // Safety net: strip any remaining action blocks before saving
+      responseContent = stripActionBlocks(responseContent);
+
       // Add assistant message
       const assistantMessage = await storage.addMessage({
         agentId: req.params.id,
@@ -1093,6 +1096,9 @@ export async function registerRoutes(
       storage.addTurnTrace(req.params.id, turnTrace).catch(err => {
         console.error("Failed to save trace:", err);
       });
+
+      // Safety net: strip any remaining action blocks before saving
+      responseContent = stripActionBlocks(responseContent);
 
       // Add assistant message
       const assistantMessage = await storage.addMessage({

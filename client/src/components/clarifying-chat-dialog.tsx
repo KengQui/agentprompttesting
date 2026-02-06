@@ -201,7 +201,7 @@ export function ClarifyingChatDialog({
                   }`}
                   data-testid={`chat-message-${msg.role}-${idx}`}
                 >
-                  {msg.content}
+                  {msg.role === "user" ? msg.content : msg.content.replace(/```action\s*\n?[\s\S]*?```/gi, '').trim()}
                 </div>
               </div>
             ))}

@@ -226,6 +226,15 @@ export function workingDataToSampleDatasets(
 }
 
 // Parse action blocks from AI response
+// Strip all action blocks from a response string (safety net for display)
+export function stripActionBlocks(response: string): string {
+  // Strip well-formed action blocks (with closing ```)
+  let cleaned = response.replace(/```action\s*\n?[\s\S]*?```/gi, '');
+  // Strip malformed action blocks (missing closing ```) - matches to end of string
+  cleaned = cleaned.replace(/```action\s*\n?[\s\S]*$/gi, '');
+  return cleaned.trim();
+}
+
 export function parseActionFromResponse(response: string): ParsedActionResult {
   const actionBlockRegex = /```action\s*\n?([\s\S]*?)```/i;
   const match = response.match(actionBlockRegex);
