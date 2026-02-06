@@ -183,23 +183,12 @@ export default function Chat() {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
 
-  const [configUpdatedAt, setConfigUpdatedAt] = useState<string | null>(null);
-  const [configChanged, setConfigChanged] = useState(false);
+  const [bannerDismissedForUpdate, setBannerDismissedForUpdate] = useState<string | null>(null);
 
   const { data: agent, isLoading: agentLoading } = useQuery<Agent>({
     queryKey: ["/api/agents", params.id],
     refetchInterval: 30000,
   });
-
-  useEffect(() => {
-    if (agent?.updatedAt) {
-      if (configUpdatedAt === null) {
-        setConfigUpdatedAt(agent.updatedAt);
-      } else if (agent.updatedAt !== configUpdatedAt) {
-        setConfigChanged(true);
-      }
-    }
-  }, [agent?.updatedAt, configUpdatedAt]);
 
   const { data: sessions = [], isLoading: sessionsLoading } = useQuery<ChatSessionWithPreview[]>({
     queryKey: ["/api/agents", params.id, "sessions"],
@@ -212,6 +201,15 @@ export default function Chat() {
 
   const activeSession = sessions.find(s => s.id === activeSessionId);
   const currentTopic = detectTopic(messages);
+
+  const configChanged = (() => {
+    if (!agent?.updatedAt || !activeSessionId) return false;
+    if (bannerDismissedForUpdate === agent.updatedAt) return false;
+    if (messages.length === 0) return false;
+    const lastMsgTime = messages[messages.length - 1]?.timestamp;
+    if (!lastMsgTime) return false;
+    return new Date(agent.updatedAt).getTime() > new Date(lastMsgTime).getTime();
+  })();
 
   useEffect(() => {
     if (sessions.length > 0 && !activeSessionId) {
@@ -557,9 +555,8 @@ export default function Chat() {
                 size="sm"
                 className="ml-auto shrink-0"
                 onClick={() => {
+                  setBannerDismissedForUpdate(agent?.updatedAt ?? null);
                   createSessionMutation.mutate();
-                  setConfigChanged(false);
-                  setConfigUpdatedAt(agent?.updatedAt ?? null);
                 }}
                 data-testid="button-new-session-banner"
               >
@@ -570,8 +567,7 @@ export default function Chat() {
                 variant="ghost"
                 size="icon"
                 onClick={() => {
-                  setConfigChanged(false);
-                  setConfigUpdatedAt(agent?.updatedAt ?? null);
+                  setBannerDismissedForUpdate(agent?.updatedAt ?? null);
                 }}
                 data-testid="button-dismiss-config-banner"
               >
