@@ -694,6 +694,13 @@ Is there anything else you'd like me to help you with?"
 - Be conversational and helpful, not robotic
 - Gather all required information before executing an action
 - After completing an action, explain any next steps or what they should expect
+
+### Smart Name Resolution:
+- When a user refers to a person by name, search the available data for matches
+- If there is exactly ONE person matching that name, proceed immediately without asking for further clarification — do NOT ask for Employee ID, record ID, or any other identifier
+- Only ask for disambiguation when there are MULTIPLE people with the same or similar name (e.g., "I found two people named John — John Smith in Engineering and John Davis in Marketing. Which one did you mean?")
+- Never expect users to know internal system identifiers like Employee IDs, record IDs, or account numbers. Instead, look up records using human-friendly attributes such as name, department, role, or other contextual details the user would naturally know
+- When you need to narrow down a match, ask about recognizable attributes (e.g., department, role, location) rather than requesting an ID number
 `;
   
   return section;
@@ -781,6 +788,14 @@ function getSystemPrompt(agent: AgentContext): string {
       if (!hasCurrentDatePlaceholder) {
         fullPrompt += currentDateSection;
       }
+      // Add smart name resolution guidelines when data is present
+      if (sampleDatasetsText || mockStateText) {
+        fullPrompt += `\n\n## Smart Name Resolution
+- When a user refers to a person by name, search the available data for matches
+- If there is exactly ONE person matching that name, proceed immediately without asking for further clarification — do NOT ask for Employee ID, record ID, or any other identifier
+- Only ask for disambiguation when there are MULTIPLE people with the same or similar name, and in that case ask about recognizable attributes (department, role, location) rather than requesting an ID number
+- Never expect users to know internal system identifiers like Employee IDs, record numbers, or account IDs. Look up records using human-friendly attributes such as name, department, role, or other contextual details the user would naturally know`;
+      }
       return fullPrompt;
     }
     
@@ -791,6 +806,14 @@ function getSystemPrompt(agent: AgentContext): string {
       // Include current date only if not already included via {{currentDate}} placeholder
       if (!hasCurrentDatePlaceholder) {
         fullPrompt += currentDateSection;
+      }
+      // Add smart name resolution guidelines when data is present
+      if (sampleDatasetsText || mockStateText) {
+        fullPrompt += `\n\n## Smart Name Resolution
+- When a user refers to a person by name, search the available data for matches
+- If there is exactly ONE person matching that name, proceed immediately without asking for further clarification — do NOT ask for Employee ID, record ID, or any other identifier
+- Only ask for disambiguation when there are MULTIPLE people with the same or similar name, and in that case ask about recognizable attributes (department, role, location) rather than requesting an ID number
+- Never expect users to know internal system identifiers like Employee IDs, record numbers, or account IDs. Look up records using human-friendly attributes such as name, department, role, or other contextual details the user would naturally know`;
       }
       return fullPrompt;
     }
@@ -834,6 +857,15 @@ function getSystemPrompt(agent: AgentContext): string {
     // Add mock user state if configured
     if (mockStateText) {
       fullPrompt += `\n\n${mockStateText}`;
+    }
+    
+    // Add smart name resolution guidelines when sample data or mock state is present
+    if (sampleDatasetsText || mockStateText) {
+      fullPrompt += `\n\n## Smart Name Resolution
+- When a user refers to a person by name, search the available data for matches
+- If there is exactly ONE person matching that name, proceed immediately without asking for further clarification — do NOT ask for Employee ID, record ID, or any other identifier
+- Only ask for disambiguation when there are MULTIPLE people with the same or similar name, and in that case ask about recognizable attributes (department, role, location) rather than requesting an ID number
+- Never expect users to know internal system identifiers like Employee IDs, record numbers, or account IDs. Look up records using human-friendly attributes such as name, department, role, or other contextual details the user would naturally know`;
     }
     
     return fullPrompt;
@@ -1077,6 +1109,8 @@ Before responding, verify:
 - Use clear, enforceable language for constraints
 - CRITICAL: Do NOT use words like "simulated", "simulation", "mock", "demo", "test environment", or "fake" in the generated prompt. The agent should present itself as a real, professional assistant. When describing actions, use natural language like "process", "update", "complete" - NOT "simulate"
 - ALWAYS ask only ONE question at a time. Never ask multiple questions in a single response. Wait for the user to answer before asking the next question.
+- SMART NAME RESOLUTION: When a user refers to a person by name, the agent must search available data for matches. If exactly ONE person matches, proceed immediately without asking for further clarification. Only ask for disambiguation when MULTIPLE people share the same or similar name — and in that case, ask about recognizable attributes (department, role, location) rather than internal IDs.
+- NEVER expect users to know internal system identifiers like Employee IDs, record numbers, or account IDs. Always look up records using human-friendly attributes (name, department, role, etc.) that users would naturally know.
 
 ## Format your output as:
 
