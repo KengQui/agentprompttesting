@@ -58,6 +58,8 @@ export async function loadAgentComponents(agentId: string, agentConfig: AgentCon
     console.log(`[agent-loader] Using base orchestrator for agent ${agentId} (no components folder)`);
   }
 
+  await orchestrator.initFlowMode();
+
   const components = { orchestrator, hasCustomComponents };
   loadedOrchestrators.set(agentId, components);
   return components;

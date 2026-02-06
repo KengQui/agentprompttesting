@@ -18,6 +18,7 @@
 import { TurnManager, TurnManagerConfig } from './turn-manager';
 import { StateManager, StateManagerConfig } from './state-manager';
 import { FlowController, FlowControllerConfig, FlowStep } from './flow-controller';
+import { GoogleGenAI } from '@google/genai';
 import type { 
   ClassificationResult, 
   ConversationContext, 
@@ -75,15 +76,85 @@ export class Orchestrator {
       this.dynamicFields = this.parseValidationRules(this.agentConfig.validationRules);
     }
 
-    this.flowMode = this.detectFlowMode(this.agentConfig.customPrompt);
-    console.log('[Orchestrator] Detected flow mode:', this.flowMode);
+    this.flowMode = 'ask-first';
+    console.log('[Orchestrator] Initial flow mode (pending AI classification):', this.flowMode);
   }
 
-  protected detectFlowMode(customPrompt?: string): FlowMode {
+  async initFlowMode(): Promise<void> {
+    const customPrompt = this.agentConfig.customPrompt;
     if (!customPrompt) {
-      return 'ask-first';
+      this.flowMode = 'ask-first';
+      console.log('[Orchestrator] No custom prompt - defaulting to ask-first');
+      return;
     }
 
+    const apiKey = process.env.GEMINI_API_KEY;
+    if (!apiKey) {
+      console.log('[Orchestrator] No GEMINI_API_KEY - falling back to keyword detection');
+      this.flowMode = this.detectFlowModeByKeywords(customPrompt);
+      return;
+    }
+
+    try {
+      const ai = new GoogleGenAI({ apiKey });
+
+      const promptSummary = customPrompt.length > 3000 
+        ? customPrompt.substring(0, 3000) + '\n...(truncated)'
+        : customPrompt;
+
+      const classificationPrompt = `You are analyzing an AI agent's system prompt to determine how it should handle conversations.
+
+There are two conversation modes:
+
+**INFER-FIRST**: The agent should extract as much information as possible from the user's initial natural-language message, then only ask about what's genuinely missing. This is appropriate when:
+- The prompt describes understanding natural-language requests
+- The prompt shows examples where users provide information naturally in their first message
+- The prompt instructs the agent to identify/extract entities from what the user says
+- The prompt emphasizes a conversational, request-driven flow
+
+**ASK-FIRST**: The agent should proactively ask for all required fields upfront in a structured way before proceeding. This is appropriate when:
+- The prompt describes a form-filling or data-collection workflow
+- The prompt requires gathering specific fields in a specific order
+- The prompt does NOT show examples of users providing info naturally
+- The agent's job is primarily survey-like or intake-form-like
+
+Based on the agent prompt below, which mode is more appropriate?
+
+--- AGENT PROMPT ---
+${promptSummary}
+--- END AGENT PROMPT ---
+
+Respond with ONLY a JSON object: {"mode": "infer-first"} or {"mode": "ask-first"}
+Include a brief "reasoning" field explaining why.`;
+
+      const response = await ai.models.generateContent({
+        model: 'gemini-2.0-flash',
+        contents: classificationPrompt,
+        config: {
+          responseMimeType: 'application/json',
+          temperature: 0.1
+        }
+      });
+
+      const text = response.text;
+      if (text) {
+        const parsed = JSON.parse(text);
+        if (parsed.mode === 'infer-first' || parsed.mode === 'ask-first') {
+          this.flowMode = parsed.mode;
+          console.log('[Orchestrator] AI classified flow mode:', this.flowMode, '| Reasoning:', parsed.reasoning || 'none');
+          return;
+        }
+      }
+
+      console.log('[Orchestrator] AI response unparseable, falling back to keyword detection');
+      this.flowMode = this.detectFlowModeByKeywords(customPrompt);
+    } catch (error) {
+      console.error('[Orchestrator] AI flow mode classification failed:', error);
+      this.flowMode = this.detectFlowModeByKeywords(customPrompt);
+    }
+  }
+
+  protected detectFlowModeByKeywords(customPrompt: string): FlowMode {
     const promptLower = customPrompt.toLowerCase();
 
     const inferFirstPhrases = [
@@ -106,12 +177,16 @@ export class Orchestrator {
       'avoid asking upfront',
       'minimize questions',
       'propose a complete solution',
-      'propose sensible defaults'
+      'propose sensible defaults',
+      'natural-language request',
+      'natural language request',
+      'identify the employee',
+      'understand the manager'
     ];
 
     for (const phrase of inferFirstPhrases) {
       if (promptLower.includes(phrase)) {
-        console.log('[Orchestrator] Found infer-first phrase:', phrase);
+        console.log('[Orchestrator] Keyword fallback found infer-first phrase:', phrase);
         return 'infer-first';
       }
     }
