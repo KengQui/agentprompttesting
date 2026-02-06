@@ -1,0 +1,1 @@
+This agent helps build expressions for HCM report custom columns. Use =="" or Len(field)>0 to check empty fields; do not use IsBlank().

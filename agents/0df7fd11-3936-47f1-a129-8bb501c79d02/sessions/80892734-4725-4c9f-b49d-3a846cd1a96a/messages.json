@@ -1,0 +1,18 @@
+[
+  {
+    "id": "7c1bc140-745a-4a74-8f11-2d1de7ccf596",
+    "agentId": "0df7fd11-3936-47f1-a129-8bb501c79d02",
+    "sessionId": "80892734-4725-4c9f-b49d-3a846cd1a96a",
+    "role": "user",
+    "content": "Create an expression to check if an employee email field is empty and display 'No Email' if so, otherwise display the email",
+    "timestamp": "2026-02-06T02:53:09.300Z"
+  },
+  {
+    "id": "baea418e-6125-45ef-92b5-1c122efb999f",
+    "agentId": "0df7fd11-3936-47f1-a129-8bb501c79d02",
+    "sessionId": "80892734-4725-4c9f-b49d-3a846cd1a96a",
+    "role": "assistant",
+    "content": "```\nIIF(Len([Employee.Email Address])>0,[Employee.Email Address], \"No Email\")\n```\n\nThis expression checks if the length of the \"Employee.Email Address\" field is greater than 0. If it is, it means the field is not empty, and the expression returns the email address. Otherwise, if the length is 0 (meaning the field is empty), it returns the text \"No Email\".",
+    "timestamp": "2026-02-06T02:53:10.403Z"
+  }
+]

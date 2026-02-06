@@ -249,5 +249,11 @@
     "username": "testuser_rapbEe",
     "password": "$2b$10$ZrRdzYpwRxt9VdUtMu8BOeSudBEHyZ1/Z6NyBX4hIwCjsjV4B8K8K",
     "createdAt": "2026-02-06T02:17:41.377Z"
+  },
+  {
+    "id": "d9fc5ee0-2c32-4e88-9479-9d95bcaf689c",
+    "username": "testuser_QlQEi2",
+    "password": "$2b$10$dUoR4EWdzOVx8.MkBto28OY7XaF1YYAcrIg92N0YgcoXrNMdyD4om",
+    "createdAt": "2026-02-06T02:50:49.638Z"
   }
 ]
