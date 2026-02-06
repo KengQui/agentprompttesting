@@ -1,0 +1,18 @@
+[
+  {
+    "id": "789eac1b-f2df-4af5-9126-068ed4f39041",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "sessionId": "257a77dd-570c-4517-9e0c-7babdf6211a9",
+    "role": "user",
+    "content": "reate an expression (a formula) to display:\n\nEmployee Email addresses: primary and secondary.\n\nIf the employee does not have either primary or secondary emails, you want to display their phone numbers: work, home, and cell.",
+    "timestamp": "2026-02-06T03:16:40.871Z"
+  },
+  {
+    "id": "dacd7fc5-74c1-4a54-8ca1-59fbd99c32ee",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "sessionId": "257a77dd-570c-4517-9e0c-7babdf6211a9",
+    "role": "assistant",
+    "content": "Okay, I can create an expression to display employee email addresses or phone numbers based on the availability of email data.\n\nTo proceed, I need to know how you would like the email addresses and phone numbers to be combined when they are available. For example, should they be concatenated with a space, a comma, or some other separator?",
+    "timestamp": "2026-02-06T03:16:42.910Z"
+  }
+]
