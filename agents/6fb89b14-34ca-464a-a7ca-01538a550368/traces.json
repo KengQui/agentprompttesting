@@ -125,6 +125,76 @@
         }
       ],
       "success": true
+    },
+    {
+      "id": "trace-1770343452770",
+      "sessionId": "d1b44719-35e7-4a90-a8d0-ffb9b49e5c1f",
+      "userInput": "I don't have her ID",
+      "agentResponse": "No problem. I can look up employees named Susan who report to you.\n\nI found two employees with the first name Susan:\n1. Susan Jones (E12345)\n2. Susanne Jones (E67890)\n\nWhich Susan are you referring to? Please provide the employee ID or confirm the correct name.",
+      "startTime": "2026-02-06T02:04:11.601Z",
+      "endTime": "2026-02-06T02:04:12.770Z",
+      "totalDuration": 1169,
+      "entries": [
+        {
+          "id": "entry-1770343451602-1",
+          "type": "intent_classification",
+          "name": "Orchestrator Intent Classification",
+          "timestamp": "2026-02-06T02:04:11.602Z",
+          "metadata": {
+            "intent": "answer_question",
+            "classificationMethod": "orchestrator",
+            "confidence": "high"
+          }
+        },
+        {
+          "id": "entry-1770343452770-3",
+          "type": "llm_call",
+          "name": "Gemini Response Generation",
+          "timestamp": "2026-02-06T02:04:12.770Z",
+          "duration": 1168,
+          "metadata": {
+            "model": "gemini",
+            "intent": "answer_question",
+            "validated": true
+          }
+        }
+      ],
+      "success": true
+    },
+    {
+      "id": "trace-1770343460168",
+      "sessionId": "d1b44719-35e7-4a90-a8d0-ffb9b49e5c1f",
+      "userInput": "1",
+      "agentResponse": "Okay, so that's Susan Jones (E12345).\n\nWhat date is Susan Jones calling in sick for?",
+      "startTime": "2026-02-06T02:04:19.392Z",
+      "endTime": "2026-02-06T02:04:20.168Z",
+      "totalDuration": 776,
+      "entries": [
+        {
+          "id": "entry-1770343459393-1",
+          "type": "intent_classification",
+          "name": "Orchestrator Intent Classification",
+          "timestamp": "2026-02-06T02:04:19.393Z",
+          "metadata": {
+            "intent": "answer_question",
+            "classificationMethod": "orchestrator",
+            "confidence": "high"
+          }
+        },
+        {
+          "id": "entry-1770343460168-3",
+          "type": "llm_call",
+          "name": "Gemini Response Generation",
+          "timestamp": "2026-02-06T02:04:20.168Z",
+          "duration": 775,
+          "metadata": {
+            "model": "gemini",
+            "intent": "answer_question",
+            "validated": true
+          }
+        }
+      ],
+      "success": true
     }
   ],
   "stats": {
@@ -133,16 +203,16 @@
     },
     "signalReads": {},
     "intentDistribution": {
-      "answer_question": 4
+      "answer_question": 6
     },
     "classificationMethods": {
-      "orchestrator": 4
+      "orchestrator": 6
     },
-    "avgResponseTime": 788.25,
-    "totalLlmCalls": 1,
+    "avgResponseTime": 849.6666666666666,
+    "totalLlmCalls": 3,
     "totalTokensUsed": 0,
     "errorCount": 0
   },
   "createdAt": "2026-02-06T01:22:58.868Z",
-  "updatedAt": "2026-02-06T02:04:00.900Z"
+  "updatedAt": "2026-02-06T02:04:20.168Z"
 }

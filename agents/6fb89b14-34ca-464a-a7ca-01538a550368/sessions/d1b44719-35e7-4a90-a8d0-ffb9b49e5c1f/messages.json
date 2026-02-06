@@ -14,5 +14,37 @@
     "role": "assistant",
     "content": "Okay, I can help with that. To process Susan's sick call-in, could you please provide her employee ID?",
     "timestamp": "2026-02-06T02:04:00.900Z"
+  },
+  {
+    "id": "c135b40f-3031-46ee-813b-2b9348dec7b7",
+    "agentId": "6fb89b14-34ca-464a-a7ca-01538a550368",
+    "sessionId": "d1b44719-35e7-4a90-a8d0-ffb9b49e5c1f",
+    "role": "user",
+    "content": "I don't have her ID",
+    "timestamp": "2026-02-06T02:04:11.601Z"
+  },
+  {
+    "id": "76bb15b8-7a46-4bb2-ba62-e0128c95daad",
+    "agentId": "6fb89b14-34ca-464a-a7ca-01538a550368",
+    "sessionId": "d1b44719-35e7-4a90-a8d0-ffb9b49e5c1f",
+    "role": "assistant",
+    "content": "No problem. I can look up employees named Susan who report to you.\n\nI found two employees with the first name Susan:\n1. Susan Jones (E12345)\n2. Susanne Jones (E67890)\n\nWhich Susan are you referring to? Please provide the employee ID or confirm the correct name.",
+    "timestamp": "2026-02-06T02:04:12.771Z"
+  },
+  {
+    "id": "5293b60d-7df4-40d0-b0a5-5dbdfb96ebb6",
+    "agentId": "6fb89b14-34ca-464a-a7ca-01538a550368",
+    "sessionId": "d1b44719-35e7-4a90-a8d0-ffb9b49e5c1f",
+    "role": "user",
+    "content": "1",
+    "timestamp": "2026-02-06T02:04:19.392Z"
+  },
+  {
+    "id": "1c74fef4-506f-4a9c-ba46-490e30c0b302",
+    "agentId": "6fb89b14-34ca-464a-a7ca-01538a550368",
+    "sessionId": "d1b44719-35e7-4a90-a8d0-ffb9b49e5c1f",
+    "role": "assistant",
+    "content": "Okay, so that's Susan Jones (E12345).\n\nWhat date is Susan Jones calling in sick for?",
+    "timestamp": "2026-02-06T02:04:20.169Z"
   }
 ]
