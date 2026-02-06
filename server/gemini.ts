@@ -752,6 +752,13 @@ function getSystemPrompt(agent: AgentContext): string {
     // Check for new-style placeholder markers and replace them (use replaceAll for all occurrences)
     const hasSampleDataMarker = fullPrompt.includes('{{SAMPLE_DATA}}');
     const hasActionsMarker = fullPrompt.includes('{{AVAILABLE_ACTIONS}}');
+    const hasDomainKnowledgeMarker = fullPrompt.includes('{{DOMAIN_KNOWLEDGE}}');
+    
+    // Replace all {{DOMAIN_KNOWLEDGE}} markers with actual domain knowledge
+    if (hasDomainKnowledgeMarker) {
+      const domainKnowledgeContent = buildDomainKnowledgeText(agent) || 'No domain knowledge configured.';
+      fullPrompt = fullPrompt.replaceAll('{{DOMAIN_KNOWLEDGE}}', domainKnowledgeContent);
+    }
     
     // Replace all {{SAMPLE_DATA}} markers with actual sample data
     if (hasSampleDataMarker) {
@@ -766,7 +773,7 @@ function getSystemPrompt(agent: AgentContext): string {
     }
     
     // If new-style markers were found and replaced, add mock state if needed and return
-    if (hasSampleDataMarker || hasActionsMarker) {
+    if (hasSampleDataMarker || hasActionsMarker || hasDomainKnowledgeMarker) {
       // If sample data marker was used with sampleDatasetsText, also append mockStateText if it exists
       if (hasSampleDataMarker && sampleDatasetsText && mockStateText) {
         fullPrompt += `\n\n${mockStateText}`;
