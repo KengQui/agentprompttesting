@@ -80,6 +80,10 @@ export class Orchestrator {
     console.log('[Orchestrator] Initial flow mode (pending AI classification):', this.flowMode);
   }
 
+  getFlowMode(): FlowMode {
+    return this.flowMode;
+  }
+
   async initFlowMode(): Promise<void> {
     const customPrompt = this.agentConfig.customPrompt;
     if (!customPrompt) {

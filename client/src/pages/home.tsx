@@ -1,10 +1,11 @@
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Link } from "wouter";
-import { Plus, MessageSquare, Settings, Bot, Sparkles, LogOut, PlayCircle, Copy } from "lucide-react";
+import { Plus, MessageSquare, Settings, Bot, Sparkles, LogOut, PlayCircle, Copy, Zap, HelpCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useAuth } from "@/hooks/use-auth";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
@@ -30,7 +31,40 @@ function formatDate(dateString: string) {
   });
 }
 
-function AgentCard({ agent }: { agent: Agent }) {
+function getFlowModeStyle(flowMode: string) {
+  switch (flowMode) {
+    case "infer-first":
+      return "bg-violet-500/10 text-violet-600 dark:text-violet-400";
+    case "ask-first":
+      return "bg-sky-500/10 text-sky-600 dark:text-sky-400";
+    default:
+      return "bg-muted text-muted-foreground";
+  }
+}
+
+function getFlowModeLabel(flowMode: string) {
+  switch (flowMode) {
+    case "infer-first":
+      return "Infer First";
+    case "ask-first":
+      return "Ask First";
+    default:
+      return "Unknown";
+  }
+}
+
+function getFlowModeDescription(flowMode: string) {
+  switch (flowMode) {
+    case "infer-first":
+      return "Analyzes data first, only asks when genuinely ambiguous";
+    case "ask-first":
+      return "Proactively asks for all required fields upfront";
+    default:
+      return "Flow mode could not be determined";
+  }
+}
+
+function AgentCard({ agent, flowMode }: { agent: Agent; flowMode?: string }) {
   const { toast } = useToast();
   const cloneMutation = useMutation({
     mutationFn: async () => {
@@ -63,13 +97,32 @@ function AgentCard({ agent }: { agent: Agent }) {
               </p>
             </div>
           </div>
-          <Badge
-            variant="secondary"
-            className={`shrink-0 capitalize ${getStatusColor(agent.status)}`}
-            data-testid={`badge-status-${agent.id}`}
-          >
-            {agent.status}
-          </Badge>
+          <div className="flex flex-col items-end gap-1.5 shrink-0">
+            <Badge
+              variant="secondary"
+              className={`capitalize ${getStatusColor(agent.status)}`}
+              data-testid={`badge-status-${agent.id}`}
+            >
+              {agent.status}
+            </Badge>
+            {flowMode && flowMode !== "unknown" && agent.status !== "draft" && (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Badge
+                    variant="secondary"
+                    className={`text-[10px] ${getFlowModeStyle(flowMode)}`}
+                    data-testid={`badge-flow-mode-${agent.id}`}
+                  >
+                    <Zap className="h-3 w-3 mr-1" />
+                    {getFlowModeLabel(flowMode)}
+                  </Badge>
+                </TooltipTrigger>
+                <TooltipContent side="left">
+                  <p className="text-xs">{getFlowModeDescription(flowMode)}</p>
+                </TooltipContent>
+              </Tooltip>
+            )}
+          </div>
         </div>
       </CardHeader>
       <CardFooter className="gap-2 pt-3 border-t">
@@ -166,11 +219,25 @@ function EmptyState() {
   );
 }
 
+interface FlowModeResult {
+  agentId: string;
+  agentName: string;
+  flowMode: string;
+}
+
 export default function Home() {
   const { data: agents, isLoading } = useQuery<Agent[]>({
     queryKey: ["/api/agents"],
   });
+  const { data: flowModes } = useQuery<FlowModeResult[]>({
+    queryKey: ["/api/agents/flow-modes"],
+    enabled: !!agents && agents.length > 0,
+  });
   const { user, logout } = useAuth();
+
+  const flowModeMap = new Map(
+    flowModes?.map((fm) => [fm.agentId, fm.flowMode]) ?? []
+  );
 
   return (
     <div className="min-h-screen bg-background">
@@ -218,7 +285,7 @@ export default function Home() {
         ) : agents && agents.length > 0 ? (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {agents.map((agent) => (
-              <AgentCard key={agent.id} agent={agent} />
+              <AgentCard key={agent.id} agent={agent} flowMode={flowModeMap.get(agent.id)} />
             ))}
           </div>
         ) : (

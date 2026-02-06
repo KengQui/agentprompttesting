@@ -243,5 +243,11 @@
     "username": "e2e_infer_YYbD2G",
     "password": "$2b$10$T4JfeZ3v0j0TFB7jiQnyyuYXBmAE3queeatJzznX8zgO0hMFmkFvy",
     "createdAt": "2026-02-06T02:01:57.642Z"
+  },
+  {
+    "id": "d8f1ebb0-1063-4c8c-94da-cbf9897d4ddf",
+    "username": "testuser_rapbEe",
+    "password": "$2b$10$ZrRdzYpwRxt9VdUtMu8BOeSudBEHyZ1/Z6NyBX4hIwCjsjV4B8K8K",
+    "createdAt": "2026-02-06T02:17:41.377Z"
   }
 ]

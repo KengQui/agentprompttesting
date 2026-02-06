@@ -315,6 +315,53 @@ export async function registerRoutes(
     }
   });
 
+  app.get("/api/agents/flow-modes", async (req: AuthenticatedRequest, res) => {
+    try {
+      const user = await getUserFromSession(req);
+      if (!user) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+
+      const agents = await storage.getAgentsByUserId(user.id);
+      const results: Array<{ agentId: string; agentName: string; flowMode: string }> = [];
+
+      for (const agent of agents) {
+        if (!agent.customPrompt) {
+          results.push({ agentId: agent.id, agentName: agent.name, flowMode: "ask-first" });
+          continue;
+        }
+
+        try {
+          const agentConfig = {
+            name: agent.name,
+            businessUseCase: agent.businessUseCase,
+            description: agent.description,
+            domainKnowledge: agent.domainKnowledge,
+            validationRules: agent.validationRules,
+            guardrails: agent.guardrails,
+            customPrompt: agent.customPrompt,
+            sampleDatasets: agent.sampleDatasets,
+            availableActions: agent.availableActions,
+            mockUserState: agent.mockUserState,
+            mockMode: agent.mockMode,
+          };
+
+          const { orchestrator } = await loadAgentComponents(agent.id, agentConfig);
+          const flowMode = orchestrator.getFlowMode();
+          results.push({ agentId: agent.id, agentName: agent.name, flowMode });
+        } catch (err) {
+          console.error(`Error detecting flow mode for agent ${agent.id}:`, err);
+          results.push({ agentId: agent.id, agentName: agent.name, flowMode: "unknown" });
+        }
+      }
+
+      res.json(results);
+    } catch (error) {
+      console.error("Error detecting flow modes:", error);
+      res.status(500).json({ message: "Failed to detect flow modes" });
+    }
+  });
+
   // Get single agent (verify ownership)
   app.get("/api/agents/:id", async (req: AuthenticatedRequest, res) => {
     try {
@@ -1086,6 +1133,36 @@ export async function registerRoutes(
     } catch (error) {
       console.error("Error checking components:", error);
       res.status(500).json({ message: "Failed to check components" });
+    }
+  });
+
+  app.get("/api/agents/:id/flow-mode", async (req: AuthenticatedRequest, res) => {
+    try {
+      const agent = await verifyAgentOwnership(req, res, req.params.id);
+      if (!agent) return;
+
+      const agentConfig = {
+        name: agent.name,
+        businessUseCase: agent.businessUseCase,
+        description: agent.description,
+        domainKnowledge: agent.domainKnowledge,
+        validationRules: agent.validationRules,
+        guardrails: agent.guardrails,
+        customPrompt: agent.customPrompt,
+        sampleDatasets: agent.sampleDatasets,
+        availableActions: agent.availableActions,
+        mockUserState: agent.mockUserState,
+        mockMode: agent.mockMode,
+      };
+
+      clearAgentCache(req.params.id);
+      const { orchestrator } = await loadAgentComponents(req.params.id, agentConfig);
+      const flowMode = orchestrator.getFlowMode();
+
+      res.json({ agentId: req.params.id, flowMode });
+    } catch (error) {
+      console.error("Error detecting flow mode:", error);
+      res.status(500).json({ message: "Failed to detect flow mode" });
     }
   });
 
