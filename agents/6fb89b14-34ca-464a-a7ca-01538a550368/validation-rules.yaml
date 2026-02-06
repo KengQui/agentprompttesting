@@ -1,0 +1,42 @@
+### Required Information
+
+The agent must gather or confirm the following to process an employee call-in:
+
+*   **Employee Identity**: The specific employee who is calling in (e.g., Employee Name, ID).
+*   **Date of Absence**: The specific date(s) for which the employee will be absent from their scheduled shift.
+*   **Earning Code Classification**: The reason for absence, explicitly classified using a valid company earning code (e.g., Sick, PTO, Unpaid Leave, Bereavement).
+*   **Manager Confirmation**: Explicit, positive confirmation from the manager before any changes are committed to the system.
+
+### Validation Criteria
+
+The following conditions must be met for a call-in request to be valid:
+
+*   **Employee Existence and Status**:
+    *   The identified employee must exist and be in an active employment status within the Core HR system.
+    *   The manager initiating the request must have valid permissions to manage time and attendance for the specified employee.
+*   **Scheduled Shift Presence**:
+    *   The identified employee must have an *assigned* scheduled shift for the specified date(s).
+    *   The shift must not already be an 'open' or 'cancelled' shift.
+*   **Earning Code Validity and Applicability**:
+    *   The selected earning code must be an active and valid earning code configured within the company's Time & Attendance system.
+    *   The earning code must be applicable to the employee and the context of the absence (e.g., some codes may be restricted by employee type or policy).
+*   **Accrual Balance Sufficiency (if applicable)**:
+    *   If the selected earning code requires the use of accrued time (e.g., PTO, Sick Leave), the employee must possess a sufficient balance in the corresponding accrual ledger to cover the full duration of the scheduled absence.
+    *   Accrual balances cannot go negative unless an explicit, permissible company override policy is in effect and applied.
+*   **Absence Date Context**:
+    *   The absence date should typically be for the current day or a recent past date. Future-dated absences may require different handling (e.g., planned leave requests versus urgent call-ins).
+
+### What to Do When Validation Fails
+
+When a validation criterion is not met, the agent must:
+
+*   **Missing Information**: Clearly and politely prompt the manager for the specific missing information, providing examples or options where appropriate.
+*   **Invalid Employee/Permissions**: Inform the manager that the employee could not be found, is inactive, or that they lack the necessary permissions. Offer to list team members or suggest contacting HR for permission issues.
+*   **No Scheduled Shift Found**: Notify the manager that no assigned shift was found for the employee on the specified date(s). Offer to check alternative dates or guide them to review the employee's schedule.
+*   **Invalid/Inapplicable Earning Code**: Inform the manager that the selected earning code is not valid or cannot be applied. Present a list of appropriate and valid earning code options based on company policy and employee eligibility.
+*   **Insufficient Accrual Balance**:
+    *   Politely explain that the employee does not have sufficient balance for the selected earning code, detailing the current balance and the hours required.
+    *   Suggest alternative earning codes that do not require accrual usage (e.g., "Unpaid Leave", "Bereavement").
+    *   Explain the company policy regarding negative balances or overrides if applicable, and offer to proceed with an alternative classification or manager override if permitted.
+*   **Pre-Commitment Review Failure**: If the manager does not provide explicit confirmation after reviewing the proposed changes, the agent must not proceed with any system updates and should offer to restart the process or cancel the request.
+*   **System Errors**: If internal system errors prevent validation or processing, inform the manager of the technical issue and advise them on the next steps (e.g., "Please try again later," "Contact IT support").

@@ -195,5 +195,11 @@
     "username": "testsettings_JaCdJW",
     "password": "$2b$10$iPLoF01oxO9mo9L4EOsocu7j7yXyVSebHImbO.byL2uxIN69IIVGy",
     "createdAt": "2026-02-05T23:53:16.031Z"
+  },
+  {
+    "id": "4c14d0d5-dcc9-45b5-a2cd-10a72f572c1e",
+    "username": "testuser_1770340000879",
+    "password": "$2b$10$ITx5bCHvVEqQAjgdkmwlW.4Ml0XbaGUPqP7azvWGNkhjnMHxF.f/i",
+    "createdAt": "2026-02-06T01:06:44.699Z"
   }
 ]

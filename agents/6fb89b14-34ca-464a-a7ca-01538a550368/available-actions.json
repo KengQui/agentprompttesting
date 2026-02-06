@@ -1,0 +1,163 @@
+[
+  {
+    "id": "293a472c-b279-4e54-916d-a3432cfc7d98",
+    "name": "report_employee_absence",
+    "description": "Process an employee's absence for a scheduled shift, classifying it with an earning code and updating the schedule.",
+    "category": "Absence Management",
+    "requiredFields": [
+      {
+        "name": "employee_id",
+        "type": "string",
+        "label": "Employee ID",
+        "required": true,
+        "description": "The unique identifier for the employee reporting the absence."
+      },
+      {
+        "name": "absence_date",
+        "type": "date",
+        "label": "Absence Date",
+        "required": true,
+        "description": "The date of the scheduled shift the employee is absent for."
+      },
+      {
+        "name": "shift_start_time",
+        "type": "string",
+        "label": "Shift Start Time (HH:MM)",
+        "required": true,
+        "description": "The exact start time of the shift being called in for (e.g., 08:00 or 15:30)."
+      },
+      {
+        "name": "earning_code",
+        "type": "select",
+        "label": "Earning Code for Absence",
+        "required": true,
+        "options": [
+          "Sick Leave (Accrued)",
+          "Vacation (Accrued)",
+          "Unpaid Time Off",
+          "Bereavement Leave",
+          "Jury Duty"
+        ],
+        "description": "The type of absence classification for payroll and accrual purposes."
+      },
+      {
+        "name": "notes",
+        "type": "string",
+        "label": "Additional Notes",
+        "required": false,
+        "description": "Any additional comments or details regarding the absence."
+      }
+    ],
+    "confirmationMessage": "You are about to report an absence for employee {employee_id} on {absence_date} for the shift starting at {shift_start_time}, classified as {earning_code}. This will deduct from accruals if applicable, convert the shift to an open shift, and record for payroll. Do you wish to proceed?",
+    "successMessage": "Successfully reported absence for employee {employee_id} on {absence_date} and updated the schedule. The shift is now open for coverage.",
+    "affectedDataFields": [
+      "employee_schedule",
+      "accrual_balance",
+      "payroll_earning_record",
+      "audit_log"
+    ]
+  },
+  {
+    "id": "375906da-5549-4e94-9da5-40d8426a4ffb",
+    "name": "view_employee_accrual_balances",
+    "description": "Retrieve the current accrual balances for a specific employee across all accrual types.",
+    "category": "Employee Information",
+    "requiredFields": [
+      {
+        "name": "employee_id",
+        "type": "string",
+        "label": "Employee ID",
+        "required": true,
+        "description": "The unique identifier for the employee whose accrual balances are to be retrieved."
+      }
+    ],
+    "confirmationMessage": "You are about to retrieve the current accrual balances for employee {employee_id}.",
+    "successMessage": "Successfully retrieved accrual balances for employee {employee_id}.",
+    "affectedDataFields": []
+  },
+  {
+    "id": "d0b0c1ef-aced-45f8-81cc-c2978a03a254",
+    "name": "update_absence_earning_code",
+    "description": "Modify the earning code for a previously reported employee absence.",
+    "category": "Absence Management",
+    "requiredFields": [
+      {
+        "name": "employee_id",
+        "type": "string",
+        "label": "Employee ID",
+        "required": true,
+        "description": "The unique identifier for the employee whose absence record needs updating."
+      },
+      {
+        "name": "absence_date",
+        "type": "date",
+        "label": "Absence Date",
+        "required": true,
+        "description": "The date of the absence record to update."
+      },
+      {
+        "name": "shift_start_time",
+        "type": "string",
+        "label": "Shift Start Time (HH:MM)",
+        "required": true,
+        "description": "The start time of the specific shift for which the absence was reported (e.g., 08:00)."
+      },
+      {
+        "name": "new_earning_code",
+        "type": "select",
+        "label": "New Earning Code",
+        "required": true,
+        "options": [
+          "Sick Leave (Accrued)",
+          "Vacation (Accrued)",
+          "Unpaid Time Off",
+          "Bereavement Leave",
+          "Jury Duty"
+        ],
+        "description": "The new earning code to apply to the absence record."
+      }
+    ],
+    "confirmationMessage": "You are about to update the earning code for employee {employee_id}'s absence on {absence_date} at {shift_start_time} to {new_earning_code}. This may adjust associated accrual balances. Do you wish to proceed?",
+    "successMessage": "Successfully updated the earning code for employee {employee_id}'s absence on {absence_date}.",
+    "affectedDataFields": [
+      "payroll_earning_record",
+      "accrual_balance",
+      "audit_log"
+    ]
+  },
+  {
+    "id": "825a8425-7215-4a09-9cfb-6e069b50143a",
+    "name": "assign_coverage_to_open_shift",
+    "description": "Assign a specific employee to an existing open shift to provide coverage.",
+    "category": "Workforce Management",
+    "requiredFields": [
+      {
+        "name": "open_shift_date",
+        "type": "date",
+        "label": "Open Shift Date",
+        "required": true,
+        "description": "The date of the open shift that needs coverage."
+      },
+      {
+        "name": "open_shift_start_time",
+        "type": "string",
+        "label": "Open Shift Start Time (HH:MM)",
+        "required": true,
+        "description": "The start time of the open shift (e.g., 08:00)."
+      },
+      {
+        "name": "assignee_employee_id",
+        "type": "string",
+        "label": "Assignee Employee ID",
+        "required": true,
+        "description": "The unique identifier for the employee who will cover the open shift."
+      }
+    ],
+    "confirmationMessage": "You are about to assign employee {assignee_employee_id} to cover the open shift on {open_shift_date} starting at {open_shift_start_time}. This will update the schedule. Do you wish to proceed?",
+    "successMessage": "Successfully assigned employee {assignee_employee_id} to the open shift on {open_shift_date}.",
+    "affectedDataFields": [
+      "employee_schedule",
+      "audit_log"
+    ]
+  }
+]

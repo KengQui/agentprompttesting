@@ -987,6 +987,41 @@
         }
       ],
       "success": true
+    },
+    {
+      "id": "trace-1770340103890",
+      "sessionId": "965757e9-f0f2-469c-962e-4991a0a8e09f",
+      "userInput": "create an expression (a formula) to display:\n\nEmployee Email addresses: primary and secondary.\n\nIf the employee does not have either primary or secondary emails, you want to display their phone numbers: work, home, and cell.",
+      "agentResponse": "I can help with that! I can create an expression to display employee email addresses (primary and secondary). If an employee doesn't have either email, it will display their phone numbers (work, home, and cell).\n\nHowever, I don't see columns for \"primary email\", \"secondary email\", \"work phone\", \"home phone\", or \"cell phone\" in the data you provided.\n\nCould you please tell me the exact column names for these fields so I can create the correct expression?",
+      "startTime": "2026-02-06T01:08:22.700Z",
+      "endTime": "2026-02-06T01:08:23.890Z",
+      "totalDuration": 1191,
+      "entries": [
+        {
+          "id": "entry-1770340102710-1",
+          "type": "intent_classification",
+          "name": "Orchestrator Intent Classification",
+          "timestamp": "2026-02-06T01:08:22.710Z",
+          "metadata": {
+            "intent": "answer_question",
+            "classificationMethod": "orchestrator",
+            "confidence": "high"
+          }
+        },
+        {
+          "id": "entry-1770340103890-3",
+          "type": "llm_call",
+          "name": "Gemini Response Generation",
+          "timestamp": "2026-02-06T01:08:23.890Z",
+          "duration": 1180,
+          "metadata": {
+            "model": "gemini",
+            "intent": "answer_question",
+            "validated": true
+          }
+        }
+      ],
+      "success": true
     }
   ],
   "stats": {
@@ -995,18 +1030,18 @@
     },
     "signalReads": {},
     "intentDistribution": {
-      "answer_question": 26,
+      "answer_question": 27,
       "unclear": 1,
       "reject": 1
     },
     "classificationMethods": {
-      "orchestrator": 28
+      "orchestrator": 29
     },
-    "avgResponseTime": 994.3571428571429,
-    "totalLlmCalls": 20,
+    "avgResponseTime": 1001.1379310344828,
+    "totalLlmCalls": 21,
     "totalTokensUsed": 0,
     "errorCount": 0
   },
   "createdAt": "2026-02-05T16:40:15.025Z",
-  "updatedAt": "2026-02-05T21:46:32.768Z"
+  "updatedAt": "2026-02-06T01:08:23.891Z"
 }
