@@ -436,6 +436,7 @@ export default function SettingsPage() {
   const [isGeneratingGuardrails, setIsGeneratingGuardrails] = useState(false);
   const [isGeneratingSampleData, setIsGeneratingSampleData] = useState(false);
   const [isGeneratingActions, setIsGeneratingActions] = useState(false);
+  const [isGeneratingPrompt, setIsGeneratingPrompt] = useState(false);
   const [sampleDataType, setSampleDataType] = useState("customer records");
   const [sampleRecordCount, setSampleRecordCount] = useState(10);
   const [sampleFormat, setSampleFormat] = useState<"json" | "csv" | "text">("json");
@@ -800,6 +801,46 @@ export default function SettingsPage() {
       });
     } finally {
       setIsGeneratingActions(false);
+    }
+  };
+
+  const handleGeneratePrompt = async (model: GeminiModel) => {
+    if (!formData?.name || !formData?.businessUseCase?.trim()) {
+      toast({
+        title: "Missing information",
+        description: "Please fill in the agent name and business use case before generating a prompt.",
+        variant: "destructive",
+      });
+      return;
+    }
+    setIsGeneratingPrompt(true);
+    try {
+      const response = await apiRequest("POST", "/api/generate/system-prompt", {
+        name: formData.name,
+        businessUseCase: formData.businessUseCase,
+        domainKnowledge: formData.domainKnowledge,
+        domainDocuments: formData.domainDocuments,
+        validationRules: formData.validationRules,
+        guardrails: formData.guardrails,
+        promptStyle: "gemini",
+        model,
+      });
+      const result = await response.json();
+      updateFormDataAndTrackCompletion({ customPrompt: result.systemPrompt });
+      setEditedPrompt(result.systemPrompt);
+      setIsEditingPrompt(false);
+      toast({
+        title: "Prompt generated",
+        description: `Generated using ${geminiModelDisplayNames[model]}.`,
+      });
+    } catch (error: any) {
+      toast({
+        title: "Generation failed",
+        description: error?.message || "Failed to generate prompt. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsGeneratingPrompt(false);
     }
   };
 
@@ -2736,6 +2777,36 @@ export default function SettingsPage() {
                 <div className="flex items-center justify-between">
                   <Label>System Prompt</Label>
                   <div className="flex gap-2">
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button
+                          type="button"
+                          variant="default"
+                          size="sm"
+                          disabled={isGeneratingPrompt}
+                          data-testid="settings-button-generate-prompt"
+                        >
+                          {isGeneratingPrompt ? (
+                            <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                          ) : (
+                            <Sparkles className="h-3 w-3 mr-1" />
+                          )}
+                          {isGeneratingPrompt ? "Generating..." : "AI Generate"}
+                          <ChevronDown className="h-3 w-3 ml-1" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        {(Object.keys(geminiModelDisplayNames) as GeminiModel[]).map((model) => (
+                          <DropdownMenuItem
+                            key={model}
+                            onClick={() => handleGeneratePrompt(model)}
+                            data-testid={`settings-generate-prompt-${model}`}
+                          >
+                            {geminiModelDisplayNames[model]}
+                          </DropdownMenuItem>
+                        ))}
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                     {formData.customPrompt && (
                       <Button
                         type="button"
