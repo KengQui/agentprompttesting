@@ -1,0 +1,18 @@
+[
+  {
+    "id": "d841d85d-cb5a-47c0-b1ce-f138d36e0649",
+    "agentId": "bdc15d16-1482-4d7f-80bc-56ffcba076f2",
+    "sessionId": "88c768c3-34cf-4588-ab43-53575c537aea",
+    "role": "user",
+    "content": "Susan called in sick",
+    "timestamp": "2026-02-06T02:02:31.622Z"
+  },
+  {
+    "id": "d0c11f8c-27d6-4fb5-9db4-c4cd034b24c8",
+    "agentId": "bdc15d16-1482-4d7f-80bc-56ffcba076f2",
+    "sessionId": "88c768c3-34cf-4588-ab43-53575c537aea",
+    "role": "assistant",
+    "content": "Processing sick call-in for Susan. What date is this for?",
+    "timestamp": "2026-02-06T02:02:33.038Z"
+  }
+]

@@ -1,0 +1,8 @@
+name: "TestFlowAgent"
+userId: "7f8b7827-145e-4aae-b4d2-35fbe96e100e"
+status: "draft"
+createdAt: "2026-02-06T01:55:03.007Z"
+updatedAt: "2026-02-06T01:57:46.793Z"
+promptStyle: "gemini"
+mockMode: "full"
+description: "Handles employee call-ins"

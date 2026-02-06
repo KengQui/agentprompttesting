@@ -1,0 +1,8 @@
+name: "InferTest_0KRXVX"
+userId: "d54328cd-4ada-49ec-8ad2-7465fc51f7aa"
+status: "draft"
+createdAt: "2026-02-06T02:02:14.426Z"
+updatedAt: "2026-02-06T02:02:22.186Z"
+promptStyle: "gemini"
+mockMode: "full"
+description: "Handles employee call-ins"

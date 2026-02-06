@@ -255,7 +255,9 @@ Include a brief "reasoning" field explaining why.`;
       'insufficient', 'missing_information', 'no_scheduled',
       'pre-commitment', 'pre_commitment', 'inapplicable',
       'existence', 'presence', 'validity', 'sufficiency',
-      'permissions', 'context', 'review_failure'
+      'permissions', 'context', 'review_failure',
+      'confirmation', 'confirm', 'manager_confirmation',
+      'explicit_confirmation', 'pre-commitment_review'
     ];
     const lower = fieldName.toLowerCase();
     return nonInputPatterns.some(pattern => lower.includes(pattern));
@@ -985,6 +987,38 @@ Return ONLY the JSON object, no other text.`;
             console.log('[Orchestrator] Pre-extracted fields from first message:', Object.keys(extracted));
             for (const [field, value] of Object.entries(extracted)) {
               this.stateManager.setAnswer(conversationId, field, value);
+            }
+            
+            const updatedState = this.stateManager.getOrCreateState(conversationId);
+            const missing = this.getMissingFields(updatedState);
+            console.log('[Orchestrator] After pre-extraction, missing fields:', missing.length, missing.map(f => f.name));
+            
+            if (missing.length === 0) {
+              this.stateManager.updateState(conversationId, { awaitingFinalConfirmation: true });
+              return {
+                intent: 'answer_question',
+                response: this.generateConfirmationSummary(updatedState)
+              };
+            }
+            
+            const extractedSummary = Object.entries(extracted)
+              .map(([key, val]) => {
+                const field = this.dynamicFields.find(f => f.name === key);
+                return field ? `${field.label}: ${val}` : `${key}: ${val}`;
+              })
+              .join(', ');
+            
+            const nextBatch = this.getNextBatch(updatedState);
+            if (nextBatch) {
+              this.stateManager.updateState(conversationId, {
+                currentBatch: nextBatch.fields.map(f => f.name)
+              });
+              
+              const missingQuestions = nextBatch.fields.map(f => f.label).join(' and ');
+              return {
+                intent: 'answer_question',
+                response: `Got it, I understood: ${extractedSummary}. I just need to know: ${missingQuestions}?`
+              };
             }
           }
         }

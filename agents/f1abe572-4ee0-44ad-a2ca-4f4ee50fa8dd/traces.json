@@ -1,0 +1,56 @@
+{
+  "agentId": "f1abe572-4ee0-44ad-a2ca-4f4ee50fa8dd",
+  "traces": [
+    {
+      "id": "trace-1770343076627",
+      "sessionId": "54291657-8317-4437-a707-1ac0e511b8b0",
+      "userInput": "Susan called in sick",
+      "agentResponse": "Processing sick call-in for Susan. What date is this for?",
+      "startTime": "2026-02-06T01:57:55.117Z",
+      "endTime": "2026-02-06T01:57:56.627Z",
+      "totalDuration": 1510,
+      "entries": [
+        {
+          "id": "entry-1770343076203-1",
+          "type": "intent_classification",
+          "name": "Orchestrator Intent Classification",
+          "timestamp": "2026-02-06T01:57:56.203Z",
+          "metadata": {
+            "intent": "answer_question",
+            "classificationMethod": "orchestrator",
+            "confidence": "high"
+          }
+        },
+        {
+          "id": "entry-1770343076627-3",
+          "type": "llm_call",
+          "name": "Gemini Response Generation",
+          "timestamp": "2026-02-06T01:57:56.627Z",
+          "duration": 424,
+          "metadata": {
+            "model": "gemini",
+            "intent": "answer_question",
+            "validated": true
+          }
+        }
+      ],
+      "success": true
+    }
+  ],
+  "stats": {
+    "hookCalls": {},
+    "signalReads": {},
+    "intentDistribution": {
+      "answer_question": 1
+    },
+    "classificationMethods": {
+      "orchestrator": 1
+    },
+    "avgResponseTime": 1510,
+    "totalLlmCalls": 1,
+    "totalTokensUsed": 0,
+    "errorCount": 0
+  },
+  "createdAt": "2026-02-06T01:57:56.627Z",
+  "updatedAt": "2026-02-06T01:57:56.627Z"
+}

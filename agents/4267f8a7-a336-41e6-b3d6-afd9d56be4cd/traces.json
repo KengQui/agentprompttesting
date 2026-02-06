@@ -1,0 +1,56 @@
+{
+  "agentId": "4267f8a7-a336-41e6-b3d6-afd9d56be4cd",
+  "traces": [
+    {
+      "id": "trace-1770342585600",
+      "sessionId": "6f9c715b-7ed0-4e22-8b79-b2c00674df5e",
+      "userInput": "Susan called in sick",
+      "agentResponse": "Okay, I can help with that.\n\nCan you please provide the employee ID of the employee calling in sick and the dates of absence?",
+      "startTime": "2026-02-06T01:49:44.815Z",
+      "endTime": "2026-02-06T01:49:45.600Z",
+      "totalDuration": 785,
+      "entries": [
+        {
+          "id": "entry-1770342584839-1",
+          "type": "intent_classification",
+          "name": "Orchestrator Intent Classification",
+          "timestamp": "2026-02-06T01:49:44.839Z",
+          "metadata": {
+            "intent": "answer_question",
+            "classificationMethod": "orchestrator",
+            "confidence": "high"
+          }
+        },
+        {
+          "id": "entry-1770342585600-3",
+          "type": "llm_call",
+          "name": "Gemini Response Generation",
+          "timestamp": "2026-02-06T01:49:45.600Z",
+          "duration": 761,
+          "metadata": {
+            "model": "gemini",
+            "intent": "answer_question",
+            "validated": true
+          }
+        }
+      ],
+      "success": true
+    }
+  ],
+  "stats": {
+    "hookCalls": {},
+    "signalReads": {},
+    "intentDistribution": {
+      "answer_question": 1
+    },
+    "classificationMethods": {
+      "orchestrator": 1
+    },
+    "avgResponseTime": 785,
+    "totalLlmCalls": 1,
+    "totalTokensUsed": 0,
+    "errorCount": 0
+  },
+  "createdAt": "2026-02-06T01:49:45.600Z",
+  "updatedAt": "2026-02-06T01:49:45.600Z"
+}
