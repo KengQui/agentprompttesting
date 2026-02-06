@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useParams, useLocation } from "wouter";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { ArrowLeft, Send, Bot, User, Settings, Loader2, X, AlertCircle, MessageSquare, Eraser, Plus, PanelLeftClose, PanelLeft, RefreshCw } from "lucide-react";
+import { ArrowLeft, Send, Bot, User, Settings, Loader2, X, AlertCircle, MessageSquare, Eraser, Plus, PanelLeftClose, PanelLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Card } from "@/components/ui/card";
@@ -183,11 +183,8 @@ export default function Chat() {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
 
-  const [bannerDismissedForUpdate, setBannerDismissedForUpdate] = useState<string | null>(null);
-
   const { data: agent, isLoading: agentLoading } = useQuery<Agent>({
     queryKey: ["/api/agents", params.id],
-    refetchInterval: 30000,
   });
 
   const { data: sessions = [], isLoading: sessionsLoading } = useQuery<ChatSessionWithPreview[]>({
@@ -202,14 +199,6 @@ export default function Chat() {
   const activeSession = sessions.find(s => s.id === activeSessionId);
   const currentTopic = detectTopic(messages);
 
-  const configChanged = (() => {
-    if (!agent?.updatedAt || !activeSessionId) return false;
-    if (bannerDismissedForUpdate === agent.updatedAt) return false;
-    if (messages.length === 0) return false;
-    const lastMsgTime = messages[messages.length - 1]?.timestamp;
-    if (!lastMsgTime) return false;
-    return new Date(agent.updatedAt).getTime() > new Date(lastMsgTime).getTime();
-  })();
 
   useEffect(() => {
     if (sessions.length > 0 && !activeSessionId) {
@@ -546,36 +535,6 @@ export default function Chat() {
         <div className="flex-1 flex flex-col overflow-hidden">
           <ContextSummary messages={messages} topic={currentTopic} sessionTitle={activeSession?.title} />
           
-          {configChanged && (
-            <div className="flex items-center gap-2 px-4 py-2 bg-amber-50 dark:bg-amber-950/30 border-b border-amber-200 dark:border-amber-800 text-amber-800 dark:text-amber-200 text-sm" data-testid="banner-config-updated">
-              <RefreshCw className="h-4 w-4 shrink-0" />
-              <span>This agent's configuration has been updated. Start a new session to use the latest version.</span>
-              <Button
-                variant="outline"
-                size="sm"
-                className="ml-auto shrink-0"
-                onClick={() => {
-                  setBannerDismissedForUpdate(agent?.updatedAt ?? null);
-                  createSessionMutation.mutate();
-                }}
-                data-testid="button-new-session-banner"
-              >
-                <Plus className="h-3 w-3 mr-1" />
-                New Session
-              </Button>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => {
-                  setBannerDismissedForUpdate(agent?.updatedAt ?? null);
-                }}
-                data-testid="button-dismiss-config-banner"
-              >
-                <X className="h-3 w-3" />
-              </Button>
-            </div>
-          )}
-
           <ScrollArea className="flex-1" ref={scrollRef}>
             <div className="max-w-3xl mx-auto px-4 py-6">
               {messagesLoading || sessionsLoading ? (
