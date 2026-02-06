@@ -32,11 +32,12 @@ export interface ClarifyingChatResponse {
   gatheredInsight?: ClarifyingInsight;
 }
 
-// Google AI Studio SDK integration for Gemini
-// Uses GEMINI_API_KEY for Google AI Studio API access
-// GOOGLE_CLOUD_PROJECT and GOOGLE_CLOUD_LOCATION are available as environment secrets
+// Vertex AI SDK integration for Gemini
+// Uses GOOGLE_CLOUD_PROJECT and GOOGLE_CLOUD_LOCATION for Vertex AI authentication
 const ai = new GoogleGenAI({
-  apiKey: process.env.GEMINI_API_KEY || "",
+  vertexai: true,
+  project: process.env.GOOGLE_CLOUD_PROJECT || "",
+  location: process.env.GOOGLE_CLOUD_LOCATION || "",
 });
 
 export interface AgentContext {
@@ -504,8 +505,8 @@ export async function generateAgentResponse(
   userMessage: string,
   chatHistory: ChatHistory[] = []
 ): Promise<string> {
-  if (!process.env.GEMINI_API_KEY) {
-    throw new Error("GEMINI_API_KEY is not configured");
+  if (!process.env.GOOGLE_CLOUD_PROJECT || !process.env.GOOGLE_CLOUD_LOCATION) {
+    throw new Error("GOOGLE_CLOUD_PROJECT and GOOGLE_CLOUD_LOCATION must be configured for Vertex AI");
   }
 
   const systemPrompt = getSystemPrompt(agent);
@@ -869,8 +870,8 @@ export interface GenerationContext {
 
 export async function generateValidationRules(context: GenerationContext): Promise<string> {
   const modelToUse = context.model || defaultGenerationModel;
-  if (!process.env.GEMINI_API_KEY) {
-    throw new Error("GEMINI_API_KEY is not configured");
+  if (!process.env.GOOGLE_CLOUD_PROJECT || !process.env.GOOGLE_CLOUD_LOCATION) {
+    throw new Error("GOOGLE_CLOUD_PROJECT and GOOGLE_CLOUD_LOCATION must be configured for Vertex AI");
   }
 
   const domainDocsText = context.domainDocuments?.length 
@@ -917,8 +918,8 @@ Generate validation rules for an AI agent handling this use case.`;
 
 export async function generateGuardrails(context: GenerationContext): Promise<string> {
   const modelToUse = context.model || defaultGenerationModel;
-  if (!process.env.GEMINI_API_KEY) {
-    throw new Error("GEMINI_API_KEY is not configured");
+  if (!process.env.GOOGLE_CLOUD_PROJECT || !process.env.GOOGLE_CLOUD_LOCATION) {
+    throw new Error("GOOGLE_CLOUD_PROJECT and GOOGLE_CLOUD_LOCATION must be configured for Vertex AI");
   }
 
   const domainDocsText = context.domainDocuments?.length 
@@ -977,8 +978,8 @@ export interface SystemPromptContext {
 
 export async function generateSystemPrompt(context: SystemPromptContext): Promise<string> {
   const modelToUse = context.model || defaultGenerationModel;
-  if (!process.env.GEMINI_API_KEY) {
-    throw new Error("GEMINI_API_KEY is not configured");
+  if (!process.env.GOOGLE_CLOUD_PROJECT || !process.env.GOOGLE_CLOUD_LOCATION) {
+    throw new Error("GOOGLE_CLOUD_PROJECT and GOOGLE_CLOUD_LOCATION must be configured for Vertex AI");
   }
 
   const domainDocsText = context.domainDocuments?.length 
@@ -1160,8 +1161,8 @@ export interface SampleDataGenerationContext {
 
 export async function generateSampleData(context: SampleDataGenerationContext): Promise<SampleDataset> {
   const modelToUse = context.model || defaultGenerationModel;
-  if (!process.env.GEMINI_API_KEY) {
-    throw new Error("GEMINI_API_KEY is not configured");
+  if (!process.env.GOOGLE_CLOUD_PROJECT || !process.env.GOOGLE_CLOUD_LOCATION) {
+    throw new Error("GOOGLE_CLOUD_PROJECT and GOOGLE_CLOUD_LOCATION must be configured for Vertex AI");
   }
 
   const format = context.format || "json";
@@ -1242,8 +1243,8 @@ export async function evaluateContextSufficiency(
   context: GenerationContext,
   generationType: "validation" | "guardrails"
 ): Promise<ContextEvaluationResult> {
-  if (!process.env.GEMINI_API_KEY) {
-    throw new Error("GEMINI_API_KEY is not configured");
+  if (!process.env.GOOGLE_CLOUD_PROJECT || !process.env.GOOGLE_CLOUD_LOCATION) {
+    throw new Error("GOOGLE_CLOUD_PROJECT and GOOGLE_CLOUD_LOCATION must be configured for Vertex AI");
   }
 
   const domainDocsText = context.domainDocuments?.length 
@@ -1324,8 +1325,8 @@ export async function processClarifyingChat(
   context: ClarifyingChatContext,
   userMessage: string
 ): Promise<ClarifyingChatResponse> {
-  if (!process.env.GEMINI_API_KEY) {
-    throw new Error("GEMINI_API_KEY is not configured");
+  if (!process.env.GOOGLE_CLOUD_PROJECT || !process.env.GOOGLE_CLOUD_LOCATION) {
+    throw new Error("GOOGLE_CLOUD_PROJECT and GOOGLE_CLOUD_LOCATION must be configured for Vertex AI");
   }
 
   const domainDocsText = context.domainDocuments?.length 
@@ -1424,8 +1425,8 @@ export async function generateValidationRulesWithInsights(
   context: GenerationContext & { clarifyingInsights?: ClarifyingInsight[] }
 ): Promise<string> {
   const modelToUse = context.model || defaultGenerationModel;
-  if (!process.env.GEMINI_API_KEY) {
-    throw new Error("GEMINI_API_KEY is not configured");
+  if (!process.env.GOOGLE_CLOUD_PROJECT || !process.env.GOOGLE_CLOUD_LOCATION) {
+    throw new Error("GOOGLE_CLOUD_PROJECT and GOOGLE_CLOUD_LOCATION must be configured for Vertex AI");
   }
 
   const domainDocsText = context.domainDocuments?.length 
@@ -1483,8 +1484,8 @@ export async function generateGuardrailsWithInsights(
   context: GenerationContext & { clarifyingInsights?: ClarifyingInsight[] }
 ): Promise<string> {
   const modelToUse = context.model || defaultGenerationModel;
-  if (!process.env.GEMINI_API_KEY) {
-    throw new Error("GEMINI_API_KEY is not configured");
+  if (!process.env.GOOGLE_CLOUD_PROJECT || !process.env.GOOGLE_CLOUD_LOCATION) {
+    throw new Error("GOOGLE_CLOUD_PROJECT and GOOGLE_CLOUD_LOCATION must be configured for Vertex AI");
   }
 
   const domainDocsText = context.domainDocuments?.length 
@@ -1577,8 +1578,8 @@ export interface GeneratedActionsResult {
 
 export async function generateActionsAndMockData(context: ActionsGenerationContext): Promise<GeneratedActionsResult> {
   const modelToUse = context.model || defaultGenerationModel;
-  if (!process.env.GEMINI_API_KEY) {
-    throw new Error("GEMINI_API_KEY is not configured");
+  if (!process.env.GOOGLE_CLOUD_PROJECT || !process.env.GOOGLE_CLOUD_LOCATION) {
+    throw new Error("GOOGLE_CLOUD_PROJECT and GOOGLE_CLOUD_LOCATION must be configured for Vertex AI");
   }
 
   const domainDocsText = context.domainDocuments?.length 
@@ -1737,8 +1738,8 @@ export async function extractBusinessCaseContent(
 ): Promise<ExtractionResult> {
   const modelToUse = model || defaultGenerationModel;
   
-  if (!process.env.GEMINI_API_KEY) {
-    throw new Error("GEMINI_API_KEY is not configured");
+  if (!process.env.GOOGLE_CLOUD_PROJECT || !process.env.GOOGLE_CLOUD_LOCATION) {
+    throw new Error("GOOGLE_CLOUD_PROJECT and GOOGLE_CLOUD_LOCATION must be configured for Vertex AI");
   }
 
   // Load the extraction rules from config

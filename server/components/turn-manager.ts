@@ -78,9 +78,14 @@ export class TurnManager {
   }
 
   private initLlmClient(): void {
-    const apiKey = process.env.GEMINI_API_KEY;
-    if (apiKey) {
-      this.llmClient = new GoogleGenAI({ apiKey });
+    const project = process.env.GOOGLE_CLOUD_PROJECT;
+    const location = process.env.GOOGLE_CLOUD_LOCATION;
+    if (project && location) {
+      this.llmClient = new GoogleGenAI({
+        vertexai: true,
+        project,
+        location,
+      });
     }
   }
 

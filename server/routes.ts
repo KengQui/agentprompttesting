@@ -824,7 +824,7 @@ export async function registerRoutes(
       } catch (aiError: any) {
         console.error("AI generation error:", aiError);
         traceSuccess = false;
-        responseContent = `I apologize, but I'm having trouble generating a response. ${aiError.message?.includes("GEMINI_API_KEY") ? "The Gemini API key may not be configured correctly." : "Please try again."}`;
+        responseContent = `I apologize, but I'm having trouble generating a response. ${aiError.message?.includes("GOOGLE_CLOUD_PROJECT") ? "The Google Cloud project configuration may not be set up correctly." : "Please try again."}`;
         
         traceEntries.push({
           id: `entry-${Date.now()}-err`,
@@ -1067,7 +1067,7 @@ export async function registerRoutes(
       } catch (aiError: any) {
         console.error("AI generation error:", aiError);
         traceSuccess = false;
-        responseContent = `I apologize, but I'm having trouble generating a response. ${aiError.message?.includes("GEMINI_API_KEY") ? "The Gemini API key may not be configured correctly." : "Please try again."}`;
+        responseContent = `I apologize, but I'm having trouble generating a response. ${aiError.message?.includes("GOOGLE_CLOUD_PROJECT") ? "The Google Cloud project configuration may not be set up correctly." : "Please try again."}`;
         traceEntries.push({
           id: `entry-${Date.now()}-err`,
           type: "error",

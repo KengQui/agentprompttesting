@@ -92,15 +92,16 @@ export class Orchestrator {
       return;
     }
 
-    const apiKey = process.env.GEMINI_API_KEY;
-    if (!apiKey) {
-      console.log('[Orchestrator] No GEMINI_API_KEY - falling back to keyword detection');
+    const project = process.env.GOOGLE_CLOUD_PROJECT;
+    const location = process.env.GOOGLE_CLOUD_LOCATION;
+    if (!project || !location) {
+      console.log('[Orchestrator] No GOOGLE_CLOUD_PROJECT/LOCATION - falling back to keyword detection');
       this.flowMode = this.detectFlowModeByKeywords(customPrompt);
       return;
     }
 
     try {
-      const ai = new GoogleGenAI({ apiKey });
+      const ai = new GoogleGenAI({ vertexai: true, project, location });
 
       const promptSummary = customPrompt.length > 3000 
         ? customPrompt.substring(0, 3000) + '\n...(truncated)'
@@ -456,13 +457,14 @@ Include a brief "reasoning" field explaining why.`;
     userInput: string,
     fields: RequiredField[]
   ): Promise<Record<string, string>> {
-    const apiKey = process.env.GEMINI_API_KEY;
-    if (!apiKey) {
+    const project = process.env.GOOGLE_CLOUD_PROJECT;
+    const location = process.env.GOOGLE_CLOUD_LOCATION;
+    if (!project || !location) {
       return {};
     }
 
     try {
-      const ai = new GoogleGenAI({ apiKey });
+      const ai = new GoogleGenAI({ vertexai: true, project, location });
       const fieldDescriptions = fields.map(f => 
         `- "${f.name}" (${f.label}): type=${f.type}${f.choices ? `, options: ${f.choices.join(', ')}` : ''}`
       ).join('\n');

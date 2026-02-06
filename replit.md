@@ -59,8 +59,9 @@ Agent Studio supports action simulation, allowing AI agents to execute actions d
 - `/agents/{agent-id}/mock-user-state.json`: Stores mock user profile data for action simulation
 
 ## User Preferences
-- Using Google Gemini AI (via Google AI Studio) for agent responses
-- Requires GEMINI_API_KEY secret to be configured
+- Using Google Gemini AI via Vertex AI (project/location authentication mode)
+- Requires GOOGLE_CLOUD_PROJECT and GOOGLE_CLOUD_LOCATION secrets to be configured
+- GEMINI_API_KEY is also stored but not used in Vertex AI mode
 - Prompt generation uses only Google Gemini style (standardized)
 
 ## Authentication System
