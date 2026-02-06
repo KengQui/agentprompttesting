@@ -23,22 +23,12 @@ Success looks like: The user successfully creates a syntactically correct and fu
 
 ### 4. INPUT
 <knowledge>
-**SYNTAX RULES**
-Expressions use function-call syntax, not Excel-style syntax. For example, write `If(condition, trueValue, falseValue)` instead of `=IF()`, and `Add(A, B)` instead of `=A+B`. Inline operators (`+`, `-`, `*`, `/`) are also valid inside expressions.
+**IMPORTANT: ONLY use functions from the domain knowledge function reference. Do NOT use any function not listed there (e.g., IsBlank, IsEmpty, SUM, VLOOKUP, COUNTIF are all INVALID). To check if a field is empty, use =="" comparison (e.g., EmplPrimaryEmail==""). To check if a field is not empty, use !="" or Len(field)>0.**
 
-**EXPRESSION CATEGORIES**
-1.  **Math Operations**: `Add()`, `Subtract()`, `Multiply()`, `Divide()`, and inline operators. Used for salary calculations, pay period conversions (e.g., multiply by 26/12 to convert bi-weekly to monthly), totals, averages, and ratios.
-2.  **Concatenation**: `Concat()` joins multiple values into one string. Can mix text and column values. Example: `Concat("Department:", DeptName, " | ", "Role:", JobTitle)`
-3.  **Conditional Logic**: `If()`, `And()`, `Or()`, `Eq()`, `Not()`. Use `If` statements for tiered lookups like age bands, tenure bands, coverage level mappings. Use `And()` for multiple conditions, `Or()` for any-of conditions.
-4.  **String Functions**: `Left(text, n)`, `Right(text, n)`, `Mid(text, start, length)`, `Len(text)`, `Search(find, text)`, `Replace(text, old, new)`, `LowerCase()`, `FormatDate(date, format)`, `FormatDouble(number, decimals)`, `ToDouble()`. Used for text extraction, formatting, and cleanup.
-
-**DATE FUNCTIONS**
--   `DateDiff(date1, date2)`: Returns the number of days between two dates.
--   `DateSubtract(date1, date2)`: Similar to `DateDiff`, returns days. `Today()` can be used as a reference for current date comparisons.
--   `FormatDate(date, "format")`: Formats a date into a specific pattern. Common patterns: "YYYY-MM-DD", "MMMM dd", "YYYYMMDD".
+Refer to the domain knowledge for the complete list of valid functions, operators, and syntax rules. All expressions must only use functions from that reference.
 
 **OUTPUT TYPES**
-Each expression produces a typed output: Numeric, Money, Text, Time, or Date. The output type determines how the new column is displayed and whether aggregations like Sum are enabled.
+Each expression produces a typed output: Text, Time, Date, Amount, or Numeric. The output type determines how the new column is displayed and whether aggregations like Sum are enabled.
 
 **COMMON PATTERN DEFAULTS**
 When users request common categorizations, use these standard defaults and offer to adjust:

@@ -78,5 +78,21 @@
     "role": "assistant",
     "content": "Successfully reported absence for employee E54321 on 2026-02-06 and updated the schedule. The shift is now open for coverage.",
     "timestamp": "2026-02-06T02:06:43.942Z"
+  },
+  {
+    "id": "99700dca-6333-43c0-ac14-41b0691f85d5",
+    "agentId": "6fb89b14-34ca-464a-a7ca-01538a550368",
+    "sessionId": "84f5b4b0-8ef3-456d-9e57-972c747c9fdc",
+    "role": "user",
+    "content": "Do you have any recommendation who should I approach for this open shift?",
+    "timestamp": "2026-02-06T02:39:31.025Z"
+  },
+  {
+    "id": "49c8de80-683e-4457-b79c-7e685bf7723a",
+    "agentId": "6fb89b14-34ca-464a-a7ca-01538a550368",
+    "sessionId": "84f5b4b0-8ef3-456d-9e57-972c747c9fdc",
+    "role": "assistant",
+    "content": "I do not have the ability to recommend who you should approach for the open shift.",
+    "timestamp": "2026-02-06T02:39:31.599Z"
   }
 ]

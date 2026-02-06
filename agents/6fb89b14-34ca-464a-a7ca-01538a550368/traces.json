@@ -598,6 +598,41 @@
         }
       ],
       "success": true
+    },
+    {
+      "id": "trace-1770345571597",
+      "sessionId": "84f5b4b0-8ef3-456d-9e57-972c747c9fdc",
+      "userInput": "Do you have any recommendation who should I approach for this open shift?",
+      "agentResponse": "I do not have the ability to recommend who you should approach for the open shift.",
+      "startTime": "2026-02-06T02:39:31.024Z",
+      "endTime": "2026-02-06T02:39:31.597Z",
+      "totalDuration": 573,
+      "entries": [
+        {
+          "id": "entry-1770345571026-1",
+          "type": "intent_classification",
+          "name": "Orchestrator Intent Classification",
+          "timestamp": "2026-02-06T02:39:31.026Z",
+          "metadata": {
+            "intent": "answer_question",
+            "classificationMethod": "orchestrator",
+            "confidence": "high"
+          }
+        },
+        {
+          "id": "entry-1770345571597-3",
+          "type": "llm_call",
+          "name": "Gemini Response Generation",
+          "timestamp": "2026-02-06T02:39:31.597Z",
+          "duration": 571,
+          "metadata": {
+            "model": "gemini",
+            "intent": "answer_question",
+            "validated": true
+          }
+        }
+      ],
+      "success": true
     }
   ],
   "stats": {
@@ -606,16 +641,16 @@
     },
     "signalReads": {},
     "intentDistribution": {
-      "answer_question": 17
+      "answer_question": 18
     },
     "classificationMethods": {
-      "orchestrator": 17
+      "orchestrator": 18
     },
-    "avgResponseTime": 928.3529411764706,
-    "totalLlmCalls": 14,
+    "avgResponseTime": 908.6111111111111,
+    "totalLlmCalls": 15,
     "totalTokensUsed": 0,
     "errorCount": 0
   },
   "createdAt": "2026-02-06T01:22:58.868Z",
-  "updatedAt": "2026-02-06T02:06:43.941Z"
+  "updatedAt": "2026-02-06T02:39:31.597Z"
 }
