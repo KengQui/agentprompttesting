@@ -1,0 +1,82 @@
+[
+  {
+    "id": "b5a95df1-0d4b-44c4-a335-08c1b1a0766a",
+    "agentId": "6fb89b14-34ca-464a-a7ca-01538a550368",
+    "sessionId": "84f5b4b0-8ef3-456d-9e57-972c747c9fdc",
+    "role": "user",
+    "content": "Michael call in sick today",
+    "timestamp": "2026-02-06T02:06:04.190Z"
+  },
+  {
+    "id": "bf19ddde-ac09-493a-b5bf-92b186806f60",
+    "agentId": "6fb89b14-34ca-464a-a7ca-01538a550368",
+    "sessionId": "84f5b4b0-8ef3-456d-9e57-972c747c9fdc",
+    "role": "assistant",
+    "content": "Okay, I can help you process a sick call-in for Michael today. To confirm, are you referring to Michael Reed (Employee ID: E54321)? Please confirm with 'yes' or provide his employee ID.",
+    "timestamp": "2026-02-06T02:06:05.036Z"
+  },
+  {
+    "id": "0ca808ff-7b44-41e6-8ea4-883ebed5219f",
+    "agentId": "6fb89b14-34ca-464a-a7ca-01538a550368",
+    "sessionId": "84f5b4b0-8ef3-456d-9e57-972c747c9fdc",
+    "role": "user",
+    "content": "yes",
+    "timestamp": "2026-02-06T02:06:12.179Z"
+  },
+  {
+    "id": "ff94871d-940f-49e9-8077-e4e1286d457b",
+    "agentId": "6fb89b14-34ca-464a-a7ca-01538a550368",
+    "sessionId": "84f5b4b0-8ef3-456d-9e57-972c747c9fdc",
+    "role": "assistant",
+    "content": "Great. I've located an assigned shift for Michael Reed (ID: E54321) on February 6, 2026, from 9:00 AM - 5:00 PM (8 hours).\n\nWhat earning code should we use for this absence? Common options include:\n1. Sick Leave (accrual required)\n2. Unpaid Time Off (no accrual)\n\nPlease select one by number or name, or specify another code if available.",
+    "timestamp": "2026-02-06T02:06:13.249Z"
+  },
+  {
+    "id": "0cf065ed-85c2-4021-9fd3-1bbe0d2f81f6",
+    "agentId": "6fb89b14-34ca-464a-a7ca-01538a550368",
+    "sessionId": "84f5b4b0-8ef3-456d-9e57-972c747c9fdc",
+    "role": "user",
+    "content": "1",
+    "timestamp": "2026-02-06T02:06:22.530Z"
+  },
+  {
+    "id": "0c2666f7-3dcf-4300-bda1-d916eff9a751",
+    "agentId": "6fb89b14-34ca-464a-a7ca-01538a550368",
+    "sessionId": "84f5b4b0-8ef3-456d-9e57-972c747c9fdc",
+    "role": "assistant",
+    "content": "Okay, processing Michael Reed's 8-hour absence for February 6, 2026 as Sick Leave.\n\nChecking accrual balance... Michael Reed currently has 24.5 hours of Sick Leave accrual available.\n\nTo proceed, can you please provide any additional notes regarding this absence? If not, you can simply say \"no notes\".",
+    "timestamp": "2026-02-06T02:06:23.541Z"
+  },
+  {
+    "id": "fc8f7b00-ac46-4912-b693-5b26646ca15a",
+    "agentId": "6fb89b14-34ca-464a-a7ca-01538a550368",
+    "sessionId": "84f5b4b0-8ef3-456d-9e57-972c747c9fdc",
+    "role": "user",
+    "content": "No",
+    "timestamp": "2026-02-06T02:06:35.411Z"
+  },
+  {
+    "id": "15b5af87-49c5-44e4-b826-9d10d37d6e18",
+    "agentId": "6fb89b14-34ca-464a-a7ca-01538a550368",
+    "sessionId": "84f5b4b0-8ef3-456d-9e57-972c747c9fdc",
+    "role": "assistant",
+    "content": "You are about to report an absence for employee E54321 on 2026-02-06 for the shift starting at 09:00, classified as Sick Leave (Accrued). This will deduct from accruals, convert the shift to an open shift, and record for payroll. Do you wish to proceed?",
+    "timestamp": "2026-02-06T02:06:36.279Z"
+  },
+  {
+    "id": "3b1669db-ed9a-4ca4-b388-020af2125cd7",
+    "agentId": "6fb89b14-34ca-464a-a7ca-01538a550368",
+    "sessionId": "84f5b4b0-8ef3-456d-9e57-972c747c9fdc",
+    "role": "user",
+    "content": "yes",
+    "timestamp": "2026-02-06T02:06:43.073Z"
+  },
+  {
+    "id": "aaafcdd5-c004-459e-aa4f-7d85dffc3acc",
+    "agentId": "6fb89b14-34ca-464a-a7ca-01538a550368",
+    "sessionId": "84f5b4b0-8ef3-456d-9e57-972c747c9fdc",
+    "role": "assistant",
+    "content": "Successfully reported absence for employee E54321 on 2026-02-06 and updated the schedule. The shift is now open for coverage.",
+    "timestamp": "2026-02-06T02:06:43.942Z"
+  }
+]

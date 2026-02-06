@@ -120,6 +120,90 @@
         }
       ],
       "success": true
+    },
+    {
+      "id": "trace-1770343634622",
+      "sessionId": "34ad2e27-74b7-4662-a1e4-5335180eaa5b",
+      "userInput": "Susan call in sick",
+      "agentResponse": "Okay, I can help with that. To make sure I have the correct information, can you confirm the date and start time of Susan's shift? Also, is this Susan Jones (ID: E12345)?",
+      "startTime": "2026-02-06T02:07:12.841Z",
+      "endTime": "2026-02-06T02:07:14.622Z",
+      "totalDuration": 1781,
+      "entries": [
+        {
+          "id": "entry-1770343633821-1",
+          "type": "intent_classification",
+          "name": "Orchestrator Intent Classification",
+          "timestamp": "2026-02-06T02:07:13.821Z",
+          "metadata": {
+            "intent": "answer_question",
+            "classificationMethod": "orchestrator",
+            "confidence": "high"
+          }
+        },
+        {
+          "id": "entry-1770343634622-3",
+          "type": "llm_call",
+          "name": "Gemini Response Generation",
+          "timestamp": "2026-02-06T02:07:14.622Z",
+          "duration": 801,
+          "metadata": {
+            "model": "gemini",
+            "intent": "answer_question",
+            "validated": true
+          }
+        }
+      ],
+      "success": true
+    },
+    {
+      "id": "trace-1770343646635",
+      "sessionId": "34ad2e27-74b7-4662-a1e4-5335180eaa5b",
+      "userInput": "is there other Susan?",
+      "agentResponse": "Successfully retrieved accrual balances for Susan.",
+      "startTime": "2026-02-06T02:07:26.039Z",
+      "endTime": "2026-02-06T02:07:26.635Z",
+      "totalDuration": 596,
+      "entries": [
+        {
+          "id": "entry-1770343646040-1",
+          "type": "intent_classification",
+          "name": "Orchestrator Intent Classification",
+          "timestamp": "2026-02-06T02:07:26.040Z",
+          "metadata": {
+            "intent": "answer_question",
+            "classificationMethod": "orchestrator",
+            "confidence": "high"
+          }
+        },
+        {
+          "id": "entry-1770343646635-action",
+          "type": "action_simulation",
+          "name": "Action: view_employee_accrual_balances",
+          "timestamp": "2026-02-06T02:07:26.635Z",
+          "metadata": {
+            "actionName": "view_employee_accrual_balances",
+            "fields": {
+              "employee_name": "Susan"
+            },
+            "success": true,
+            "message": "Successfully retrieved accrual balances for Susan."
+          }
+        },
+        {
+          "id": "entry-1770343646635-3",
+          "type": "llm_call",
+          "name": "Gemini Response Generation",
+          "timestamp": "2026-02-06T02:07:26.635Z",
+          "duration": 595,
+          "metadata": {
+            "model": "gemini",
+            "intent": "answer_question",
+            "validated": true
+          }
+        }
+      ],
+      "success": true
     }
   ],
   "stats": {
@@ -128,16 +212,16 @@
     },
     "signalReads": {},
     "intentDistribution": {
-      "answer_question": 4
+      "answer_question": 6
     },
     "classificationMethods": {
-      "orchestrator": 4
+      "orchestrator": 6
     },
-    "avgResponseTime": 7.75,
-    "totalLlmCalls": 0,
+    "avgResponseTime": 401.3333333333333,
+    "totalLlmCalls": 2,
     "totalTokensUsed": 0,
     "errorCount": 0
   },
   "createdAt": "2026-02-05T20:48:26.888Z",
-  "updatedAt": "2026-02-05T21:00:23.324Z"
+  "updatedAt": "2026-02-06T02:07:26.635Z"
 }

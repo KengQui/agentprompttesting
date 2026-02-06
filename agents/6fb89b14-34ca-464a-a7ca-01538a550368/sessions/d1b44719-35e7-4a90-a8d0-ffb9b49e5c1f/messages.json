@@ -46,5 +46,101 @@
     "role": "assistant",
     "content": "Okay, so that's Susan Jones (E12345).\n\nWhat date is Susan Jones calling in sick for?",
     "timestamp": "2026-02-06T02:04:20.169Z"
+  },
+  {
+    "id": "0c8d1e6d-9a2b-473f-b437-d9932fc78b87",
+    "agentId": "6fb89b14-34ca-464a-a7ca-01538a550368",
+    "sessionId": "d1b44719-35e7-4a90-a8d0-ffb9b49e5c1f",
+    "role": "user",
+    "content": "today",
+    "timestamp": "2026-02-06T02:04:24.652Z"
+  },
+  {
+    "id": "92543a98-3f55-41f6-9b47-5c42b2be30d4",
+    "agentId": "6fb89b14-34ca-464a-a7ca-01538a550368",
+    "sessionId": "d1b44719-35e7-4a90-a8d0-ffb9b49e5c1f",
+    "role": "assistant",
+    "content": "Understood. That would be February 6, 2026.\n\nI see that Susan Jones (E12345) does not have an assigned shift today, February 6, 2026. Would you like me to check her schedule for a different date or review her upcoming shifts?",
+    "timestamp": "2026-02-06T02:04:25.655Z"
+  },
+  {
+    "id": "1a1f942d-8b29-4e6f-93af-7e19088ef8c0",
+    "agentId": "6fb89b14-34ca-464a-a7ca-01538a550368",
+    "sessionId": "d1b44719-35e7-4a90-a8d0-ffb9b49e5c1f",
+    "role": "user",
+    "content": "review her upcoming shifts",
+    "timestamp": "2026-02-06T02:04:44.831Z"
+  },
+  {
+    "id": "cd8d2cbf-a0fe-4a36-843d-5642bcb4bb60",
+    "agentId": "6fb89b14-34ca-464a-a7ca-01538a550368",
+    "sessionId": "d1b44719-35e7-4a90-a8d0-ffb9b49e5c1f",
+    "role": "assistant",
+    "content": "Okay, I will check Susan Jones' upcoming shifts.\n\nI see that Susan Jones (E12345) has an assigned shift on February 05, 2026, which is yesterday. It was scheduled to start at 9:00 AM.\n\nIs Susan calling in for that shift?",
+    "timestamp": "2026-02-06T02:04:45.882Z"
+  },
+  {
+    "id": "3c0d11e2-9122-4bde-ba10-c1ac928a6909",
+    "agentId": "6fb89b14-34ca-464a-a7ca-01538a550368",
+    "sessionId": "d1b44719-35e7-4a90-a8d0-ffb9b49e5c1f",
+    "role": "user",
+    "content": "that is silly",
+    "timestamp": "2026-02-06T02:05:01.872Z"
+  },
+  {
+    "id": "98c34bce-a287-46f7-b68b-3b53d7a677a3",
+    "agentId": "6fb89b14-34ca-464a-a7ca-01538a550368",
+    "sessionId": "d1b44719-35e7-4a90-a8d0-ffb9b49e5c1f",
+    "role": "assistant",
+    "content": "I apologize for the confusion. Let's get this right.\n\nI need to confirm the date for which Susan Jones (E12345) is calling in sick. Could you please provide the correct date?",
+    "timestamp": "2026-02-06T02:05:02.690Z"
+  },
+  {
+    "id": "a509c4ef-5f59-4d02-a0b7-bdfddc496db8",
+    "agentId": "6fb89b14-34ca-464a-a7ca-01538a550368",
+    "sessionId": "d1b44719-35e7-4a90-a8d0-ffb9b49e5c1f",
+    "role": "user",
+    "content": "Today",
+    "timestamp": "2026-02-06T02:05:09.822Z"
+  },
+  {
+    "id": "aeb1158b-d4bd-4876-bc1d-7e30161945cc",
+    "agentId": "6fb89b14-34ca-464a-a7ca-01538a550368",
+    "sessionId": "d1b44719-35e7-4a90-a8d0-ffb9b49e5c1f",
+    "role": "assistant",
+    "content": "Okay, that would be February 6, 2026.\n\nI see that Susan Jones (E12345) does not have an assigned shift today, February 6, 2026.\n\nCan you confirm the correct date for this call-in? If she is not scheduled, do you want to proceed anyway?",
+    "timestamp": "2026-02-06T02:05:10.766Z"
+  },
+  {
+    "id": "f885eeb1-ad99-460b-a4fd-3b29e2040613",
+    "agentId": "6fb89b14-34ca-464a-a7ca-01538a550368",
+    "sessionId": "d1b44719-35e7-4a90-a8d0-ffb9b49e5c1f",
+    "role": "user",
+    "content": "when is she scheduled",
+    "timestamp": "2026-02-06T02:05:27.377Z"
+  },
+  {
+    "id": "50c8f349-6ad9-4273-872a-b7aa98375544",
+    "agentId": "6fb89b14-34ca-464a-a7ca-01538a550368",
+    "sessionId": "d1b44719-35e7-4a90-a8d0-ffb9b49e5c1f",
+    "role": "assistant",
+    "content": "Okay, let's take a look at Susan Jones' schedule.\n\nI see that Susan Jones (E12345) has an assigned shift on February 03, 2026, which was earlier this week.\n\nI also see that Susan Jones (E12345) has an assigned shift on February 05, 2026, which was yesterday. It was scheduled to start at 9:00 AM.\n\nI also see that Susan Jones (E12345) has an assigned shift on February 08, 2026, which is this Sunday. It is scheduled to start at 9:00 AM.\n\nIs Susan calling in sick for February 8th?",
+    "timestamp": "2026-02-06T02:05:28.808Z"
+  },
+  {
+    "id": "94e47328-7854-424b-961f-2e2aa20828c5",
+    "agentId": "6fb89b14-34ca-464a-a7ca-01538a550368",
+    "sessionId": "d1b44719-35e7-4a90-a8d0-ffb9b49e5c1f",
+    "role": "user",
+    "content": "who is schedule to work today",
+    "timestamp": "2026-02-06T02:05:47.561Z"
+  },
+  {
+    "id": "a419bb76-0f57-43ff-81a2-65141bf8c4de",
+    "agentId": "6fb89b14-34ca-464a-a7ca-01538a550368",
+    "sessionId": "d1b44719-35e7-4a90-a8d0-ffb9b49e5c1f",
+    "role": "assistant",
+    "content": "Okay, let me check who is scheduled to work today, February 6, 2026.\n\nMichael Reed (E54321) is scheduled to work today.\n\nIs there anyone else you would like me to look up?",
+    "timestamp": "2026-02-06T02:05:48.339Z"
   }
 ]

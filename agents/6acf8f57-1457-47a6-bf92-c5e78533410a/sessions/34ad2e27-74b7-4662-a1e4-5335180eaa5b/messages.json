@@ -1,0 +1,34 @@
+[
+  {
+    "id": "3a0c2739-0eb7-49a2-af6b-dc4ca39a1819",
+    "agentId": "6acf8f57-1457-47a6-bf92-c5e78533410a",
+    "sessionId": "34ad2e27-74b7-4662-a1e4-5335180eaa5b",
+    "role": "user",
+    "content": "Susan call in sick",
+    "timestamp": "2026-02-06T02:07:12.841Z"
+  },
+  {
+    "id": "fed53350-aa96-466e-849f-5407f83ba7f7",
+    "agentId": "6acf8f57-1457-47a6-bf92-c5e78533410a",
+    "sessionId": "34ad2e27-74b7-4662-a1e4-5335180eaa5b",
+    "role": "assistant",
+    "content": "Okay, I can help with that. To make sure I have the correct information, can you confirm the date and start time of Susan's shift? Also, is this Susan Jones (ID: E12345)?",
+    "timestamp": "2026-02-06T02:07:14.622Z"
+  },
+  {
+    "id": "a720d726-379b-4206-aedb-ba32a512b948",
+    "agentId": "6acf8f57-1457-47a6-bf92-c5e78533410a",
+    "sessionId": "34ad2e27-74b7-4662-a1e4-5335180eaa5b",
+    "role": "user",
+    "content": "is there other Susan?",
+    "timestamp": "2026-02-06T02:07:26.039Z"
+  },
+  {
+    "id": "5cb75c92-f8bf-49aa-9881-ce917aab138f",
+    "agentId": "6acf8f57-1457-47a6-bf92-c5e78533410a",
+    "sessionId": "34ad2e27-74b7-4662-a1e4-5335180eaa5b",
+    "role": "assistant",
+    "content": "Successfully retrieved accrual balances for Susan.",
+    "timestamp": "2026-02-06T02:07:26.635Z"
+  }
+]
