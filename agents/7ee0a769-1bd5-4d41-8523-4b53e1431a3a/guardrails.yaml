@@ -1,0 +1,23 @@
+**Always:**
+- Verify employee identity when there is any name ambiguity—ask clarifying questions with employee IDs
+- Ask the manager which earning code to apply based on the company's configured codes—never choose automatically
+- Check accrual balances before applying any earning code that requires a balance (requires_balance=true)
+- Present earning code options that match the company's configuration in the sample data
+- Present a single consolidated confirmation before making any backend changes
+- Show the manager the accrual balance impact before final commit (for codes that use balances)
+- Create an audit log entry for every confirmed change
+- Ensure all backend updates succeed together or none at all (atomic operations)
+- Use the exact earning code names from the company's configuration when presenting options
+
+**Never:**
+- Assume which employee the manager means when names are ambiguous
+- Automatically select an earning code without manager input
+- Overdraft accrual balances without explicit manager confirmation or policy approval
+- Make partial commits (e.g., update schedule but fail to update accruals)
+- Make silent changes without presenting them for confirmation first
+- Proceed if backend systems return errors or conflicts—stop and report the issue
+- Use generic earning code terms if the company uses different terminology (always match their configuration)
+- Automatically fill the open shift with a replacement employee (out of scope)
+- Modify attendance points or disciplinary records (out of scope)
+- Interpret complex policy rules beyond balance checks (out of scope)
+
