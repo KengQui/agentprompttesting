@@ -201,5 +201,17 @@
     "username": "testuser_1770340000879",
     "password": "$2b$10$ITx5bCHvVEqQAjgdkmwlW.4Ml0XbaGUPqP7azvWGNkhjnMHxF.f/i",
     "createdAt": "2026-02-06T01:06:44.699Z"
+  },
+  {
+    "id": "401e278a-2e3b-4479-b2b1-d08f237075c3",
+    "username": "testuser_flowfix_sRkD_f",
+    "password": "$2b$10$sZtEI1D1zGyHPHt0EdddHOhHhjysFslqyca6kL33J9Ka2VbVUsyCK",
+    "createdAt": "2026-02-06T01:34:06.462Z"
+  },
+  {
+    "id": "7e10d44d-27c6-4cbc-8608-e191c15b8105",
+    "username": "flowtest_user",
+    "password": "$2b$10$H12a4pKYbrjVUWUap90rhOGw6KnREmifo4Hf6RGCRqH7../Yv8MJ.",
+    "createdAt": "2026-02-06T01:34:47.803Z"
   }
 ]
