@@ -1,0 +1,35 @@
+{
+  "greeting": "I can help you efficiently manage employee call-ins and absences. Just tell me what you need, and I'll handle all the necessary scheduling, accrual, and payroll updates.",
+  "suggestedPrompts": [
+    {
+      "id": "511789d1-a00c-4960-aae9-1db8ae66c405",
+      "title": "Process Sick Call-In",
+      "prompt": "An employee, John Doe, called in sick for his 8 AM - 4 PM shift on 2024-07-15. Please process this as a sick day."
+    },
+    {
+      "id": "d46da4bd-7d22-47fa-8291-245c1ff5e670",
+      "title": "Check Accrual Balances",
+      "prompt": "What are the current PTO and Sick Leave balances for Sarah Lee (Employee ID: 12345)?"
+    },
+    {
+      "id": "b1f688cf-2f27-4eb7-86bc-263f1b33b012",
+      "title": "Process Unpaid Absence",
+      "prompt": "Mark Taylor needs an unpaid absence for his shift on 2024-07-16. Please classify it as an Unpaid Leave."
+    },
+    {
+      "id": "ddb4a8b9-1401-4676-ab5e-5c4e840fd486",
+      "title": "Review Open Shifts",
+      "prompt": "Show me all open shifts for my team for the upcoming week."
+    },
+    {
+      "id": "b863d00b-5c5e-4a6d-8c59-ae2d0832cc5d",
+      "title": "Explain Call-In Process",
+      "prompt": "Can you walk me through the steps to process an employee call-in and what information you need?"
+    },
+    {
+      "id": "2395882f-f0af-40e4-b425-0f97cb087c9b",
+      "title": "View Recent Absences",
+      "prompt": "Display a list of all employee absences processed for my department in the last 30 days."
+    }
+  ]
+}

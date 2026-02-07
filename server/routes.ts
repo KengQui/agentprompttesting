@@ -29,7 +29,7 @@ async function requireAuth(req: AuthenticatedRequest, res: Response, next: NextF
   req.user = user;
   next();
 }
-import { generateAgentResponse, generateValidationRules, generateGuardrails, generateSystemPrompt, generateSampleData, evaluateContextSufficiency, processClarifyingChat, generateValidationRulesWithInsights, generateGuardrailsWithInsights, generateActionsAndMockData, parseActionFromResponse, stripActionBlocks, executeSimulatedAction, executeActionWithSampleData, extractBusinessCaseContent, sampleDatasetsToWorkingData, workingDataToSampleDatasets, type GenerationContext, type SystemPromptContext, type SampleDataGenerationContext, type ClarifyingChatContext, type ActionsGenerationContext, type ExtractionResult } from "./gemini";
+import { generateAgentResponse, generateValidationRules, generateGuardrails, generateSystemPrompt, generateSampleData, evaluateContextSufficiency, processClarifyingChat, generateValidationRulesWithInsights, generateGuardrailsWithInsights, generateActionsAndMockData, parseActionFromResponse, stripActionBlocks, executeSimulatedAction, executeActionWithSampleData, extractBusinessCaseContent, sampleDatasetsToWorkingData, workingDataToSampleDatasets, generateWelcomeConfig, type GenerationContext, type SystemPromptContext, type SampleDataGenerationContext, type ClarifyingChatContext, type ActionsGenerationContext, type ExtractionResult, type WelcomeConfigGenerationContext } from "./gemini";
 import { loadAgentComponents, clearAgentCache, hasCustomComponents } from "./agent-loader";
 import { createRecoveryManager } from "./components/recovery-manager";
 import multer from "multer";
@@ -1800,6 +1800,90 @@ export async function registerRoutes(
     } catch (error) {
       console.error("Error simulating config:", error);
       res.status(500).json({ message: "Failed to simulate config" });
+    }
+  });
+
+  // Generate welcome config using AI
+  app.post("/api/generate/welcome-config", async (req, res) => {
+    try {
+      const welcomeConfigRequestSchema = z.object({
+        name: z.string().min(1, "Agent name is required"),
+        businessUseCase: z.string().min(1, "Business use case is required"),
+        domainKnowledge: z.string().optional(),
+        model: z.enum(["gemini-2.5-flash", "gemini-2.5-pro", "gemini-3-flash-preview", "gemini-3-pro-preview"]).optional(),
+      });
+
+      const parsed = welcomeConfigRequestSchema.safeParse(req.body);
+      if (!parsed.success) {
+        return res.status(400).json({ message: parsed.error.errors[0]?.message || "Invalid request" });
+      }
+
+      const context: WelcomeConfigGenerationContext = {
+        name: parsed.data.name,
+        businessUseCase: parsed.data.businessUseCase,
+        domainKnowledge: parsed.data.domainKnowledge,
+        model: parsed.data.model,
+      };
+
+      const welcomeConfig = await generateWelcomeConfig(context);
+      res.json(welcomeConfig);
+    } catch (error: any) {
+      console.error("Error generating welcome config:", error);
+      res.status(500).json({ message: error?.message || "Failed to generate welcome config" });
+    }
+  });
+
+  // Save welcome config for an agent
+  app.put("/api/agents/:id/welcome-config", requireAuth, async (req, res) => {
+    try {
+      const agent = await storage.getAgent(req.params.id);
+      if (!agent) return res.status(404).json({ message: "Agent not found" });
+      if (agent.userId && agent.userId !== req.user!.id) return res.status(403).json({ message: "Forbidden" });
+
+      const { welcomeConfigSchema } = await import("@shared/schema");
+      const parsed = welcomeConfigSchema.safeParse(req.body);
+      if (!parsed.success) {
+        return res.status(400).json({ message: parsed.error.errors[0]?.message || "Invalid welcome config" });
+      }
+
+      await storage.updateAgent(req.params.id, { welcomeConfig: parsed.data });
+      res.json(parsed.data);
+    } catch (error: any) {
+      console.error("Error saving welcome config:", error);
+      res.status(500).json({ message: error?.message || "Failed to save welcome config" });
+    }
+  });
+
+  // Get welcome config for an agent (public - used by chat page)
+  // Auto-generates for existing agents that don't have one yet
+  app.get("/api/agents/:id/welcome-config", async (req, res) => {
+    try {
+      const agent = await storage.getAgent(req.params.id);
+      if (!agent) return res.status(404).json({ message: "Agent not found" });
+
+      if (agent.welcomeConfig) {
+        return res.json(agent.welcomeConfig);
+      }
+
+      // Auto-generate for existing agents that have a business use case
+      if (agent.businessUseCase && agent.businessUseCase.trim()) {
+        try {
+          const config = await generateWelcomeConfig({
+            name: agent.name,
+            businessUseCase: agent.businessUseCase,
+            domainKnowledge: agent.domainKnowledge,
+          });
+          await storage.updateAgent(agent.id, { welcomeConfig: config });
+          return res.json(config);
+        } catch (genError) {
+          console.error("Auto-generate welcome config failed:", genError);
+        }
+      }
+
+      res.json({ enabled: false, greeting: "", suggestedPrompts: [] });
+    } catch (error: any) {
+      console.error("Error getting welcome config:", error);
+      res.status(500).json({ message: error?.message || "Failed to get welcome config" });
     }
   });
 

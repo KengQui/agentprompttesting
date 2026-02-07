@@ -1885,3 +1885,80 @@ Return only the JSON response with extracted content.`;
     };
   }
 }
+
+export interface WelcomeConfigGenerationContext {
+  name: string;
+  businessUseCase: string;
+  domainKnowledge?: string;
+  model?: GeminiModel;
+}
+
+export interface GeneratedWelcomeConfig {
+  greeting: string;
+  suggestedPrompts: Array<{ id: string; title: string; prompt: string }>;
+}
+
+export async function generateWelcomeConfig(context: WelcomeConfigGenerationContext): Promise<GeneratedWelcomeConfig> {
+  const modelToUse = context.model || defaultGenerationModel;
+  if (!process.env.GEMINI_API_KEY) {
+    throw new Error("GEMINI_API_KEY is not configured");
+  }
+
+  const systemPrompt = `You are an expert at creating welcoming, user-friendly start screens for AI agents. Based on the agent's name, business use case, and domain knowledge, generate:
+
+1. A short, friendly greeting message (1-2 sentences) that tells the user what this agent can help with. Do NOT include the agent's name in the greeting. Keep it conversational and action-oriented.
+
+2. Exactly 4-6 suggested prompts that represent the most common tasks users would want to do with this agent. Each prompt should have:
+   - A short title (2-5 words) that describes the task category
+   - A complete, ready-to-send prompt that the user can click to immediately start a conversation
+
+The prompts should cover the breadth of what the agent can do, from simple to moderate complexity.
+
+IMPORTANT: Return ONLY valid JSON in this exact format, no markdown, no code fences:
+{
+  "greeting": "Your greeting message here",
+  "suggestedPrompts": [
+    { "title": "Short Title", "prompt": "The full prompt text the user would send" },
+    { "title": "Another Title", "prompt": "Another full prompt" }
+  ]
+}`;
+
+  const userPrompt = `Agent Name: ${context.name}
+
+Business Use Case:
+${context.businessUseCase}
+
+${context.domainKnowledge ? `Domain Knowledge:\n${context.domainKnowledge}` : ""}
+
+Generate the welcome screen configuration.`;
+
+  try {
+    const response = await ai.models.generateContent({
+      model: modelToUse,
+      contents: [{ role: "user", parts: [{ text: userPrompt }] }],
+      config: {
+        systemInstruction: systemPrompt,
+        temperature: 0.7,
+        maxOutputTokens: 2000,
+      },
+    });
+
+    const text = response.text?.trim() || "";
+    const cleanedText = text.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
+    const parsed = JSON.parse(cleanedText);
+
+    const suggestedPrompts = (parsed.suggestedPrompts || []).map((p: any, i: number) => ({
+      id: uuidv4(),
+      title: p.title || `Prompt ${i + 1}`,
+      prompt: p.prompt || "",
+    }));
+
+    return {
+      greeting: parsed.greeting || `How can I help you today?`,
+      suggestedPrompts,
+    };
+  } catch (error: any) {
+    console.error("Error generating welcome config:", error);
+    throw new Error(`Failed to generate welcome config: ${error?.message || error}`);
+  }
+}

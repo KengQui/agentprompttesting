@@ -13,7 +13,7 @@ import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { ContextProgressBar } from "@/components/context-progress-bar";
 import { SessionSidebar } from "@/components/session-sidebar";
-import type { Agent, ChatMessage, ChatSession, ChatSessionWithPreview } from "@shared/schema";
+import type { Agent, ChatMessage, ChatSession, ChatSessionWithPreview, WelcomeConfig } from "@shared/schema";
 
 const MAX_MESSAGE_LENGTH = 2000;
 const RATE_LIMIT_COOLDOWN = 2000;
@@ -157,9 +157,47 @@ function detectTopic(messages: ChatMessage[]): string | null {
   return 'General';
 }
 
-function EmptyChat({ agentName, hasSession }: { agentName: string; hasSession: boolean }) {
+function EmptyChat({ agentName, hasSession, welcomeConfig, onSendPrompt }: { 
+  agentName: string; 
+  hasSession: boolean;
+  welcomeConfig?: WelcomeConfig | null;
+  onSendPrompt?: (prompt: string) => void;
+}) {
+  if (welcomeConfig?.enabled && welcomeConfig.suggestedPrompts?.length > 0) {
+    return (
+      <div className="flex flex-col items-center justify-center h-full py-8" data-testid="welcome-screen">
+        <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary/10 mb-4">
+          <Bot className="h-7 w-7 text-primary" />
+        </div>
+        <h3 className="text-xl font-semibold mb-1" data-testid="text-welcome-greeting-title">
+          {agentName}
+        </h3>
+        <p className="text-muted-foreground text-center max-w-md mb-6" data-testid="text-welcome-greeting">
+          {welcomeConfig.greeting}
+        </p>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full max-w-lg">
+          {welcomeConfig.suggestedPrompts.map((prompt, index) => (
+            <Card
+              key={prompt.id || index}
+              className="hover-elevate cursor-pointer p-4 transition-colors"
+              onClick={() => onSendPrompt?.(prompt.prompt)}
+              data-testid={`card-suggested-prompt-${index}`}
+            >
+              <p className="text-sm font-medium mb-1" data-testid={`text-prompt-title-${index}`}>
+                {prompt.title}
+              </p>
+              <p className="text-xs text-muted-foreground line-clamp-2" data-testid={`text-prompt-text-${index}`}>
+                {prompt.prompt}
+              </p>
+            </Card>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="flex flex-col items-center justify-center h-full py-12">
+    <div className="flex flex-col items-center justify-center h-full py-12" data-testid="empty-chat">
       <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 mb-4">
         <Bot className="h-8 w-8 text-primary" />
       </div>
@@ -189,9 +227,15 @@ export default function Chat() {
   const scrollRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
+  const pendingPromptRef = useRef<string | null>(null);
 
   const { data: agent, isLoading: agentLoading } = useQuery<Agent>({
     queryKey: ["/api/agents", params.id],
+  });
+
+  const { data: welcomeConfig } = useQuery<WelcomeConfig>({
+    queryKey: ["/api/agents", params.id, "welcome-config"],
+    enabled: !!params.id,
   });
 
   const { data: sessions = [], isLoading: sessionsLoading } = useQuery<ChatSessionWithPreview[]>({
@@ -357,6 +401,42 @@ export default function Chat() {
     if (!message.trim() || sendMutation.isPending || isRateLimited || isOverLimit || !activeSessionId) return;
     sendMutation.mutate(message.trim());
     setMessage("");
+  };
+
+  useEffect(() => {
+    if (activeSessionId && pendingPromptRef.current && !sendMutation.isPending) {
+      const prompt = pendingPromptRef.current;
+      pendingPromptRef.current = null;
+      sendMutation.mutate(prompt);
+    }
+  }, [activeSessionId]);
+
+  const handleSendPrompt = async (prompt: string) => {
+    if (sendMutation.isPending) return;
+    const trimmed = prompt.trim();
+    if (!trimmed) return;
+
+    if (!activeSessionId) {
+      pendingPromptRef.current = trimmed;
+      try {
+        const response = await apiRequest("POST", `/api/agents/${params.id}/sessions`, {
+          title: "New Session",
+        });
+        const session = await response.json() as ChatSession;
+        queryClient.invalidateQueries({ queryKey: ["/api/agents", params.id, "sessions"] });
+        setActiveSessionId(session.id);
+      } catch {
+        pendingPromptRef.current = null;
+        toast({
+          title: "Error",
+          description: "Failed to create session",
+          variant: "destructive",
+        });
+      }
+      return;
+    }
+
+    sendMutation.mutate(trimmed);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -554,7 +634,7 @@ export default function Chat() {
                   ))}
                 </div>
               ) : !activeSessionId || messages.length === 0 ? (
-                <EmptyChat agentName={agent.name} hasSession={!!activeSessionId} />
+                <EmptyChat agentName={agent.name} hasSession={!!activeSessionId} welcomeConfig={welcomeConfig} onSendPrompt={handleSendPrompt} />
               ) : (
                 <div className="space-y-4">
                   {messages.map((msg) => (

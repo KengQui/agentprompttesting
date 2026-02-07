@@ -435,6 +435,7 @@ export class MemStorage implements IStorage {
     const clarifyingInsights = readJsonFile<ClarifyingInsight[]>(getAgentFilePath(agentId, "clarifying-insights.json"), []);
     const availableActions = readJsonFile<AgentAction[]>(getAgentFilePath(agentId, "available-actions.json"), []);
     const mockUserState = readJsonFile<MockUserState[]>(getAgentFilePath(agentId, "mock-user-state.json"), []);
+    const welcomeConfig = readJsonFile<import("@shared/schema").WelcomeConfig | undefined>(getAgentFilePath(agentId, "welcome-config.json"), undefined);
     
     return {
       id: agentId,
@@ -456,6 +457,7 @@ export class MemStorage implements IStorage {
       clarifyingInsights,
       availableActions,
       mockUserState,
+      welcomeConfig,
     };
   }
 
@@ -553,6 +555,11 @@ export class MemStorage implements IStorage {
     // 11. Save mock-user-state.json
     writeJsonFile(getAgentFilePath(agent.id, "mock-user-state.json"), agent.mockUserState || []);
 
+    // 12. Save welcome-config.json (only if defined)
+    if (agent.welcomeConfig) {
+      writeJsonFile(getAgentFilePath(agent.id, "welcome-config.json"), agent.welcomeConfig);
+    }
+
     // Clean up legacy files if they exist
     const legacyConfigPath = getAgentFilePath(agent.id, AGENT_FILES.LEGACY_CONFIG);
     const legacyDataPath = getAgentFilePath(agent.id, AGENT_FILES.LEGACY_DATA);
@@ -631,6 +638,7 @@ export class MemStorage implements IStorage {
       availableActions: insertAgent.availableActions || [],
       mockUserState: insertAgent.mockUserState || [],
       mockMode: insertAgent.mockMode || "full",
+      welcomeConfig: insertAgent.welcomeConfig,
       status,
       configurationStep: insertAgent.configurationStep || 1,
       createdAt: now,
@@ -695,6 +703,7 @@ export class MemStorage implements IStorage {
       availableActions: JSON.parse(JSON.stringify(source.availableActions)),
       mockUserState: JSON.parse(JSON.stringify(source.mockUserState)),
       mockMode: source.mockMode,
+      welcomeConfig: source.welcomeConfig ? JSON.parse(JSON.stringify(source.welcomeConfig)) : undefined,
       status: source.status === "draft" ? "draft" : "configured",
       configurationStep: source.configurationStep,
     };

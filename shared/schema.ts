@@ -111,6 +111,25 @@ export const mockModeDescriptions: Record<MockMode, string> = {
   "read_only": "Read-only mock - allows reads but simulates writes locally"
 };
 
+// Welcome screen suggested prompt schema
+export const welcomePromptSchema = z.object({
+  id: z.string(),
+  title: z.string(),
+  prompt: z.string(),
+  icon: z.string().optional(),
+});
+
+export type WelcomePrompt = z.infer<typeof welcomePromptSchema>;
+
+// Welcome screen config schema
+export const welcomeConfigSchema = z.object({
+  enabled: z.boolean().default(true),
+  greeting: z.string().default(""),
+  suggestedPrompts: z.array(welcomePromptSchema).default([]),
+});
+
+export type WelcomeConfig = z.infer<typeof welcomeConfigSchema>;
+
 // Agent schema
 export const agentSchema = z.object({
   id: z.string(),
@@ -129,6 +148,7 @@ export const agentSchema = z.object({
   availableActions: z.array(agentActionSchema).default([]),
   mockUserState: z.array(mockUserStateSchema).default([]),
   mockMode: mockModeEnum.default("full"), // Default to full mock for usability testing
+  welcomeConfig: welcomeConfigSchema.optional(),
   status: agentStatusEnum.default("draft"),
   configurationStep: z.number().default(1), // Track wizard progress for draft agents
   createdAt: z.string(),
@@ -223,6 +243,7 @@ export const wizardStepSchema = z.object({
   availableActions: z.array(agentActionSchema).default([]),
   mockUserState: z.array(mockUserStateSchema).default([]),
   mockMode: mockModeEnum.default("full"),
+  welcomeConfig: welcomeConfigSchema.optional(),
 });
 
 export type WizardStepData = z.infer<typeof wizardStepSchema>;
