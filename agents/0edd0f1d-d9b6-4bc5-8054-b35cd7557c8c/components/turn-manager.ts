@@ -1,5 +1,5 @@
 /**
- * Turn Manager - Copy of HCM Report Custom Column Expression Builder
+ * Turn Manager - HCM Report Custom Column Expression Builder
  * 
  * Customized intent classification for this agent.
  * Modify keywords to match your domain-specific language.
@@ -38,12 +38,12 @@ const CONFIG: TurnManagerConfig = {
   ]
 };
 
-export class CopyofHCMReportCustomColumnExpressionBuilderTurnManager extends BaseTurnManager {
+export class HCMReportCustomColumnExpressionBuilderTurnManager extends BaseTurnManager {
   constructor() {
     super(CONFIG);
   }
 }
 
-export function createTurnManager(): CopyofHCMReportCustomColumnExpressionBuilderTurnManager {
-  return new CopyofHCMReportCustomColumnExpressionBuilderTurnManager();
+export function createTurnManager(): HCMReportCustomColumnExpressionBuilderTurnManager {
+  return new HCMReportCustomColumnExpressionBuilderTurnManager();
 }

@@ -1,0 +1,36 @@
+{
+  "enabled": true,
+  "greeting": "Hi [user name], I can help you craft custom column expressions for your HCM reports. Tell me what data you want to calculate, compare, or transform, and I'll guide you through building the perfect formula.",
+  "suggestedPrompts": [
+    {
+      "id": "f225a368-e155-467e-8890-e3a024542c1f",
+      "title": "Calculate Annual Salary",
+      "prompt": "I need to calculate 'Annual Salary'. I have 'HourlyRate' (text) and 'StandardHoursPerWeek' (numeric). Assume 52 weeks per year."
+    },
+    {
+      "id": "89b7ef5a-e36d-4f74-a2d1-854dd76111c4",
+      "title": "Combine Full Name",
+      "prompt": "Create a 'Full Name' column by combining 'FirstName' and 'LastName'. I want it formatted as 'LastName, FirstName'."
+    },
+    {
+      "id": "c5fc007d-e066-42bd-8b57-c569510b1150",
+      "title": "Determine Bonus Eligibility",
+      "prompt": "I want a 'Bonus Eligibility' column. If 'PerformanceRating' is 'Exceeds Expectations' AND 'YearsOfService' is greater than or equal to 5, the value should be 'Eligible'. Otherwise, it should be 'Not Eligible'."
+    },
+    {
+      "id": "de168b93-ab4d-40cb-9c00-7ceb3d88c3aa",
+      "title": "Calculate Employee Tenure",
+      "prompt": "I need to calculate 'Employee Tenure' in years. I have 'HireDate' and I want to compare it to today's date."
+    },
+    {
+      "id": "395ddff4-8d6e-46c4-9abf-610ffcf27293",
+      "title": "Extract Department Code",
+      "prompt": "From the 'DepartmentID' column (e.g., 'HR-1234', 'FIN-5678'), I need to extract only the numeric part after the hyphen, assuming it's always four digits."
+    },
+    {
+      "id": "16e2a8b8-3f82-4bc1-99db-6eed7b17bca2",
+      "title": "Format Phone Number",
+      "prompt": "Format 'PhoneNumber' (text) into '(XXX) XXX-XXXX'. If the 'PhoneNumber' field is empty, it should display 'N/A'."
+    }
+  ]
+}
