@@ -1,5 +1,5 @@
 /**
- * Flow Controller - HCM Report Custom Column Expression Builder
+ * Flow Controller - Copy of HCM Report Custom Column Expression Builder
  * 
  * Define your conversation flow steps here.
  * Customize questions, validation, and help text.
@@ -30,12 +30,12 @@ const CONFIG: FlowControllerConfig = {
   completionMessage: "Thanks for chatting! Let me know if you need anything else."
 };
 
-export class HCMReportCustomColumnExpressionBuilderFlowController extends BaseFlowController {
+export class CopyofHCMReportCustomColumnExpressionBuilderFlowController extends BaseFlowController {
   constructor() {
     super(CONFIG);
   }
 }
 
-export function createFlowController(): HCMReportCustomColumnExpressionBuilderFlowController {
-  return new HCMReportCustomColumnExpressionBuilderFlowController();
+export function createFlowController(): CopyofHCMReportCustomColumnExpressionBuilderFlowController {
+  return new CopyofHCMReportCustomColumnExpressionBuilderFlowController();
 }

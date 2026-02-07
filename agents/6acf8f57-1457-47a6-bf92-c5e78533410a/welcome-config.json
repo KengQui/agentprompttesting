@@ -1,0 +1,30 @@
+{
+  "greeting": "I can help you quickly process employee call-ins, manage shift changes, and ensure accurate time-off tracking. Just tell me who called in and for which shift.",
+  "suggestedPrompts": [
+    {
+      "id": "75d8f621-8691-4ac5-8535-41039227ff6a",
+      "title": "Mark Employee Call-In",
+      "prompt": "Mark Susan Jones as a call-in for her shift today."
+    },
+    {
+      "id": "6bcdc9e7-bc5b-40da-9065-5b086b0f9685",
+      "title": "Call-In with PTO",
+      "prompt": "Michael Reed called in. Please use PTO for his absence."
+    },
+    {
+      "id": "d80c1a0c-0bbf-4ea3-9e65-0bcbffd9b96a",
+      "title": "Call-In for 'Susie'",
+      "prompt": "Susie called out for her shift today."
+    },
+    {
+      "id": "a2870631-bb03-4529-b7d9-f7cd35225b8d",
+      "title": "Specific Date Call-In",
+      "prompt": "Mark Susan Jones as a call-in for her 9 AM shift on 2/3/2026. Use sick leave."
+    },
+    {
+      "id": "72c30d64-97d3-4515-b680-ae5cb5160f56",
+      "title": "Mark Unpaid Call-In",
+      "prompt": "Mark Michael Reed as a call-in, it should be unpaid."
+    }
+  ]
+}

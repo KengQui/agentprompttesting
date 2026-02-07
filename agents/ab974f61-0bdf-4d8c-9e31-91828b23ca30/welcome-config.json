@@ -1,0 +1,36 @@
+{
+  "enabled": true,
+  "greeting": "I can help you create powerful custom column expressions for your HCM reports. Tell me what data you want to calculate or transform, and I'll guide you through building the expression.",
+  "suggestedPrompts": [
+    {
+      "id": "1b350635-b82a-47a0-aeae-4f14f09adbd5",
+      "title": "Annualized Hourly Pay",
+      "prompt": "I need to calculate the annualized pay for hourly employees. Can you help me write an expression that multiplies 'Hourly Pay' by 2080 (40 hours/week, 52 weeks/year)?"
+    },
+    {
+      "id": "e0b1e956-1838-4f2d-96f9-a5995021ed99",
+      "title": "Employee Pay Status",
+      "prompt": "Create a new column that shows 'Salaried' if the 'Pay Type' is 'Salaried', and 'Hourly' otherwise."
+    },
+    {
+      "id": "2fbfec20-4d77-4526-95e4-4b776f64bac9",
+      "title": "Years of Service",
+      "prompt": "I want to calculate the years of service for each employee based on their 'Hire Date' and today's date, rounded to two decimal places."
+    },
+    {
+      "id": "1aba6c9c-f6dd-490b-81f3-ec0d392be10d",
+      "title": "Full Employee Identifier",
+      "prompt": "Combine 'Employee Name' and 'Employee ID' into a single column, formatted as 'Name (ID)'."
+    },
+    {
+      "id": "56bf49ed-be6d-4e01-9fb2-3843081099d6",
+      "title": "Total Benefit Cost",
+      "prompt": "Calculate the total benefit cost by summing 'Scheduled EE Amount' and 'Scheduled ER Amount'."
+    },
+    {
+      "id": "55b168a7-8b59-447d-9ba0-5860cccce7e5",
+      "title": "LOTO Authorized Check",
+      "prompt": "Create a new column that indicates 'True' if an employee's 'Training Profile' includes 'LOTO Authorized', and 'False' otherwise."
+    }
+  ]
+}

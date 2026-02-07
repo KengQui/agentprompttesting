@@ -1,5 +1,5 @@
 /**
- * Orchestrator - HCM Report Custom Column Expression Builder
+ * Orchestrator - Copy of HCM Report Custom Column Expression Builder
  * 
  * Coordinates all components for this agent.
  * Override handlers to customize behavior.
@@ -11,11 +11,11 @@
 import { 
   Orchestrator as BaseOrchestrator
 } from '../../../server/components/orchestrator';
-import { HCMReportCustomColumnExpressionBuilderTurnManager } from './turn-manager';
-import { HCMReportCustomColumnExpressionBuilderFlowController } from './flow-controller';
+import { CopyofHCMReportCustomColumnExpressionBuilderTurnManager } from './turn-manager';
+import { CopyofHCMReportCustomColumnExpressionBuilderFlowController } from './flow-controller';
 import type { ClassificationResult, TurnResult, AgentConfig } from '../../../server/components/types';
 
-export class HCMReportCustomColumnExpressionBuilderOrchestrator extends BaseOrchestrator {
+export class CopyofHCMReportCustomColumnExpressionBuilderOrchestrator extends BaseOrchestrator {
   constructor(agentConfig: AgentConfig) {
     super({
       agentConfig,
@@ -33,8 +33,8 @@ export class HCMReportCustomColumnExpressionBuilderOrchestrator extends BaseOrch
       }
     });
 
-    this.turnManager = new HCMReportCustomColumnExpressionBuilderTurnManager();
-    this.flowController = new HCMReportCustomColumnExpressionBuilderFlowController();
+    this.turnManager = new CopyofHCMReportCustomColumnExpressionBuilderTurnManager();
+    this.flowController = new CopyofHCMReportCustomColumnExpressionBuilderFlowController();
   }
 
   protected async handleAnswerQuestion(
@@ -50,6 +50,6 @@ export class HCMReportCustomColumnExpressionBuilderOrchestrator extends BaseOrch
   }
 }
 
-export function createOrchestrator(agentConfig: AgentConfig): HCMReportCustomColumnExpressionBuilderOrchestrator {
-  return new HCMReportCustomColumnExpressionBuilderOrchestrator(agentConfig);
+export function createOrchestrator(agentConfig: AgentConfig): CopyofHCMReportCustomColumnExpressionBuilderOrchestrator {
+  return new CopyofHCMReportCustomColumnExpressionBuilderOrchestrator(agentConfig);
 }
