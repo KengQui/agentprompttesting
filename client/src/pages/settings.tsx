@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useParams, useLocation } from "wouter";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { ArrowLeft, Save, Trash2, Bot, Briefcase, Shield, AlertTriangle, Loader2, BookOpen, Upload, X, FileText, Code, Pencil, RotateCcw, HelpCircle, ExternalLink, Info, Sparkles, ChevronDown, ChevronUp, Database, Check, Settings, Activity, FlaskConical, Zap, User, Eye, Filter, Plus, ArrowRight, CheckSquare, CheckCircle2, XCircle, AlertCircle } from "lucide-react";
+import { ArrowLeft, Save, Trash2, Bot, Briefcase, Shield, AlertTriangle, Loader2, BookOpen, Upload, X, FileText, Code, Pencil, RotateCcw, HelpCircle, ExternalLink, Info, Sparkles, ChevronDown, ChevronUp, Database, Check, Settings, Activity, FlaskConical, Zap, User, Eye, Filter, Plus, ArrowRight, CheckSquare, CheckCircle2, XCircle, AlertCircle, MessageSquare } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -11,6 +11,8 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Switch } from "@/components/ui/switch";
+import { v4 as uuidv4 } from "uuid";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Dialog,
@@ -42,7 +44,7 @@ import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { businessUseCaseTemplate, validationRulesTemplate, guardrailsTemplate } from "@/lib/config-templates";
 import { TracingDashboard, SimulationPanel, ConfigHistoryPanel } from "@/components/tracing-dashboard";
-import type { Agent, UpdateAgent, AgentStatus, DomainDocument, SampleDataset, GeminiModel, AgentAction, MockUserState, MockMode, ActionField, ClarifyingInsight } from "@shared/schema";
+import type { Agent, UpdateAgent, AgentStatus, DomainDocument, SampleDataset, GeminiModel, AgentAction, MockUserState, MockMode, ActionField, ClarifyingInsight, WelcomeConfig, WelcomePrompt } from "@shared/schema";
 import { geminiModelDisplayNames, defaultGenerationModel, mockModeDescriptions } from "@shared/schema";
 import { ClarifyingChatDialog } from "@/components/clarifying-chat-dialog";
 
@@ -125,6 +127,7 @@ const settingsSteps = [
   { id: 7, name: "Available Actions", icon: Zap, description: "Define actions agent can simulate" },
   { id: 8, name: "Validation Checklist", icon: CheckSquare, description: "Review configuration quality" },
   { id: 9, name: "Prompt Configuration", icon: Code, description: "Customize the system prompt" },
+  { id: 10, name: "Welcome Screen", icon: MessageSquare, description: "Configure the chat welcome screen" },
 ];
 
 function SettingsStepIndicator({ 
@@ -437,6 +440,7 @@ export default function SettingsPage() {
   const [isGeneratingSampleData, setIsGeneratingSampleData] = useState(false);
   const [isGeneratingActions, setIsGeneratingActions] = useState(false);
   const [isGeneratingPrompt, setIsGeneratingPrompt] = useState(false);
+  const [isGeneratingWelcome, setIsGeneratingWelcome] = useState(false);
   const [sampleDataType, setSampleDataType] = useState("customer records");
   const [sampleRecordCount, setSampleRecordCount] = useState(10);
   const [sampleFormat, setSampleFormat] = useState<"json" | "csv" | "text">("json");
@@ -494,6 +498,8 @@ export default function SettingsPage() {
     if (data.availableActions && data.availableActions.length > 0) completed.add(7);
     // Step 8 (Prompt) is auto-completed since prompt is AI-generated based on other steps
     if (data.businessUseCase) completed.add(8);
+    if (data.customPrompt) completed.add(9);
+    if (data.welcomeConfig?.enabled && data.welcomeConfig.greeting) completed.add(10);
     return completed;
   };
 
@@ -514,6 +520,7 @@ export default function SettingsPage() {
         mockUserState: agent.mockUserState || [],
         mockMode: agent.mockMode || "full",
         status: agent.status,
+        welcomeConfig: agent.welcomeConfig,
       });
       setEditedPrompt(agent.customPrompt || "");
       
@@ -528,6 +535,7 @@ export default function SettingsPage() {
         promptStyle: agent.promptStyle,
         customPrompt: agent.customPrompt,
         availableActions: agent.availableActions || [],
+        welcomeConfig: agent.welcomeConfig,
       }));
     }
   }, [agent, formData]);
@@ -2898,6 +2906,251 @@ export default function SettingsPage() {
             </CardContent>
           </Card>
         );
+
+      case 10: {
+        const welcomeConfig: WelcomeConfig = formData.welcomeConfig || {
+          enabled: true,
+          greeting: "",
+          suggestedPrompts: [],
+        };
+
+        const updateWelcomeConfig = (updates: Partial<WelcomeConfig>) => {
+          updateFormDataAndTrackCompletion({ welcomeConfig: { ...welcomeConfig, ...updates } });
+        };
+
+        const generateWelcomeConfigFn = async () => {
+          if (!formData.businessUseCase?.trim()) {
+            toast({
+              title: "Missing business use case",
+              description: "Please provide a business use case first to auto-generate the welcome screen.",
+              variant: "destructive",
+            });
+            return;
+          }
+
+          setIsGeneratingWelcome(true);
+          try {
+            const response = await apiRequest("POST", "/api/generate/welcome-config", {
+              name: formData.name,
+              businessUseCase: formData.businessUseCase,
+              domainKnowledge: formData.domainKnowledge,
+            });
+            const result = await response.json();
+            updateFormDataAndTrackCompletion({
+              welcomeConfig: {
+                enabled: true,
+                greeting: result.greeting || "",
+                suggestedPrompts: (result.suggestedPrompts || []).map((p: any) => ({
+                  id: uuidv4(),
+                  title: p.title || "",
+                  prompt: p.prompt || "",
+                })),
+              },
+            });
+            toast({
+              title: "Welcome screen generated",
+              description: "Your welcome screen has been configured using AI.",
+            });
+          } catch (error: any) {
+            toast({
+              title: "Generation failed",
+              description: error.message || "Failed to generate welcome config.",
+              variant: "destructive",
+            });
+          } finally {
+            setIsGeneratingWelcome(false);
+          }
+        };
+
+        const addWelcomePrompt = () => {
+          const newPrompt: WelcomePrompt = {
+            id: uuidv4(),
+            title: "",
+            prompt: "",
+          };
+          updateWelcomeConfig({
+            suggestedPrompts: [...welcomeConfig.suggestedPrompts, newPrompt],
+          });
+        };
+
+        const removeWelcomePrompt = (id: string) => {
+          updateWelcomeConfig({
+            suggestedPrompts: welcomeConfig.suggestedPrompts.filter((p) => p.id !== id),
+          });
+        };
+
+        const updateWelcomePrompt = (id: string, updates: Partial<WelcomePrompt>) => {
+          updateWelcomeConfig({
+            suggestedPrompts: welcomeConfig.suggestedPrompts.map((p) =>
+              p.id === id ? { ...p, ...updates } : p
+            ),
+          });
+        };
+
+        return (
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 flex-wrap">
+                <MessageSquare className="h-5 w-5 text-primary" />
+                Welcome Screen
+                <Badge variant="secondary">Optional</Badge>
+              </CardTitle>
+              <CardDescription>
+                Configure the greeting and suggested prompts that users see when they start a new chat.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-6">
+                <div className="flex items-center justify-between gap-4">
+                  <div>
+                    <Label htmlFor="settings-welcome-enabled">Enable Welcome Screen</Label>
+                    <p className="text-sm text-muted-foreground">
+                      Show a greeting and suggested prompts when users open the chat
+                    </p>
+                  </div>
+                  <Switch
+                    id="settings-welcome-enabled"
+                    checked={welcomeConfig.enabled}
+                    onCheckedChange={(checked) => updateWelcomeConfig({ enabled: checked })}
+                    data-testid="settings-switch-welcome-enabled"
+                  />
+                </div>
+
+                {welcomeConfig.enabled && (
+                  <>
+                    <div>
+                      <div className="flex items-center justify-between mb-2 flex-wrap gap-2">
+                        <Label htmlFor="settings-greeting">Greeting Message</Label>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={generateWelcomeConfigFn}
+                          disabled={isGeneratingWelcome}
+                          data-testid="settings-button-regenerate-welcome"
+                        >
+                          {isGeneratingWelcome ? (
+                            <>
+                              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                              Generating...
+                            </>
+                          ) : (
+                            <>
+                              <Sparkles className="h-4 w-4 mr-2" />
+                              Regenerate
+                            </>
+                          )}
+                        </Button>
+                      </div>
+                      <Textarea
+                        id="settings-greeting"
+                        placeholder="e.g., Hi there! I'm your assistant. How can I help you today?"
+                        value={welcomeConfig.greeting}
+                        onChange={(e) => updateWelcomeConfig({ greeting: e.target.value })}
+                        className="resize-none"
+                        rows={3}
+                        data-testid="settings-textarea-welcome-greeting"
+                      />
+                    </div>
+
+                    <div>
+                      <div className="flex items-center justify-between mb-2 flex-wrap gap-2">
+                        <Label>Suggested Prompts</Label>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={addWelcomePrompt}
+                          data-testid="settings-button-add-prompt"
+                        >
+                          <Plus className="h-4 w-4 mr-2" />
+                          Add Prompt
+                        </Button>
+                      </div>
+                      <p className="text-sm text-muted-foreground mb-3">
+                        Quick-start prompts that users can click to begin a conversation.
+                      </p>
+
+                      {isGeneratingWelcome ? (
+                        <div className="flex items-center justify-center py-8">
+                          <Loader2 className="h-6 w-6 animate-spin text-primary" />
+                          <span className="ml-2 text-muted-foreground">Generating welcome config...</span>
+                        </div>
+                      ) : welcomeConfig.suggestedPrompts.length === 0 ? (
+                        <div className="text-center py-6 text-muted-foreground border rounded-md">
+                          No suggested prompts yet. Click "Add Prompt" or "Regenerate" to get started.
+                        </div>
+                      ) : (
+                        <div className="space-y-3">
+                          {welcomeConfig.suggestedPrompts.map((prompt) => (
+                            <Card key={prompt.id} data-testid={`settings-card-prompt-${prompt.id}`}>
+                              <CardContent className="p-4 space-y-3">
+                                <div className="flex items-start justify-between gap-2">
+                                  <div className="flex-1 space-y-2">
+                                    <Input
+                                      placeholder="Prompt title (e.g., Check my order status)"
+                                      value={prompt.title}
+                                      onChange={(e) => updateWelcomePrompt(prompt.id, { title: e.target.value })}
+                                      data-testid={`settings-input-prompt-title-${prompt.id}`}
+                                    />
+                                    <Textarea
+                                      placeholder="Full prompt text (e.g., I'd like to check the status of my recent order)"
+                                      value={prompt.prompt}
+                                      onChange={(e) => updateWelcomePrompt(prompt.id, { prompt: e.target.value })}
+                                      className="resize-none"
+                                      rows={2}
+                                      data-testid={`settings-textarea-prompt-text-${prompt.id}`}
+                                    />
+                                  </div>
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    onClick={() => removeWelcomePrompt(prompt.id)}
+                                    data-testid={`settings-button-remove-prompt-${prompt.id}`}
+                                  >
+                                    <Trash2 className="h-4 w-4 text-muted-foreground" />
+                                  </Button>
+                                </div>
+                              </CardContent>
+                            </Card>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="border-t pt-4">
+                      <Label className="mb-3 block">Preview</Label>
+                      <Card className="bg-muted/50">
+                        <CardContent className="p-6">
+                          <div className="flex flex-col items-center text-center space-y-4">
+                            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
+                              <Bot className="h-6 w-6 text-primary" />
+                            </div>
+                            <p className="text-foreground" data-testid="settings-text-preview-greeting">
+                              {welcomeConfig.greeting || "Hi there! How can I help you today?"}
+                            </p>
+                            {welcomeConfig.suggestedPrompts.length > 0 && (
+                              <div className="flex flex-wrap justify-center gap-2 mt-2">
+                                {welcomeConfig.suggestedPrompts.map((prompt) => (
+                                  <Badge
+                                    key={prompt.id}
+                                    variant="outline"
+                                    data-testid={`settings-badge-preview-prompt-${prompt.id}`}
+                                  >
+                                    {prompt.title || "Untitled prompt"}
+                                  </Badge>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </div>
+                  </>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        );
+      }
 
       default:
         return null;
