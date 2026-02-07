@@ -1944,13 +1944,29 @@ Generate the welcome screen configuration.`;
       config: {
         systemInstruction: systemPrompt,
         temperature: 0.7,
-        maxOutputTokens: 2000,
+        maxOutputTokens: 4000,
       },
     });
 
     const text = response.text?.trim() || "";
     const cleanedText = text.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
-    const parsed = JSON.parse(cleanedText);
+    
+    let parsed;
+    try {
+      parsed = JSON.parse(cleanedText);
+    } catch (jsonError: any) {
+      console.error("Failed to parse welcome config JSON. Raw text:", text);
+      const greetingMatch = cleanedText.match(/"greeting"\s*:\s*"([^"]+)"/);
+      const promptMatches = [...cleanedText.matchAll(/"title"\s*:\s*"([^"]+)"[^}]*"prompt"\s*:\s*"([^"]+)"/g)];
+      if (greetingMatch && promptMatches.length > 0) {
+        parsed = {
+          greeting: greetingMatch[1],
+          suggestedPrompts: promptMatches.map(m => ({ title: m[1], prompt: m[2] })),
+        };
+      } else {
+        throw new Error(`Failed to parse AI response as JSON: ${jsonError.message}`);
+      }
+    }
 
     const suggestedPrompts = (parsed.suggestedPrompts || []).map((p: any, i: number) => ({
       id: uuidv4(),
