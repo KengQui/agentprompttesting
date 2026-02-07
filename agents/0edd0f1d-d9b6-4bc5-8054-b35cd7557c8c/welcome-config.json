@@ -1,36 +1,36 @@
 {
   "enabled": true,
-  "greeting": "I can help you craft custom column expressions for your HCM reports. Tell me what data you want to calculate, compare, or transform, and I'll guide you through building the perfect formula.",
+  "greeting": "I can help you build custom column expressions for your HCM reports. Describe the new column you want to create, and I'll guide you through writing the expression using your report's data.",
   "suggestedPrompts": [
     {
-      "id": "f225a368-e155-467e-8890-e3a024542c1f",
-      "title": "Calculate Annual Salary",
-      "prompt": "I need to calculate 'Annual Salary' for hourly employees. I have 'Hourly Pay' and 'Pay Type' columns. For employees where 'Pay Type' is 'Hourly', calculate their annual salary assuming 40 hours per week and 52 weeks per year."
+      "id": "cd30d9b5-21e5-4376-98f0-36c85b55a15b",
+      "title": "Calculate Weekly Pay",
+      "prompt": "Create an expression to calculate weekly pay. For 'Hourly' Pay Type, multiply 'Hourly Pay' by 40. For 'Salaried' Pay Type, divide 'Annual Salary' by 52. Ensure numeric conversion for calculations."
     },
     {
-      "id": "89b7ef5a-e36d-4f74-a2d1-854dd76111c4",
-      "title": "Calculate Years Employed",
-      "prompt": "I need to calculate how many years each employee has been with the company. I have 'Days Employed' as a numeric column. Convert it to years and round to one decimal place."
+      "id": "99ac05f3-b20c-4fff-8c5e-1963ab775269",
+      "title": "Employee Tenure Status",
+      "prompt": "Write an expression that labels employees as 'New Hire' if 'Days Employed' is less than 365, 'Mid-Career' if between 365 and 1825 days, and 'Veteran' if 'Days Employed' is 1825 days or more."
     },
     {
-      "id": "c5fc007d-e066-42bd-8b57-c569510b1150",
-      "title": "Check Credential Status",
-      "prompt": "I want a column that shows whether an employee's credentials are expired, expiring soon, or current. I have 'Credential Expires' as a date column. If it's past today, show 'Expired'. If within 90 days, show 'Expiring Soon'. Otherwise show 'Current'."
+      "id": "6579678f-10b1-43dd-b559-7675395caed1",
+      "title": "Days to Credential Expiry",
+      "prompt": "Create an expression to calculate the number of days remaining until 'Credential Expires'. If 'Credential Expires' is blank or already passed, display 'N/A' or 'Expired'. Use 'Today()' for the current date."
     },
     {
-      "id": "de168b93-ab4d-40cb-9c00-7ceb3d88c3aa",
-      "title": "Calculate Benefit Cost",
-      "prompt": "I want to calculate total monthly benefit cost per employee. I have 'Scheduled EE Amount' and 'Scheduled ER Amount' columns. Add them together for a 'Total Benefit Cost' column."
+      "id": "97706792-1844-4851-8d96-fd95563e2752",
+      "title": "Full Contact Info",
+      "prompt": "Build an expression to combine 'Employee Name' and 'Primary Email' into a single text string like 'Sarah Johnson (sarah.johnson@company.com)'. If 'Primary Email' is blank, just show the 'Employee Name'."
     },
     {
-      "id": "395ddff4-8d6e-46c4-9abf-610ffcf27293",
-      "title": "Format Phone Number",
-      "prompt": "I have a 'Work Phone' column with values like '555-0101'. If the field is empty, display 'N/A'. Otherwise, keep the existing format."
+      "id": "9801447b-0d39-4130-8775-d154283c6635",
+      "title": "Total Monthly Benefit Cost",
+      "prompt": "Create an expression that adds 'Scheduled EE Amount' and 'Scheduled ER Amount' to show the total monthly benefit cost. Ensure the output is formatted as a number with two decimal places."
     },
     {
-      "id": "16e2a8b8-3f82-4bc1-99db-6eed7b17bca2",
-      "title": "Identify Training Needs",
-      "prompt": "Create a column based on 'Training Profile'. If the value is 'New Hire', show 'Onboarding Required'. If it contains 'LOTO Authorized', show 'Safety Certified'. Otherwise show 'Standard'."
+      "id": "09a59c74-c86c-422f-be20-50f4fbca22fd",
+      "title": "Special Coverage/Training",
+      "prompt": "Identify employees who have 'EE + Spouse' or 'EE + Family' benefit coverage, OR whose 'Training Profile' indicates 'LOTO Authorized'. Display 'Special' if true, otherwise 'Standard'."
     }
   ]
 }
