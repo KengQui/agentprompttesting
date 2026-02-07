@@ -1915,6 +1915,8 @@ export async function generateWelcomeConfig(context: WelcomeConfigGenerationCont
 
 The prompts should cover the breadth of what the agent can do, from simple to moderate complexity.
 
+CRITICAL: If sample data is provided, you MUST use the EXACT column names, field names, and example values from the sample data in your suggested prompts. Do NOT invent or guess column names. Only reference columns that actually exist in the provided sample data. For example, if the sample data has a column called "Hourly Pay", use "Hourly Pay" — not "HourlyRate" or "Hourly_Rate". This ensures the prompts are directly relevant and actionable for the user's actual data.
+
 IMPORTANT: Return ONLY valid JSON in this exact format, no markdown, no code fences:
 {
   "greeting": "Your greeting message here",
@@ -1931,7 +1933,7 @@ ${context.businessUseCase}
 
 ${context.domainKnowledge ? `Domain Knowledge:\n${context.domainKnowledge}` : ""}
 
-${context.sampleData ? `Sample Data (use this to make prompts more specific and realistic):\n${context.sampleData}` : ""}
+${context.sampleData ? `Sample Data (CRITICAL: You MUST reference the EXACT column names and example values from this data in your suggested prompts. Do NOT invent column names that are not present here):\n${context.sampleData}` : ""}
 
 Generate the welcome screen configuration.`;
 
