@@ -1890,6 +1890,7 @@ export interface WelcomeConfigGenerationContext {
   name: string;
   businessUseCase: string;
   domainKnowledge?: string;
+  sampleData?: string;
   model?: GeminiModel;
 }
 
@@ -1904,7 +1905,7 @@ export async function generateWelcomeConfig(context: WelcomeConfigGenerationCont
     throw new Error("GEMINI_API_KEY is not configured");
   }
 
-  const systemPrompt = `You are an expert at creating welcoming, user-friendly start screens for AI agents. Based on the agent's name, business use case, and domain knowledge, generate:
+  const systemPrompt = `You are an expert at creating welcoming, user-friendly start screens for AI agents. Based on the agent's name, business use case, domain knowledge, and sample data (if provided), generate:
 
 1. A short, friendly greeting message (1-2 sentences) that tells the user what this agent can help with. Do NOT include the agent's name in the greeting. Keep it conversational and action-oriented.
 
@@ -1929,6 +1930,8 @@ Business Use Case:
 ${context.businessUseCase}
 
 ${context.domainKnowledge ? `Domain Knowledge:\n${context.domainKnowledge}` : ""}
+
+${context.sampleData ? `Sample Data (use this to make prompts more specific and realistic):\n${context.sampleData}` : ""}
 
 Generate the welcome screen configuration.`;
 

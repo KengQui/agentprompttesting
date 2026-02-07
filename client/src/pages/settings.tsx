@@ -2930,10 +2930,14 @@ export default function SettingsPage() {
 
           setIsGeneratingWelcome(true);
           try {
+            const sampleDataString = formData.sampleDatasets?.length
+              ? formData.sampleDatasets.map((s: any) => `${s.name || "Sample"}:\n${typeof s.content === 'string' ? s.content : JSON.stringify(s.content)}`).join("\n\n")
+              : undefined;
             const response = await apiRequest("POST", "/api/generate/welcome-config", {
               name: formData.name,
               businessUseCase: formData.businessUseCase,
               domainKnowledge: formData.domainKnowledge,
+              sampleData: sampleDataString,
             });
             const result = await response.json();
             updateFormDataAndTrackCompletion({

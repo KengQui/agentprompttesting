@@ -1810,6 +1810,7 @@ export async function registerRoutes(
         name: z.string().min(1, "Agent name is required"),
         businessUseCase: z.string().min(1, "Business use case is required"),
         domainKnowledge: z.string().optional(),
+        sampleData: z.string().optional(),
         model: z.enum(["gemini-2.5-flash", "gemini-2.5-pro", "gemini-3-flash-preview", "gemini-3-pro-preview"]).optional(),
       });
 
@@ -1822,6 +1823,7 @@ export async function registerRoutes(
         name: parsed.data.name,
         businessUseCase: parsed.data.businessUseCase,
         domainKnowledge: parsed.data.domainKnowledge,
+        sampleData: parsed.data.sampleData,
         model: parsed.data.model,
       };
 
@@ -1868,10 +1870,14 @@ export async function registerRoutes(
       // Auto-generate for existing agents that have a business use case
       if (agent.businessUseCase && agent.businessUseCase.trim()) {
         try {
+          const sampleDataString = agent.sampleDatasets?.length
+            ? agent.sampleDatasets.map((s: any) => `${s.name || "Sample"}:\n${typeof s.content === 'string' ? s.content : JSON.stringify(s.content)}`).join("\n\n")
+            : undefined;
           const config = await generateWelcomeConfig({
             name: agent.name,
             businessUseCase: agent.businessUseCase,
             domainKnowledge: agent.domainKnowledge,
+            sampleData: sampleDataString,
           });
           await storage.updateAgent(agent.id, { welcomeConfig: config });
           return res.json(config);

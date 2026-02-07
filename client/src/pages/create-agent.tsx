@@ -3288,10 +3288,14 @@ function Step10WelcomeScreen({
 
     setIsGenerating(true);
     try {
+      const sampleDataString = data.sampleDatasets?.length
+        ? data.sampleDatasets.map((s: any) => `${s.name || "Sample"}:\n${typeof s.content === 'string' ? s.content : JSON.stringify(s.content)}`).join("\n\n")
+        : undefined;
       const response = await apiRequest("POST", "/api/generate/welcome-config", {
         name: data.name,
         businessUseCase: data.businessUseCase,
         domainKnowledge: data.domainKnowledge,
+        sampleData: sampleDataString,
       });
       const result = await response.json();
       onUpdate({
