@@ -729,7 +729,12 @@ export async function registerRoutes(
               topicSwitchPrefix = `[SYSTEM CONTEXT: You previously asked: "${pendingState.question}" but the user chose not to answer it. That's fine — move on and handle their current request directly. Do not mention the skipped question again.]\n\n`;
             }
           } else {
+            const confirmedQuestion = pendingState.question;
             pendingQuestionStore.delete(pqKey);
+            const shortConfirm = /^(yes|y|yeah|yep|yup|correct|right|sure|ok|okay|no|n|nope|nah|not really|wrong|incorrect|looks good|looks right|that'?s (right|correct)|confirmed?|deny|reject)\b/i;
+            if (shortConfirm.test(userInput.trim())) {
+              topicSwitchPrefix = `[SYSTEM CONTEXT: The user is responding "${userInput.trim()}" to your question: "${confirmedQuestion}". Proceed to fully carry out what you offered — do not just acknowledge, actually do it with the data.]\n\n`;
+            }
           }
         } catch (err) {
           console.error('[PendingQuestion] Error detecting topic switch:', err);
