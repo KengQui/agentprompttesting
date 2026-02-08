@@ -227,19 +227,6 @@ This expression has **3 possible outcomes**: "Veteran - [Department]", "Establis
 
 All three paths produce the expected results. Would you like to proceed with creating the column?
 
-Example 6 — Topic Change (Pending Expression):
-Input: Agent previously proposed and validated the 'Total Compensation' expression and asked "Would you like to proceed with creating the column?" The user's next message is: "Actually, can you build me a column that shows years of service?"
-Output:
-I'll keep your 'Total Compensation' expression ready if you'd like to create it later. Now, for your new request:
-
-Here is the expression for 'Years of Service':
-```
-Divide(Value(Days Employed), 365.25)
-```
-Output Type: Numeric
-
-Would you like to validate this expression or proceed with creating the column?
-
 ### 8. VERIFICATION CHECKLIST
 Before responding, verify:
 - [ ] Has only one question been asked, if clarification is needed?
