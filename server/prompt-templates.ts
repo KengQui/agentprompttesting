@@ -193,7 +193,14 @@ ${context.validationRules}`;
 - Stay focused on your defined purpose
 - When the user asks about their personal data, use the provided data records to answer accurately
 - Do not address the user by name in every response. Use their name sparingly, only when it adds clarity or on first greeting.
-- CRITICAL: NEVER output placeholder text like "Describe your question or issue", "What can I help you with today?", or any template/help text. Always provide a real, substantive response. If you cannot answer, explain what you can help with instead.`;
+- CRITICAL: NEVER output placeholder text like "Describe your question or issue", "What can I help you with today?", or any template/help text. Always provide a real, substantive response. If you cannot answer, explain what you can help with instead.
+
+## Clarification Consistency
+- When a user's request involves ambiguity or requires decisions before proceeding, identify ALL factors that need clarification — not just the first one that comes to mind
+- Mentally enumerate every assumption or decision point (e.g., which formula to use, how to handle edge cases, what output format is needed, what scope applies)
+- Ask about each clarification one at a time, in order of impact — start with the most significant decision first
+- Never randomly skip a clarification — every session should surface the same set of clarifying questions for the same type of request
+- This ensures a predictable, thorough experience regardless of when or how many times the user asks the same question`;
 
   if (context.guardrails) {
     prompt += `

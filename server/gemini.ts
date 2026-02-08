@@ -715,6 +715,13 @@ Is there anything else you'd like me to help you with?"
 - Only ask for disambiguation when there are MULTIPLE people with the same or similar name (e.g., "I found two people named John — John Smith in Engineering and John Davis in Marketing. Which one did you mean?")
 - Never expect users to know internal system identifiers like Employee IDs, record IDs, or account numbers. Instead, look up records using human-friendly attributes such as name, department, role, or other contextual details the user would naturally know
 - When you need to narrow down a match, ask about recognizable attributes (e.g., department, role, location) rather than requesting an ID number
+
+### Clarification Consistency:
+- When a user's request involves ambiguity or requires decisions before proceeding, identify ALL factors that need clarification — not just the first one that comes to mind
+- Mentally enumerate every assumption or decision point (e.g., which formula to use, how to handle edge cases, what output format is needed, what scope applies)
+- Ask about each clarification one at a time, in order of impact — start with the most significant decision first
+- Never randomly skip a clarification — every session should surface the same set of clarifying questions for the same type of request
+- This ensures a predictable, thorough experience regardless of when or how many times the user asks the same question
 `;
   
   return section;
@@ -810,6 +817,12 @@ function getSystemPrompt(agent: AgentContext): string {
 - Only ask for disambiguation when there are MULTIPLE people with the same or similar name, and in that case ask about recognizable attributes (department, role, location) rather than requesting an ID number
 - Never expect users to know internal system identifiers like Employee IDs, record numbers, or account IDs. Look up records using human-friendly attributes such as name, department, role, or other contextual details the user would naturally know`;
       }
+      fullPrompt += `\n\n## Clarification Consistency
+- When a user's request involves ambiguity or requires decisions before proceeding, identify ALL factors that need clarification — not just the first one that comes to mind
+- Mentally enumerate every assumption or decision point (e.g., which formula to use, how to handle edge cases, what output format is needed, what scope applies)
+- Ask about each clarification one at a time, in order of impact — start with the most significant decision first
+- Never randomly skip a clarification — every session should surface the same set of clarifying questions for the same type of request
+- This ensures a predictable, thorough experience regardless of when or how many times the user asks the same question`;
       return fullPrompt;
     }
     
@@ -829,6 +842,12 @@ function getSystemPrompt(agent: AgentContext): string {
 - Only ask for disambiguation when there are MULTIPLE people with the same or similar name, and in that case ask about recognizable attributes (department, role, location) rather than requesting an ID number
 - Never expect users to know internal system identifiers like Employee IDs, record numbers, or account IDs. Look up records using human-friendly attributes such as name, department, role, or other contextual details the user would naturally know`;
       }
+      fullPrompt += `\n\n## Clarification Consistency
+- When a user's request involves ambiguity or requires decisions before proceeding, identify ALL factors that need clarification — not just the first one that comes to mind
+- Mentally enumerate every assumption or decision point (e.g., which formula to use, how to handle edge cases, what output format is needed, what scope applies)
+- Ask about each clarification one at a time, in order of impact — start with the most significant decision first
+- Never randomly skip a clarification — every session should surface the same set of clarifying questions for the same type of request
+- This ensures a predictable, thorough experience regardless of when or how many times the user asks the same question`;
       return fullPrompt;
     }
     
@@ -881,6 +900,13 @@ function getSystemPrompt(agent: AgentContext): string {
 - Only ask for disambiguation when there are MULTIPLE people with the same or similar name, and in that case ask about recognizable attributes (department, role, location) rather than requesting an ID number
 - Never expect users to know internal system identifiers like Employee IDs, record numbers, or account IDs. Look up records using human-friendly attributes such as name, department, role, or other contextual details the user would naturally know`;
     }
+    
+    fullPrompt += `\n\n## Clarification Consistency
+- When a user's request involves ambiguity or requires decisions before proceeding, identify ALL factors that need clarification — not just the first one that comes to mind
+- Mentally enumerate every assumption or decision point (e.g., which formula to use, how to handle edge cases, what output format is needed, what scope applies)
+- Ask about each clarification one at a time, in order of impact — start with the most significant decision first
+- Never randomly skip a clarification — every session should surface the same set of clarifying questions for the same type of request
+- This ensures a predictable, thorough experience regardless of when or how many times the user asks the same question`;
     
     return fullPrompt;
   }
@@ -1123,6 +1149,7 @@ Before responding, verify:
 - Use clear, enforceable language for constraints
 - CRITICAL: Do NOT use words like "simulated", "simulation", "mock", "demo", "test environment", or "fake" in the generated prompt. The agent should present itself as a real, professional assistant. When describing actions, use natural language like "process", "update", "complete" - NOT "simulate"
 - ALWAYS ask only ONE question at a time. Never ask multiple questions in a single response. Wait for the user to answer before asking the next question.
+- CLARIFICATION CONSISTENCY: When a user's request involves ambiguity or requires decisions before proceeding, the agent MUST consistently identify ALL factors that need clarification — not just one. The agent should mentally enumerate every assumption or decision point (e.g., formula choice, edge case handling, output format, scope) and then ask about each one, one at a time, in order of impact (most significant decision first). The agent must NEVER randomly skip a clarification that was asked in a previous session. Every session should surface the same set of clarifying questions for the same type of request, ensuring a predictable and thorough experience regardless of when or how many times the user asks.
 - SMART NAME RESOLUTION: When a user refers to a person by name, the agent must search available data for matches. If exactly ONE person matches, proceed immediately without asking for further clarification. Only ask for disambiguation when MULTIPLE people share the same or similar name — and in that case, ask about recognizable attributes (department, role, location) rather than internal IDs.
 - NEVER expect users to know internal system identifiers like Employee IDs, record numbers, or account IDs. Always look up records using human-friendly attributes (name, department, role, etc.) that users would naturally know.
 
