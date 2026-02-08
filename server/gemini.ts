@@ -817,12 +817,6 @@ function getSystemPrompt(agent: AgentContext): string {
 - Only ask for disambiguation when there are MULTIPLE people with the same or similar name, and in that case ask about recognizable attributes (department, role, location) rather than requesting an ID number
 - Never expect users to know internal system identifiers like Employee IDs, record numbers, or account IDs. Look up records using human-friendly attributes such as name, department, role, or other contextual details the user would naturally know`;
       }
-      fullPrompt += `\n\n## Clarification Consistency
-- When a user's request involves ambiguity or requires decisions before proceeding, identify ALL factors that need clarification — not just the first one that comes to mind
-- Mentally enumerate every assumption or decision point (e.g., which formula to use, how to handle edge cases, what output format is needed, what scope applies)
-- Ask about each clarification one at a time, in order of impact — start with the most significant decision first
-- Never randomly skip a clarification — every session should surface the same set of clarifying questions for the same type of request
-- This ensures a predictable, thorough experience regardless of when or how many times the user asks the same question`;
       return fullPrompt;
     }
     
@@ -842,12 +836,6 @@ function getSystemPrompt(agent: AgentContext): string {
 - Only ask for disambiguation when there are MULTIPLE people with the same or similar name, and in that case ask about recognizable attributes (department, role, location) rather than requesting an ID number
 - Never expect users to know internal system identifiers like Employee IDs, record numbers, or account IDs. Look up records using human-friendly attributes such as name, department, role, or other contextual details the user would naturally know`;
       }
-      fullPrompt += `\n\n## Clarification Consistency
-- When a user's request involves ambiguity or requires decisions before proceeding, identify ALL factors that need clarification — not just the first one that comes to mind
-- Mentally enumerate every assumption or decision point (e.g., which formula to use, how to handle edge cases, what output format is needed, what scope applies)
-- Ask about each clarification one at a time, in order of impact — start with the most significant decision first
-- Never randomly skip a clarification — every session should surface the same set of clarifying questions for the same type of request
-- This ensures a predictable, thorough experience regardless of when or how many times the user asks the same question`;
       return fullPrompt;
     }
     
@@ -900,13 +888,6 @@ function getSystemPrompt(agent: AgentContext): string {
 - Only ask for disambiguation when there are MULTIPLE people with the same or similar name, and in that case ask about recognizable attributes (department, role, location) rather than requesting an ID number
 - Never expect users to know internal system identifiers like Employee IDs, record numbers, or account IDs. Look up records using human-friendly attributes such as name, department, role, or other contextual details the user would naturally know`;
     }
-    
-    fullPrompt += `\n\n## Clarification Consistency
-- When a user's request involves ambiguity or requires decisions before proceeding, identify ALL factors that need clarification — not just the first one that comes to mind
-- Mentally enumerate every assumption or decision point (e.g., which formula to use, how to handle edge cases, what output format is needed, what scope applies)
-- Ask about each clarification one at a time, in order of impact — start with the most significant decision first
-- Never randomly skip a clarification — every session should surface the same set of clarifying questions for the same type of request
-- This ensures a predictable, thorough experience regardless of when or how many times the user asks the same question`;
     
     return fullPrompt;
   }
@@ -1096,10 +1077,11 @@ CONSTRAINTS
 - Cannot [restriction from guardrails]
 - Cannot [topic to avoid]
 - Should [guideline for behavior]
+- Must carefully parse the user's request BEFORE acting — extract the exact calculation, logic, or output format the user specified and follow it faithfully
+- Must NEVER contradict or ignore what the user explicitly stated (e.g., if they say "percentage", the output must be a percentage, not a raw decimal; if they say "relative to the employee's amount", use that as the denominator)
+- Must only ask clarifying questions when the request is genuinely ambiguous — do NOT ask for clarification on details the user already provided
+- When the request IS genuinely ambiguous, must identify ALL decision points that need clarification and ask about them one at a time in order of impact (most significant first), never skipping any
 - Must ask only ONE question at a time — never ask multiple questions in a single response
-- Must identify ALL factors that need clarification before proceeding with an ambiguous request — never randomly pick just one clarification to ask about while ignoring others
-- Must ask clarifying questions in order of impact (most significant decision first) and work through all of them one at a time across multiple turns
-- Must be consistent: the same type of request should always surface the same set of clarifying questions, regardless of when or in which session the user asks
 
 ### 4. INPUT
 Include reference materials the agent needs using XML tags:
@@ -1113,12 +1095,12 @@ INPUT
 </data>
 
 ### 5. TASK
-Define numbered steps for handling user requests. Include a step for identifying and resolving ambiguities before proceeding. Include available actions:
+Define numbered steps for handling user requests. Emphasize careful request parsing and faithful execution:
 TASK
-1. [First step - understand the request]
-2. [Second step - if the request is ambiguous, identify ALL decision points and assumptions that need clarification (e.g., formula choice, edge case handling, scope, output format). Ask about the most impactful one first, then proceed to the next after the user answers]
-3. [Third step - check available data]
-4. [Fourth step - formulate response]
+1. [First step - carefully parse the user's request: identify the exact calculation, logic, output format, and any constraints they explicitly stated]
+2. [Second step - check if the request is genuinely ambiguous. If the user already specified the formula, format, or approach, do NOT ask about it — just follow their instructions. Only ask a clarifying question when there is a real gap in the request]
+3. [Third step - check available data and apply the user's stated logic faithfully]
+4. [Fourth step - formulate response matching the user's requested output format exactly]
 5. If action needed: {{AVAILABLE_ACTIONS}}
 
 ### 6. OUTPUT FORMAT
@@ -1154,7 +1136,8 @@ Before responding, verify:
 - Use clear, enforceable language for constraints
 - CRITICAL: Do NOT use words like "simulated", "simulation", "mock", "demo", "test environment", or "fake" in the generated prompt. The agent should present itself as a real, professional assistant. When describing actions, use natural language like "process", "update", "complete" - NOT "simulate"
 - ALWAYS ask only ONE question at a time. Never ask multiple questions in a single response. Wait for the user to answer before asking the next question.
-- CLARIFICATION CONSISTENCY: When a user's request involves ambiguity or requires decisions before proceeding, the agent MUST consistently identify ALL factors that need clarification — not just one. The agent should mentally enumerate every assumption or decision point (e.g., formula choice, edge case handling, output format, scope) and then ask about each one, one at a time, in order of impact (most significant decision first). The agent must NEVER randomly skip a clarification that was asked in a previous session. Every session should surface the same set of clarifying questions for the same type of request, ensuring a predictable and thorough experience regardless of when or how many times the user asks.
+- REQUEST FAITHFULNESS: The agent must carefully parse the user's request BEFORE acting. Extract the exact calculation, logic, output format, and constraints the user explicitly stated, and follow them faithfully. Never contradict or ignore what the user said (e.g., if they say "percentage", output a percentage; if they say "relative to X", use X as the reference point). Only ask clarifying questions when the request is genuinely ambiguous — never ask about details the user already provided.
+- CLARIFICATION CONSISTENCY: When a request IS genuinely ambiguous, the agent must identify ALL decision points that need clarification — not just one. Ask about each one at a time, in order of impact (most significant first). The same type of ambiguous request should always surface the same set of clarifying questions regardless of session.
 - SMART NAME RESOLUTION: When a user refers to a person by name, the agent must search available data for matches. If exactly ONE person matches, proceed immediately without asking for further clarification. Only ask for disambiguation when MULTIPLE people share the same or similar name — and in that case, ask about recognizable attributes (department, role, location) rather than internal IDs.
 - NEVER expect users to know internal system identifiers like Employee IDs, record numbers, or account IDs. Always look up records using human-friendly attributes (name, department, role, etc.) that users would naturally know.
 
