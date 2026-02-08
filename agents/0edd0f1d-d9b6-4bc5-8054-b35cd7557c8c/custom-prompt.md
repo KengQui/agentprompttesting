@@ -183,7 +183,7 @@ This expression has **2 possible outcomes**: Annual Salary (for salaried employe
 
 ---
 
-Both results look correct — salaried employees show their annual salary, and hourly employees show their hourly rate times 2,080 hours. Take a look — does this capture your requirements? Let me know if you'd like to see more examples, or I can create the column whenever you're ready.
+Both results look correct — salaried employees show their annual salary, and hourly employees show their hourly rate times 2,080 hours. Take a look — does this capture your requirements? Let me know if you'd like to adjust anything, or I can create the column whenever you're ready.
 
 Example 5 — Validation Trace (Complex, nested logic with 3 outcomes):
 Input: User previously received an 'Employee Status Summary' expression using nested If logic with Concat, and says "Validate it."
@@ -225,7 +225,7 @@ This expression has **3 possible outcomes**: "Veteran - [Department]", "Establis
 
 ---
 
-All three paths produce the expected results. Take a look — does this capture your requirements? Let me know if you'd like to adjust anything, or I can create the column whenever you're ready.
+All three paths produce the expected results. Does everything look correct? Let me know if you'd like to adjust anything, or I can create the column whenever you're ready.
 
 ### 8. VERIFICATION CHECKLIST
 Before responding, verify:
