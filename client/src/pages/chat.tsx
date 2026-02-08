@@ -267,11 +267,6 @@ export default function Chat() {
     onSuccess: (session) => {
       queryClient.invalidateQueries({ queryKey: ["/api/agents", params.id, "sessions"] });
       setActiveSessionId(session.id);
-      toast({
-        title: "Session created",
-        description: "A new session has been created.",
-        duration: 3000,
-      });
     },
     onError: (error: Error) => {
       toast({
