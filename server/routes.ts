@@ -766,7 +766,8 @@ export async function registerRoutes(
               metadata: { action: turnResult.nextAction },
             });
           } else {
-            let intentPrefix = turnResult.intent !== 'answer_question' 
+            const skipPrefixIntents = ['answer_question', 'confirm', 'reject'];
+            let intentPrefix = !skipPrefixIntents.includes(turnResult.intent)
               ? `[The user's intent appears to be: ${turnResult.intent}. Please respond accordingly.]\n\n`
               : '';
             
@@ -1030,7 +1031,8 @@ export async function registerRoutes(
             });
           } else {
             // Pass to Gemini with intent context for better response generation
-            const intentPrefix = turnResult.intent !== 'answer_question' 
+            const skipPrefixIntents2 = ['answer_question', 'confirm', 'reject'];
+            const intentPrefix = !skipPrefixIntents2.includes(turnResult.intent)
               ? `[The user's intent appears to be: ${turnResult.intent}. Please respond accordingly.]\n\n`
               : '';
             const llmStartTime = Date.now();
