@@ -1,5 +1,5 @@
 import { GoogleGenAI } from "@google/genai";
-import { generatePrompt, type PromptContext } from "./prompt-templates";
+import { generatePrompt, countRecordsInDataset, type PromptContext } from "./prompt-templates";
 import type { PromptStyle, DomainDocument, GeminiModel, SampleDataset, ClarifyingInsight, AgentAction, MockUserState } from "@shared/schema";
 import { defaultGenerationModel } from "@shared/schema";
 import { v4 as uuidv4 } from "uuid";
@@ -582,7 +582,6 @@ function stripCodeBlocks(content: string): string {
   return cleaned.trim();
 }
 
-// Build sample datasets section
 function buildSampleDatasetsText(agent: AgentContext): string {
   if (!agent.sampleDatasets || agent.sampleDatasets.length === 0) {
     return "";
@@ -590,9 +589,15 @@ function buildSampleDatasetsText(agent: AgentContext): string {
   
   let section = "User Data Records:\n";
   for (const dataset of agent.sampleDatasets) {
-    // Strip code block markers from the content
     const cleanedContent = stripCodeBlocks(dataset.content);
-    section += `\n--- ${dataset.name} (${dataset.format.toUpperCase()}) ---\n${cleanedContent}\n`;
+    const recordCount = countRecordsInDataset(dataset.content, dataset.format);
+    const countLabel = recordCount > 0 ? `Total records: ${recordCount}` : "";
+    
+    section += `\n--- ${dataset.name} (${dataset.format.toUpperCase()}) ---\n`;
+    if (countLabel) {
+      section += `${countLabel}\n`;
+    }
+    section += `${cleanedContent}\n`;
   }
   return section;
 }

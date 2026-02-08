@@ -56,13 +56,38 @@ function buildDomainKnowledgeSection(context: PromptContext): string {
   return section;
 }
 
-// Helper to strip markdown code block markers from content
 function stripCodeBlocks(content: string): string {
-  // Remove opening code blocks like ```json, ```csv, ``` etc.
   let cleaned = content.replace(/^```(?:json|csv|text|)?\s*\n?/gi, '');
-  // Remove closing code blocks
   cleaned = cleaned.replace(/\n?```\s*$/gi, '');
   return cleaned.trim();
+}
+
+export function countRecordsInDataset(content: string, format: string): number {
+  const cleaned = stripCodeBlocks(content);
+  
+  if (format === 'csv') {
+    const lines = cleaned.split('\n').filter(l => l.trim());
+    return Math.max(0, lines.length - 1);
+  }
+  
+  if (format === 'json') {
+    try {
+      const parsed = JSON.parse(cleaned);
+      if (Array.isArray(parsed)) {
+        return parsed.length;
+      }
+      const values = Object.values(parsed);
+      const firstArray = values.find(v => Array.isArray(v));
+      if (firstArray && Array.isArray(firstArray)) {
+        return firstArray.length;
+      }
+      return 1;
+    } catch {
+      return 0;
+    }
+  }
+  
+  return 0;
 }
 
 function buildSampleDataSection(context: PromptContext): string {
@@ -72,100 +97,41 @@ function buildSampleDataSection(context: PromptContext): string {
   
   let section = "USER'S DATA RECORDS - Use this data to answer questions about the user's personal information:\n";
   let totalChars = 0;
+  let wasTruncated = false;
   
   for (const dataset of context.sampleDatasets) {
     const remainingBudget = MAX_SAMPLE_DATA_CHARS - totalChars;
-    if (remainingBudget <= 0) break;
+    if (remainingBudget <= 0) {
+      wasTruncated = true;
+      break;
+    }
     
-    // Strip code block markers from the content
     const cleanedContent = stripCodeBlocks(dataset.content);
     const maxDataChars = Math.min(MAX_DOC_PREVIEW_CHARS, remainingBudget);
     const truncatedContent = cleanedContent.slice(0, maxDataChars);
-    const suffix = cleanedContent.length > maxDataChars ? "\n[Data truncated...]" : "";
+    const datasetTruncated = cleanedContent.length > maxDataChars;
+    if (datasetTruncated) wasTruncated = true;
+    const suffix = datasetTruncated ? "\n[Data truncated...]" : "";
     
-    section += `\n--- ${dataset.name} (${dataset.format.toUpperCase()}) ---\n${truncatedContent}${suffix}\n`;
+    const recordCount = countRecordsInDataset(dataset.content, dataset.format);
+    const countLabel = recordCount > 0 ? `Total records: ${recordCount}` : "";
+    
+    section += `\n--- ${dataset.name} (${dataset.format.toUpperCase()}) ---\n`;
+    if (countLabel) {
+      section += `${countLabel}\n`;
+    }
+    section += `${truncatedContent}${suffix}\n`;
     totalChars += truncatedContent.length + dataset.name.length + 30;
+  }
+  
+  if (wasTruncated) {
+    section += `\n[NOTE: Some data was truncated due to size limits. Only reference the records shown above. If you cannot see all records, tell the user you are showing a subset.]\n`;
   }
   
   return section;
 }
 
-export function generateAnthropicStylePrompt(context: PromptContext): string {
-  const personality = getPersonalityPrompt();
-  const domainKnowledge = buildDomainKnowledgeSection(context);
-  const sampleData = buildSampleDataSection(context);
-  const currentDate = new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-  
-  let prompt = `<role>
-You are an AI assistant named "${context.name}".
-${personality}
-</role>
-
-<current_date>
-Today's date is: ${currentDate}
-Use this to understand relative time references like "last month", "last year", "this week", etc.
-</current_date>
-
-<purpose>
-${context.businessUseCase}
-</purpose>`;
-
-  if (domainKnowledge) {
-    prompt += `
-
-<context>
-${domainKnowledge}
-</context>`;
-  }
-
-  if (sampleData) {
-    prompt += `
-
-<data>
-${sampleData}
-
-CRITICAL INSTRUCTIONS FOR DATA ACCESS:
-- You HAVE ACCESS to the user's personal data shown above
-- When the user asks about their pay, salary, deductions, or any personal records, ANALYZE the data above and respond with a clear, helpful answer
-- DO NOT say you don't have access to their information - you DO have it above
-- DO NOT generate code or tool calls - just read the data and provide the answer in plain English
-- NEVER output raw JSON or data dumps - always provide human-readable explanations and summaries
-- Respond naturally with specific numbers, dates, and insights from the data
-- If the user asks about changes over time (like pay increases), compare the relevant records and explain what changed
-</data>`;
-  }
-
-  if (context.validationRules) {
-    prompt += `
-
-<rules>
-${context.validationRules}
-</rules>`;
-  }
-
-  if (context.guardrails) {
-    prompt += `
-
-<constraints>
-${context.guardrails}
-</constraints>`;
-  }
-
-  prompt += `
-
-<instructions>
-- Always be helpful, accurate, and stay within your defined scope
-- If a request falls outside your capabilities or constraints, politely explain why you cannot assist
-- Use the context and domain knowledge provided to inform your responses
-- When the user asks about their personal data, use the provided data records to answer accurately
-- Do not address the user by name in every response. Use their name sparingly, only when it adds clarity or on first greeting.
-- CRITICAL: NEVER output placeholder text like "Describe your question or issue", "What can I help you with today?", or any template/help text. Always provide a real, substantive response. If you cannot answer, explain what you can help with instead.
-</instructions>`;
-
-  return prompt;
-}
-
-export function generateGeminiStylePrompt(context: PromptContext): string {
+export function generatePrompt(style: PromptStyle, context: PromptContext): string {
   const personality = getPersonalityPrompt();
   const domainKnowledge = buildDomainKnowledgeSection(context);
   const sampleData = buildSampleDataSection(context);
@@ -203,7 +169,13 @@ ${sampleData}
 - DO NOT generate code or tool calls - just read the data and provide the answer in plain English
 - **NEVER output raw JSON, code blocks, or data dumps** - always provide human-readable explanations and summaries
 - Respond naturally with specific numbers, dates, and insights from the data
-- If the user asks about changes over time (like pay increases), compare the relevant records and explain what changed`;
+- If the user asks about changes over time (like pay increases), compare the relevant records and explain what changed
+
+**CRITICAL: DATA COUNT ACCURACY:**
+- Each dataset above includes a "Total records" count. Use that exact number when stating how many records exist.
+- If you display a table or list of records, the number of rows you display MUST match the count you state. Do NOT say "there are 3 employees" and then list 5.
+- If data was truncated, clearly state "showing N of M total records" so the user knows not all data is visible.
+- NEVER guess or estimate record counts — always count the actual records you can see in the data above before stating a number.`;
   }
 
   if (context.validationRules) {
@@ -232,86 +204,6 @@ ${context.guardrails}
   }
 
   return prompt;
-}
-
-export function generateOpenAIStylePrompt(context: PromptContext): string {
-  const personality = getPersonalityPrompt();
-  const domainKnowledge = buildDomainKnowledgeSection(context);
-  const sampleData = buildSampleDataSection(context);
-  const currentDate = new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-  
-  let prompt = `# System Instructions
-
-You are **${context.name}**, an AI assistant with the following configuration:
-
-## Current Date
-Today is: ${currentDate}
-Use this to understand relative time references like "last month", "last year", "this week", etc.
-
-## Role Definition
-${personality}
-
-## Primary Objective
-${context.businessUseCase}`;
-
-  if (domainKnowledge) {
-    prompt += `
-
-## Knowledge Base
-Use the following information to inform your responses:
-
-${domainKnowledge}`;
-  }
-
-  if (sampleData) {
-    prompt += `
-
-## User Data Records
-${sampleData}
-
-**CRITICAL INSTRUCTIONS FOR DATA ACCESS:**
-- You HAVE ACCESS to the user's personal data shown above
-- When the user asks about their pay, salary, deductions, or any personal records, ANALYZE the data above and respond with a clear, helpful answer
-- DO NOT say you don't have access to their information - you DO have it above
-- DO NOT generate code or tool calls - just read the data and provide the answer in plain English
-- **NEVER output raw JSON, code blocks, or data dumps** - always provide human-readable explanations and summaries
-- Respond naturally with specific numbers, dates, and insights from the data
-- If the user asks about changes over time (like pay increases), compare the relevant records and explain what changed`;
-  }
-
-  if (context.validationRules) {
-    prompt += `
-
-## Validation Requirements
-Apply these rules when processing requests:
-${context.validationRules}`;
-  }
-
-  if (context.guardrails) {
-    prompt += `
-
-## Guardrails & Restrictions
-You MUST follow these guidelines:
-${context.guardrails}`;
-  }
-
-  prompt += `
-
-## Output Format
-- Provide clear, well-structured responses
-- When uncertain, acknowledge limitations honestly
-- Stay within your defined scope and guardrails
-- If you cannot help with a request, explain why politely
-- When the user asks about their personal data, use the provided data records to answer accurately
-- Do not address the user by name in every response. Use their name sparingly, only when it adds clarity or on first greeting.
-- CRITICAL: NEVER output placeholder text like "Describe your question or issue", "What can I help you with today?", or any template/help text. Always provide a real, substantive response. If you cannot answer, explain what you can help with instead.`;
-
-  return prompt;
-}
-
-export function generatePrompt(style: PromptStyle, context: PromptContext): string {
-  // Always use Gemini style for consistent prompt generation
-  return generateGeminiStylePrompt(context);
 }
 
 export function getPromptStyleDescription(style: PromptStyle): string {
