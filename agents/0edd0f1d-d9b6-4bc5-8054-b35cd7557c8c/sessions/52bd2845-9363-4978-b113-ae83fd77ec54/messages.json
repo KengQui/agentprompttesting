@@ -30,5 +30,69 @@
     "role": "assistant",
     "content": "**Validating your expression against 2 employees from your data:**\n\n---\n\n**Sarah Johnson (Senior Developer, Salaried)**\n\n*   Looking at Pay Type → it's **\"Salaried\"**\n*   Since Pay Type equals \"Salaried\", we take the first path\n*   Scheduled ER Amount is **$142.75**\n*   $142.75 multiplied by 24 = **$3,426**\n*   Annual Salary is **$95,000.00**\n*   $95,000 multiplied by 0.15 = **$14,250**\n*   $3,426 plus $14,250 = **$17,676**\n*   **Expected Result: $17,676**\n\n---\n\n**Michael Chen (Sales Coordinator, Hourly)**\n\n*   Looking at Pay Type → it's **\"Hourly\"**\n*   Since Pay Type is NOT \"Salaried\", we take the second path\n*   Scheduled ER Amount is **$97.50**\n*   $97.50 multiplied by 24 = **$2,340**\n*   $2,340 plus $2,500 = **$4,840**\n*   **Expected Result: $4,840**\n\n---\n\nBoth results look correct. Would you like to proceed with creating the column?",
     "timestamp": "2026-02-08T00:17:09.161Z"
+  },
+  {
+    "id": "101c709d-75ff-41c3-94cd-ead802f686c4",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "sessionId": "52bd2845-9363-4978-b113-ae83fd77ec54",
+    "role": "user",
+    "content": "reate a column that labels employees as 'High' if their annual salary is over $100,000, 'Mid' if between $50,000 and $100,000, and 'Entry' otherwise.",
+    "timestamp": "2026-02-08T00:20:02.614Z"
+  },
+  {
+    "id": "7af2fa5b-4c78-4745-8806-d627e1352150",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "sessionId": "52bd2845-9363-4978-b113-ae83fd77ec54",
+    "role": "assistant",
+    "content": "Understood. Here's the expression for the 'Salary Level' column:\n\n```\nIf(Value(Annual Salary) > 100000, \"High\", If(And(Value(Annual Salary) >= 50000, Value(Annual Salary) <= 100000), \"Mid\", \"Entry\"))\n```\n\nOutput Type: Text\n\nWould you like to validate this expression or proceed with creating the column?",
+    "timestamp": "2026-02-08T00:20:03.560Z"
+  },
+  {
+    "id": "61a247db-00e3-4f64-95c5-4fa41c82b616",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "sessionId": "52bd2845-9363-4978-b113-ae83fd77ec54",
+    "role": "user",
+    "content": "Yes, validate this expression",
+    "timestamp": "2026-02-08T00:20:43.368Z"
+  },
+  {
+    "id": "ee6710c2-0325-4fcb-814c-dcb5ffbabbd4",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "sessionId": "52bd2845-9363-4978-b113-ae83fd77ec54",
+    "role": "assistant",
+    "content": "**Validating your expression against 2 employees from your data:**\n\n---\n\n**Emily Rodriguez (HR Manager, $110,000 Annual Salary)**\n\n*   Looking at Annual Salary → it's **$110,000.00**\n*   Is $110,000 greater than $100,000? → **Yes**\n*   **Expected Result: \"High\"**\n\n---\n\n**Michael Chen (Sales Coordinator, no Annual Salary)**\n\n*   Looking at Annual Salary → it's **empty**\n*   Is empty greater than $100,000? Since it's blank → **No**, move to next check\n*   Is empty greater than or equal to $50,000 AND less than or equal to $100,000? Since it's blank → **No**, move to last option\n*   **Expected Result: \"Entry\"**\n\n---\n\nThe results look correct for these two cases. Do you want to proceed with creating the column?",
+    "timestamp": "2026-02-08T00:20:45.072Z"
+  },
+  {
+    "id": "db0e151d-8ba1-4aa7-b8d1-a28c7c2ae129",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "sessionId": "52bd2845-9363-4978-b113-ae83fd77ec54",
+    "role": "user",
+    "content": "Show 'Expired' if the credential has already expired, 'Expiring Soon' if within 90 days, and 'Active' otherwise.\"\n\nTests: DateDiff() comparing Credential Expires to Today(), nested If().",
+    "timestamp": "2026-02-08T00:21:37.541Z"
+  },
+  {
+    "id": "15cb6aa4-b097-418b-ab15-36f9283f6f69",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "sessionId": "52bd2845-9363-4978-b113-ae83fd77ec54",
+    "role": "assistant",
+    "content": "Okay, I can create a column that checks the expiration status of credentials. Here's the expression:\n\n```\nIf(DateDiff(Today(), Credential Expires) < 0, \"Expired\", If(DateDiff(Today(), Credential Expires) <= 90, \"Expiring Soon\", \"Active\"))\n```\n\nOutput type: Text\n\nWould you like to validate this expression or proceed with creating the column?",
+    "timestamp": "2026-02-08T00:21:38.517Z"
+  },
+  {
+    "id": "94758873-96fb-4210-82eb-0bc95b33e54d",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "sessionId": "52bd2845-9363-4978-b113-ae83fd77ec54",
+    "role": "user",
+    "content": "Yes, validate this expression",
+    "timestamp": "2026-02-08T00:22:06.271Z"
+  },
+  {
+    "id": "4a4f0b42-d682-4f5a-94de-7341ad1e459e",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "sessionId": "52bd2845-9363-4978-b113-ae83fd77ec54",
+    "role": "assistant",
+    "content": "**Validating your expression against 2 employees from your data:**\n\n**Important Context:** Today's date is Sunday, February 8, 2026.\n\n---\n\n**Sarah Johnson (Senior Developer, Credential Expires: 2026-06-30)**\n\n*   Looking at Credential Expires → it's **2026-06-30**\n*   The difference in days between Today (2026-02-08) and 2026-06-30 is 142 days.\n*   Is 142 less than 0? → **No**, move to next check.\n*   Is 142 less than or equal to 90? → **No**, move to the last option.\n*   **Expected Result: \"Active\"**\n\n---\n\n**James Williams (Help Desk Technician, Credential Expires: 2025-09-01)**\n\n*   Looking at Credential Expires → it's **2025-09-01**\n*   The difference in days between Today (2026-02-08) and 2025-09-01 is -160 days.\n*   Is -160 less than 0? → **Yes**\n*   **Expected Result: \"Expired\"**\n\n---\n\nThe results look correct. Do you want to proceed with creating the column?",
+    "timestamp": "2026-02-08T00:22:08.428Z"
   }
 ]
