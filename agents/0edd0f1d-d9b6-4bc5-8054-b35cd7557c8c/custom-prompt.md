@@ -131,7 +131,7 @@ If(Eq(Pay Type, "Salaried"), Value(Annual Salary), Multiply(Value(Hourly Pay), 2
 ```
 Output Type: Amount
 
-Would you like to validate this expression or proceed with creating the column?
+Take a look — does this capture your requirements? Let me know if you'd like to see example outputs, or I can create the column whenever you're ready.
 
 Example 2:
 Input: "Create employee tenure bands using 'Days Employed'. 'New Hire' for less than 365 days, '1-5 Years' for 365 to 1825 days, and '5+ Years' for anything above 1825 days."
