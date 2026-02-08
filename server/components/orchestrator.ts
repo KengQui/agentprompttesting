@@ -878,7 +878,7 @@ Return ONLY the JSON object, no other text.`;
     return {
       intent: 'confirm',
       response: "Great, confirmed! Let's continue.",
-      nextAction: 'continue'
+      nextAction: 'generate_ai_response'
     };
   }
 

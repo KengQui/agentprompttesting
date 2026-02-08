@@ -1,0 +1,91 @@
+{
+  "agentId": "058c77db-3d7f-42de-8a36-ceb923be26de",
+  "traces": [
+    {
+      "id": "trace-1770585793508",
+      "sessionId": "f7cc5e27-e83c-40af-b0c1-01c58df5b0ee",
+      "userInput": "Create a column showing what percentage the employer contributes relative to the employee's scheduled amount.",
+      "agentResponse": "Okay, I can create a column showing the employer's contribution as a percentage of the employee's scheduled amount.\n\nTo clarify, should this percentage be calculated on a per-row basis, showing the employer contribution percentage for each employee individually? Or do you want a single, overall percentage based on the total employer and employee contributions across all rows?",
+      "startTime": "2026-02-08T21:23:12.639Z",
+      "endTime": "2026-02-08T21:23:13.508Z",
+      "totalDuration": 869,
+      "entries": [
+        {
+          "id": "entry-1770585792661-1",
+          "type": "intent_classification",
+          "name": "Orchestrator Intent Classification",
+          "timestamp": "2026-02-08T21:23:12.661Z",
+          "metadata": {
+            "intent": "answer_question",
+            "classificationMethod": "orchestrator",
+            "confidence": "high"
+          }
+        },
+        {
+          "id": "entry-1770585793508-3",
+          "type": "llm_call",
+          "name": "Gemini Response Generation",
+          "timestamp": "2026-02-08T21:23:13.508Z",
+          "duration": 847,
+          "metadata": {
+            "model": "gemini",
+            "intent": "answer_question",
+            "validated": true
+          }
+        }
+      ],
+      "success": true
+    },
+    {
+      "id": "trace-1770585805782",
+      "sessionId": "f7cc5e27-e83c-40af-b0c1-01c58df5b0ee",
+      "userInput": "yes",
+      "agentResponse": "Okay, I'll calculate the percentage on a per-row basis.\n\nHere's the calculation: `(Scheduled ER Amount / Scheduled EE Amount) * 100`\n\nEmployee Name, Employer Contribution Percentage (of Employee Amount)\nSarah Johnson, 300.00%\nMichael Chen, 100.00%\nEmily Rodriguez, 300.00%\nDavid Kim, 300.00%\nJessica Miller, 0.00%\nRobert Wilson, 50.00%\nAmanda Lewis, 0.00%\nJames Hall, 300.00%\nLinda Martinez, 50.00%\nThomas Anderson, 100.00%\n\nThere are 10 total records.",
+      "startTime": "2026-02-08T21:23:24.488Z",
+      "endTime": "2026-02-08T21:23:25.782Z",
+      "totalDuration": 1294,
+      "entries": [
+        {
+          "id": "entry-1770585804489-1",
+          "type": "intent_classification",
+          "name": "Orchestrator Intent Classification",
+          "timestamp": "2026-02-08T21:23:24.489Z",
+          "metadata": {
+            "intent": "answer_question",
+            "classificationMethod": "orchestrator",
+            "confidence": "high"
+          }
+        },
+        {
+          "id": "entry-1770585805782-3",
+          "type": "llm_call",
+          "name": "Gemini Response Generation",
+          "timestamp": "2026-02-08T21:23:25.782Z",
+          "duration": 1293,
+          "metadata": {
+            "model": "gemini",
+            "intent": "answer_question",
+            "validated": true
+          }
+        }
+      ],
+      "success": true
+    }
+  ],
+  "stats": {
+    "hookCalls": {},
+    "signalReads": {},
+    "intentDistribution": {
+      "answer_question": 2
+    },
+    "classificationMethods": {
+      "orchestrator": 2
+    },
+    "avgResponseTime": 1081.5,
+    "totalLlmCalls": 2,
+    "totalTokensUsed": 0,
+    "errorCount": 0
+  },
+  "createdAt": "2026-02-08T21:23:13.508Z",
+  "updatedAt": "2026-02-08T21:23:25.782Z"
+}

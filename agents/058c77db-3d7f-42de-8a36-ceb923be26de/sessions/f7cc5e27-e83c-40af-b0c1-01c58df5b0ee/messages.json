@@ -1,0 +1,34 @@
+[
+  {
+    "id": "97d093c8-7c00-4546-97d5-351e504c6edb",
+    "agentId": "058c77db-3d7f-42de-8a36-ceb923be26de",
+    "sessionId": "f7cc5e27-e83c-40af-b0c1-01c58df5b0ee",
+    "role": "user",
+    "content": "Create a column showing what percentage the employer contributes relative to the employee's scheduled amount.",
+    "timestamp": "2026-02-08T21:23:12.639Z"
+  },
+  {
+    "id": "a23b1bbc-985b-425f-aeed-67bcf4a62e47",
+    "agentId": "058c77db-3d7f-42de-8a36-ceb923be26de",
+    "sessionId": "f7cc5e27-e83c-40af-b0c1-01c58df5b0ee",
+    "role": "assistant",
+    "content": "Okay, I can create a column showing the employer's contribution as a percentage of the employee's scheduled amount.\n\nTo clarify, should this percentage be calculated on a per-row basis, showing the employer contribution percentage for each employee individually? Or do you want a single, overall percentage based on the total employer and employee contributions across all rows?",
+    "timestamp": "2026-02-08T21:23:13.509Z"
+  },
+  {
+    "id": "82f00d20-eed2-4c4d-8dbd-a1b467420530",
+    "agentId": "058c77db-3d7f-42de-8a36-ceb923be26de",
+    "sessionId": "f7cc5e27-e83c-40af-b0c1-01c58df5b0ee",
+    "role": "user",
+    "content": "yes",
+    "timestamp": "2026-02-08T21:23:24.488Z"
+  },
+  {
+    "id": "30cf1feb-92dc-4c4f-b16c-c04bf80d3184",
+    "agentId": "058c77db-3d7f-42de-8a36-ceb923be26de",
+    "sessionId": "f7cc5e27-e83c-40af-b0c1-01c58df5b0ee",
+    "role": "assistant",
+    "content": "Okay, I'll calculate the percentage on a per-row basis.\n\nHere's the calculation: `(Scheduled ER Amount / Scheduled EE Amount) * 100`\n\nEmployee Name, Employer Contribution Percentage (of Employee Amount)\nSarah Johnson, 300.00%\nMichael Chen, 100.00%\nEmily Rodriguez, 300.00%\nDavid Kim, 300.00%\nJessica Miller, 0.00%\nRobert Wilson, 50.00%\nAmanda Lewis, 0.00%\nJames Hall, 300.00%\nLinda Martinez, 50.00%\nThomas Anderson, 100.00%\n\nThere are 10 total records.",
+    "timestamp": "2026-02-08T21:23:25.782Z"
+  }
+]
