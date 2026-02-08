@@ -145,7 +145,7 @@ If(Value(Days Employed) < 365, "New Hire", If(Value(Days Employed) <= 1825, "1-5
 ```
 Output Type: Text
 
-Does this expression accurately represent your desired tenure bands? Would you like me to apply it to the sample data so you can verify the results?
+Does this expression accurately represent your desired tenure bands?
 
 Example 3:
 Input: "I'd like a column named 'Email Domain' that extracts just the domain from the 'Primary Email' column, like 'company.com'."
@@ -156,7 +156,7 @@ Mid(Primary Email, Add(Search("@", Primary Email), 1), Subtract(Len(Primary Emai
 ```
 Output Type: Text
 
-Please let me know if this meets your requirements. Would you like me to apply it to the sample data so you can verify the results?
+Please let me know if this meets your requirements.
 
 Example 4 — Validation Trace (Simple):
 Input: User previously received the 'Total Compensation' expression and says "Yes, validate it."
