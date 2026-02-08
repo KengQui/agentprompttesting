@@ -1,0 +1,34 @@
+[
+  {
+    "id": "65fb9761-147e-44bc-9ef7-be57058d5492",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "sessionId": "1692d704-67b6-4cfa-9d59-c5688d7ce80c",
+    "role": "user",
+    "content": "Show 'Expired' if the credential has already expired, 'Expiring Soon' if within 90 days, and 'Active' otherwise",
+    "timestamp": "2026-02-08T18:45:30.254Z"
+  },
+  {
+    "id": "c6fa40d3-299f-4f7d-8e54-29eada35ad65",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "sessionId": "1692d704-67b6-4cfa-9d59-c5688d7ce80c",
+    "role": "assistant",
+    "content": "Okay! Here's an expression that checks the 'Credential Expires' date and determines the status:\n\n```\nIf(DateDiff(Today(), Credential Expires) < 0, \"Expired\", If(DateDiff(Today(), Credential Expires) <= 90, \"Expiring Soon\", \"Active\"))\n```\n\nOutput Type: Text\n\nThis expression calculates the difference in days between today and the 'Credential Expires' date. If the difference is negative (meaning the expiration date is in the past), it displays \"Expired\". If it's within 90 days, it displays \"Expiring Soon,\" and otherwise, it displays \"Active.\"\n\nWould you like me to apply this expression to the sample data so you can verify the results?",
+    "timestamp": "2026-02-08T18:45:31.753Z"
+  },
+  {
+    "id": "fc9006e1-e178-4567-b550-525e8283dc83",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "sessionId": "1692d704-67b6-4cfa-9d59-c5688d7ce80c",
+    "role": "user",
+    "content": "Yes",
+    "timestamp": "2026-02-08T18:45:38.830Z"
+  },
+  {
+    "id": "d9bf15a3-3651-41c8-9630-a9577d3bd4aa",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "sessionId": "1692d704-67b6-4cfa-9d59-c5688d7ce80c",
+    "role": "assistant",
+    "content": "This expression has **3 possible outcomes**: \"Expired\", \"Expiring Soon\", and \"Active\". I'll test one employee for each outcome based on their 'Credential Expires' date.\n\n**Validating your expression against 3 employees from your data:**\n\n---\n\n**Sarah Johnson (Senior Developer)**\n\n- Credential Expires: **2026-06-30**\n- Today is **2026-02-08**\n- DateDiff(Today, Credential Expires) = DateDiff(2026-02-08, 2026-06-30) = **142 days**\n- Is 142 less than 0? → **No**, move to next check\n- Is 142 less than or equal to 90? → **No**\n- **Expected Result: \"Active\"**\n\n---\n\n**Michael Chen (Sales Coordinator)**\n\n- Credential Expires: **2025-12-15**\n- Today is **2026-02-08**\n- DateDiff(Today, Credential Expires) = DateDiff(2026-02-08, 2025-12-15) = **-55 days**\n- Is -55 less than 0? → **Yes**\n- **Expected Result: \"Expired\"**\n\n---\n\n**James Williams (Help Desk Technician)**\n\n* Credential Expires: **2025-09-01**\n* Today is **2026-02-08**\n* DateDiff(Today, Credential Expires) = DateDiff(2026-02-08, 2025-09-01) = **-160 days**\n* Is -160 less than 0? → **Yes**\n* **Expected Result: \"Expired\"**\n\n---\n**Lisa Park (Data Services Manager)**\n\n- Credential Expires: **2028-01-22**\n- Today is **2026-02-08**\n- DateDiff(Today, Credential Expires) = DateDiff(2026-02-08, 2028-01-22) = **713 days**\n- Is 713 less than 0? → **No**, move to next check\n- Is 713 less than or equal to 90? → **No**\n- **Expected Result: \"Active\"**\n\n---\n**Emily Rodriguez (HR Manager)**\n\n- Credential Expires: **2027-03-10**\n- Today is **2026-02-08**\n- DateDiff(Today, Credential Expires) = DateDiff(2026-02-08, 2027-03-10) = **396 days**\n- Is 396 less than 0? → **No**, move to next check\n- Is 396 less than or equal to 90? → **No**\n- **Expected Result: \"Active\"**\n\n---\nI realized that none of the sample data produces \"Expiring Soon\". Credential Expiration Dates must be between 2026-02-09 and 2026-05-09 to trigger that status.\n\nThe 'Expired' and 'Active' paths are working as expected. Let me know if you'd like to adjust anything, or I can create the column whenever you're ready.",
+    "timestamp": "2026-02-08T18:45:44.163Z"
+  }
+]

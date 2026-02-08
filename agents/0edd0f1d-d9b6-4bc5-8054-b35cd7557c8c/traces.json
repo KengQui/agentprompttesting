@@ -2664,6 +2664,174 @@
         }
       ],
       "success": true
+    },
+    {
+      "id": "trace-1770576331751",
+      "sessionId": "1692d704-67b6-4cfa-9d59-c5688d7ce80c",
+      "userInput": "Show 'Expired' if the credential has already expired, 'Expiring Soon' if within 90 days, and 'Active' otherwise",
+      "agentResponse": "Okay! Here's an expression that checks the 'Credential Expires' date and determines the status:\n\n```\nIf(DateDiff(Today(), Credential Expires) < 0, \"Expired\", If(DateDiff(Today(), Credential Expires) <= 90, \"Expiring Soon\", \"Active\"))\n```\n\nOutput Type: Text\n\nThis expression calculates the difference in days between today and the 'Credential Expires' date. If the difference is negative (meaning the expiration date is in the past), it displays \"Expired\". If it's within 90 days, it displays \"Expiring Soon,\" and otherwise, it displays \"Active.\"\n\nWould you like me to apply this expression to the sample data so you can verify the results?",
+      "startTime": "2026-02-08T18:45:30.254Z",
+      "endTime": "2026-02-08T18:45:31.751Z",
+      "totalDuration": 1497,
+      "entries": [
+        {
+          "id": "entry-1770576330275-1",
+          "type": "intent_classification",
+          "name": "Orchestrator Intent Classification",
+          "timestamp": "2026-02-08T18:45:30.275Z",
+          "metadata": {
+            "intent": "answer_question",
+            "classificationMethod": "orchestrator",
+            "confidence": "high"
+          }
+        },
+        {
+          "id": "entry-1770576331751-3",
+          "type": "llm_call",
+          "name": "Gemini Response Generation",
+          "timestamp": "2026-02-08T18:45:31.751Z",
+          "duration": 1476,
+          "metadata": {
+            "model": "gemini",
+            "intent": "answer_question",
+            "validated": true
+          }
+        }
+      ],
+      "success": true
+    },
+    {
+      "id": "trace-1770576344161",
+      "sessionId": "1692d704-67b6-4cfa-9d59-c5688d7ce80c",
+      "userInput": "Yes",
+      "agentResponse": "This expression has **3 possible outcomes**: \"Expired\", \"Expiring Soon\", and \"Active\". I'll test one employee for each outcome based on their 'Credential Expires' date.\n\n**Validating your expression against 3 employees from your data:**\n\n---\n\n**Sarah Johnson (Senior Developer)**\n\n- Credential Expires: **2026-06-30**\n- Today is **2026-02-08**\n- DateDiff(Today, Credential Expires) = DateDiff(2026-02-08, 2026-06-30) = **142 days**\n- Is 142 less than 0? → **No**, move to next check\n- Is 142 less than or equal to 90? → **No**\n- **Expected Result: \"Active\"**\n\n---\n\n**Michael Chen (Sales Coordinator)**\n\n- Credential Expires: **2025-12-15**\n- Today is **2026-02-08**\n- DateDiff(Today, Credential Expires) = DateDiff(2026-02-08, 2025-12-15) = **-55 days**\n- Is -55 less than 0? → **Yes**\n- **Expected Result: \"Expired\"**\n\n---\n\n**James Williams (Help Desk Technician)**\n\n* Credential Expires: **2025-09-01**\n* Today is **2026-02-08**\n* DateDiff(Today, Credential Expires) = DateDiff(2026-02-08, 2025-09-01) = **-160 days**\n* Is -160 less than 0? → **Yes**\n* **Expected Result: \"Expired\"**\n\n---\n**Lisa Park (Data Services Manager)**\n\n- Credential Expires: **2028-01-22**\n- Today is **2026-02-08**\n- DateDiff(Today, Credential Expires) = DateDiff(2026-02-08, 2028-01-22) = **713 days**\n- Is 713 less than 0? → **No**, move to next check\n- Is 713 less than or equal to 90? → **No**\n- **Expected Result: \"Active\"**\n\n---\n**Emily Rodriguez (HR Manager)**\n\n- Credential Expires: **2027-03-10**\n- Today is **2026-02-08**\n- DateDiff(Today, Credential Expires) = DateDiff(2026-02-08, 2027-03-10) = **396 days**\n- Is 396 less than 0? → **No**, move to next check\n- Is 396 less than or equal to 90? → **No**\n- **Expected Result: \"Active\"**\n\n---\nI realized that none of the sample data produces \"Expiring Soon\". Credential Expiration Dates must be between 2026-02-09 and 2026-05-09 to trigger that status.\n\nThe 'Expired' and 'Active' paths are working as expected. Let me know if you'd like to adjust anything, or I can create the column whenever you're ready.",
+      "startTime": "2026-02-08T18:45:38.830Z",
+      "endTime": "2026-02-08T18:45:44.161Z",
+      "totalDuration": 5331,
+      "entries": [
+        {
+          "id": "entry-1770576338831-1",
+          "type": "intent_classification",
+          "name": "Orchestrator Intent Classification",
+          "timestamp": "2026-02-08T18:45:38.831Z",
+          "metadata": {
+            "intent": "answer_question",
+            "classificationMethod": "orchestrator",
+            "confidence": "high"
+          }
+        },
+        {
+          "id": "entry-1770576344161-action",
+          "type": "action_simulation",
+          "name": "Action: validate_expression_syntax",
+          "timestamp": "2026-02-08T18:45:44.161Z",
+          "metadata": {
+            "actionName": "validate_expression_syntax",
+            "fields": {
+              "expression": "If(DateDiff(Today(), Credential Expires) < 0, \"Expired\", If(DateDiff(Today(), Credential Expires) <= 90, \"Expiring Soon\", \"Active\"))"
+            },
+            "success": true,
+            "message": "Successfully validated the expression. No syntax errors were found and parentheses are balanced."
+          }
+        },
+        {
+          "id": "entry-1770576344161-3",
+          "type": "llm_call",
+          "name": "Gemini Response Generation",
+          "timestamp": "2026-02-08T18:45:44.161Z",
+          "duration": 5330,
+          "metadata": {
+            "model": "gemini",
+            "intent": "answer_question",
+            "validated": true
+          }
+        }
+      ],
+      "success": true
+    },
+    {
+      "id": "trace-1770576367856",
+      "sessionId": "36ec0495-4dc5-4ffe-95ff-6432d056f9a7",
+      "userInput": "Show 'Expired' if the credential has already expired, 'Expiring Soon' if within 90 days, and 'Active' otherwise",
+      "agentResponse": "Okay! Here's the expression to determine the credential status:\n\n```\nIf(DateDiff(Today(), Credential Expires) < 0, \"Expired\", If(DateDiff(Today(), Credential Expires) <= 90, \"Expiring Soon\", \"Active\"))\n```\n\nOutput Type: Text\n\nThis expression calculates the difference in days between today and the 'Credential Expires' date. If the difference is negative (meaning the credential has already expired), it returns \"Expired\". If the difference is less than or equal to 90 days, it returns \"Expiring Soon\". Otherwise, it returns \"Active\".\n\nWould you like me to apply this expression to the sample data so you can verify the results?",
+      "startTime": "2026-02-08T18:46:06.408Z",
+      "endTime": "2026-02-08T18:46:07.856Z",
+      "totalDuration": 1448,
+      "entries": [
+        {
+          "id": "entry-1770576366411-1",
+          "type": "intent_classification",
+          "name": "Orchestrator Intent Classification",
+          "timestamp": "2026-02-08T18:46:06.411Z",
+          "metadata": {
+            "intent": "answer_question",
+            "classificationMethod": "orchestrator",
+            "confidence": "high"
+          }
+        },
+        {
+          "id": "entry-1770576367856-3",
+          "type": "llm_call",
+          "name": "Gemini Response Generation",
+          "timestamp": "2026-02-08T18:46:07.856Z",
+          "duration": 1445,
+          "metadata": {
+            "model": "gemini",
+            "intent": "answer_question",
+            "validated": true
+          }
+        }
+      ],
+      "success": true
+    },
+    {
+      "id": "trace-1770576376446",
+      "sessionId": "36ec0495-4dc5-4ffe-95ff-6432d056f9a7",
+      "userInput": "yes",
+      "agentResponse": "This expression has **3 possible outcomes**: \"Expired\", \"Expiring Soon\", and \"Active\". I'll test one employee for each.\n\n**Validating your expression against 3 employees from your data:**\n\n---\n\n**Sarah Johnson (Senior Developer)**\n\n- Looking at Credential Expires → it's **2026-06-30**\n- Calculating the difference in days between today (2026-02-08) and 2026-06-30 → it's **142 days**\n- Is 142 less than 0? → **No**, move to next check\n- Is 142 less than or equal to 90? → **No**\n- **Expected Result: \"Active\"**\n\n---\n\n**Michael Chen (Sales Coordinator)**\n\n- Looking at Credential Expires → it's **2025-12-15**\n- Calculating the difference in days between today (2026-02-08) and 2025-12-15 → it's **-55 days**\n- Is -55 less than 0? → **Yes**\n- **Expected Result: \"Expired\"**\n\n---\n\n**James Williams (Help Desk Technician)**\n\n- Looking at Credential Expires → it's **2025-09-01**\n- Calculating the difference in days between today (2026-02-08) and 2025-09-01 → it's **-160 days**\n- Is -160 less than 0? → **Yes**\n- **Expected Result: \"Expired\"**\n\n---\n\n**Lisa Park (Data Services Manager)**\n\n- Looking at Credential Expires → it's **2028-01-22**\n- Calculating the difference in days between today (2026-02-08) and 2028-01-22 → it's **683 days**\n- Is 683 less than 0? → **No**, move to next check\n- Is 683 less than or equal to 90? → **No**\n- **Expected Result: \"Active\"**\n\n---\n\nNote: The sample data does not include an employee whose credentials expire within the next 90 days, so I wasn't able to test the \"Expiring Soon\" path. You may want to verify that case manually.\n\nThe tested paths produce the expected results. Does everything look correct? Let me know if you'd like to adjust anything, or I can create the column whenever you're ready.",
+      "startTime": "2026-02-08T18:46:11.914Z",
+      "endTime": "2026-02-08T18:46:16.446Z",
+      "totalDuration": 4532,
+      "entries": [
+        {
+          "id": "entry-1770576371914-1",
+          "type": "intent_classification",
+          "name": "Orchestrator Intent Classification",
+          "timestamp": "2026-02-08T18:46:11.914Z",
+          "metadata": {
+            "intent": "answer_question",
+            "classificationMethod": "orchestrator",
+            "confidence": "high"
+          }
+        },
+        {
+          "id": "entry-1770576376446-action",
+          "type": "action_simulation",
+          "name": "Action: validate_expression_syntax",
+          "timestamp": "2026-02-08T18:46:16.446Z",
+          "metadata": {
+            "actionName": "validate_expression_syntax",
+            "fields": {
+              "expression": "If(DateDiff(Today(), Credential Expires) < 0, \"Expired\", If(DateDiff(Today(), Credential Expires) <= 90, \"Expiring Soon\", \"Active\"))"
+            },
+            "success": true,
+            "message": "Successfully validated the expression. No syntax errors were found and parentheses are balanced."
+          }
+        },
+        {
+          "id": "entry-1770576376446-3",
+          "type": "llm_call",
+          "name": "Gemini Response Generation",
+          "timestamp": "2026-02-08T18:46:16.446Z",
+          "duration": 4532,
+          "metadata": {
+            "model": "gemini",
+            "intent": "answer_question",
+            "validated": true
+          }
+        }
+      ],
+      "success": true
     }
   ],
   "stats": {
@@ -2672,18 +2840,18 @@
     },
     "signalReads": {},
     "intentDistribution": {
-      "answer_question": 71,
+      "answer_question": 75,
       "unclear": 1,
       "reject": 1
     },
     "classificationMethods": {
-      "orchestrator": 73
+      "orchestrator": 77
     },
-    "avgResponseTime": 1328.2328767123288,
-    "totalLlmCalls": 65,
+    "avgResponseTime": 1425.5714285714287,
+    "totalLlmCalls": 69,
     "totalTokensUsed": 0,
     "errorCount": 0
   },
   "createdAt": "2026-02-05T16:40:15.025Z",
-  "updatedAt": "2026-02-08T18:41:12.313Z"
+  "updatedAt": "2026-02-08T18:46:16.446Z"
 }
