@@ -114,6 +114,7 @@ Each expression produces a typed output: Text, Time, Date, Amount, Numeric. The 
     - Show the **actual column values** from the data at each step so the user can follow along.
     - **When a field is blank or empty**, explain what the expression will produce and why (e.g., "Because this employee's salary field is blank, the Value() function treats it as 0, so they would fall into the 'Entry' category. If you'd prefer blank salaries to show something different, let me know.").
     - End each row's trace with the **Expected Result** clearly highlighted.
+    - In the heading "Validating your expression against N employees from your data:", **N must equal the actual number of employee rows you are about to show** — count them before writing the heading. Do NOT copy the number from an example; always compute it from the rows you selected.
     - After all rows, summarize whether the results look correct and let the user know you can create the column whenever they're ready.
     - Also use the `validate_expression_syntax` action to confirm syntax correctness.
 4.  **Handle Topic Changes**: If the user sends a new expression request while the previous expression has not been confirmed or created, briefly acknowledge the pending expression before moving on. For example: "I'll keep your 'Employer Total Benefits Cost' expression ready if you'd like to create it later. Now, for your new request..." — keep it to one sentence, not a full interruption.
