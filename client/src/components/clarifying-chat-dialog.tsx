@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from "react";
+import ReactMarkdown from "react-markdown";
 import {
   Dialog,
   DialogContent,
@@ -201,7 +202,11 @@ export function ClarifyingChatDialog({
                   }`}
                   data-testid={`chat-message-${msg.role}-${idx}`}
                 >
-                  {msg.role === "user" ? msg.content : msg.content.replace(/```action\s*\n?[\s\S]*?```/gi, '').trim()}
+                  {msg.role === "user" ? msg.content : (
+                    <div className="prose prose-sm dark:prose-invert max-w-none [&>*:first-child]:mt-0 [&>*:last-child]:mb-0 [&_p]:my-1 [&_ul]:my-1 [&_ol]:my-1 [&_li]:my-0">
+                      <ReactMarkdown>{msg.content.replace(/```action\s*\n?[\s\S]*?```/gi, '').trim()}</ReactMarkdown>
+                    </div>
+                  )}
                 </div>
               </div>
             ))}

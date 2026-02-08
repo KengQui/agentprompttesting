@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useParams, useLocation } from "wouter";
 import { useQuery, useMutation } from "@tanstack/react-query";
+import ReactMarkdown from "react-markdown";
 import { ArrowLeft, Send, Bot, User, Settings, Loader2, X, AlertCircle, MessageSquare, Eraser, Plus, PanelLeftClose, PanelLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -47,7 +48,13 @@ function MessageBubble({ message }: { message: ChatMessage }) {
             : "bg-muted"
         }`}
       >
-        <p className="text-sm whitespace-pre-wrap">{displayContent}</p>
+        {isUser ? (
+          <p className="text-sm whitespace-pre-wrap">{displayContent}</p>
+        ) : (
+          <div className="text-sm prose prose-sm dark:prose-invert max-w-none [&>*:first-child]:mt-0 [&>*:last-child]:mb-0 [&_p]:my-1 [&_ul]:my-1 [&_ol]:my-1 [&_li]:my-0">
+            <ReactMarkdown>{displayContent}</ReactMarkdown>
+          </div>
+        )}
         <p
           className={`text-xs mt-1 ${
             isUser ? "text-primary-foreground/70" : "text-muted-foreground"
