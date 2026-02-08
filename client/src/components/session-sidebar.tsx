@@ -241,7 +241,7 @@ export function SessionSidebar({
   });
 
   return (
-    <div className="w-64 border-r bg-muted/30 flex flex-col h-full">
+    <div className="w-80 border-r bg-muted/30 flex flex-col h-full">
       <div className="p-3 border-b">
         <Button
           onClick={onNewSession}
