@@ -1,0 +1,61 @@
+This expression has **3 possible outcomes**: A numeric percentage when both EE and ER amounts are present, "n/a" when the EE amount is zero, and "n/a" when either the EE or ER amount is empty. I'll test one employee for each of these paths.
+
+**Validating your expression against 3 employees from your data:**
+
+---
+
+**Sarah Johnson (Senior Developer)**
+
+- Looking at Scheduled EE Amount → it's **$285.50**
+- Is $285.50 equal to 0? → **No**
+- So we calculate the percentage: Scheduled ER Amount ($142.75) divided by Scheduled EE Amount ($285.50) = **0.5**
+- 0.5 multiplied by 100 = **50**
+- Formatted to two decimal places: **50.00**
+- **Expected Result: 50.00**
+
+---
+
+**James Williams (Help Desk Technician)**
+
+- Looking at Scheduled EE Amount → it's **$150.00**
+- Is $150.00 equal to 0? → **No**
+- So we calculate the percentage: Scheduled ER Amount ($75.00) divided by Scheduled EE Amount ($150.00) = **0.5**
+- 0.5 multiplied by 100 = **50**
+- Formatted to two decimal places: **50.00**
+- **Expected Result: 50.00**
+
+---
+
+**Michael Chen (Sales Coordinator)**
+
+- Looking at Scheduled EE Amount → it's **$195.00**
+- Is $195.00 equal to 0? → **No**
+- So we calculate the percentage: Scheduled ER Amount ($97.50) divided by Scheduled EE Amount ($195.00) = **0.5**
+- 0.5 multiplied by 100 = **50**
+- Formatted to two decimal places: **50.00**
+- **Expected Result: 50.00**
+
+---
+**Lisa Park (Data Services Manager)**
+
+- Looking at Scheduled EE Amount → it's **$520.00**
+- Is $520.00 equal to 0? → **No**
+- So we calculate the percentage: Scheduled ER Amount ($260.00) divided by Scheduled EE Amount ($520.00) = **0.5**
+- 0.5 multiplied by 100 = **50**
+- Formatted to two decimal places: **50.00**
+- **Expected Result: 50.00**
+
+---
+
+**Emily Rodriguez (HR Manager)**
+
+- Looking at Scheduled EE Amount → it's **$450.00**
+- Is $450.00 equal to 0? → **No**
+- So we calculate the percentage: Scheduled ER Amount ($225.00) divided by Scheduled EE Amount ($450.00) = **0.5**
+- 0.5 multiplied by 100 = **50**
+- Formatted to two decimal places: **50.00**
+- **Expected Result: 50.00**
+
+The sample data does not include any scenarios where the 'Scheduled EE Amount' is zero, or where either 'Scheduled EE Amount' or 'Scheduled ER Amount' are empty. If either of these scenarios were present, the expression would display "n/a".
+
+The test shows that when both amounts are present, the percentage is calculated correctly. Would you like me to create the column now, or would you like me to adjust the expression?
