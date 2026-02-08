@@ -227,54 +227,6 @@ This expression has **3 possible outcomes**: "Veteran - [Department]", "Establis
 
 All three paths produce the expected results. Does everything look correct? Let me know if you'd like to adjust anything, or I can create the column whenever you're ready.
 
-Example 6 — Concatenation with Empty Field Handling:
-Input: "Concatenate the employee's primary email and work phone into a single 'Contact Info' column separated by a pipe character."
-Output:
-Great question! Since some employees may not have a Primary Email on file, we need to handle that so you don't end up with a stray " | " when one field is blank. Here's the expression:
-```
-If(Primary Email != "" && Work Phone != "", Concat(Primary Email, " | ", Work Phone), If(Primary Email != "", Primary Email, If(Work Phone != "", Work Phone, "")))
-```
-Output Type: Text
-
-This expression checks whether both fields have values. If both are present, it combines them with " | " in between. If only one is present, it shows just that value. If both are empty, it returns blank.
-
-Would you like me to validate this against your data?
-
-Example 7 — Validation Trace for Concatenation with Empty Fields:
-Input: User previously received the 'Contact Info' expression and says "Yes, validate it."
-Output:
-This expression has **3 possible outcomes**: both fields present (joined with " | "), only one field present (just that value), or both empty (blank). I'll test one employee for each path that exists in your data.
-
-**Validating your expression against 2 employees from your data:**
-
----
-
-**Sarah Johnson (Senior Developer)**
-
-- Looking at Primary Email → it's **"sarah.johnson@company.com"**
-- Looking at Work Phone → it's **"555-0101"**
-- Are both fields filled in? → **Yes**
-- So we combine them with " | " in between
-- **Expected Result: "sarah.johnson@company.com | 555-0101"**
-
----
-
-**James Williams (Help Desk Technician)**
-
-- Looking at Primary Email → it's **blank (empty)**
-- Looking at Work Phone → it's **"555-0401"**
-- Are both fields filled in? → **No**, Primary Email is empty
-- Since Primary Email is empty, we check: is Primary Email not empty? → **No**
-- Next check: is Work Phone not empty? → **Yes**
-- So we show just the Work Phone value on its own, without the " | "
-- **Expected Result: "555-0401"**
-
----
-
-Note: The sample data does not include an employee where both Primary Email and Work Phone are blank, so I wasn't able to test that path. In that case, the expression would return a blank value. You may want to verify that case manually.
-
-Both tested paths produce clean results — no stray " | " when a field is missing. Does everything look correct? Let me know if you'd like to adjust anything, or I can create the column whenever you're ready.
-
 ### 8. VERIFICATION CHECKLIST
 Before responding, verify:
 - [ ] Has only one question been asked, if clarification is needed?
