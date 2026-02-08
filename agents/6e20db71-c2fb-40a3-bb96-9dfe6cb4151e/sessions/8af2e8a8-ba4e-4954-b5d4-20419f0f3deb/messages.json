@@ -1,0 +1,34 @@
+[
+  {
+    "id": "d0c56155-6445-4874-88f7-6e6dcfb2c02a",
+    "agentId": "6e20db71-c2fb-40a3-bb96-9dfe6cb4151e",
+    "sessionId": "8af2e8a8-ba4e-4954-b5d4-20419f0f3deb",
+    "role": "user",
+    "content": "I want to order something",
+    "timestamp": "2026-02-08T21:08:54.281Z"
+  },
+  {
+    "id": "23c59d09-b5d4-404f-ad7e-ecfd9adb9cd3",
+    "agentId": "6e20db71-c2fb-40a3-bb96-9dfe6cb4151e",
+    "sessionId": "8af2e8a8-ba4e-4954-b5d4-20419f0f3deb",
+    "role": "assistant",
+    "content": "Okay! I can help with that. What would you like to order?",
+    "timestamp": "2026-02-08T21:08:54.888Z"
+  },
+  {
+    "id": "d6b13e69-a579-46d0-ae9c-70ca6ed94464",
+    "agentId": "6e20db71-c2fb-40a3-bb96-9dfe6cb4151e",
+    "sessionId": "8af2e8a8-ba4e-4954-b5d4-20419f0f3deb",
+    "role": "user",
+    "content": "A latte please",
+    "timestamp": "2026-02-08T21:09:00.727Z"
+  },
+  {
+    "id": "810b4f86-7cef-402d-b622-64e273afdfb8",
+    "agentId": "6e20db71-c2fb-40a3-bb96-9dfe6cb4151e",
+    "sessionId": "8af2e8a8-ba4e-4954-b5d4-20419f0f3deb",
+    "role": "assistant",
+    "content": "Sure. What kind of milk would you like? We have whole milk, skim milk, oat milk, and almond milk.",
+    "timestamp": "2026-02-08T21:09:01.752Z"
+  }
+]

@@ -893,7 +893,9 @@ export async function registerRoutes(
 
       const newPendingQuestion = extractPendingQuestion(responseContent);
       if (newPendingQuestion) {
-        pendingQuestionStore.set(pqKey, { question: newPendingQuestion, alreadyNudged: false });
+        const existingState = pendingQuestionStore.get(pqKey);
+        const preserveNudged = topicSwitchDetected && existingState?.alreadyNudged === true;
+        pendingQuestionStore.set(pqKey, { question: newPendingQuestion, alreadyNudged: preserveNudged });
       } else if (!topicSwitchDetected) {
         pendingQuestionStore.delete(pqKey);
       }

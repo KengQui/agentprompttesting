@@ -261,5 +261,11 @@
     "username": "testuser_apikey",
     "password": "$2b$10$Oj0p8dByyuu62vW2D9v0mOwO1OezEJNjc6CH6eWj/HbuV4gGnvjRa",
     "createdAt": "2026-02-06T18:13:36.947Z"
+  },
+  {
+    "id": "ede40124-a694-4e26-ac25-9ce6b46e645c",
+    "username": "testuser_pq",
+    "password": "$2b$10$NE29ZnBIeh5Mt/6PejtN8uhP57mSovNq2dOqiK7ycTs1uDSrjui12",
+    "createdAt": "2026-02-08T21:06:41.547Z"
   }
 ]

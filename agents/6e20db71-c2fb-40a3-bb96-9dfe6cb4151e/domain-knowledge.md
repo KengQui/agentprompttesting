@@ -1,0 +1,1 @@
+We sell coffee, tea, and pastries. Our hours are 7am-7pm.
