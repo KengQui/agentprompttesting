@@ -19,5 +19,19 @@
     "title": "Test Direct Answer",
     "createdAt": "2026-02-08T21:08:48.819Z",
     "updatedAt": "2026-02-08T21:09:01.752Z"
+  },
+  {
+    "id": "fd3daaba-bde6-4cbd-abc2-819c8087a377",
+    "agentId": "6e20db71-c2fb-40a3-bb96-9dfe6cb4151e",
+    "title": "Sample Data Test",
+    "createdAt": "2026-02-08T21:14:43.159Z",
+    "updatedAt": "2026-02-08T21:14:43.159Z"
+  },
+  {
+    "id": "97512d38-d780-4f91-9680-f61dd8c15bff",
+    "agentId": "6e20db71-c2fb-40a3-bb96-9dfe6cb4151e",
+    "title": "Sample Data Test 2",
+    "createdAt": "2026-02-08T21:15:09.668Z",
+    "updatedAt": "2026-02-08T21:15:10.339Z"
   }
 ]

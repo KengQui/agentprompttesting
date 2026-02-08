@@ -1,0 +1,18 @@
+[
+  {
+    "id": "44702ffc-0aa8-4ec0-8d95-f41c2cc0b85a",
+    "agentId": "6e20db71-c2fb-40a3-bb96-9dfe6cb4151e",
+    "sessionId": "97512d38-d780-4f91-9680-f61dd8c15bff",
+    "role": "user",
+    "content": "What is Alice Smith's salary?",
+    "timestamp": "2026-02-08T21:15:09.797Z"
+  },
+  {
+    "id": "42d68b46-d8a4-4137-808e-1f423771ad65",
+    "agentId": "6e20db71-c2fb-40a3-bb96-9dfe6cb4151e",
+    "sessionId": "97512d38-d780-4f91-9680-f61dd8c15bff",
+    "role": "assistant",
+    "content": "Alice Smith's salary is $85,000.",
+    "timestamp": "2026-02-08T21:15:10.339Z"
+  }
+]

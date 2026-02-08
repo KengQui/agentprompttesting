@@ -280,22 +280,57 @@
         }
       ],
       "success": true
+    },
+    {
+      "id": "trace-1770585310338",
+      "sessionId": "97512d38-d780-4f91-9680-f61dd8c15bff",
+      "userInput": "What is Alice Smith's salary?",
+      "agentResponse": "Alice Smith's salary is $85,000.",
+      "startTime": "2026-02-08T21:15:09.797Z",
+      "endTime": "2026-02-08T21:15:10.338Z",
+      "totalDuration": 541,
+      "entries": [
+        {
+          "id": "entry-1770585309805-1",
+          "type": "intent_classification",
+          "name": "Orchestrator Intent Classification",
+          "timestamp": "2026-02-08T21:15:09.805Z",
+          "metadata": {
+            "intent": "answer_question",
+            "classificationMethod": "orchestrator",
+            "confidence": "high"
+          }
+        },
+        {
+          "id": "entry-1770585310338-3",
+          "type": "llm_call",
+          "name": "Gemini Response Generation",
+          "timestamp": "2026-02-08T21:15:10.338Z",
+          "duration": 533,
+          "metadata": {
+            "model": "gemini",
+            "intent": "answer_question",
+            "validated": true
+          }
+        }
+      ],
+      "success": true
     }
   ],
   "stats": {
     "hookCalls": {},
     "signalReads": {},
     "intentDistribution": {
-      "answer_question": 8
+      "answer_question": 9
     },
     "classificationMethods": {
-      "orchestrator": 8
+      "orchestrator": 9
     },
-    "avgResponseTime": 771.875,
-    "totalLlmCalls": 8,
+    "avgResponseTime": 746.2222222222222,
+    "totalLlmCalls": 9,
     "totalTokensUsed": 0,
     "errorCount": 0
   },
   "createdAt": "2026-02-08T21:07:28.624Z",
-  "updatedAt": "2026-02-08T21:09:01.751Z"
+  "updatedAt": "2026-02-08T21:15:10.338Z"
 }
