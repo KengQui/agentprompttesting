@@ -29,7 +29,7 @@ async function requireAuth(req: AuthenticatedRequest, res: Response, next: NextF
   req.user = user;
   next();
 }
-import { generateAgentResponse, generateValidationRules, generateGuardrails, generateSystemPrompt, generateSampleData, evaluateContextSufficiency, processClarifyingChat, generateValidationRulesWithInsights, generateGuardrailsWithInsights, generateActionsAndMockData, parseActionFromResponse, stripActionBlocks, executeSimulatedAction, executeActionWithSampleData, extractBusinessCaseContent, sampleDatasetsToWorkingData, workingDataToSampleDatasets, generateWelcomeConfig, type GenerationContext, type SystemPromptContext, type SampleDataGenerationContext, type ClarifyingChatContext, type ActionsGenerationContext, type ExtractionResult, type WelcomeConfigGenerationContext } from "./gemini";
+import { generateAgentResponse, generateValidationRules, generateGuardrails, generateSystemPrompt, generateSampleData, evaluateContextSufficiency, processClarifyingChat, generateValidationRulesWithInsights, generateGuardrailsWithInsights, generateActionsAndMockData, parseActionFromResponse, stripActionBlocks, executeSimulatedAction, executeActionWithSampleData, extractBusinessCaseContent, sampleDatasetsToWorkingData, workingDataToSampleDatasets, generateWelcomeConfig, extractPendingQuestion, detectTopicSwitch, type GenerationContext, type SystemPromptContext, type SampleDataGenerationContext, type ClarifyingChatContext, type ActionsGenerationContext, type ExtractionResult, type WelcomeConfigGenerationContext } from "./gemini";
 import { loadAgentComponents, clearAgentCache, hasCustomComponents } from "./agent-loader";
 import { createRecoveryManager } from "./components/recovery-manager";
 import multer from "multer";
@@ -155,6 +155,16 @@ const upload = multer({
     }
   }
 });
+
+interface PendingQuestionState {
+  question: string;
+  alreadyNudged: boolean;
+}
+const pendingQuestionStore = new Map<string, PendingQuestionState>();
+
+function getPendingQuestionKey(agentId: string, sessionId: string): string {
+  return `${agentId}:${sessionId}`;
+}
 
 export async function registerRoutes(
   httpServer: Server,
@@ -601,6 +611,7 @@ export async function registerRoutes(
       if (!deleted) {
         return res.status(404).json({ message: "Session not found" });
       }
+      pendingQuestionStore.delete(getPendingQuestionKey(req.params.id, req.params.sessionId));
       res.status(204).send();
     } catch (error) {
       console.error("Error deleting session:", error);
@@ -700,15 +711,39 @@ export async function registerRoutes(
       let detectedIntent = "answer_question";
       let classificationMethod = "standard";
 
+      const pqKey = getPendingQuestionKey(req.params.id, req.params.sessionId);
+      const pendingState = pendingQuestionStore.get(pqKey);
+      let topicSwitchDetected = false;
+      let topicSwitchPrefix = '';
+
+      if (pendingState) {
+        try {
+          const isSwitching = await detectTopicSwitch(pendingState.question, userInput);
+          if (isSwitching) {
+            topicSwitchDetected = true;
+            if (!pendingState.alreadyNudged) {
+              pendingQuestionStore.set(pqKey, { ...pendingState, alreadyNudged: true });
+              topicSwitchPrefix = `[SYSTEM CONTEXT: You previously asked the user: "${pendingState.question}" but they have not answered it. Instead they are asking about something new. Before addressing their new request, ask them to answer your pending question first. For example: "Before we move on to your new request — ${pendingState.question}" Do NOT process their new request yet. Keep it brief and natural.]\n\n`;
+            } else {
+              pendingQuestionStore.delete(pqKey);
+              topicSwitchPrefix = `[SYSTEM CONTEXT: You previously asked: "${pendingState.question}" but the user chose not to answer it. That's fine — move on and handle their current request directly. Do not mention the skipped question again.]\n\n`;
+            }
+          } else {
+            pendingQuestionStore.delete(pqKey);
+          }
+        } catch (err) {
+          console.error('[PendingQuestion] Error detecting topic switch:', err);
+          pendingQuestionStore.delete(pqKey);
+        }
+      }
+
       try {
-        // Always use orchestrator for consistent batching and confirmation behavior
         classificationMethod = "orchestrator";
         const { orchestrator } = await loadAgentComponents(req.params.id, agentConfig);
         const turnResult = await orchestrator.processTurn(req.params.id, userInput);
         
         detectedIntent = turnResult.intent;
           
-          // Record intent classification trace
           traceEntries.push({
             id: `entry-${Date.now()}-1`,
             type: "intent_classification",
@@ -721,7 +756,6 @@ export async function registerRoutes(
             },
           });
           
-          // If the orchestrator handled it completely (like go_back, change_previous_answer)
           if (turnResult.nextAction !== 'generate_ai_response') {
             responseContent = turnResult.response;
             traceEntries.push({
@@ -732,10 +766,11 @@ export async function registerRoutes(
               metadata: { action: turnResult.nextAction },
             });
           } else {
-            // Pass to Gemini with intent context for better response generation
-            const intentPrefix = turnResult.intent !== 'answer_question' 
+            let intentPrefix = turnResult.intent !== 'answer_question' 
               ? `[The user's intent appears to be: ${turnResult.intent}. Please respond accordingly.]\n\n`
               : '';
+            
+            intentPrefix = topicSwitchPrefix + intentPrefix;
             
             const llmStartTime = Date.now();
             const rawResponse = await generateAgentResponse(
@@ -856,6 +891,13 @@ export async function registerRoutes(
       // Safety net: strip any remaining action blocks before saving
       responseContent = stripActionBlocks(responseContent);
 
+      const newPendingQuestion = extractPendingQuestion(responseContent);
+      if (newPendingQuestion) {
+        pendingQuestionStore.set(pqKey, { question: newPendingQuestion, alreadyNudged: false });
+      } else if (!topicSwitchDetected) {
+        pendingQuestionStore.delete(pqKey);
+      }
+
       // Add assistant message
       const assistantMessage = await storage.addMessage({
         agentId: req.params.id,
@@ -883,6 +925,7 @@ export async function registerRoutes(
       }
 
       await storage.clearMessages(req.params.id, req.params.sessionId);
+      pendingQuestionStore.delete(getPendingQuestionKey(req.params.id, req.params.sessionId));
       res.status(204).send();
     } catch (error) {
       console.error("Error clearing messages:", error);

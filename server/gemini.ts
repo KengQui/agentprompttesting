@@ -505,6 +505,72 @@ export function executeActionWithSampleData(
   return result;
 }
 
+export function extractPendingQuestion(assistantResponse: string): string | null {
+  if (!assistantResponse) return null;
+  
+  const lines = assistantResponse.trim().split('\n').filter(l => l.trim());
+  if (lines.length === 0) return null;
+  
+  const lastFewLines = lines.slice(-3);
+  
+  for (let i = lastFewLines.length - 1; i >= 0; i--) {
+    const line = lastFewLines[i].trim();
+    if (line.endsWith('?')) {
+      const cleanedLine = line
+        .replace(/^\*\*/, '').replace(/\*\*$/, '')
+        .replace(/^\*/, '').replace(/\*$/, '')
+        .replace(/^[-•]\s*/, '')
+        .trim();
+      if (cleanedLine.length > 10) {
+        return cleanedLine;
+      }
+    }
+  }
+  
+  return null;
+}
+
+export async function detectTopicSwitch(
+  pendingQuestion: string,
+  userMessage: string
+): Promise<boolean> {
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey) return false;
+
+  const confirmPatterns = /^(yes|y|yeah|yep|yup|correct|right|sure|ok|okay|no|n|nope|nah|not really|wrong|incorrect|looks good|looks right|that'?s (right|correct)|confirmed?|deny|reject)/i;
+  if (confirmPatterns.test(userMessage.trim())) {
+    return false;
+  }
+
+  try {
+    const detectAi = new GoogleGenAI({ apiKey });
+    const prompt = `You are analyzing whether a user's message is answering/responding to a specific question, or if they are switching to a completely different topic.
+
+QUESTION THAT WAS ASKED: "${pendingQuestion}"
+
+USER'S RESPONSE: "${userMessage}"
+
+Is the user answering or responding to the question above, or are they asking about something completely different/unrelated?
+
+Reply with ONLY one word: "ANSWERING" or "SWITCHING"`;
+
+    const response = await detectAi.models.generateContent({
+      model: 'gemini-2.0-flash',
+      contents: prompt,
+      config: {
+        temperature: 0.1,
+        maxOutputTokens: 10
+      }
+    });
+
+    const result = (response.text || '').trim().toUpperCase();
+    return result.includes('SWITCHING');
+  } catch (error) {
+    console.error('[detectTopicSwitch] Error:', error);
+    return false;
+  }
+}
+
 export async function generateAgentResponse(
   agent: AgentContext,
   userMessage: string,
@@ -1082,6 +1148,7 @@ CONSTRAINTS
 - Must only ask clarifying questions when the request is genuinely ambiguous — do NOT ask for clarification on details the user already provided
 - When the request IS genuinely ambiguous, must identify ALL decision points that need clarification and ask about them one at a time in order of impact (most significant first), never skipping any
 - Must ask only ONE question at a time — never ask multiple questions in a single response
+- When a [SYSTEM CONTEXT] note indicates a pending unanswered question and a topic switch, must follow the system's instruction: either ask the user to resolve the pending question first (naturally and briefly), or move on if they already declined once. Never use robotic phrasing like "I'll take that as confirmed."
 
 ### 4. INPUT
 Include reference materials the agent needs using XML tags:
@@ -1140,6 +1207,10 @@ Before responding, verify:
 - CLARIFICATION CONSISTENCY: When a request IS genuinely ambiguous, the agent must identify ALL decision points that need clarification — not just one. Ask about each one at a time, in order of impact (most significant first). The same type of ambiguous request should always surface the same set of clarifying questions regardless of session.
 - SMART NAME RESOLUTION: When a user refers to a person by name, the agent must search available data for matches. If exactly ONE person matches, proceed immediately without asking for further clarification. Only ask for disambiguation when MULTIPLE people share the same or similar name — and in that case, ask about recognizable attributes (department, role, location) rather than internal IDs.
 - NEVER expect users to know internal system identifiers like Employee IDs, record numbers, or account IDs. Always look up records using human-friendly attributes (name, department, role, etc.) that users would naturally know.
+- TOPIC TRANSITION HANDLING: When the system injects a [SYSTEM CONTEXT] note about a pending unanswered question, follow these rules:
+  1. If instructed to ask the user to resolve the pending question first, do so naturally and briefly. For example: "Before we move on to your new request — [restate the pending question naturally]." Do NOT process their new request in that response.
+  2. If instructed that the user chose not to answer and to move on, simply handle their current request directly without mentioning the skipped question.
+  3. Never use robotic phrases like "I'll take that as confirmed" or "I notice you didn't answer my question." Keep transitions natural and conversational.
 
 ## Format your output as:
 
