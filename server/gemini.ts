@@ -805,8 +805,6 @@ function getSystemPrompt(agent: AgentContext): string {
 - Only ask for disambiguation when there are MULTIPLE people with the same or similar name, and in that case ask about recognizable attributes (department, role, location) rather than requesting an ID number
 - Never expect users to know internal system identifiers like Employee IDs, record numbers, or account IDs. Look up records using human-friendly attributes such as name, department, role, or other contextual details the user would naturally know`;
       }
-      fullPrompt += `\n\n## Expression Follow-Up
-- After generating any expression, formula, or calculated field, ALWAYS ask the user if they would like to see the result of the expression applied to the sample data so they can verify it is correct.`;
       return fullPrompt;
     }
     
@@ -826,8 +824,6 @@ function getSystemPrompt(agent: AgentContext): string {
 - Only ask for disambiguation when there are MULTIPLE people with the same or similar name, and in that case ask about recognizable attributes (department, role, location) rather than requesting an ID number
 - Never expect users to know internal system identifiers like Employee IDs, record numbers, or account IDs. Look up records using human-friendly attributes such as name, department, role, or other contextual details the user would naturally know`;
       }
-      fullPrompt += `\n\n## Expression Follow-Up
-- After generating any expression, formula, or calculated field, ALWAYS ask the user if they would like to see the result of the expression applied to the sample data so they can verify it is correct.`;
       return fullPrompt;
     }
     
@@ -880,9 +876,6 @@ function getSystemPrompt(agent: AgentContext): string {
 - Only ask for disambiguation when there are MULTIPLE people with the same or similar name, and in that case ask about recognizable attributes (department, role, location) rather than requesting an ID number
 - Never expect users to know internal system identifiers like Employee IDs, record numbers, or account IDs. Look up records using human-friendly attributes such as name, department, role, or other contextual details the user would naturally know`;
     }
-    
-    fullPrompt += `\n\n## Expression Follow-Up
-- After generating any expression, formula, or calculated field, ALWAYS ask the user if they would like to see the result of the expression applied to the sample data so they can verify it is correct.`;
     
     return fullPrompt;
   }
@@ -1127,7 +1120,6 @@ Before responding, verify:
 - ALWAYS ask only ONE question at a time. Never ask multiple questions in a single response. Wait for the user to answer before asking the next question.
 - SMART NAME RESOLUTION: When a user refers to a person by name, the agent must search available data for matches. If exactly ONE person matches, proceed immediately without asking for further clarification. Only ask for disambiguation when MULTIPLE people share the same or similar name — and in that case, ask about recognizable attributes (department, role, location) rather than internal IDs.
 - NEVER expect users to know internal system identifiers like Employee IDs, record numbers, or account IDs. Always look up records using human-friendly attributes (name, department, role, etc.) that users would naturally know.
-- EXPRESSION FOLLOW-UP: After generating any expression, formula, or calculated field, ALWAYS ask the user if they would like to see the result of the expression applied to the sample data. For example: "Would you like me to apply this expression to the sample data so you can verify the results?"
 
 ## Format your output as:
 
