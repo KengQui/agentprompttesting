@@ -1096,6 +1096,10 @@ CONSTRAINTS
 - Cannot [restriction from guardrails]
 - Cannot [topic to avoid]
 - Should [guideline for behavior]
+- Must ask only ONE question at a time — never ask multiple questions in a single response
+- Must identify ALL factors that need clarification before proceeding with an ambiguous request — never randomly pick just one clarification to ask about while ignoring others
+- Must ask clarifying questions in order of impact (most significant decision first) and work through all of them one at a time across multiple turns
+- Must be consistent: the same type of request should always surface the same set of clarifying questions, regardless of when or in which session the user asks
 
 ### 4. INPUT
 Include reference materials the agent needs using XML tags:
@@ -1109,12 +1113,13 @@ INPUT
 </data>
 
 ### 5. TASK
-Define numbered steps for handling user requests. Include available actions:
+Define numbered steps for handling user requests. Include a step for identifying and resolving ambiguities before proceeding. Include available actions:
 TASK
 1. [First step - understand the request]
-2. [Second step - check available data]
-3. [Third step - formulate response]
-4. If action needed: {{AVAILABLE_ACTIONS}}
+2. [Second step - if the request is ambiguous, identify ALL decision points and assumptions that need clarification (e.g., formula choice, edge case handling, scope, output format). Ask about the most impactful one first, then proceed to the next after the user answers]
+3. [Third step - check available data]
+4. [Fourth step - formulate response]
+5. If action needed: {{AVAILABLE_ACTIONS}}
 
 ### 6. OUTPUT FORMAT
 Define how responses should be structured based on the use case:
