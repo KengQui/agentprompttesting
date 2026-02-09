@@ -264,5 +264,33 @@
     "title": "New Session",
     "createdAt": "2026-02-09T17:33:06.668Z",
     "updatedAt": "2026-02-09T17:33:23.941Z"
+  },
+  {
+    "id": "054ab1ff-c1d3-436b-a284-f0cf32b00f75",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "title": "New Session",
+    "createdAt": "2026-02-09T17:45:56.920Z",
+    "updatedAt": "2026-02-09T17:45:56.920Z"
+  },
+  {
+    "id": "301bb815-530c-4591-a428-568ed6ed9fa9",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "title": "New Session",
+    "createdAt": "2026-02-09T17:52:02.444Z",
+    "updatedAt": "2026-02-09T17:57:40.145Z"
+  },
+  {
+    "id": "951a9a39-080e-4297-aaa5-42e9cba6558e",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "title": "UC-1.2: Subtraction",
+    "createdAt": "2026-02-09T18:00:04.880Z",
+    "updatedAt": "2026-02-09T18:06:49.411Z"
+  },
+  {
+    "id": "5ffa9646-6360-4954-a7dc-198453e11c38",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "title": "New Session",
+    "createdAt": "2026-02-09T18:06:56.642Z",
+    "updatedAt": "2026-02-09T18:06:56.642Z"
   }
 ]
