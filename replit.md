@@ -65,6 +65,7 @@ Agent Studio supports action simulation, allowing AI agents to execute actions d
 - Requires GEMINI_API_KEY secret to be configured
 - GOOGLE_CLOUD_PROJECT and GOOGLE_CLOUD_LOCATION secrets are also stored but not currently used
 - Prompt generation uses only Google Gemini style (standardized)
+- **Test Login Credentials**: Username: `kengqui.chia@ukg.com` / Password: `123456`
 
 ## Authentication System
 - **User Authentication**: Username/password registration with bcrypt password hashing
