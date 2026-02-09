@@ -598,6 +598,7 @@ export async function generateAgentResponse(
       model: "gemini-2.0-flash",
       config: {
         systemInstruction: systemPrompt,
+        maxOutputTokens: 4000,
       },
       contents: contents,
     });
