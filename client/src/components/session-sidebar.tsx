@@ -176,7 +176,7 @@ function SessionCard({
             </p>
           )}
           <div className="flex items-center flex-wrap gap-2 mt-1 text-xs text-muted-foreground">
-            <span>{session.messageCount} messages</span>
+            <span className="font-mono truncate max-w-[140px]" title={session.id}>{session.id}</span>
             <span>·</span>
             <span>{formatDate(session.lastMessageAt || session.updatedAt)}</span>
           </div>

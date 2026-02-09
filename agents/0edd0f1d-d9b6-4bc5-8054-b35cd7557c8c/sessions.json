@@ -231,13 +231,6 @@
     "updatedAt": "2026-02-09T12:59:30.093Z"
   },
   {
-    "id": "50075adf-203b-42ae-98e2-97d1a65f66ea",
-    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
-    "title": "New Session",
-    "createdAt": "2026-02-09T13:00:04.544Z",
-    "updatedAt": "2026-02-09T13:00:04.544Z"
-  },
-  {
     "id": "87e77bee-5320-444c-88c8-99d2c2c6ddf7",
     "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
     "title": "New Session",
@@ -256,6 +249,13 @@
     "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
     "title": "New Session",
     "createdAt": "2026-02-09T16:40:30.914Z",
-    "updatedAt": "2026-02-09T16:41:10.339Z"
+    "updatedAt": "2026-02-09T16:42:17.041Z"
+  },
+  {
+    "id": "1523a87d-a00a-4c0c-a560-601a003602ad",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "title": "New Session",
+    "createdAt": "2026-02-09T16:43:15.927Z",
+    "updatedAt": "2026-02-09T16:43:27.225Z"
   }
 ]
