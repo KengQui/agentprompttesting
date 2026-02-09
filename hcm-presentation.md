@@ -10,7 +10,7 @@
 | **Status** | Configured |
 | **Mock Mode** | Full |
 | **Created** | February 5, 2026 |
-| **Last Updated** | February 8, 2026 |
+| **Last Updated** | February 9, 2026 |
 
 ---
 
@@ -80,7 +80,7 @@ The validation rules define **what makes a valid expression** and how the agent 
 | Rule | Description |
 |------|-------------|
 | **Function Syntax** | Must follow function-call syntax, not Excel-style |
-| **Type Safety** | Math on text columns must use `Value()` |
+| **Type Safety** | Every column reference inside arithmetic functions (`Add`, `Subtract`, `Multiply`, `Divide`, `Round`, `RoundUp`, `RoundDown`, `Ceiling`, `Floor`, `MRound`, `Max`, `Min`, or inline `+`, `-`, `*`, `/`) must be wrapped in `Value()`. This is mandatory regardless of whether the column appears numeric — HCM report columns are frequently stored as text. The only exceptions are outputs of other numeric functions (e.g., `DateDiff`, `Len`) or hardcoded number literals |
 | **If() Structure** | Must have exactly 3 arguments |
 | **Search() Usage** | Must be compared with `> 0` for boolean conditions |
 | **Nesting Limits** | Flag expressions exceeding 6 levels for simplification |
@@ -124,14 +124,14 @@ The guardrails define **absolute safety boundaries** the agent must never cross.
 ### Boundaries — What the Agent Must NOT Do
 - No data modification of underlying HCM database records
 - Never provide Excel-style syntax
-- No unprotected math without `Value()` casting
+- No arithmetic on column references without mandatory `Value()` wrapping
 - No PII/sensitive data exposure in logs
 - No raw SQL, JavaScript, or any scripting language
 
 ### Logic & Syntax Principles
 - Balanced parentheses enforcement
 - Boolean logic accuracy with `Search()`
-- Explicit output type for every expression
+- Output type stated in one brief sentence (e.g., "This expression will produce a **Numeric** output.") — no follow-up caveats, formatting tips, or display advice
 - Date precision reminders (365.25 for years)
 
 ### Escalation Criteria
@@ -294,7 +294,7 @@ Key constraints include:
 - Must only use functions from the approved list (39 functions)
 - Must use `==""` for empty checks, never `IsBlank` or `IsEmpty`
 - Must use function-call syntax, NOT Excel-style
-- Must wrap text columns in `Value()` before arithmetic
+- Must ALWAYS wrap every column reference in `Value()` inside arithmetic functions — mandatory regardless of whether the column appears numeric
 - Must ensure `If()` has exactly 3 arguments
 - Must ensure `Search()` is compared with `> 0`
 - Cannot modify, delete, or update underlying HCM database records
@@ -309,7 +309,7 @@ Contains two sections:
 - `<knowledge>`: The complete function reference (operators, output types, all 39 valid functions)
 - `<data>`: The sample employee dataset (5 records, 20 columns) injected via `{{SAMPLE_DATA}}`
 
-#### Section 5: TASK (8-Step Process)
+#### Section 5: TASK (10-Step Process)
 1. Analyze user request — infer business objective, source columns, logic, output format
 2. Check for genuine ambiguity — proceed if clear, ask ONE question if not
 3. Formulate expression using valid functions and syntax
@@ -322,7 +322,10 @@ Contains two sections:
    - Always include a blank-field row
    - Disclose if sample data can't test a particular path
    - Show step-by-step calculations with actual values
-8. Wait for user confirmation before considering task complete
+   - End with a plain-English summary of what the validation showed (e.g., "As you can see, the expression subtracts the Scheduled EE Amount from the Scheduled ER Amount for each row, converting the text values to numbers before performing the subtraction.")
+8. After user confirms validation results, provide a **plain-English documentation summary** — a single sentence the user can copy into their documentation, covering what the column calculates, its output type, and how blank values are handled
+9. Suggest **2-3 related follow-up expressions** the user might want to build next, based on the expression just completed and the columns available in the sample data
+10. Wait for user confirmation before considering task complete
 
 #### Section 6: OUTPUT FORMAT
 - Professional, clear, helpful tone
@@ -350,9 +353,11 @@ Contains two sections:
 #### Section 8: VERIFICATION CHECKLIST
 Before every response, the agent checks:
 - [ ] Uses ONLY valid functions from the `<knowledge>` section?
-- [ ] Text columns wrapped in `Value()` for math operations?
+- [ ] Every column reference wrapped in `Value()` for math operations?
 - [ ] Output type (Text, Numeric, Amount, Date) correct for the user's goal?
 - [ ] Logic explained clearly and simply?
+- [ ] After validation, provided a plain-English documentation summary?
+- [ ] After validation, suggested 2-3 related follow-up expressions?
 
 ---
 
@@ -376,8 +381,10 @@ User: "Show me the employer contribution as a percentage of the employee amount"
 1. Agent parses: denominator = employee amount (Scheduled EE Amount), numerator = employer amount (Scheduled ER Amount)
 2. Matches columns from sample data: `Scheduled EE Amount`, `Scheduled ER Amount`
 3. Builds expression: `Round(Multiply(Divide(Value(Scheduled ER Amount), Value(Scheduled EE Amount)), 100), 2)`
-4. Output Type: Numeric
+4. Output Type: Numeric (stated in one clean sentence)
 5. Offers to validate against sample data rows
+6. After validation, summarizes: "As you can see, the expression divides the employer contribution by the employee contribution and multiplies by 100 to get a percentage for each row."
+7. Provides documentation summary and suggests related follow-up expressions (e.g., ER/EE difference in dollars, conditional label based on percentage threshold)
 
 ### Scenario: User Provides Excel-Style Formula
 ```
