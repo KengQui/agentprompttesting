@@ -88,7 +88,18 @@ The validation rules define **what makes a valid expression** and how the agent 
 | **Date Calculations** | Must include appropriate divisor (e.g., `/ 365.25` for years) |
 
 ### Validation Trace Coverage
-- **Logic Path Coverage**: Select one test row per distinct outcome. 3 possible results = 3 test rows.
+
+Here's how the logic would work across all use cases with a minimum of 2:
+
+| Expression Type | Row Count Rule | Example |
+|---|---|---|
+| Simple arithmetic, no blanks in data | 2 rows (two different employees to show varied results) | `Divide(ER, EE)` → show 2 rows with different dollar amounts |
+| Simple arithmetic, blanks exist in data | 2 rows (1 representative + 1 blank-field row) | `Add(A, B)` where B is blank for one employee |
+| Conditional with 2 branches | 2 rows (1 per outcome) | `If(X > 100, "High", "Low")` |
+| Conditional with 3+ branches | 3+ rows (1 per outcome) | Tenure bands → 3 rows |
+| Conditional + blanks exist | Branches + 1 blank row | 3-branch If + blank = 4 rows |
+
+- **Logic Path Coverage**: The minimum number of validation rows is always 2. Select one test row per distinct outcome. For simple expressions with no conditional logic, show exactly 2 rows with different values.
 - **Missing Path Disclosure**: If sample data can't trigger a particular outcome, disclose this gap explicitly.
 - **Blank/Empty Field Handling**: When a blank field is encountered, explain what the expression produces and why (e.g., `Value()` treats blank as 0), and ask if the behavior is acceptable.
 - **No Unsupported Self-Corrections**: After a validation trace, do not override results without identifying the specific step that was wrong.
