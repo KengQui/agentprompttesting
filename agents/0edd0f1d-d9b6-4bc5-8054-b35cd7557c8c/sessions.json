@@ -284,13 +284,13 @@
     "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
     "title": "UC-1.2: Subtraction",
     "createdAt": "2026-02-09T18:00:04.880Z",
-    "updatedAt": "2026-02-09T18:35:15.394Z"
+    "updatedAt": "2026-02-09T18:44:28.559Z"
   },
   {
     "id": "5ffa9646-6360-4954-a7dc-198453e11c38",
     "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
-    "title": "New Session",
+    "title": "UC-1.1: Simple Arithmetic",
     "createdAt": "2026-02-09T18:06:56.642Z",
-    "updatedAt": "2026-02-09T18:06:56.642Z"
+    "updatedAt": "2026-02-09T18:46:03.650Z"
   }
 ]
