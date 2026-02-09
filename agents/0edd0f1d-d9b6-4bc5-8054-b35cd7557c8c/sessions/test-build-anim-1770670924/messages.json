@@ -1,0 +1,38 @@
+[
+  {
+    "id": "test-user-1",
+    "role": "user",
+    "content": "Create a column that adds the Scheduled EE Amount and Scheduled ER Amount",
+    "timestamp": "2026-02-09T21:00:00.000Z"
+  },
+  {
+    "id": "test-assistant-1",
+    "role": "assistant",
+    "content": "I can help with that. Here is the expression:\n\n`Add(Value([Scheduled EE Amount]), Value([Scheduled ER Amount]))`\n\nShall I validate this expression against the sample data?",
+    "timestamp": "2026-02-09T21:00:10.000Z"
+  },
+  {
+    "id": "test-user-2",
+    "role": "user",
+    "content": "yes",
+    "timestamp": "2026-02-09T21:00:20.000Z"
+  },
+  {
+    "id": "test-assistant-2",
+    "role": "assistant",
+    "content": "Validation passed. The expression produces valid numeric results for all rows. Shall I add this column to your report?",
+    "timestamp": "2026-02-09T21:00:30.000Z"
+  },
+  {
+    "id": "test-user-3",
+    "role": "user",
+    "content": "yes",
+    "timestamp": "2026-02-09T21:00:40.000Z"
+  },
+  {
+    "id": "test-assistant-build",
+    "role": "assistant",
+    "content": "**Documentation summary:** This column calculates the sum of the 'Scheduled EE Amount' and 'Scheduled ER Amount' columns.\n\nI'll now add this as a new column to your report.\n\nYour 'Total Scheduled Benefit Amount' column has been added to the report.\n\nHere are some follow-up calculations you might find useful:\n* **Difference**: Use `Subtract(Value([Scheduled ER Amount]), Value([Scheduled EE Amount]))`\n* **Percentage**: Use `Divide(Value([Scheduled EE Amount]), Add(Value([Scheduled EE Amount]), Value([Scheduled ER Amount])))`\n\nWould you like to build any of these next?",
+    "timestamp": "2026-02-09T21:10:44.305Z"
+  }
+]

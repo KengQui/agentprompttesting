@@ -1,5 +1,11 @@
 [
   {
+    "id": "test-build-anim-1770670924",
+    "title": "Test Build Animation",
+    "createdAt": "2026-02-09T21:02:04.571Z",
+    "lastMessageAt": "2026-02-09T21:02:04.572Z"
+  },
+  {
     "id": "92776c61-0d24-4078-90e0-1c203cfcb16d",
     "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
     "title": "New Session",
@@ -320,5 +326,75 @@
     "title": "New Session",
     "createdAt": "2026-02-09T20:01:03.342Z",
     "updatedAt": "2026-02-09T20:01:39.089Z"
+  },
+  {
+    "id": "fd0deb52-6221-48e4-a99b-9d4feeb0ff15",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "title": "New Session",
+    "createdAt": "2026-02-09T20:13:05.598Z",
+    "updatedAt": "2026-02-09T20:13:56.823Z"
+  },
+  {
+    "id": "605a6c6e-1dd6-4018-94bc-b55fee63f4c8",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "title": "New Session",
+    "createdAt": "2026-02-09T20:19:42.888Z",
+    "updatedAt": "2026-02-09T20:20:17.447Z"
+  },
+  {
+    "id": "3c9a4915-fd2c-4add-a2ab-05d34aafa373",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "title": "New Session",
+    "createdAt": "2026-02-09T20:22:35.581Z",
+    "updatedAt": "2026-02-09T20:23:37.785Z"
+  },
+  {
+    "id": "d1a38029-c929-4575-934f-157c1a025ffb",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "title": "New Session",
+    "createdAt": "2026-02-09T20:25:59.783Z",
+    "updatedAt": "2026-02-09T20:26:54.679Z"
+  },
+  {
+    "id": "7e4a89ac-2c10-495a-8c30-43157a0fa178",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "title": "New Session",
+    "createdAt": "2026-02-09T20:29:32.178Z",
+    "updatedAt": "2026-02-09T20:30:03.151Z"
+  },
+  {
+    "id": "ee72dcea-fa30-46a1-967e-a777d91c3c3a",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "title": "New Session",
+    "createdAt": "2026-02-09T20:35:13.948Z",
+    "updatedAt": "2026-02-09T20:37:01.237Z"
+  },
+  {
+    "id": "06a113b5-3f0b-486f-8253-adf1d29b40fc",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "title": "New Session",
+    "createdAt": "2026-02-09T20:40:08.403Z",
+    "updatedAt": "2026-02-09T20:40:19.489Z"
+  },
+  {
+    "id": "b49311b9-2af5-40f9-b199-e20181fd7e5f",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "title": "New Session",
+    "createdAt": "2026-02-09T20:42:45.284Z",
+    "updatedAt": "2026-02-09T20:43:21.269Z"
+  },
+  {
+    "id": "4fa36c67-c3a8-4692-8db4-9fd834e95c63",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "title": "New Session",
+    "createdAt": "2026-02-09T20:46:55.404Z",
+    "updatedAt": "2026-02-09T20:47:44.016Z"
+  },
+  {
+    "id": "0fe9d51a-4b72-4be7-a935-602bc69e46d8",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "title": "New Session",
+    "createdAt": "2026-02-09T20:51:30.811Z",
+    "updatedAt": "2026-02-09T20:51:42.675Z"
   }
 ]

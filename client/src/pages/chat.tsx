@@ -18,6 +18,7 @@ import type { Agent, ChatMessage, ChatSession, ChatSessionWithPreview, WelcomeCo
 
 const MAX_MESSAGE_LENGTH = 2000;
 const RATE_LIMIT_COOLDOWN = 2000;
+const HCM_EXPRESSION_BUILDER_AGENT_ID = "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c";
 
 function stripActionBlocks(text: string): string {
   let cleaned = text.replace(/```action\s*\n?[\s\S]*?```/gi, '');
@@ -25,9 +26,29 @@ function stripActionBlocks(text: string): string {
   return cleaned.trim();
 }
 
-function MessageBubble({ message }: { message: ChatMessage }) {
+function splitColumnBuildResponse(content: string): { before: string; after: string } | null {
+  const buildMarker = /I'll now add this as a new column to your report\./i;
+  const match = content.match(buildMarker);
+  if (!match || match.index === undefined) return null;
+
+  const splitPoint = match.index + match[0].length;
+  const before = content.slice(0, splitPoint).trim();
+  const after = content.slice(splitPoint).trim();
+
+  if (!after || !/has been added/i.test(after)) return null;
+
+  return { before, after };
+}
+
+function MessageBubble({ message, agentId, isLatest }: { message: ChatMessage; agentId?: string; isLatest?: boolean }) {
   const isUser = message.role === "user";
   const displayContent = isUser ? message.content : stripActionBlocks(message.content);
+
+  const isHcmAgent = agentId === HCM_EXPRESSION_BUILDER_AGENT_ID;
+  const splitResult = !isUser && isHcmAgent ? splitColumnBuildResponse(displayContent) : null;
+
+  const isRecentMessage = Date.now() - new Date(message.timestamp).getTime() < 30000;
+  const shouldAnimate = splitResult && isLatest && isRecentMessage;
 
   return (
     <div
@@ -50,6 +71,27 @@ function MessageBubble({ message }: { message: ChatMessage }) {
       >
         {isUser ? (
           <p className="text-sm whitespace-pre-wrap">{displayContent}</p>
+        ) : splitResult ? (
+          <div className="text-sm prose prose-sm dark:prose-invert max-w-none [&>*:first-child]:mt-0 [&>*:last-child]:mb-0 [&_p]:my-1 [&_ul]:my-1 [&_ol]:my-1 [&_li]:my-0">
+            <ReactMarkdown>{splitResult.before}</ReactMarkdown>
+            {shouldAnimate ? (
+              <>
+                <div className="column-build-spinner-anim" data-testid="column-build-spinner">
+                  <div className="flex items-center gap-3 my-3 py-2">
+                    <Loader2 className="h-4 w-4 animate-spin text-primary" />
+                    <span className="text-sm text-muted-foreground">Building column...</span>
+                  </div>
+                </div>
+                <div className="column-build-after-anim border-t border-border/50 pt-2 mt-2">
+                  <ReactMarkdown>{splitResult.after}</ReactMarkdown>
+                </div>
+              </>
+            ) : (
+              <div className="border-t border-border/50 pt-2 mt-2">
+                <ReactMarkdown>{splitResult.after}</ReactMarkdown>
+              </div>
+            )}
+          </div>
         ) : (
           <div className="text-sm prose prose-sm dark:prose-invert max-w-none [&>*:first-child]:mt-0 [&>*:last-child]:mb-0 [&_p]:my-1 [&_ul]:my-1 [&_ol]:my-1 [&_li]:my-0">
             <ReactMarkdown>{displayContent}</ReactMarkdown>
@@ -606,10 +648,15 @@ export default function Chat() {
                 <EmptyChat agentName={agent.name} hasSession={!!activeSessionId} welcomeConfig={welcomeConfig} onSendPrompt={handleSendPrompt} />
               ) : (
                 <div className="space-y-4">
-                  {messages.map((msg) => (
-                    <MessageBubble key={msg.id} message={msg} />
+                  {messages.map((msg, idx) => (
+                    <MessageBubble key={msg.id} message={msg} agentId={params.id} isLatest={idx === messages.length - 1} />
                   ))}
                   {sendMutation.isPending && <TypingIndicator onCancel={handleCancel} />}
+                  {params.id === HCM_EXPRESSION_BUILDER_AGENT_ID && (
+                    <div data-testid="debug-build-anim" style={{ display: 'none' }}>
+                      msgs={messages.length} | splitCheck={messages.length > 0 && messages[messages.length-1].role === 'assistant' ? (splitColumnBuildResponse(stripActionBlocks(messages[messages.length-1].content)) ? 'MATCH' : 'no-match') : 'N/A'}
+                    </div>
+                  )}
                 </div>
               )}
             </div>
