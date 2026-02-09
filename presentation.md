@@ -242,6 +242,30 @@ These components work together with the generated system prompt to deliver a coh
 
 ---
 
+## Post-Build Agent Enhancements
+
+After the initial prompt is generated, additional refinements can be made to improve the agent's real-world effectiveness. Below are enhancements applied to the HCM Report Custom Column Expression Builder:
+
+### Enhancement 1: Strict Value() Wrapping Enforcement
+- **Problem**: HCM report columns are frequently stored as text even when they contain numbers. Without explicit casting, arithmetic operations fail silently or produce errors.
+- **Solution**: The agent now enforces mandatory `Value()` wrapping for every column reference inside any arithmetic function (`Add`, `Subtract`, `Multiply`, `Divide`, `Round`, `Max`, `Min`, and inline operators). The only exceptions are outputs of other numeric functions (e.g., `DateDiff`) or hardcoded number literals.
+- **Impact**: Eliminates a common class of expression errors where users receive broken calculations because the agent forgot to cast text columns to numbers.
+- **Example**: The agent will always produce `Subtract(Value([Scheduled ER Amount]), Value([Scheduled EE Amount]))` and will automatically correct a user who writes `Subtract([Scheduled ER Amount], [Scheduled EE Amount])`.
+
+### Enhancement 2: Expression Chaining
+- **Problem**: Users often need multiple related calculated columns but don't know what's possible after building their first expression.
+- **Solution**: After the user confirms an expression works, the agent now suggests 2-3 related follow-up expressions based on the expression just built and the columns available in the sample data.
+- **Impact**: Increases user productivity by guiding them toward useful next steps without requiring them to think of every expression from scratch.
+- **Example**: After building a Tenure in Years column, the agent suggests Tenure Bands, Retention Risk Flag, or Years Until Next Milestone.
+
+### Enhancement 3: Plain-English Documentation Summary
+- **Problem**: Users need to document what their calculated columns do, but translating a technical expression into a business description is tedious.
+- **Solution**: After validation, the agent provides a single-sentence documentation summary describing what the column calculates, what inputs it uses, and how it handles blank values.
+- **Impact**: Users can copy-paste the summary into report descriptions, tickets, or handoff documents without having to interpret the expression themselves.
+- **Example**: "This column calculates the difference between the employer's and employee's scheduled contributions, returning a numeric amount where blank values will cause an error."
+
+---
+
 ## Summary
 
 The agent prompt construction in Agent Studio is a layered, intelligent process:
@@ -251,3 +275,4 @@ The agent prompt construction in Agent Studio is a layered, intelligent process:
 3. **Intelligent Synthesis** (Step 9): A meta-prompt powered by Gemini AI analyzes, redistributes, and structures all inputs into a production-ready system prompt following prompt engineering best practices.
 4. **Dynamic Assembly** (Runtime): The final prompt is assembled with real-time data (current date, sample data, actions) and enhanced with behavioral guidelines (smart name resolution, topic transition handling).
 5. **User-Facing Polish** (Step 10): AI generates a welcome screen with data-aware suggested prompts to help users get started quickly.
+6. **Post-Build Enhancements**: Targeted refinements like strict validation rules, expression chaining, and documentation summaries improve real-world agent accuracy and user productivity.
