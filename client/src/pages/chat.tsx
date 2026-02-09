@@ -101,24 +101,14 @@ function TypingIndicator({ onCancel }: { onCancel?: () => void }) {
   );
 }
 
-function ContextSummary({ messages, topic, sessionTitle }: { messages: ChatMessage[]; topic: string | null; sessionTitle?: string }) {
+function ContextSummary({ messages, sessionId }: { messages: ChatMessage[]; sessionId?: string }) {
   if (messages.length === 0) return null;
   
   return (
     <div className="flex items-center gap-2 px-4 py-2 bg-muted/50 border-b">
       <MessageSquare className="h-4 w-4 text-muted-foreground" />
-      <span className="text-sm text-muted-foreground">
-        {messages.length} message{messages.length !== 1 ? 's' : ''} in conversation
-        {sessionTitle && (
-          <Badge variant="outline" className="ml-2 text-xs">
-            {sessionTitle}
-          </Badge>
-        )}
-        {topic && (
-          <Badge variant="secondary" className="ml-2 text-xs">
-            {topic}
-          </Badge>
-        )}
+      <span className="text-sm text-muted-foreground font-mono">
+        Conversation ID: {sessionId || "—"}
       </span>
     </div>
   );
@@ -141,28 +131,6 @@ function CharacterCounter({ current, max }: { current: number; max: number }) {
   );
 }
 
-function detectTopic(messages: ChatMessage[]): string | null {
-  if (messages.length === 0) return null;
-  
-  const recentMessages = messages.slice(-5);
-  const allText = recentMessages.map(m => m.content.toLowerCase()).join(' ');
-  
-  const topics = [
-    { keywords: ['help', 'support', 'issue', 'problem', 'fix'], label: 'Support' },
-    { keywords: ['buy', 'purchase', 'price', 'cost', 'order'], label: 'Sales' },
-    { keywords: ['how', 'what', 'why', 'explain', 'tell me'], label: 'Questions' },
-    { keywords: ['thanks', 'thank you', 'great', 'awesome'], label: 'Feedback' },
-    { keywords: ['schedule', 'book', 'appointment', 'meeting'], label: 'Scheduling' },
-  ];
-  
-  for (const topic of topics) {
-    if (topic.keywords.some(keyword => allText.includes(keyword))) {
-      return topic.label;
-    }
-  }
-  
-  return 'General';
-}
 
 function EmptyChat({ agentName, hasSession, welcomeConfig, onSendPrompt }: { 
   agentName: string; 
@@ -255,7 +223,6 @@ export default function Chat() {
   });
 
   const activeSession = sessions.find(s => s.id === activeSessionId);
-  const currentTopic = detectTopic(messages);
 
 
   useEffect(() => {
@@ -622,7 +589,7 @@ export default function Chat() {
         )}
 
         <div className="flex-1 flex flex-col overflow-hidden">
-          <ContextSummary messages={messages} topic={currentTopic} sessionTitle={activeSession?.title} />
+          <ContextSummary messages={messages} sessionId={activeSessionId || undefined} />
           
           <ScrollArea className="flex-1" ref={scrollRef}>
             <div className="max-w-3xl mx-auto px-4 py-6">
