@@ -1,0 +1,8 @@
+name: "HR Assistant Tester"
+userId: "4cd563b9-d44e-457b-89a1-2973ffd915e6"
+status: "configured"
+createdAt: "2026-02-09T13:35:54.057Z"
+updatedAt: "2026-02-09T13:35:57.207Z"
+promptStyle: "gemini"
+mockMode: "full"
+description: ""

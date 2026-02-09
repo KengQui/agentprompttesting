@@ -126,61 +126,62 @@ function SessionCard({
               </Button>
             </div>
           ) : (
-            <p className="text-sm font-medium truncate" data-testid="text-session-title">
-              {session.title}
-            </p>
+            <div className="flex items-start justify-between gap-1">
+              <p className="text-sm font-medium truncate" data-testid="text-session-title">
+                {session.title}
+              </p>
+              {!isEditing && (
+                <div className="flex gap-0.5 shrink-0">
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        className="h-5 w-5 opacity-0 group-hover:opacity-100 transition-opacity"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setIsEditing(true);
+                        }}
+                        data-testid="button-rename-session"
+                      >
+                        <Pencil className="h-3 w-3" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>Rename session</TooltipContent>
+                  </Tooltip>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        className="h-5 w-5 text-destructive hover:text-destructive"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onDelete();
+                        }}
+                        data-testid="button-delete-session"
+                      >
+                        <Trash2 className="h-3 w-3" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>Delete session</TooltipContent>
+                  </Tooltip>
+                </div>
+              )}
+            </div>
           )}
           {session.firstMessage && !isEditing && (
-            <p className="text-xs text-muted-foreground truncate mt-0.5">
+            <p className="text-xs text-muted-foreground line-clamp-2 mt-0.5">
               {session.firstMessage}
             </p>
           )}
-          <div className="flex items-center gap-2 mt-1 text-xs text-muted-foreground">
+          <div className="flex items-center flex-wrap gap-2 mt-1 text-xs text-muted-foreground">
             <span>{session.messageCount} messages</span>
             <span>·</span>
             <span>{formatDate(session.lastMessageAt || session.updatedAt)}</span>
           </div>
         </div>
       </div>
-
-      {!isEditing && (
-        <div className="absolute right-2 top-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                size="icon"
-                variant="ghost"
-                className="h-6 w-6"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setIsEditing(true);
-                }}
-                data-testid="button-rename-session"
-              >
-                <Pencil className="h-3 w-3" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>Rename session</TooltipContent>
-          </Tooltip>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                size="icon"
-                variant="ghost"
-                className="h-6 w-6 text-destructive hover:text-destructive"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onDelete();
-                }}
-                data-testid="button-delete-session"
-              >
-                <Trash2 className="h-3 w-3" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>Delete session</TooltipContent>
-          </Tooltip>
-        </div>
-      )}
     </div>
   );
 }

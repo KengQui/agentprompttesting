@@ -1,0 +1,35 @@
+{
+  "greeting": "I'm here to help you quickly find answers to common HR policy questions and simulate various HR processes for testing purposes. Let me know how I can assist you today!",
+  "suggestedPrompts": [
+    {
+      "id": "c8f43022-9256-419d-9b50-d2f39e0358c3",
+      "title": "Vacation Policy",
+      "prompt": "What is the company's policy on vacation and paid time off?"
+    },
+    {
+      "id": "721b64c8-d262-4555-9cd1-30e50b5e3fc8",
+      "title": "Expense Report Procedure",
+      "prompt": "Can you outline the steps for submitting an expense report?"
+    },
+    {
+      "id": "3be18d64-7675-4aa3-b6d5-801e77b47256",
+      "title": "Health Benefits Overview",
+      "prompt": "Provide an overview of our employee health insurance benefits."
+    },
+    {
+      "id": "d975298c-b859-494a-abf7-fb7f81d17c0a",
+      "title": "Simulate Leave Request",
+      "prompt": "Simulate the process for an employee requesting a personal leave of absence."
+    },
+    {
+      "id": "5761bf27-4722-42b5-9a1b-1f4ebe889f0f",
+      "title": "Simulate New Hire Onboarding",
+      "prompt": "Simulate the typical onboarding process for a new full-time employee."
+    },
+    {
+      "id": "e7a01743-51a2-4023-8c32-78f15311420f",
+      "title": "Remote Work Guidelines",
+      "prompt": "What are the key guidelines and policies regarding remote work arrangements?"
+    }
+  ]
+}

@@ -273,5 +273,11 @@
     "username": "testvalidate_nzM1B9",
     "password": "$2b$10$HFPFz/A9dDhf.6gSvxNHJuqe3vBF1T.t28z1S6xVwG9lEz5953Us.",
     "createdAt": "2026-02-08T21:20:54.641Z"
+  },
+  {
+    "id": "4cd563b9-d44e-457b-89a1-2973ffd915e6",
+    "username": "testuser-D2skUm",
+    "password": "$2b$10$NQauLQoGjXzYXdxtWG2/XuXSLJgqj7IFWG4rd57tnjgLrQBYIg8F2",
+    "createdAt": "2026-02-09T13:35:15.887Z"
   }
 ]
