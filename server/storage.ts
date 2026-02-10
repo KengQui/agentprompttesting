@@ -448,7 +448,7 @@ export class MemStorage implements IStorage {
     
     return {
       id: agentId,
-      userId: meta.userId || "", // Legacy agents may not have userId
+      userId: meta.userId || "",
       name: meta.name,
       status: (meta.status || "configured") as AgentStatus,
       createdAt: meta.createdAt,
@@ -456,6 +456,8 @@ export class MemStorage implements IStorage {
       promptStyle: "gemini" as PromptStyle,
       mockMode: (meta.mockMode || "full") as MockMode,
       description: meta.description || "",
+      promptGeneratedAt: meta.promptGeneratedAt || undefined,
+      lastConfigUpdate: meta.lastConfigUpdate || undefined,
       businessUseCase,
       domainKnowledge,
       validationRules,
@@ -531,6 +533,8 @@ export class MemStorage implements IStorage {
       promptStyle: agent.promptStyle || "gemini",
       mockMode: agent.mockMode || "full",
       description: agent.description || "",
+      ...(agent.promptGeneratedAt ? { promptGeneratedAt: agent.promptGeneratedAt } : {}),
+      ...(agent.lastConfigUpdate ? { lastConfigUpdate: agent.lastConfigUpdate } : {}),
     });
     writeTextFile(getAgentFilePath(agent.id, AGENT_FILES.META), metaYaml);
 
@@ -672,10 +676,19 @@ export class MemStorage implements IStorage {
     const agent = this.agents.get(id);
     if (!agent) return undefined;
 
+    const configFields = ['businessUseCase', 'domainKnowledge', 'domainDocuments', 'validationRules', 'guardrails', 'sampleDatasets', 'availableActions', 'mockUserState'];
+    const hasConfigChange = configFields.some(field => 
+      field in updates && JSON.stringify((updates as any)[field]) !== JSON.stringify((agent as any)[field])
+    );
+
+    const isPromptUpdate = 'customPrompt' in updates && updates.customPrompt !== agent.customPrompt;
+
     const updatedAgent: Agent = {
       ...agent,
       ...updates,
       updatedAt: new Date().toISOString(),
+      ...(hasConfigChange ? { lastConfigUpdate: new Date().toISOString() } : {}),
+      ...(isPromptUpdate ? { promptGeneratedAt: new Date().toISOString() } : {}),
     };
 
     this.agents.set(id, updatedAgent);

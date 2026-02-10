@@ -28,6 +28,7 @@ interface PromptCoachProps {
   agentName: string;
   isOpen: boolean;
   onToggle: () => void;
+  onConfigChanged?: (field: string) => void;
 }
 
 const FIELD_LABELS: Record<string, string> = {
@@ -52,7 +53,7 @@ export function PromptCoachTrigger({ isOpen, onToggle, isLoading }: { isOpen: bo
   );
 }
 
-export function PromptCoachPanel({ agentId, agentName, onClose }: { agentId: string; agentName: string; onClose: () => void }) {
+export function PromptCoachPanel({ agentId, agentName, onClose, onConfigChanged }: { agentId: string; agentName: string; onClose: () => void; onConfigChanged?: (field: string) => void }) {
   const [messages, setMessages] = useState<CoachMessage[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -209,6 +210,10 @@ export function PromptCoachPanel({ agentId, agentName, onClose }: { agentId: str
       saveHistory(updatedMessages);
 
       queryClient.invalidateQueries({ queryKey: ["/api/agents", agentId] });
+
+      if (onConfigChanged) {
+        onConfigChanged(change.field);
+      }
 
       toast({
         title: "Change applied",

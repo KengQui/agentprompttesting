@@ -1,6 +1,6 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { Plus, MessageSquare, Trash2, Pencil, Check, X, Loader2 } from "lucide-react";
+import { Plus, MessageSquare, Trash2, Pencil, Check, X, Loader2, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -197,7 +197,24 @@ export function SessionSidebar({
   width = 320,
 }: SessionSidebarProps) {
   const [coachOpen, setCoachOpen] = useState(false);
+  const [isRegeneratingPrompt, setIsRegeneratingPrompt] = useState(false);
   const { toast } = useToast();
+
+  const handleCoachConfigChanged = useCallback(async (field: string) => {
+    const fieldLabels: Record<string, string> = {
+      businessUseCase: "Business Use Case",
+      domainKnowledge: "Domain Knowledge",
+      validationRules: "Validation Rules",
+      guardrails: "Guardrails",
+    };
+    const label = fieldLabels[field] || field;
+    
+    toast({
+      title: `${label} updated`,
+      description: "Your system prompt may need to be regenerated to reflect this change. Go to Settings to regenerate.",
+      duration: 6000,
+    });
+  }, [toast, agentId, agentName]);
 
   const { data: sessions = [], isLoading } = useQuery<ChatSessionWithPreview[]>({
     queryKey: ["/api/agents", agentId, "sessions"],
@@ -259,7 +276,7 @@ export function SessionSidebar({
         </Button>
       </div>
       {coachOpen ? (
-        <PromptCoachPanel agentId={agentId} agentName={agentName} onClose={() => setCoachOpen(false)} />
+        <PromptCoachPanel agentId={agentId} agentName={agentName} onClose={() => setCoachOpen(false)} onConfigChanged={handleCoachConfigChanged} />
       ) : (
         <ScrollArea className="flex-1">
           <div className="p-2 space-y-1">

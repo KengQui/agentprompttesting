@@ -459,6 +459,11 @@ export default function SettingsPage() {
   const [conflictSummary, setConflictSummary] = useState<ConflictCheckResult['summary'] | null>(null);
   const conflictCheckTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
+  // Prompt outdated dialog state
+  const [showPromptOutdatedDialog, setShowPromptOutdatedDialog] = useState(false);
+  const [isRegeneratingPrompt, setIsRegeneratingPrompt] = useState(false);
+  const [pendingSaveData, setPendingSaveData] = useState<UpdateAgent | null>(null);
+
   // Clarifying chat dialog state
   const [showValidationChatDialog, setShowValidationChatDialog] = useState(false);
   const [showGuardrailsChatDialog, setShowGuardrailsChatDialog] = useState(false);
@@ -1308,9 +1313,81 @@ export default function SettingsPage() {
     },
   });
 
+  const configFields = ['businessUseCase', 'domainKnowledge', 'domainDocuments', 'validationRules', 'guardrails', 'sampleDatasets', 'availableActions', 'mockUserState'];
+
+  const hasConfigChanged = (data: UpdateAgent): boolean => {
+    if (!agent) return false;
+    return configFields.some(field => {
+      const newVal = (data as any)[field];
+      const oldVal = (agent as any)[field];
+      if (newVal === undefined) return false;
+      return JSON.stringify(newVal) !== JSON.stringify(oldVal);
+    });
+  };
+
   const handleSave = () => {
-    if (formData) {
+    if (!formData) return;
+    
+    if (agent?.customPrompt && hasConfigChanged(formData)) {
+      setPendingSaveData(formData);
+      setShowPromptOutdatedDialog(true);
+    } else {
       updateMutation.mutate(formData);
+    }
+  };
+
+  const handleSaveWithoutRegenerate = async () => {
+    if (pendingSaveData) {
+      try {
+        await updateMutation.mutateAsync(pendingSaveData);
+      } catch (e) {
+      }
+    }
+    setShowPromptOutdatedDialog(false);
+    setPendingSaveData(null);
+  };
+
+  const handleSaveAndRegenerate = async () => {
+    if (!pendingSaveData) return;
+    
+    setIsRegeneratingPrompt(true);
+    try {
+      await updateMutation.mutateAsync(pendingSaveData);
+      
+      const mergedData = { ...agent, ...pendingSaveData };
+      const response = await apiRequest("POST", "/api/generate/system-prompt", {
+        name: mergedData.name,
+        businessUseCase: mergedData.businessUseCase,
+        domainKnowledge: mergedData.domainKnowledge,
+        domainDocuments: mergedData.domainDocuments,
+        validationRules: mergedData.validationRules,
+        guardrails: mergedData.guardrails,
+        promptStyle: "gemini",
+      });
+      const result = await response.json();
+      
+      await apiRequest("PATCH", `/api/agents/${params.id}`, { customPrompt: result.systemPrompt });
+      queryClient.invalidateQueries({ queryKey: ["/api/agents", params.id] });
+      
+      if (formData) {
+        setFormData({ ...formData, customPrompt: result.systemPrompt });
+      }
+      setEditedPrompt(result.systemPrompt);
+      
+      toast({
+        title: "Prompt regenerated",
+        description: "The system prompt has been updated with your latest configuration changes.",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Prompt regeneration failed",
+        description: "Your settings were saved, but the prompt could not be regenerated. You can regenerate it manually in the Prompt section.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsRegeneratingPrompt(false);
+      setShowPromptOutdatedDialog(false);
+      setPendingSaveData(null);
     }
   };
 
@@ -3663,6 +3740,49 @@ export default function SettingsPage() {
         initialQuestion={guardrailsInitialQuestion}
         onComplete={handleGuardrailsChatComplete}
       />
+
+      <AlertDialog open={showPromptOutdatedDialog} onOpenChange={setShowPromptOutdatedDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5 text-yellow-500" />
+              System Prompt May Be Outdated
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              You've made changes to your agent's configuration that aren't reflected in the current system prompt. The prompt controls how your agent behaves during conversations.
+              <span className="block mt-2 font-medium text-foreground">
+                Would you like to regenerate the prompt with your latest changes?
+              </span>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className="flex flex-col gap-2 sm:flex-row sm:justify-end">
+            <AlertDialogCancel
+              onClick={handleSaveWithoutRegenerate}
+              disabled={isRegeneratingPrompt}
+              data-testid="button-save-without-regenerate"
+            >
+              Save Without Updating Prompt
+            </AlertDialogCancel>
+            <Button
+              onClick={handleSaveAndRegenerate}
+              disabled={isRegeneratingPrompt}
+              data-testid="button-save-and-regenerate"
+            >
+              {isRegeneratingPrompt ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Regenerating...
+                </>
+              ) : (
+                <>
+                  <Sparkles className="h-4 w-4 mr-2" />
+                  Save & Regenerate Prompt
+                </>
+              )}
+            </Button>
+          </div>
+        </AlertDialogContent>
+      </AlertDialog>
 
     </div>
   );

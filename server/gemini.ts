@@ -837,29 +837,40 @@ function getSystemPrompt(agent: AgentContext): string {
     
     let fullPrompt = customPrompt;
     
-    // If custom prompt uses legacy placeholders, process them first
-    if (hasPlaceholders(customPrompt)) {
-      fullPrompt = processCustomPrompt(customPrompt, agent);
-    }
-    
-    // Check for new-style placeholder markers and replace them (use replaceAll for all occurrences)
+    // Replace new-style UPPERCASE markers FIRST (before legacy processing, since
+    // legacy uses case-insensitive regex that would match uppercase markers too)
+    const hasGuardrailsMarker = fullPrompt.includes('{{GUARDRAILS}}');
+    const hasValidationRulesMarker = fullPrompt.includes('{{VALIDATION_RULES}}');
     const hasSampleDataMarker = fullPrompt.includes('{{SAMPLE_DATA}}');
     const hasActionsMarker = fullPrompt.includes('{{AVAILABLE_ACTIONS}}');
     
-    // Replace all {{SAMPLE_DATA}} markers with actual sample data
+    if (hasGuardrailsMarker) {
+      const guardrailsContent = agent.guardrails || '';
+      fullPrompt = fullPrompt.replaceAll('{{GUARDRAILS}}', guardrailsContent);
+    }
+    
+    if (hasValidationRulesMarker) {
+      const validationRulesContent = agent.validationRules || '';
+      fullPrompt = fullPrompt.replaceAll('{{VALIDATION_RULES}}', validationRulesContent);
+    }
+    
     if (hasSampleDataMarker) {
       const sampleDataContent = sampleDatasetsText || mockStateText || 'No sample data configured.';
       fullPrompt = fullPrompt.replaceAll('{{SAMPLE_DATA}}', sampleDataContent);
     }
     
-    // Replace all {{AVAILABLE_ACTIONS}} markers with actual actions
     if (hasActionsMarker) {
       const actionsContent = actionsText || 'No actions configured.';
       fullPrompt = fullPrompt.replaceAll('{{AVAILABLE_ACTIONS}}', actionsContent);
     }
     
+    // Then process legacy lowercase placeholders (these can coexist with new-style markers)
+    if (hasPlaceholders(fullPrompt)) {
+      fullPrompt = processCustomPrompt(fullPrompt, agent);
+    }
+    
     // If new-style markers were found and replaced, add mock state if needed and return
-    if (hasSampleDataMarker || hasActionsMarker) {
+    if (hasSampleDataMarker || hasActionsMarker || hasGuardrailsMarker || hasValidationRulesMarker) {
       // If sample data marker was used with sampleDatasetsText, also append mockStateText if it exists
       if (hasSampleDataMarker && sampleDatasetsText && mockStateText) {
         fullPrompt += `\n\n${mockStateText}`;
@@ -1137,13 +1148,18 @@ GOAL
 Success looks like: [Describe what a successful interaction achieves]
 
 ### 3. CONSTRAINTS
-Combine validation rules, guardrails, AND any rule-like content from domain knowledge. Analyze ALL inputs to extract constraints - they may be scattered across different fields. Use Must/Cannot/Should format:
+Analyze domain knowledge, business use case, AND any rule-like content to extract behavioral constraints. Use Must/Cannot/Should format for constraints that are INHERENT to the role and domain logic.
+
+IMPORTANT: Do NOT hardcode the validation rules or guardrails content into this section. Instead, include the placeholders {{VALIDATION_RULES}} and {{GUARDRAILS}} exactly as shown below. These will be dynamically replaced with the latest content at runtime, ensuring the prompt always reflects current configuration.
+
 CONSTRAINTS
-- Must [requirement from validation rules]
-- Must [data format requirement]
-- Cannot [restriction from guardrails]
-- Cannot [topic to avoid]
-- Should [guideline for behavior]
+
+{{VALIDATION_RULES}}
+
+{{GUARDRAILS}}
+
+Additionally, include these universal constraints:
+- Must [any domain-specific constraint inferred from the business use case or domain knowledge]
 - Must carefully parse the user's request BEFORE acting — extract the exact calculation, logic, or output format the user specified and follow it faithfully
 - Must NEVER contradict or ignore what the user explicitly stated (e.g., if they say "percentage", the output must be a percentage, not a raw decimal; if they say "relative to the employee's amount", use that as the denominator)
 - Must only ask clarifying questions when the request is genuinely ambiguous — do NOT ask for clarification on details the user already provided
