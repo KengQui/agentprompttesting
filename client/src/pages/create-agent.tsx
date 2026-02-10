@@ -2187,7 +2187,7 @@ ${datasetsContent}
 </data>`;
   } else {
     inputContent += `\n\n<data>
-{{SAMPLE_DATA}}
+[Sample data will be included here when configured]
 </data>`;
   }
   
@@ -2211,7 +2211,7 @@ ${datasetsContent}
     }).join('\n');
     taskContent += `\n${actionsContent}`;
   } else {
-    taskContent += `\n4. If an action is needed: {{AVAILABLE_ACTIONS}}`;
+    taskContent += `\n4. If an action is needed, execute the appropriate available action`;
   }
 
   return `ROLE

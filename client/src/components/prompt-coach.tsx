@@ -192,11 +192,12 @@ export function PromptCoachPanel({ agentId, agentName, onClose, onConfigChanged 
     setApplyingIndex(key);
 
     try {
-      await apiRequest("POST", `/api/agents/${agentId}/prompt-coach/apply`, {
+      const response = await apiRequest("POST", `/api/agents/${agentId}/prompt-coach/apply`, {
         field: change.field,
         action: change.action,
         content: change.content,
       });
+      const responseData = await response.json();
 
       const updatedMessages = messages.map((msg, idx) => {
         if (idx === messageIndex && msg.appliedChanges) {
@@ -217,7 +218,9 @@ export function PromptCoachPanel({ agentId, agentName, onClose, onConfigChanged 
 
       toast({
         title: "Change applied",
-        description: `Updated ${FIELD_LABELS[change.field] || change.field} successfully.`,
+        description: responseData.promptRegenerated 
+          ? `Updated ${FIELD_LABELS[change.field] || change.field} and regenerated the system prompt.`
+          : `Updated ${FIELD_LABELS[change.field] || change.field} successfully.`,
         duration: 3000,
       });
     } catch (error: any) {

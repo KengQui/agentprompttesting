@@ -835,7 +835,8 @@ export default function SettingsPage() {
         domainDocuments: formData.domainDocuments,
         validationRules: formData.validationRules,
         guardrails: formData.guardrails,
-        promptStyle: "gemini",
+        sampleDatasets: formData.sampleDatasets,
+        availableActions: formData.availableActions,
         model,
       });
       const result = await response.json();
@@ -1362,7 +1363,8 @@ export default function SettingsPage() {
         domainDocuments: mergedData.domainDocuments,
         validationRules: mergedData.validationRules,
         guardrails: mergedData.guardrails,
-        promptStyle: "gemini",
+        sampleDatasets: mergedData.sampleDatasets,
+        availableActions: mergedData.availableActions,
       });
       const result = await response.json();
       
@@ -2932,29 +2934,8 @@ export default function SettingsPage() {
                 
                 {isEditingPrompt && (
                   <div className="mb-3 p-3 bg-amber-50 dark:bg-amber-950 rounded-md border border-amber-200 dark:border-amber-800">
-                    <p className="text-xs font-medium text-amber-800 dark:text-amber-200 mb-1">
-                      Available Placeholders
-                    </p>
-                    <p className="text-xs text-amber-700 dark:text-amber-300 mb-2">
-                      Use these placeholders and they will be replaced with your agent's configuration:
-                    </p>
-                    <div className="flex flex-wrap gap-1">
-                      {["{{name}}", "{{businessUseCase}}", "{{domainKnowledge}}", "{{validationRules}}", "{{guardrails}}", "{{sampleDatasets}}", "{{currentDate}}"].map((placeholder) => (
-                        <code 
-                          key={placeholder}
-                          className="px-1.5 py-0.5 bg-amber-100 dark:bg-amber-900 text-amber-800 dark:text-amber-200 rounded text-xs cursor-pointer hover:bg-amber-200 dark:hover:bg-amber-800"
-                          onClick={() => {
-                            setEditedPrompt((prev) => prev + placeholder);
-                          }}
-                          title="Click to insert"
-                          data-testid={`placeholder-${placeholder.replace(/[{}]/g, '')}`}
-                        >
-                          {placeholder}
-                        </code>
-                      ))}
-                    </div>
-                    <p className="text-xs text-amber-600 dark:text-amber-400 mt-2 italic">
-                      If no placeholders are used, domain knowledge and guardrails will be automatically appended to your custom prompt.
+                    <p className="text-xs text-amber-700 dark:text-amber-300">
+                      The system prompt is a complete, self-contained document generated from your configuration. When you change business use case, domain knowledge, validation rules, or guardrails, regenerate the prompt to keep it in sync.
                     </p>
                   </div>
                 )}
@@ -3741,17 +3722,17 @@ export default function SettingsPage() {
         onComplete={handleGuardrailsChatComplete}
       />
 
-      <AlertDialog open={showPromptOutdatedDialog} onOpenChange={setShowPromptOutdatedDialog}>
+      <AlertDialog open={showPromptOutdatedDialog} onOpenChange={(open) => { if (!open && isRegeneratingPrompt) return; }}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle className="flex items-center gap-2">
               <AlertTriangle className="h-5 w-5 text-yellow-500" />
-              System Prompt May Be Outdated
+              Configuration Changed — Prompt Update Required
             </AlertDialogTitle>
             <AlertDialogDescription>
               You've made changes to your agent's configuration that aren't reflected in the current system prompt. The prompt controls how your agent behaves during conversations.
               <span className="block mt-2 font-medium text-foreground">
-                Would you like to regenerate the prompt with your latest changes?
+                Regenerating the prompt ensures your agent uses the latest configuration. You can skip this, but the prompt may be out of sync.
               </span>
             </AlertDialogDescription>
           </AlertDialogHeader>
@@ -3761,7 +3742,7 @@ export default function SettingsPage() {
               disabled={isRegeneratingPrompt}
               data-testid="button-save-without-regenerate"
             >
-              Save Without Updating Prompt
+              Save Without Updating
             </AlertDialogCancel>
             <Button
               onClick={handleSaveAndRegenerate}

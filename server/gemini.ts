@@ -610,16 +610,6 @@ export async function generateAgentResponse(
   }
 }
 
-// Available placeholders for custom prompts
-const PROMPT_PLACEHOLDERS = {
-  name: "{{name}}",
-  businessUseCase: "{{businessUseCase}}",
-  domainKnowledge: "{{domainKnowledge}}",
-  validationRules: "{{validationRules}}",
-  guardrails: "{{guardrails}}",
-  sampleDatasets: "{{sampleDatasets}}",
-  currentDate: "{{currentDate}}",
-};
 
 // Build domain knowledge section including documents
 function buildDomainKnowledgeText(agent: AgentContext): string {
@@ -669,33 +659,6 @@ function buildSampleDatasetsText(agent: AgentContext): string {
   return section;
 }
 
-// Replace placeholders in custom prompt with actual values
-function processCustomPrompt(customPrompt: string, agent: AgentContext): string {
-  const currentDate = new Date().toLocaleDateString('en-US', { 
-    weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' 
-  });
-  
-  const domainKnowledgeText = buildDomainKnowledgeText(agent);
-  const sampleDatasetsText = buildSampleDatasetsText(agent);
-  
-  // Replace all placeholders with actual values
-  let processedPrompt = customPrompt
-    .replace(/\{\{name\}\}/gi, agent.name || "")
-    .replace(/\{\{businessUseCase\}\}/gi, agent.businessUseCase || "")
-    .replace(/\{\{domainKnowledge\}\}/gi, domainKnowledgeText)
-    .replace(/\{\{validationRules\}\}/gi, agent.validationRules || "")
-    .replace(/\{\{guardrails\}\}/gi, agent.guardrails || "")
-    .replace(/\{\{sampleDatasets\}\}/gi, sampleDatasetsText)
-    .replace(/\{\{currentDate\}\}/gi, currentDate);
-  
-  return processedPrompt;
-}
-
-// Check if custom prompt uses any placeholders
-function hasPlaceholders(customPrompt: string): boolean {
-  const placeholderPattern = /\{\{(name|businessUseCase|domainKnowledge|validationRules|guardrails|sampleDatasets|currentDate)\}\}/gi;
-  return placeholderPattern.test(customPrompt);
-}
 
 // Build action simulation section for system prompt
 function buildActionsText(agent: AgentContext): string {
@@ -816,149 +779,28 @@ function buildMockUserStateText(agent: AgentContext): string {
 }
 
 function getSystemPrompt(agent: AgentContext): string {
-  // Always compute the current date upfront - this must be included in ALL prompts
   const currentDate = new Date().toLocaleDateString('en-US', { 
     weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' 
   });
   const currentDateSection = `\n\n## Current Date\nToday is: ${currentDate}`;
   
-  // Use custom prompt if the user has edited it
   if (agent.customPrompt && agent.customPrompt.trim()) {
-    const customPrompt = agent.customPrompt.trim();
+    let fullPrompt = agent.customPrompt.trim();
     
-    // Check if the original custom prompt already includes a {{currentDate}} placeholder
-    // If so, we don't need to append the date section (to avoid duplication)
-    const hasCurrentDatePlaceholder = /\{\{currentDate\}\}/i.test(customPrompt);
-    
-    // Build the data sections upfront
     const sampleDatasetsText = buildSampleDatasetsText(agent);
     const actionsText = buildActionsText(agent);
     const mockStateText = buildMockUserStateText(agent);
     
-    let fullPrompt = customPrompt;
-    
-    // Replace new-style UPPERCASE markers FIRST (before legacy processing, since
-    // legacy uses case-insensitive regex that would match uppercase markers too)
-    const hasGuardrailsMarker = fullPrompt.includes('{{GUARDRAILS}}');
-    const hasValidationRulesMarker = fullPrompt.includes('{{VALIDATION_RULES}}');
-    const hasSampleDataMarker = fullPrompt.includes('{{SAMPLE_DATA}}');
-    const hasActionsMarker = fullPrompt.includes('{{AVAILABLE_ACTIONS}}');
-    
-    if (hasGuardrailsMarker) {
-      const guardrailsContent = agent.guardrails || '';
-      fullPrompt = fullPrompt.replaceAll('{{GUARDRAILS}}', guardrailsContent);
-    }
-    
-    if (hasValidationRulesMarker) {
-      const validationRulesContent = agent.validationRules || '';
-      fullPrompt = fullPrompt.replaceAll('{{VALIDATION_RULES}}', validationRulesContent);
-    }
-    
-    if (hasSampleDataMarker) {
-      const sampleDataContent = sampleDatasetsText || mockStateText || 'No sample data configured.';
-      fullPrompt = fullPrompt.replaceAll('{{SAMPLE_DATA}}', sampleDataContent);
-    }
-    
-    if (hasActionsMarker) {
-      const actionsContent = actionsText || 'No actions configured.';
-      fullPrompt = fullPrompt.replaceAll('{{AVAILABLE_ACTIONS}}', actionsContent);
-    }
-    
-    // Then process legacy lowercase placeholders (these can coexist with new-style markers)
-    if (hasPlaceholders(fullPrompt)) {
-      fullPrompt = processCustomPrompt(fullPrompt, agent);
-    }
-    
-    // If new-style markers were found and replaced, add mock state if needed and return
-    if (hasSampleDataMarker || hasActionsMarker || hasGuardrailsMarker || hasValidationRulesMarker) {
-      // If sample data marker was used with sampleDatasetsText, also append mockStateText if it exists
-      if (hasSampleDataMarker && sampleDatasetsText && mockStateText) {
-        fullPrompt += `\n\n${mockStateText}`;
-      }
-      // If no markers used mockStateText but it exists, append it
-      if (!hasSampleDataMarker && mockStateText) {
-        fullPrompt += `\n\n${mockStateText}`;
-      }
-      // If actions marker wasn't present but actionsText exists, append it
-      if (!hasActionsMarker && actionsText) {
-        fullPrompt += `\n\n${actionsText}`;
-      }
-      // Include current date only if not already included via {{currentDate}} placeholder
-      if (!hasCurrentDatePlaceholder) {
-        fullPrompt += currentDateSection;
-      }
-      // Add smart name resolution guidelines when data is present
-      if (sampleDatasetsText || mockStateText) {
-        fullPrompt += `\n\n## Smart Name Resolution
-- When a user refers to a person by name, search the available data for matches
-- If there is exactly ONE person matching that name, proceed immediately without asking for further clarification — do NOT ask for Employee ID, record ID, or any other identifier
-- Only ask for disambiguation when there are MULTIPLE people with the same or similar name, and in that case ask about recognizable attributes (department, role, location) rather than requesting an ID number
-- Never expect users to know internal system identifiers like Employee IDs, record numbers, or account IDs. Look up records using human-friendly attributes such as name, department, role, or other contextual details the user would naturally know`;
-      }
-      return fullPrompt;
-    }
-    
-    // If legacy placeholders were processed but no new markers, add actions and mock state
-    if (hasPlaceholders(customPrompt)) {
-      if (actionsText) fullPrompt += `\n\n${actionsText}`;
-      if (mockStateText) fullPrompt += `\n\n${mockStateText}`;
-      // Include current date only if not already included via {{currentDate}} placeholder
-      if (!hasCurrentDatePlaceholder) {
-        fullPrompt += currentDateSection;
-      }
-      // Add smart name resolution guidelines when data is present
-      if (sampleDatasetsText || mockStateText) {
-        fullPrompt += `\n\n## Smart Name Resolution
-- When a user refers to a person by name, search the available data for matches
-- If there is exactly ONE person matching that name, proceed immediately without asking for further clarification — do NOT ask for Employee ID, record ID, or any other identifier
-- Only ask for disambiguation when there are MULTIPLE people with the same or similar name, and in that case ask about recognizable attributes (department, role, location) rather than requesting an ID number
-- Never expect users to know internal system identifiers like Employee IDs, record numbers, or account IDs. Look up records using human-friendly attributes such as name, department, role, or other contextual details the user would naturally know`;
-      }
-      return fullPrompt;
-    }
-    
-    // Fallback: If no markers found, append data to end (backward compatibility)
-    const domainKnowledgeText = buildDomainKnowledgeText(agent);
-    
-    // Add current date (no placeholder was used, so we must add it)
     fullPrompt += currentDateSection;
     
-    // Add business use case if available
-    if (agent.businessUseCase) {
-      fullPrompt += `\n\n## Purpose\n${agent.businessUseCase}`;
-    }
-    
-    // Add domain knowledge if available
-    if (domainKnowledgeText) {
-      fullPrompt += `\n\n## Domain Knowledge\n${domainKnowledgeText}`;
-    }
-    
-    // Add sample datasets if available
-    if (sampleDatasetsText) {
-      fullPrompt += `\n\n## User Data\n${sampleDatasetsText}`;
-    }
-    
-    // Add validation rules if available
-    if (agent.validationRules) {
-      fullPrompt += `\n\n## Validation Rules\n${agent.validationRules}`;
-    }
-    
-    // Add guardrails if available - these are critical for safety
-    if (agent.guardrails) {
-      fullPrompt += `\n\n## Guardrails (CRITICAL - Must Follow)\n${agent.guardrails}`;
-    }
-    
-    // Add available actions if configured
     if (actionsText) {
       fullPrompt += `\n\n${actionsText}`;
     }
     
-    // Add mock user state if configured
     if (mockStateText) {
       fullPrompt += `\n\n${mockStateText}`;
     }
     
-    // Add smart name resolution guidelines when sample data or mock state is present
     if (sampleDatasetsText || mockStateText) {
       fullPrompt += `\n\n## Smart Name Resolution
 - When a user refers to a person by name, search the available data for matches
@@ -970,23 +812,53 @@ function getSystemPrompt(agent: AgentContext): string {
     return fullPrompt;
   }
   
-  // Otherwise generate using the selected style
-  const style = agent.promptStyle || "anthropic";
-  const context: PromptContext = {
-    name: agent.name,
-    businessUseCase: agent.businessUseCase,
-    domainKnowledge: agent.domainKnowledge,
-    domainDocuments: agent.domainDocuments,
-    sampleDatasets: agent.sampleDatasets,
-    validationRules: agent.validationRules,
-    guardrails: agent.guardrails,
-  };
+  const domainKnowledgeText = buildDomainKnowledgeText(agent);
+  const sampleDatasetsText = buildSampleDatasetsText(agent);
+  const actionsText = buildActionsText(agent);
+  const mockStateText = buildMockUserStateText(agent);
   
-  return generatePrompt(style, context);
+  let fullPrompt = `You are ${agent.name}, a helpful AI assistant.`;
+  
+  fullPrompt += currentDateSection;
+  
+  if (agent.businessUseCase) {
+    fullPrompt += `\n\n## Purpose\n${agent.businessUseCase}`;
+  }
+  
+  if (domainKnowledgeText) {
+    fullPrompt += `\n\n## Domain Knowledge\n${domainKnowledgeText}`;
+  }
+  
+  if (sampleDatasetsText) {
+    fullPrompt += `\n\n## User Data\n${sampleDatasetsText}`;
+  }
+  
+  if (agent.validationRules) {
+    fullPrompt += `\n\n## Validation Rules\n${agent.validationRules}`;
+  }
+  
+  if (agent.guardrails) {
+    fullPrompt += `\n\n## Guardrails (CRITICAL - Must Follow)\n${agent.guardrails}`;
+  }
+  
+  if (actionsText) {
+    fullPrompt += `\n\n${actionsText}`;
+  }
+  
+  if (mockStateText) {
+    fullPrompt += `\n\n${mockStateText}`;
+  }
+  
+  if (sampleDatasetsText || mockStateText) {
+    fullPrompt += `\n\n## Smart Name Resolution
+- When a user refers to a person by name, search the available data for matches
+- If there is exactly ONE person matching that name, proceed immediately without asking for further clarification — do NOT ask for Employee ID, record ID, or any other identifier
+- Only ask for disambiguation when there are MULTIPLE people with the same or similar name, and in that case ask about recognizable attributes (department, role, location) rather than requesting an ID number
+- Never expect users to know internal system identifiers like Employee IDs, record numbers, or account IDs. Look up records using human-friendly attributes such as name, department, role, or other contextual details the user would naturally know`;
+  }
+  
+  return fullPrompt;
 }
-
-// Export for use in UI hints
-export const AVAILABLE_PLACEHOLDERS = Object.values(PROMPT_PLACEHOLDERS);
 
 export interface GenerationContext {
   businessUseCase: string;
@@ -1148,15 +1020,15 @@ GOAL
 Success looks like: [Describe what a successful interaction achieves]
 
 ### 3. CONSTRAINTS
-Analyze domain knowledge, business use case, AND any rule-like content to extract behavioral constraints. Use Must/Cannot/Should format for constraints that are INHERENT to the role and domain logic.
+Analyze ALL input sources — domain knowledge, business use case, validation rules, AND guardrails — to extract and synthesize behavioral constraints. Cross-reference the content: if domain knowledge contains rule-like statements (e.g., "never use X", "always do Y"), place them here as constraints rather than in the knowledge section. If validation rules contain guardrail-like boundaries, merge them appropriately.
 
-IMPORTANT: Do NOT hardcode the validation rules or guardrails content into this section. Instead, include the placeholders {{VALIDATION_RULES}} and {{GUARDRAILS}} exactly as shown below. These will be dynamically replaced with the latest content at runtime, ensuring the prompt always reflects current configuration.
+Integrate the FULL content of the provided validation rules and guardrails into this section, organized logically. Do NOT summarize or omit any rules — include every single rule from both sources, restructured for clarity.
 
 CONSTRAINTS
 
-{{VALIDATION_RULES}}
+[All validation rules — fully included, not summarized]
 
-{{GUARDRAILS}}
+[All guardrails — fully included, not summarized]
 
 Additionally, include these universal constraints:
 - Must [any domain-specific constraint inferred from the business use case or domain knowledge]
@@ -1168,14 +1040,14 @@ Additionally, include these universal constraints:
 - When a [SYSTEM CONTEXT] note indicates a pending unanswered question and a topic switch, must follow the system's instruction: either ask the user to resolve the pending question first (naturally and briefly), or move on if they already declined once. Never use robotic phrasing like "I'll take that as confirmed."
 
 ### 4. INPUT
-Include reference materials the agent needs using XML tags:
+Include reference materials the agent needs. Analyze the domain knowledge to separate factual reference material (which goes here) from behavioral rules (which should go in CONSTRAINTS).
 INPUT
 <knowledge>
-[Domain knowledge that is NOT rules - facts, procedures, reference materials, policies]
+[Domain knowledge that is purely reference material — facts, procedures, function lists, schemas, policies. Exclude any rule-like statements that belong in CONSTRAINTS]
 </knowledge>
 
 <data>
-{{SAMPLE_DATA}}
+[Include sample data here if provided. Format it clearly for the agent to reference during conversations]
 </data>
 
 ### 5. TASK
@@ -1185,7 +1057,7 @@ TASK
 2. [Second step - check if the request is genuinely ambiguous. If the user already specified the formula, format, or approach, do NOT ask about it — just follow their instructions. Only ask a clarifying question when there is a real gap in the request]
 3. [Third step - check available data and apply the user's stated logic faithfully]
 4. [Fourth step - formulate response matching the user's requested output format exactly]
-5. If action needed: {{AVAILABLE_ACTIONS}}
+5. [If actions are available, include step for executing actions when the user requests them]
 
 ### 6. OUTPUT FORMAT
 Define how responses should be structured based on the use case:
@@ -1214,7 +1086,9 @@ Before responding, verify:
 - [ ] [Constraint compliance check]
 
 ## Key Principles:
-- INTELLIGENTLY REDISTRIBUTE content (e.g., guardrail-like content in domain knowledge should go to CONSTRAINTS)
+- PRODUCE A COMPLETE, SELF-CONTAINED PROMPT — no placeholders, no markers, no dynamic tokens. Every piece of content must be fully baked into the final prompt.
+- INTELLIGENTLY REDISTRIBUTE content across sections: domain knowledge with rule-like content goes to CONSTRAINTS, reference material goes to INPUT, business context informs ROLE and GOAL. Cross-reference all input sources.
+- Include ALL validation rules and guardrails in CONSTRAINTS — do NOT summarize or omit any rules. Every rule provided must appear in the output.
 - INFER realistic examples based on the business context - do not leave placeholders
 - Keep it concise - every sentence should serve a purpose
 - Use clear, enforceable language for constraints
