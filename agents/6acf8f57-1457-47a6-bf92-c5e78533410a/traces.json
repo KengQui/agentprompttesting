@@ -274,6 +274,41 @@
         }
       ],
       "success": true
+    },
+    {
+      "id": "trace-1770742608128",
+      "sessionId": "83ab6a97-4d83-4e07-bfb7-ed61e2778db4",
+      "userInput": "Andrew called in sick",
+      "agentResponse": "I don't see an employee named Andrew in the system. Could you double-check the name or provide their employee ID so I can look them up?",
+      "startTime": "2026-02-10T16:56:47.427Z",
+      "endTime": "2026-02-10T16:56:48.128Z",
+      "totalDuration": 701,
+      "entries": [
+        {
+          "id": "entry-1770742607429-1",
+          "type": "intent_classification",
+          "name": "Orchestrator Intent Classification",
+          "timestamp": "2026-02-10T16:56:47.429Z",
+          "metadata": {
+            "intent": "answer_question",
+            "classificationMethod": "orchestrator",
+            "confidence": "high"
+          }
+        },
+        {
+          "id": "entry-1770742608128-3",
+          "type": "llm_call",
+          "name": "Gemini Response Generation",
+          "timestamp": "2026-02-10T16:56:48.128Z",
+          "duration": 699,
+          "metadata": {
+            "model": "gemini",
+            "intent": "answer_question",
+            "validated": true
+          }
+        }
+      ],
+      "success": true
     }
   ],
   "stats": {
@@ -282,16 +317,16 @@
     },
     "signalReads": {},
     "intentDistribution": {
-      "answer_question": 8
+      "answer_question": 9
     },
     "classificationMethods": {
-      "orchestrator": 8
+      "orchestrator": 9
     },
-    "avgResponseTime": 580.125,
-    "totalLlmCalls": 4,
+    "avgResponseTime": 593.5555555555555,
+    "totalLlmCalls": 5,
     "totalTokensUsed": 0,
     "errorCount": 0
   },
   "createdAt": "2026-02-05T20:48:26.888Z",
-  "updatedAt": "2026-02-10T16:55:57.901Z"
+  "updatedAt": "2026-02-10T16:56:48.128Z"
 }

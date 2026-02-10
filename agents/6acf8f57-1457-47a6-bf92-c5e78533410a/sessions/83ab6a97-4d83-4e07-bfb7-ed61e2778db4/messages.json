@@ -1,0 +1,18 @@
+[
+  {
+    "id": "0ecd3e2b-63cf-4cfd-8431-3180c98f5265",
+    "agentId": "6acf8f57-1457-47a6-bf92-c5e78533410a",
+    "sessionId": "83ab6a97-4d83-4e07-bfb7-ed61e2778db4",
+    "role": "user",
+    "content": "Andrew called in sick",
+    "timestamp": "2026-02-10T16:56:47.427Z"
+  },
+  {
+    "id": "cb33d7bb-3d26-4b68-a5fb-a8b0f3cbd5ce",
+    "agentId": "6acf8f57-1457-47a6-bf92-c5e78533410a",
+    "sessionId": "83ab6a97-4d83-4e07-bfb7-ed61e2778db4",
+    "role": "assistant",
+    "content": "I don't see an employee named Andrew in the system. Could you double-check the name or provide their employee ID so I can look them up?",
+    "timestamp": "2026-02-10T16:56:48.129Z"
+  }
+]
