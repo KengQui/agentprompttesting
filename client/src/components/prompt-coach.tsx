@@ -4,7 +4,6 @@ import { GraduationCap, Send, X, Loader2, Check, Minimize2, Maximize2 } from "lu
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Card } from "@/components/ui/card";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useToast } from "@/hooks/use-toast";
@@ -234,7 +233,7 @@ export function PromptCoach({ agentId, agentName }: PromptCoachProps) {
 
   return (
     <div className="fixed bottom-6 right-6 z-50 flex flex-col" style={{ maxHeight: "calc(100vh - 6rem)" }}>
-      <Card className="w-96 flex flex-col shadow-lg" style={{ maxHeight: "calc(100vh - 6rem)" }}>
+      <Card className="w-96 flex flex-col shadow-lg overflow-hidden" style={{ maxHeight: "calc(100vh - 6rem)" }}>
         <div className="flex items-center justify-between gap-2 p-3 border-b shrink-0">
           <div className="flex items-center gap-2">
             <GraduationCap className="h-4 w-4 text-primary" />
@@ -262,7 +261,7 @@ export function PromptCoach({ agentId, agentName }: PromptCoachProps) {
           </div>
         </div>
 
-        <ScrollArea className="flex-1 min-h-0" style={{ maxHeight: "calc(100vh - 16rem)" }} ref={scrollRef}>
+        <div className="flex-1 min-h-0 overflow-y-auto" ref={scrollRef}>
           <div className="space-y-4 p-4">
             {messages.map((msg, msgIdx) => (
               <div key={msgIdx}>
@@ -338,7 +337,7 @@ export function PromptCoach({ agentId, agentName }: PromptCoachProps) {
               </div>
             )}
           </div>
-        </ScrollArea>
+        </div>
 
         <div className="border-t p-3 shrink-0">
           <div className="flex gap-2">
