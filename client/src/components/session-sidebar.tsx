@@ -17,6 +17,7 @@ interface SessionSidebarProps {
   onSessionSelect: (sessionId: string) => void;
   onNewSession: () => void;
   onSessionDeleted?: (sessionId: string) => void;
+  width?: number;
 }
 
 function SessionCard({
@@ -193,6 +194,7 @@ export function SessionSidebar({
   onSessionSelect,
   onNewSession,
   onSessionDeleted,
+  width = 320,
 }: SessionSidebarProps) {
   const [coachOpen, setCoachOpen] = useState(false);
   const { toast } = useToast();
@@ -244,7 +246,7 @@ export function SessionSidebar({
   });
 
   return (
-    <div className="w-80 shrink-0 border-r bg-muted/30 flex flex-col h-full">
+    <div className="shrink-0 border-r bg-muted/30 flex flex-col h-full" style={{ width: `${width}px` }}>
       <div className="p-3 border-b shrink-0">
         <Button
           onClick={onNewSession}

@@ -14,6 +14,7 @@ import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { ContextProgressBar } from "@/components/context-progress-bar";
 import { SessionSidebar } from "@/components/session-sidebar";
+import { ResizeHandle, useResizable } from "@/components/resize-handle";
 import type { Agent, ChatMessage, ChatSession, ChatSessionWithPreview, WelcomeConfig } from "@shared/schema";
 
 const MAX_MESSAGE_LENGTH = 2000;
@@ -239,6 +240,13 @@ export default function Chat() {
   const [isCancelled, setIsCancelled] = useState(false);
   const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const { width: sidebarWidth, handleMouseDown: handleSidebarResize } = useResizable({
+    initialWidth: 320,
+    minWidth: 200,
+    maxWidth: 500,
+    direction: "left",
+    storageKey: "chat-sidebar-width",
+  });
   const scrollRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
@@ -619,14 +627,18 @@ export default function Chat() {
 
       <div className="flex-1 flex overflow-hidden">
         {sidebarOpen && (
-          <SessionSidebar
-            agentId={params.id!}
-            agentName={agent.name}
-            activeSessionId={activeSessionId}
-            onSessionSelect={handleSessionSelect}
-            onNewSession={handleNewSession}
-            onSessionDeleted={handleSessionDeleted}
-          />
+          <>
+            <SessionSidebar
+              agentId={params.id!}
+              agentName={agent.name}
+              activeSessionId={activeSessionId}
+              onSessionSelect={handleSessionSelect}
+              onNewSession={handleNewSession}
+              onSessionDeleted={handleSessionDeleted}
+              width={sidebarWidth}
+            />
+            <ResizeHandle onMouseDown={handleSidebarResize} />
+          </>
         )}
 
         <div className="flex-1 flex flex-col overflow-hidden">
