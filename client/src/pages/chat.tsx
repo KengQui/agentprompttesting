@@ -80,11 +80,16 @@ function SplitMessageBubbles({ message, before, after }: { message: ChatMessage;
     }
 
     hasAnimated.current = true;
-    setPhase("typing");
-    const timer = setTimeout(() => {
+    const showTypingTimer = setTimeout(() => {
+      setPhase("typing");
+    }, 800);
+    const showAfterTimer = setTimeout(() => {
       setPhase("after");
-    }, 1500);
-    return () => clearTimeout(timer);
+    }, 2800);
+    return () => {
+      clearTimeout(showTypingTimer);
+      clearTimeout(showAfterTimer);
+    };
   }, [message.timestamp]);
 
   return (
