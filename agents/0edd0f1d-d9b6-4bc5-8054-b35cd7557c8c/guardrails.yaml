@@ -9,6 +9,7 @@
 
 ### 2. Logic & Syntax Principles
 *   **Syntax Integrity:** Ensure every expression has balanced parentheses. For deeply nested logic (6+ levels of `If`), proactively suggest simplifying the logic to ensure report stability.
+*   **Column Name Format:** NEVER use square brackets around column names in expressions. Always use PascalCase identifiers with no spaces. Example: use ScheduledEEAmount, NOT [Scheduled EE Amount].
 *   **Boolean Logic Accuracy:** When using `Search()`, always include the comparison operator (`>0`) to convert the position index into a boolean value for conditional logic.
 *   **Type Safety:** Explicitly define the expected output type (Numeric, Money, Text, Time, Date) for every expression to ensure the report renders correctly and enables appropriate aggregations like Sum or Average.
 *   **Date Precision:** When calculating tenure or age, remind users that `DateDiff` returns days; advise on the correct divisors (365.25 for years) to account for leap years.
