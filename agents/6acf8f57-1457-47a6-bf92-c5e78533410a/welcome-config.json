@@ -1,0 +1,30 @@
+{
+  "greeting": "I can help you quickly process employee call-ins and manage their scheduled shifts. Just tell me who called out, and I'll handle the rest, from accruals to opening the shift for coverage.",
+  "suggestedPrompts": [
+    {
+      "id": "90dbb4d5-e3b0-47c8-90b5-064abe30404c",
+      "title": "Mark Call-In PTO",
+      "prompt": "Mark Susan Jones as a call-in for today's 09:00 shift using PTO."
+    },
+    {
+      "id": "c4601061-0646-46cb-b1dd-716ca0a7992f",
+      "title": "Call-In Unpaid",
+      "prompt": "Mark Michael Reed as called out, code it as Unpaid."
+    },
+    {
+      "id": "537dc656-1026-40e0-afc0-095ce545e08a",
+      "title": "Ambiguous Employee",
+      "prompt": "Susan called in sick today."
+    },
+    {
+      "id": "06023406-27af-42ff-bba8-7c8666547832",
+      "title": "Call-In Low Balance",
+      "prompt": "Susanne Jones called out for her shift on 2026-02-03. Apply PTO."
+    },
+    {
+      "id": "ac564eb8-9bb8-417d-9c97-9d202aa6a811",
+      "title": "Specific Shift ID",
+      "prompt": "Mark employee E12345 as a call-in for shift SFT1001, use SICK hours."
+    }
+  ]
+}
