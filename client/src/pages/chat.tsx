@@ -41,6 +41,73 @@ function splitColumnBuildResponse(content: string): { before: string; after: str
   return { before, after };
 }
 
+function AssistantBubble({ content, timestamp, testId }: { content: string; timestamp: string; testId?: string }) {
+  return (
+    <div
+      className="flex gap-3"
+      data-testid={testId}
+    >
+      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-muted">
+        <Bot className="h-4 w-4" />
+      </div>
+      <div className="max-w-[80%] rounded-lg px-4 py-2 bg-muted">
+        <div className="text-sm prose prose-sm dark:prose-invert max-w-none [&>*:first-child]:mt-0 [&>*:last-child]:mb-0 [&_p]:my-1 [&_ul]:my-1 [&_ol]:my-1 [&_li]:my-0">
+          <ReactMarkdown>{content}</ReactMarkdown>
+        </div>
+        <p className="text-xs mt-1 text-muted-foreground">
+          {new Date(timestamp).toLocaleTimeString([], {
+            hour: "2-digit",
+            minute: "2-digit",
+          })}
+        </p>
+      </div>
+    </div>
+  );
+}
+
+function SplitMessageBubbles({ message, before, after }: { message: ChatMessage; before: string; after: string }) {
+  const [phase, setPhase] = useState<"before" | "typing" | "after">("before");
+  const hasAnimated = useRef(false);
+
+  useEffect(() => {
+    if (hasAnimated.current) return;
+
+    const messageAge = Date.now() - new Date(message.timestamp).getTime();
+    if (messageAge > 5000) {
+      setPhase("after");
+      hasAnimated.current = true;
+      return;
+    }
+
+    hasAnimated.current = true;
+    setPhase("typing");
+    const timer = setTimeout(() => {
+      setPhase("after");
+    }, 1500);
+    return () => clearTimeout(timer);
+  }, [message.timestamp]);
+
+  return (
+    <>
+      <AssistantBubble
+        content={before}
+        timestamp={message.timestamp}
+        testId={`message-${message.id}-before`}
+      />
+      {phase === "typing" && (
+        <TypingIndicator />
+      )}
+      {phase === "after" && (
+        <AssistantBubble
+          content={after}
+          timestamp={message.timestamp}
+          testId={`message-${message.id}-after`}
+        />
+      )}
+    </>
+  );
+}
+
 function MessageBubble({ message, agentId }: { message: ChatMessage; agentId?: string }) {
   const isUser = message.role === "user";
   const displayContent = isUser ? message.content : stripActionBlocks(message.content);
@@ -48,6 +115,15 @@ function MessageBubble({ message, agentId }: { message: ChatMessage; agentId?: s
   const isHcmAgent = agentId === HCM_EXPRESSION_BUILDER_AGENT_ID;
   const splitResult = !isUser && isHcmAgent ? splitColumnBuildResponse(displayContent) : null;
 
+  if (splitResult) {
+    return (
+      <SplitMessageBubbles
+        message={message}
+        before={splitResult.before}
+        after={splitResult.after}
+      />
+    );
+  }
 
   return (
     <div
@@ -70,13 +146,6 @@ function MessageBubble({ message, agentId }: { message: ChatMessage; agentId?: s
       >
         {isUser ? (
           <p className="text-sm whitespace-pre-wrap">{displayContent}</p>
-        ) : splitResult ? (
-          <div className="text-sm prose prose-sm dark:prose-invert max-w-none [&>*:first-child]:mt-0 [&>*:last-child]:mb-0 [&_p]:my-1 [&_ul]:my-1 [&_ol]:my-1 [&_li]:my-0">
-            <ReactMarkdown>{splitResult.before}</ReactMarkdown>
-            <div className="border-t border-border/50 pt-2 mt-2">
-              <ReactMarkdown>{splitResult.after}</ReactMarkdown>
-            </div>
-          </div>
         ) : (
           <div className="text-sm prose prose-sm dark:prose-invert max-w-none [&>*:first-child]:mt-0 [&>*:last-child]:mb-0 [&_p]:my-1 [&_ul]:my-1 [&_ol]:my-1 [&_li]:my-0">
             <ReactMarkdown>{displayContent}</ReactMarkdown>
