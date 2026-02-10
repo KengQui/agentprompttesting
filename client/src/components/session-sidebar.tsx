@@ -7,7 +7,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { PromptCoach } from "@/components/prompt-coach";
+import { PromptCoachTrigger, PromptCoachPanel } from "@/components/prompt-coach";
 import type { ChatSessionWithPreview } from "@shared/schema";
 
 interface SessionSidebarProps {
@@ -194,6 +194,7 @@ export function SessionSidebar({
   onNewSession,
   onSessionDeleted,
 }: SessionSidebarProps) {
+  const [coachOpen, setCoachOpen] = useState(false);
   const { toast } = useToast();
 
   const { data: sessions = [], isLoading } = useQuery<ChatSessionWithPreview[]>({
@@ -243,8 +244,8 @@ export function SessionSidebar({
   });
 
   return (
-    <div className="w-80 shrink-0 border-r bg-muted/30 flex flex-col h-full relative">
-      <div className="p-3 border-b">
+    <div className="w-80 shrink-0 border-r bg-muted/30 flex flex-col h-full">
+      <div className="p-3 border-b shrink-0">
         <Button
           onClick={onNewSession}
           className="w-full"
@@ -255,35 +256,39 @@ export function SessionSidebar({
           New Session
         </Button>
       </div>
-      <ScrollArea className="flex-1">
-        <div className="p-2 space-y-1">
-          {isLoading ? (
-            <div className="flex items-center justify-center py-8">
-              <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-            </div>
-          ) : sessions.length === 0 ? (
-            <div className="text-center py-8 px-4">
-              <MessageSquare className="h-8 w-8 mx-auto text-muted-foreground/50 mb-2" />
-              <p className="text-sm text-muted-foreground">No sessions yet</p>
-              <p className="text-xs text-muted-foreground/70 mt-1">
-                Click "New Session" to start
-              </p>
-            </div>
-          ) : (
-            sessions.map((session) => (
-              <SessionCard
-                key={session.id}
-                session={session}
-                isActive={session.id === activeSessionId}
-                onSelect={() => onSessionSelect(session.id)}
-                onRename={(title) => renameMutation.mutate({ sessionId: session.id, title })}
-                onDelete={() => deleteMutation.mutate(session.id)}
-              />
-            ))
-          )}
-        </div>
-      </ScrollArea>
-      <PromptCoach agentId={agentId} agentName={agentName} />
+      {coachOpen ? (
+        <PromptCoachPanel agentId={agentId} agentName={agentName} onClose={() => setCoachOpen(false)} />
+      ) : (
+        <ScrollArea className="flex-1">
+          <div className="p-2 space-y-1">
+            {isLoading ? (
+              <div className="flex items-center justify-center py-8">
+                <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+              </div>
+            ) : sessions.length === 0 ? (
+              <div className="text-center py-8 px-4">
+                <MessageSquare className="h-8 w-8 mx-auto text-muted-foreground/50 mb-2" />
+                <p className="text-sm text-muted-foreground">No sessions yet</p>
+                <p className="text-xs text-muted-foreground/70 mt-1">
+                  Click "New Session" to start
+                </p>
+              </div>
+            ) : (
+              sessions.map((session) => (
+                <SessionCard
+                  key={session.id}
+                  session={session}
+                  isActive={session.id === activeSessionId}
+                  onSelect={() => onSessionSelect(session.id)}
+                  onRename={(title) => renameMutation.mutate({ sessionId: session.id, title })}
+                  onDelete={() => deleteMutation.mutate(session.id)}
+                />
+              ))
+            )}
+          </div>
+        </ScrollArea>
+      )}
+      <PromptCoachTrigger isOpen={coachOpen} onToggle={() => setCoachOpen(!coachOpen)} isLoading={false} />
     </div>
   );
 }
