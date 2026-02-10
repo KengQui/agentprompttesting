@@ -86,25 +86,28 @@ export class Orchestrator {
 
   async initFlowMode(): Promise<void> {
     const customPrompt = this.agentConfig.customPrompt;
-    if (!customPrompt) {
+    const validationRules = this.agentConfig.validationRules;
+    const combinedText = [customPrompt, validationRules].filter(Boolean).join('\n');
+    
+    if (!combinedText) {
       this.flowMode = 'ask-first';
-      console.log('[Orchestrator] No custom prompt - defaulting to ask-first');
+      console.log('[Orchestrator] No custom prompt or validation rules - defaulting to ask-first');
       return;
     }
 
     const apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey) {
       console.log('[Orchestrator] No GEMINI_API_KEY - falling back to keyword detection');
-      this.flowMode = this.detectFlowModeByKeywords(customPrompt);
+      this.flowMode = this.detectFlowModeByKeywords(combinedText);
       return;
     }
 
     try {
       const ai = new GoogleGenAI({ apiKey });
 
-      const promptSummary = customPrompt.length > 3000 
-        ? customPrompt.substring(0, 3000) + '\n...(truncated)'
-        : customPrompt;
+      const promptSummary = combinedText.length > 3000 
+        ? combinedText.substring(0, 3000) + '\n...(truncated)'
+        : combinedText;
 
       const classificationPrompt = `You are analyzing an AI agent's system prompt to determine how it should handle conversations.
 
@@ -155,10 +158,10 @@ Include a brief "reasoning" field explaining why.`;
       }
 
       console.log('[Orchestrator] AI response unparseable, falling back to keyword detection');
-      this.flowMode = this.detectFlowModeByKeywords(customPrompt);
+      this.flowMode = this.detectFlowModeByKeywords(combinedText);
     } catch (error) {
       console.error('[Orchestrator] AI flow mode classification failed:', error);
-      this.flowMode = this.detectFlowModeByKeywords(customPrompt);
+      this.flowMode = this.detectFlowModeByKeywords(combinedText);
     }
   }
 
@@ -207,17 +210,18 @@ Include a brief "reasoning" field explaining why.`;
     
     console.log('[Orchestrator] parseValidationRules called, input length:', validationRules?.length || 0);
     
-    const requiredInfoMatch = validationRules.match(/###\s*(?:\d+\.\s*)?Required Information[\s\S]*?(?=###|$)/i);
-    console.log('[Orchestrator] Section match found:', !!requiredInfoMatch);
+    const infoGatheringMatch = validationRules.match(/###\s*(?:\d+\.\s*)?(?:Required Information|Information Gathering[^\n]*)[\s\S]*?(?=###|$)/i);
+    console.log('[Orchestrator] Section match found:', !!infoGatheringMatch);
     
-    if (requiredInfoMatch) {
-      const section = requiredInfoMatch[0];
-      console.log('[Orchestrator] Parsing Required Information section, length:', section.length);
+    if (infoGatheringMatch) {
+      const section = infoGatheringMatch[0];
+      console.log('[Orchestrator] Parsing Information Gathering section, length:', section.length);
       const bulletMatches = section.matchAll(/\*\s*\*\*([^*]+)\*\*:?\s*([^*\n]+)?/g);
       
       for (const match of bulletMatches) {
-        const name = match[1].trim().toLowerCase().replace(/\s+/g, '_');
-        const label = match[1].trim();
+        const rawLabel = match[1].trim().replace(/:+$/, '');
+        const name = rawLabel.toLowerCase().replace(/\s+/g, '_');
+        const label = rawLabel;
         const description = match[2]?.trim() || '';
         
         if (!this.isNonInputField(name)) {
@@ -234,8 +238,15 @@ Include a brief "reasoning" field explaining why.`;
       return fields;
     }
 
-    console.log('[Orchestrator] Using fallback regex (no section header)');
-    const bulletMatches = validationRules.matchAll(/\*\*([^*]+)\*\*:?\s*([^*\n]+)?/g);
+    console.log('[Orchestrator] No information gathering section found - checking if validation-only rules');
+    const sectionHeaders = validationRules.match(/###\s*(?:\d+\.\s*)?(?:Validation|Handling|Coverage)/gi);
+    if (sectionHeaders && sectionHeaders.length > 0) {
+      console.log('[Orchestrator] Document contains validation/handling sections only - no user input fields to extract');
+      return fields;
+    }
+
+    console.log('[Orchestrator] Using fallback regex (no recognized section headers)');
+    const bulletMatches = validationRules.matchAll(/\*\s*\*\*([^*]+)\*\*:?\s*([^*\n]+)?/g);
     for (const match of bulletMatches) {
       const name = match[1].trim().toLowerCase().replace(/\s+/g, '_');
       const label = match[1].trim();
