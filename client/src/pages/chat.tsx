@@ -41,15 +41,13 @@ function splitColumnBuildResponse(content: string): { before: string; after: str
   return { before, after };
 }
 
-function MessageBubble({ message, agentId, isLatest }: { message: ChatMessage; agentId?: string; isLatest?: boolean }) {
+function MessageBubble({ message, agentId }: { message: ChatMessage; agentId?: string }) {
   const isUser = message.role === "user";
   const displayContent = isUser ? message.content : stripActionBlocks(message.content);
 
   const isHcmAgent = agentId === HCM_EXPRESSION_BUILDER_AGENT_ID;
   const splitResult = !isUser && isHcmAgent ? splitColumnBuildResponse(displayContent) : null;
 
-  const isRecentMessage = Date.now() - new Date(message.timestamp).getTime() < 30000;
-  const shouldAnimate = splitResult && isLatest && isRecentMessage;
 
   return (
     <div
@@ -75,23 +73,9 @@ function MessageBubble({ message, agentId, isLatest }: { message: ChatMessage; a
         ) : splitResult ? (
           <div className="text-sm prose prose-sm dark:prose-invert max-w-none [&>*:first-child]:mt-0 [&>*:last-child]:mb-0 [&_p]:my-1 [&_ul]:my-1 [&_ol]:my-1 [&_li]:my-0">
             <ReactMarkdown>{splitResult.before}</ReactMarkdown>
-            {shouldAnimate ? (
-              <>
-                <div className="column-build-spinner-anim" data-testid="column-build-spinner">
-                  <div className="flex items-center gap-3 my-3 py-2">
-                    <Loader2 className="h-4 w-4 animate-spin text-primary" />
-                    <span className="text-sm text-muted-foreground">Building column...</span>
-                  </div>
-                </div>
-                <div className="column-build-after-anim border-t border-border/50 pt-2 mt-2">
-                  <ReactMarkdown>{splitResult.after}</ReactMarkdown>
-                </div>
-              </>
-            ) : (
-              <div className="border-t border-border/50 pt-2 mt-2">
-                <ReactMarkdown>{splitResult.after}</ReactMarkdown>
-              </div>
-            )}
+            <div className="border-t border-border/50 pt-2 mt-2">
+              <ReactMarkdown>{splitResult.after}</ReactMarkdown>
+            </div>
           </div>
         ) : (
           <div className="text-sm prose prose-sm dark:prose-invert max-w-none [&>*:first-child]:mt-0 [&>*:last-child]:mb-0 [&_p]:my-1 [&_ul]:my-1 [&_ol]:my-1 [&_li]:my-0">
@@ -660,7 +644,7 @@ export default function Chat() {
               ) : (
                 <div className="space-y-4">
                   {messages.map((msg, idx) => (
-                    <MessageBubble key={msg.id} message={msg} agentId={params.id} isLatest={idx === messages.length - 1} />
+                    <MessageBubble key={msg.id} message={msg} agentId={params.id} />
                   ))}
                   {sendMutation.isPending && <TypingIndicator onCancel={handleCancel} />}
                   {params.id === HCM_EXPRESSION_BUILDER_AGENT_ID && (
