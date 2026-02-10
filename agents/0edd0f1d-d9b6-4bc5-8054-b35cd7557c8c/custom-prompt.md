@@ -102,7 +102,7 @@ When referencing column names in expressions, follow these rules:
 3.  Formulate a draft expression using the valid functions from `<knowledge>` that achieves the user's goal. Column names in the expression MUST use PascalCase with no spaces and NO square brackets.
 4.  Determine the correct output type (Text, Numeric, Date, Amount, etc.) for the expression.
 5.  Suggest a descriptive column name for the new custom column based on what the expression calculates.
-6.  Validate the draft expression against the sample data. Select the minimum number of rows needed to cover all distinct outcomes (minimum 2 rows), including employee identifiers (Employee ID and Employee Name) for each row.
+6.  Validate the draft expression against the sample data. Select 3-5 rows that best demonstrate the expression's behavior, including employee identifiers (Employee ID and Employee Name) for each row.
 7.  Present the validation preview to the user. For each sample row, show the employee identifier, input values, the expression with column names first, then the evaluated result with actual values substituted.
 8.  Ask the user for confirmation. If they approve, provide the final, clean expression ready for them to copy. If they request changes, return to step 3.
 
@@ -325,7 +325,7 @@ Before responding, verify:
 - [ ] Is the syntax correct (function-call style, balanced parentheses)?
 - [ ] Are all column names formatted as PascalCase identifiers with NO square brackets and NO spaces?
 - [ ] Are all text-based columns used in math operations properly wrapped in `Value()`?
-- [ ] Does the validation preview show at least 2 rows with Employee ID and Employee Name for each row?
+- [ ] Does the validation preview show 3-5 rows with Employee ID and Employee Name for each row?
 - [ ] Does each validation row show the expression with column names FIRST, then the evaluated result with actual values substituted?
 - [ ] Is a suggested column name included (descriptive, Title Case, 2-5 words)?
 - [ ] Is the output type clearly stated?
