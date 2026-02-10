@@ -1,108 +1,29 @@
 # Agent Studio - AI Agent Configuration Platform
 
 ## Overview
-Agent Studio is a web application designed for the end-to-end creation, configuration, and management of AI agents. It provides an intuitive 8-step wizard interface for users to define essential AI agent parameters such as business use cases, domain knowledge, validation rules, guardrails, sample datasets, and simulated actions. The platform aims to streamline the development and deployment of tailored AI agents for various business needs.
-
-## Recent Changes (Since Jan 29, 2026)
-- **Topic Switch Detection & Pending Question Handling (Feb 8, 2026)**: When an AI agent asks a question and the user switches topics without answering, the system now detects the topic switch (via LLM classification) and nudges the user to answer the pending question first. If the user ignores the nudge a second time, the system moves on to handle their new request. Key functions: `extractPendingQuestion()` and `detectTopicSwitch()` in `server/gemini.ts`, with in-memory `pendingQuestionStore` tracking per agent/session in `server/routes.ts`. Meta-prompt updated to include topic transition handling instructions.
-- **Welcome Screen Step (Step 10)**: Added a new "Welcome Screen" step to the wizard and settings page (now 10 steps total). This step auto-generates a greeting message and 4-6 suggested prompts using AI based on the agent's business use case, domain knowledge, and sample data. Users can toggle the welcome screen on/off, edit the greeting/prompts, add/remove prompts, and regenerate with AI. The welcome screen is displayed on the chat page when there are no messages yet, and clicking a suggested prompt immediately sends it. Existing agents auto-generate a welcome config on first chat load. Data stored as `welcomeConfig` on the Agent schema.
-- **Validation Checklist Step**: Added a new Step 8 "Validation Checklist" to the 9-step wizard (Agent Prompt moved to Step 9). Runs 16 automated checks across 4 categories (Separation of Concerns, Completeness, Clarity, Wizard Compatibility) before prompt generation. Shows pass/fail/unable-to-verify for each check, with optional auto-fix for common issues. Users can always proceed regardless of results.
-- **Automatic Flow Mode Detection**: Orchestrator now automatically detects from agent's custom prompt whether to use "infer-first" (analyze data before asking) or "ask-first" (collect information upfront) mode - no manual configuration required
-- **Direct Action Execution**: Agents now execute actions directly instead of narrating navigation steps to users
-- **Prompt Style Standardization**: Simplified to use only Google Gemini style (removed other prompt styles)
-- **Enhanced Prompt Markers**: New placeholder marker replacement system (`{{MARKER_NAME}}`) for dynamic prompt generation
-- **Smart Content Extractor**: Automatically extracts business case information from uploaded documents
-- **Mock Mode Toggle**: Added ability to toggle mock mode for testing agent configurations
-- **Trace Logging**: Added `traces.json` for tracking agent interactions and debugging
-- **Clarifying Insights**: Added `clarifying-insights.json` to store AI clarification flow data
-
-## Flow Mode Detection
-The orchestrator automatically determines conversation flow style by analyzing the agent's custom prompt for natural language phrases:
-
-### Infer-First Mode
-Triggered when the custom prompt contains phrases like:
-- "analyze data first", "infer first", "analyze sample data"
-- "only ask when ambiguous", "don't ask upfront"
-- "propose solution first", "examine data before asking"
-
-In this mode, the agent:
-- Skips the dynamic field collection phase
-- Provides a simple welcome greeting
-- Lets the AI analyze available data before asking questions
-
-### Ask-First Mode (Default)
-Used when no infer-first phrases are detected. This is the traditional behavior where:
-- The orchestrator extracts required fields from validation rules
-- Welcome message includes questions about required fields
-- Information is collected upfront in batches
-
-### Key Files
-- `server/components/orchestrator.ts`: Contains `detectFlowMode()` function and flow-aware `processTurn()`/`getWelcomeMessage()` methods
-- `server/components/types.ts`: Defines `FlowMode` type
-
-## Action Simulation Feature
-Agent Studio supports action simulation, allowing AI agents to execute actions directly (e.g., adding dependents to health policies, updating employee records) without connecting to real APIs. This enables realistic testing of agent workflows.
-
-### How It Works
-1. **Configure Actions**: In the wizard's "Available Actions" step (step 7), users can auto-generate or manually define actions with required fields, categories (create, update, delete), confirmation messages, and success messages.
-2. **Set Up Mock User State**: Define mock user profiles with sample data that actions can reference and modify.
-3. **AI Executes Actions**: When users chat with the agent, the AI executes actions directly by outputting special action blocks in the format:
-   ```action
-   ACTION: action_name
-   FIELDS: {"field": "value"}
-   ```
-4. **State Updates**: The system parses action blocks, validates fields, executes simulated updates to mock state, and returns clean confirmation messages to users.
-
-### Key Files
-- `server/gemini.ts`: Contains `parseActionFromResponse()` and `executeSimulatedAction()` functions
-- `server/routes.ts`: Integrates action processing in chat message handlers (4 code paths)
-- `shared/schema.ts`: Defines `AgentAction` and `MockUserState` types
-- `/agents/{agent-id}/available-actions.json`: Stores configured actions for each agent
-- `/agents/{agent-id}/mock-user-state.json`: Stores mock user profile data for action simulation
+Agent Studio is a web application for the end-to-end creation, configuration, and management of AI agents. It provides an intuitive wizard interface for users to define essential AI agent parameters such as business use cases, domain knowledge, validation rules, guardrails, sample datasets, and simulated actions. The platform aims to streamline the development and deployment of tailored AI agents for various business needs, offering capabilities like AI-powered "Prompt Coach," automated topic switch detection, and direct action execution for realistic testing of agent workflows. The project's vision is to enable businesses to easily create and deploy highly customized AI agents, increasing efficiency and automating complex tasks.
 
 ## User Preferences
 - Using Google Gemini AI via Google AI Studio (API key authentication mode)
 - Requires GEMINI_API_KEY secret to be configured
 - GOOGLE_CLOUD_PROJECT and GOOGLE_CLOUD_LOCATION secrets are also stored but not currently used
 - Prompt generation uses only Google Gemini style (standardized)
-- **Test Login Credentials**: Username: `kengqui.chia@ukg.com` / Password: `123456`
-
-## Authentication System
-- **User Authentication**: Username/password registration with bcrypt password hashing
-- **Session Management**: Cookie-based sessions with 7-day expiration, httpOnly and sameSite=lax flags
-- **Password Reset**: Username-only verification - user enters username to verify account exists, then sets new password
-- **Agent Isolation**: Each user can only see and manage their own agents; agents are associated with userId
-- **Backward Compatibility**: Legacy agents without userId are accessible for migration purposes
-- **Protected Routes**: All agent-related routes (sessions, messages, traces, config-history) enforce ownership verification
-- **Storage**: Users stored in `/users/users.json` with file-based persistence
+- Test Login Credentials: Username: `kengqui.chia@ukg.com` / Password: `123456`
 
 ## System Architecture
 Agent Studio utilizes a modern web application architecture with a clear separation between frontend and backend.
 
 ### Frontend
 - **Tech Stack**: React, TypeScript, TanStack Query, Wouter, Tailwind CSS, Shadcn UI.
-- **UI/UX**: Features a professional tech theme with dark mode support. Uses Inter for sans-serif fonts and JetBrains Mono for code. The primary color scheme is purple (#8B5CF6).
+- **UI/UX**: Professional tech theme with dark mode, Inter for sans-serif fonts, JetBrains Mono for code. Primary color scheme is purple (#8B5CF6).
 - **Core Features**:
-    - **Agent Creation Wizard**: A 9-step process guiding users through defining agent parameters:
-        1. Business Use Case - Define the problem this agent solves
-        2. Agent Name - Name your agent
-        3. Domain Knowledge - Add knowledge and documents
-        4. Validation Rules - Set input/output validation rules
-        5. Guardrails - Define safety boundaries
-        6. Sample Data - Upload or generate sample data
-        7. Available Actions - Define actions agent can simulate
-        8. Validation Checklist - Review configuration quality (16 checks, auto-fix option)
-        9. Agent Prompt - Define your agent's prompt
-    - **Chat Interface**: For testing and interacting with configured agents, with the following features:
-        - **Session Management**: Multiple renamable sessions per agent for organizing test scenarios
-        - **Session Sidebar**: Collapsible sidebar showing all sessions with previews, message counts, and inline renaming
-        - **Context Progress Bar**: Compact header indicator showing context window fill level with color-coded status
-        - **Cancel Response**: Ability to cancel AI responses mid-generation
-        - **Mock Mode Toggle**: Enable/disable mock mode for testing
+    - **Agent Creation Wizard**: A 10-step process for defining agent parameters, including: Business Use Case, Agent Name, Domain Knowledge, Validation Rules, Guardrails, Sample Data, Available Actions (for simulation), Validation Checklist (16 automated checks with auto-fix), Agent Prompt, and Welcome Screen (AI-generated greeting and suggested prompts).
+    - **Chat Interface**: For testing agents, featuring multiple renamable sessions, a collapsible session sidebar, a context progress bar, and the ability to cancel AI responses.
     - **Agent Management**: Pages for listing, editing, and deleting agents.
-    - **AI-Powered Prompt Generation**: System prompts are automatically generated using Google Gemini AI with a meta-prompt that follows prompt engineering best practices. The AI curates domain knowledge, embeds validation rules naturally, makes guardrails enforceable, and determines appropriate output formats based on the use case. Users can optionally customize the generated prompt.
-    - **Smart Generation**: AI evaluates context and engages in clarifying questions when necessary to gather sufficient information for generating validation rules or guardrails.
+    - **AI-Powered Prompt Generation**: System prompts are automatically generated using Google Gemini AI, curating domain knowledge, embedding validation rules, enforcing guardrails, and determining output formats based on the use case.
+    - **Smart Generation**: AI evaluates context and asks clarifying questions for generating validation rules or guardrails.
     - **Smart Content Extractor**: Automatically extracts business case information from uploaded domain documents.
+    - **Prompt Coach**: An AI-powered chatbot that analyzes agent configuration and suggests improvements through conversational interaction, with "Apply" buttons to update the configuration directly.
 
 ### Backend
 - **Tech Stack**: Node.js, Express.js.
@@ -110,41 +31,27 @@ Agent Studio utilizes a modern web application architecture with a clear separat
     - **Agent API**: CRUD operations for agents, chat messages, and session management.
     - **Document Upload API**: For handling domain knowledge documents.
     - **AI Generation APIs**: Endpoints for generating system prompts, validation rules, guardrails, and sample data using Google Gemini.
-    - **Recovery Manager**: Component for handling error recovery and guardrail conflict detection, escalating to human support when needed.
+    - **Recovery Manager**: Handles error recovery and guardrail conflict detection.
     - **Turn Management**: Modular, per-agent component architecture for intent detection and conversational flow.
-    - **Enhanced Prompt Processing**: Uses placeholder markers (`{{MARKER_NAME}}`) for dynamic content replacement in prompts.
+    - **Enhanced Prompt Processing**: Uses placeholder markers (`{{MARKER_NAME}}`) for dynamic content replacement.
+    - **Flow Mode Detection**: Orchestrator automatically detects "infer-first" or "ask-first" conversation flow based on the agent's custom prompt.
+    - **Action Simulation**: Allows AI agents to execute actions directly by outputting special action blocks, updating mock user state without connecting to real APIs.
+
+### Authentication System
+- **User Authentication**: Username/password registration with bcrypt hashing.
+- **Session Management**: Cookie-based sessions with 7-day expiration.
+- **Password Reset**: Username-only verification for password reset.
+- **Agent Isolation**: Each user can only manage their own agents.
+- **Protected Routes**: All agent-related routes enforce ownership verification.
+- **Data Persistence**: Users stored in `/users/users.json`.
 
 ### Agent Component Templates
-- **Template System**: Agent components (TurnManager, FlowController, Orchestrator) are generated from templates in `/server/templates/agent-components/`.
-- **How it works**: When a new agent is created, the template files are copied to `/agents/{agent-id}/components/` with placeholder values replaced (e.g., `{{AGENT_NAME}}`, `{{CLASS_NAME}}`).
-- **CRITICAL RULE**: When adding new features to agent components, you **MUST** also update the corresponding template files so that newly created agents automatically receive those features.
-  - Template files: `turn-manager.template.ts`, `flow-controller.template.ts`, `orchestrator.template.ts`, `index.template.ts`
-  - To add a new component: Create a new `.template.ts` file, update `index.template.ts` to export it, and update the `copyComponentTemplates()` function in `server/storage.ts` to copy it.
-- **See**: `/server/templates/agent-components/README.md` for detailed instructions.
+- **Template System**: Agent components (TurnManager, FlowController, Orchestrator) are generated from templates in `/server/templates/agent-components/`. When a new agent is created, these templates are copied to `/agents/{agent-id}/components/` with placeholders replaced. New features for agent components **MUST** be added to the corresponding template files.
 
 ### Data Persistence
-- **Agent Configuration**: Each agent's configuration is stored in a dedicated folder (`/agents/{agent-id}/`) using a multi-file structure for modularity:
-  - `meta.yaml` - Agent metadata (name, dates, userId)
-  - `business-use-case.md` - Business use case description
-  - `domain-knowledge.md` - Domain knowledge content
-  - `validation-rules.yaml` - Validation rules configuration
-  - `guardrails.yaml` - Guardrails configuration
-  - `custom-prompt.md` - Custom system prompt
-  - `domain-documents.json` - Uploaded domain documents
-  - `sample-data.json` - Sample data for testing
-  - `sessions.json` - List of chat session records
-  - `available-actions.json` - Configured actions for simulation
-  - `mock-user-state.json` - Mock user profile data for action simulation
-  - `clarifying-insights.json` - AI clarification flow data
-  - `traces.json` - Agent interaction traces for debugging
-  - `components/` - Generated agent component files (TurnManager, FlowController, Orchestrator)
-- **Per-Session Message Storage**: Chat messages are stored in individual session files at `/agents/{agent-id}/sessions/{session-id}/messages.json`. This architecture:
-  - Enables independent experiment threads per session
-  - Supports session isolation for testing different scenarios
-  - Includes automatic migration from legacy single-file `chat.json` format
-  - Provides cross-session message queries sorted by timestamp
-  - Cleans up orphaned session folders during clear operations
-- **In-memory storage**: Utilizes nested Maps (`Map<agentId, Map<sessionId, ChatMessage[]>>`) for transient data, with persistence to YAML/JSON files.
+- **Agent Configuration**: Stored in dedicated folders (`/agents/{agent-id}/`) with a multi-file structure (e.g., `meta.yaml`, `business-use-case.md`, `validation-rules.yaml`, `custom-prompt.md`, `available-actions.json`).
+- **Per-Session Message Storage**: Chat messages stored in individual session files (`/agents/{agent-id}/sessions/{session-id}/messages.json`) for independent experiment threads and session isolation.
+- **In-memory storage**: Utilizes nested Maps for transient data, persisted to YAML/JSON files.
 
 ## External Dependencies
 - **Google Gemini AI**: Used for generating agent responses, system prompts, validation rules, guardrails, and sample data.
