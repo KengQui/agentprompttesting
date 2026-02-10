@@ -204,6 +204,76 @@
         }
       ],
       "success": true
+    },
+    {
+      "id": "trace-1770742509808",
+      "sessionId": "34ad2e27-74b7-4662-a1e4-5335180eaa5b",
+      "userInput": "hello",
+      "agentResponse": "There are two employees that match the name \"Susan\": Susan Jones (ID: E12345) and Susanne Jones (ID: E67890). Could you please clarify which employee you're referring to?",
+      "startTime": "2026-02-10T16:55:08.952Z",
+      "endTime": "2026-02-10T16:55:09.808Z",
+      "totalDuration": 856,
+      "entries": [
+        {
+          "id": "entry-1770742508953-1",
+          "type": "intent_classification",
+          "name": "Orchestrator Intent Classification",
+          "timestamp": "2026-02-10T16:55:08.953Z",
+          "metadata": {
+            "intent": "answer_question",
+            "classificationMethod": "orchestrator",
+            "confidence": "high"
+          }
+        },
+        {
+          "id": "entry-1770742509808-3",
+          "type": "llm_call",
+          "name": "Gemini Response Generation",
+          "timestamp": "2026-02-10T16:55:09.808Z",
+          "duration": 855,
+          "metadata": {
+            "model": "gemini",
+            "intent": "answer_question",
+            "validated": true
+          }
+        }
+      ],
+      "success": true
+    },
+    {
+      "id": "trace-1770742557901",
+      "sessionId": "34ad2e27-74b7-4662-a1e4-5335180eaa5b",
+      "userInput": "ping for typing indicator",
+      "agentResponse": "Before we move on, could you please clarify which employee you're referring to? There are two employees that match the name \"Susan\": Susan Jones (ID: E12345) and Susanne Jones (ID: E67890).",
+      "startTime": "2026-02-10T16:55:56.524Z",
+      "endTime": "2026-02-10T16:55:57.901Z",
+      "totalDuration": 1377,
+      "entries": [
+        {
+          "id": "entry-1770742557032-1",
+          "type": "intent_classification",
+          "name": "Orchestrator Intent Classification",
+          "timestamp": "2026-02-10T16:55:57.032Z",
+          "metadata": {
+            "intent": "answer_question",
+            "classificationMethod": "orchestrator",
+            "confidence": "high"
+          }
+        },
+        {
+          "id": "entry-1770742557901-3",
+          "type": "llm_call",
+          "name": "Gemini Response Generation",
+          "timestamp": "2026-02-10T16:55:57.901Z",
+          "duration": 869,
+          "metadata": {
+            "model": "gemini",
+            "intent": "answer_question",
+            "validated": true
+          }
+        }
+      ],
+      "success": true
     }
   ],
   "stats": {
@@ -212,16 +282,16 @@
     },
     "signalReads": {},
     "intentDistribution": {
-      "answer_question": 6
+      "answer_question": 8
     },
     "classificationMethods": {
-      "orchestrator": 6
+      "orchestrator": 8
     },
-    "avgResponseTime": 401.3333333333333,
-    "totalLlmCalls": 2,
+    "avgResponseTime": 580.125,
+    "totalLlmCalls": 4,
     "totalTokensUsed": 0,
     "errorCount": 0
   },
   "createdAt": "2026-02-05T20:48:26.888Z",
-  "updatedAt": "2026-02-06T02:07:26.635Z"
+  "updatedAt": "2026-02-10T16:55:57.901Z"
 }

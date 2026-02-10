@@ -118,26 +118,24 @@ function TypingIndicator({ onCancel }: { onCancel?: () => void }) {
       <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-muted">
         <Bot className="h-4 w-4" />
       </div>
-      <div className="bg-muted rounded-lg px-4 py-3">
-        <div className="flex items-center gap-3">
-          <div className="flex gap-1">
-            <div className="w-2 h-2 bg-muted-foreground/50 rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
-            <div className="w-2 h-2 bg-muted-foreground/50 rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
-            <div className="w-2 h-2 bg-muted-foreground/50 rounded-full animate-bounce" style={{ animationDelay: "300ms" }} />
-          </div>
-          {onCancel && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={onCancel}
-              className="h-6 px-2 text-xs text-muted-foreground"
-              data-testid="button-cancel-response"
-            >
-              <X className="h-3 w-3 mr-1" />
-              Cancel
-            </Button>
-          )}
+      <div className="flex items-center gap-3 py-2">
+        <div className="flex gap-1">
+          <div className="w-2 h-2 bg-muted-foreground/50 rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
+          <div className="w-2 h-2 bg-muted-foreground/50 rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
+          <div className="w-2 h-2 bg-muted-foreground/50 rounded-full animate-bounce" style={{ animationDelay: "300ms" }} />
         </div>
+        {onCancel && (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onCancel}
+            className="text-xs text-muted-foreground"
+            data-testid="button-cancel-response"
+          >
+            <X className="h-3 w-3 mr-1" />
+            Cancel
+          </Button>
+        )}
       </div>
     </div>
   );
