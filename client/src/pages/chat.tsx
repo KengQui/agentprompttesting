@@ -27,6 +27,13 @@ function stripActionBlocks(text: string): string {
   return cleaned.trim();
 }
 
+// PROTOTYPE ONLY: Split-bubble animation for column creation.
+// This simulates a "processing" step between documentation and column confirmation
+// by splitting the AI response into two message bubbles with typing dots in between.
+// This is a UI-only effect for the Agent Studio testing interface.
+// For production HCM integration: the agent prompt already outputs these as distinct
+// logical steps (documentation → confirmation → suggestions). Your product UI can
+// insert its own processing animation (spinner, progress bar, etc.) between them.
 function splitColumnBuildResponse(content: string): { before: string; after: string } | null {
   const buildMarker = /I'll now add this as a new column to your report\./i;
   const match = content.match(buildMarker);
@@ -65,6 +72,10 @@ function AssistantBubble({ content, timestamp, testId }: { content: string; time
   );
 }
 
+// PROTOTYPE ONLY: Animated split-bubble display.
+// Shows the first part of the response, then typing dots (simulating processing),
+// then the second part. Timing: 800ms delay before dots, 2000ms dots duration.
+// For production: replace with your product's native loading/processing UI pattern.
 function SplitMessageBubbles({ message, before, after }: { message: ChatMessage; before: string; after: string }) {
   const [phase, setPhase] = useState<"before" | "typing" | "after">("before");
   const hasAnimated = useRef(false);
@@ -117,6 +128,8 @@ function MessageBubble({ message, agentId }: { message: ChatMessage; agentId?: s
   const isUser = message.role === "user";
   const displayContent = isUser ? message.content : stripActionBlocks(message.content);
 
+  // PROTOTYPE ONLY: Apply split-bubble animation for HCM Expression Builder agent only.
+  // This creates a simulated "processing" effect between documentation and confirmation.
   const isHcmAgent = agentId === HCM_EXPRESSION_BUILDER_AGENT_ID;
   const splitResult = !isUser && isHcmAgent ? splitColumnBuildResponse(displayContent) : null;
 
