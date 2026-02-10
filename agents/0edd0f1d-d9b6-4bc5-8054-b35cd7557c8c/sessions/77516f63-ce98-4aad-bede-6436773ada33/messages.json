@@ -1,0 +1,18 @@
+[
+  {
+    "id": "2adaa078-bbe8-467a-ad58-f2a6459c5155",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "sessionId": "77516f63-ce98-4aad-bede-6436773ada33",
+    "role": "user",
+    "content": "Create a column that adds the Scheduled EE Amount and Scheduled ER Amount",
+    "timestamp": "2026-02-10T16:47:06.721Z"
+  },
+  {
+    "id": "64a15f70-a254-45c7-bc92-35e4eb3c01a4",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "sessionId": "77516f63-ce98-4aad-bede-6436773ada33",
+    "role": "assistant",
+    "content": "I can help with that. I will create a column that adds the Scheduled EE Amount and the Scheduled ER Amount.\n\nHere is the expression:\n```\nAdd(Value([Scheduled EE Amount]), Value([Scheduled ER Amount]))\n```\n\nThis expression will produce an **Amount** output.\n\nWould you like me to validate this logic against a few rows from your report data?",
+    "timestamp": "2026-02-10T16:47:07.790Z"
+  }
+]
