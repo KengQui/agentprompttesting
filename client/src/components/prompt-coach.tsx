@@ -20,6 +20,7 @@ interface CoachMessage {
   content: string;
   suggestedChanges?: SuggestedChange[];
   appliedChanges?: Set<number>;
+  timestamp?: string;
 }
 
 interface PromptCoachProps {
@@ -68,6 +69,7 @@ export function PromptCoachPanel({ agentId, agentName, onClose }: { agentId: str
       content: m.content,
       suggestedChanges: m.suggestedChanges,
       appliedChanges: m.appliedChanges ? Array.from(m.appliedChanges) : undefined,
+      timestamp: m.timestamp || new Date().toISOString(),
     }));
   }, []);
 
@@ -77,6 +79,7 @@ export function PromptCoachPanel({ agentId, agentName, onClose }: { agentId: str
       content: m.content,
       suggestedChanges: m.suggestedChanges,
       appliedChanges: m.appliedChanges ? new Set(m.appliedChanges) : undefined,
+      timestamp: m.timestamp,
     }));
   }, []);
 
@@ -125,6 +128,7 @@ export function PromptCoachPanel({ agentId, agentName, onClose }: { agentId: str
         {
           role: "assistant",
           content: `Hi! I'm your Prompt Coach for **${agentName}**. I can help you improve your agent's configuration — things like the business use case, domain knowledge, validation rules, and guardrails.\n\nWhat would you like to improve? Or say **"review my agent"** and I'll analyze your current setup.`,
+          timestamp: new Date().toISOString(),
         },
       ]);
       setIsLoadingHistory(false);
@@ -145,7 +149,8 @@ export function PromptCoachPanel({ agentId, agentName, onClose }: { agentId: str
 
     const userMessage = input.trim();
     setInput("");
-    const updatedWithUser = [...messages, { role: "user" as const, content: userMessage }];
+    const now = new Date().toISOString();
+    const updatedWithUser = [...messages, { role: "user" as const, content: userMessage, timestamp: now }];
     setMessages(updatedWithUser);
     setIsLoading(true);
 
@@ -162,6 +167,7 @@ export function PromptCoachPanel({ agentId, agentName, onClose }: { agentId: str
         content: result.message,
         suggestedChanges: result.suggestedChanges,
         appliedChanges: new Set(),
+        timestamp: new Date().toISOString(),
       };
       const finalMessages = [...updatedWithUser, assistantMsg];
       setMessages(finalMessages);
@@ -170,6 +176,7 @@ export function PromptCoachPanel({ agentId, agentName, onClose }: { agentId: str
       const errorMsg: CoachMessage = {
         role: "assistant",
         content: "Sorry, I ran into an issue. Could you try again?",
+        timestamp: new Date().toISOString(),
       };
       const finalMessages = [...updatedWithUser, errorMsg];
       setMessages(finalMessages);
@@ -244,6 +251,7 @@ export function PromptCoachPanel({ agentId, agentName, onClose }: { agentId: str
                   {
                     role: "assistant",
                     content: `Hi! I'm your Prompt Coach for **${agentName}**. I can help you improve your agent's configuration — things like the business use case, domain knowledge, validation rules, and guardrails.\n\nWhat would you like to improve? Or say **"review my agent"** and I'll analyze your current setup.`,
+                    timestamp: new Date().toISOString(),
                   },
                 ]);
               }}
@@ -268,7 +276,7 @@ export function PromptCoachPanel({ agentId, agentName, onClose }: { agentId: str
           {!isLoadingHistory && messages.length > 1 && (
             <div className="flex items-center gap-1.5 text-xs text-muted-foreground px-1" data-testid="text-coach-expiry-warning">
               <Clock className="h-3 w-3 shrink-0" />
-              <span>Chat history older than 2 weeks is automatically cleared.</span>
+              <span>Individual messages older than 2 weeks are automatically removed.</span>
             </div>
           )}
           {isLoadingHistory ? (

@@ -1366,18 +1366,23 @@ export class MemStorage implements IStorage {
     const filePath = getPromptCoachPath(agentId);
     const data = readJsonFile<any>(filePath, null);
     if (!data) return [];
-    const savedAt = data.savedAt;
     const messages = data.messages || (Array.isArray(data) ? data : []);
-    if (savedAt) {
-      const twoWeeksMs = 14 * 24 * 60 * 60 * 1000;
-      if (Date.now() - new Date(savedAt).getTime() > twoWeeksMs) {
-        if (fs.existsSync(filePath)) {
-          fs.unlinkSync(filePath);
-        }
-        return [];
+    const twoWeeksMs = 14 * 24 * 60 * 60 * 1000;
+    const cutoff = Date.now() - twoWeeksMs;
+    const filtered = messages.filter((m: any) => {
+      if (!m.timestamp) return true;
+      return new Date(m.timestamp).getTime() > cutoff;
+    });
+    if (filtered.length === 0 && messages.length > 0) {
+      if (fs.existsSync(filePath)) {
+        fs.unlinkSync(filePath);
       }
+      return [];
     }
-    return messages;
+    if (filtered.length < messages.length) {
+      writeJsonFile(filePath, { messages: filtered, savedAt: new Date().toISOString() });
+    }
+    return filtered;
   }
 
   async savePromptCoachHistory(agentId: string, messages: any[]): Promise<void> {
