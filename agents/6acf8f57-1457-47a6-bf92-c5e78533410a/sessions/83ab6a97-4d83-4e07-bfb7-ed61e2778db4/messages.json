@@ -14,5 +14,85 @@
     "role": "assistant",
     "content": "I don't see an employee named Andrew in the system. Could you double-check the name or provide their employee ID so I can look them up?",
     "timestamp": "2026-02-10T16:56:48.129Z"
+  },
+  {
+    "id": "e5cff017-a810-45ac-b0c7-f9e009341e5e",
+    "agentId": "6acf8f57-1457-47a6-bf92-c5e78533410a",
+    "sessionId": "83ab6a97-4d83-4e07-bfb7-ed61e2778db4",
+    "role": "user",
+    "content": "Susan called in sick",
+    "timestamp": "2026-02-10T16:57:18.115Z"
+  },
+  {
+    "id": "bf795804-4951-4252-ba08-6c3d9c432a0b",
+    "agentId": "6acf8f57-1457-47a6-bf92-c5e78533410a",
+    "sessionId": "83ab6a97-4d83-4e07-bfb7-ed61e2778db4",
+    "role": "assistant",
+    "content": "Before we move on to your new request, I need to clarify who you were referring to earlier. I don't see an employee named Andrew in the system. Could you double-check the name or provide their employee ID so I can look them up?\n\nRegarding Susan's call-in, there are two employees with similar names: Susan Jones (ID: E12345) or Susanne Jones (ID: E67890). Which one are you referring to?",
+    "timestamp": "2026-02-10T16:57:19.871Z"
+  },
+  {
+    "id": "475c8e38-5162-4e9c-a310-23c0d3627be6",
+    "agentId": "6acf8f57-1457-47a6-bf92-c5e78533410a",
+    "sessionId": "83ab6a97-4d83-4e07-bfb7-ed61e2778db4",
+    "role": "user",
+    "content": "Susan Jones",
+    "timestamp": "2026-02-10T16:57:32.759Z"
+  },
+  {
+    "id": "7fcc48b9-c9e1-4377-a873-80ab2192c7a2",
+    "agentId": "6acf8f57-1457-47a6-bf92-c5e78533410a",
+    "sessionId": "83ab6a97-4d83-4e07-bfb7-ed61e2778db4",
+    "role": "assistant",
+    "content": "OK. And for what date and time was Susan Jones scheduled to work?",
+    "timestamp": "2026-02-10T16:57:33.828Z"
+  },
+  {
+    "id": "4f29eff3-6226-4cac-b392-a89b76659f68",
+    "agentId": "6acf8f57-1457-47a6-bf92-c5e78533410a",
+    "sessionId": "83ab6a97-4d83-4e07-bfb7-ed61e2778db4",
+    "role": "user",
+    "content": "today",
+    "timestamp": "2026-02-10T16:57:40.680Z"
+  },
+  {
+    "id": "029851a9-aa63-486b-8ec2-be46a4b99b59",
+    "agentId": "6acf8f57-1457-47a6-bf92-c5e78533410a",
+    "sessionId": "83ab6a97-4d83-4e07-bfb7-ed61e2778db4",
+    "role": "assistant",
+    "content": "I found one shift for Susan Jones (ID: E12345) today, February 10, 2026, from 09:00 to 15:00. Is this the shift you are referring to?",
+    "timestamp": "2026-02-10T16:57:42.121Z"
+  },
+  {
+    "id": "d0b2538e-0c7e-4f42-a02d-caedf9fe3e83",
+    "agentId": "6acf8f57-1457-47a6-bf92-c5e78533410a",
+    "sessionId": "83ab6a97-4d83-4e07-bfb7-ed61e2778db4",
+    "role": "user",
+    "content": "yes",
+    "timestamp": "2026-02-10T16:57:48.666Z"
+  },
+  {
+    "id": "c12c620d-3e62-46b2-8ba4-d4e743cf84d6",
+    "agentId": "6acf8f57-1457-47a6-bf92-c5e78533410a",
+    "sessionId": "83ab6a97-4d83-4e07-bfb7-ed61e2778db4",
+    "role": "assistant",
+    "content": "How should Susan Jones' absence be coded: PTO, Sick Leave, or Unpaid?",
+    "timestamp": "2026-02-10T16:57:49.353Z"
+  },
+  {
+    "id": "5150be87-c3db-496c-ba0b-b4ad78d0e373",
+    "agentId": "6acf8f57-1457-47a6-bf92-c5e78533410a",
+    "sessionId": "83ab6a97-4d83-4e07-bfb7-ed61e2778db4",
+    "role": "user",
+    "content": "what is PTO",
+    "timestamp": "2026-02-10T16:57:58.994Z"
+  },
+  {
+    "id": "ee5cba56-e63c-4ddf-ab09-32e9a454711d",
+    "agentId": "6acf8f57-1457-47a6-bf92-c5e78533410a",
+    "sessionId": "83ab6a97-4d83-4e07-bfb7-ed61e2778db4",
+    "role": "assistant",
+    "content": "PTO stands for Paid Time Off. Would you like Susan Jones' absence to be coded as PTO, Sick Leave, or Unpaid?",
+    "timestamp": "2026-02-10T16:58:00.052Z"
   }
 ]

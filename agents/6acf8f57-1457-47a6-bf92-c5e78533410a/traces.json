@@ -309,6 +309,181 @@
         }
       ],
       "success": true
+    },
+    {
+      "id": "trace-1770742639870",
+      "sessionId": "83ab6a97-4d83-4e07-bfb7-ed61e2778db4",
+      "userInput": "Susan called in sick",
+      "agentResponse": "Before we move on to your new request, I need to clarify who you were referring to earlier. I don't see an employee named Andrew in the system. Could you double-check the name or provide their employee ID so I can look them up?\n\nRegarding Susan's call-in, there are two employees with similar names: Susan Jones (ID: E12345) or Susanne Jones (ID: E67890). Which one are you referring to?",
+      "startTime": "2026-02-10T16:57:18.115Z",
+      "endTime": "2026-02-10T16:57:19.870Z",
+      "totalDuration": 1755,
+      "entries": [
+        {
+          "id": "entry-1770742638586-1",
+          "type": "intent_classification",
+          "name": "Orchestrator Intent Classification",
+          "timestamp": "2026-02-10T16:57:18.586Z",
+          "metadata": {
+            "intent": "answer_question",
+            "classificationMethod": "orchestrator",
+            "confidence": "high"
+          }
+        },
+        {
+          "id": "entry-1770742639870-3",
+          "type": "llm_call",
+          "name": "Gemini Response Generation",
+          "timestamp": "2026-02-10T16:57:19.870Z",
+          "duration": 1284,
+          "metadata": {
+            "model": "gemini",
+            "intent": "answer_question",
+            "validated": true
+          }
+        }
+      ],
+      "success": true
+    },
+    {
+      "id": "trace-1770742653827",
+      "sessionId": "83ab6a97-4d83-4e07-bfb7-ed61e2778db4",
+      "userInput": "Susan Jones",
+      "agentResponse": "OK. And for what date and time was Susan Jones scheduled to work?",
+      "startTime": "2026-02-10T16:57:32.759Z",
+      "endTime": "2026-02-10T16:57:33.827Z",
+      "totalDuration": 1068,
+      "entries": [
+        {
+          "id": "entry-1770742653143-1",
+          "type": "intent_classification",
+          "name": "Orchestrator Intent Classification",
+          "timestamp": "2026-02-10T16:57:33.143Z",
+          "metadata": {
+            "intent": "answer_question",
+            "classificationMethod": "orchestrator",
+            "confidence": "high"
+          }
+        },
+        {
+          "id": "entry-1770742653827-3",
+          "type": "llm_call",
+          "name": "Gemini Response Generation",
+          "timestamp": "2026-02-10T16:57:33.827Z",
+          "duration": 684,
+          "metadata": {
+            "model": "gemini",
+            "intent": "answer_question",
+            "validated": true
+          }
+        }
+      ],
+      "success": true
+    },
+    {
+      "id": "trace-1770742662120",
+      "sessionId": "83ab6a97-4d83-4e07-bfb7-ed61e2778db4",
+      "userInput": "today",
+      "agentResponse": "I found one shift for Susan Jones (ID: E12345) today, February 10, 2026, from 09:00 to 15:00. Is this the shift you are referring to?",
+      "startTime": "2026-02-10T16:57:40.680Z",
+      "endTime": "2026-02-10T16:57:42.120Z",
+      "totalDuration": 1440,
+      "entries": [
+        {
+          "id": "entry-1770742661176-1",
+          "type": "intent_classification",
+          "name": "Orchestrator Intent Classification",
+          "timestamp": "2026-02-10T16:57:41.176Z",
+          "metadata": {
+            "intent": "answer_question",
+            "classificationMethod": "orchestrator",
+            "confidence": "high"
+          }
+        },
+        {
+          "id": "entry-1770742662120-3",
+          "type": "llm_call",
+          "name": "Gemini Response Generation",
+          "timestamp": "2026-02-10T16:57:42.120Z",
+          "duration": 944,
+          "metadata": {
+            "model": "gemini",
+            "intent": "answer_question",
+            "validated": true
+          }
+        }
+      ],
+      "success": true
+    },
+    {
+      "id": "trace-1770742669352",
+      "sessionId": "83ab6a97-4d83-4e07-bfb7-ed61e2778db4",
+      "userInput": "yes",
+      "agentResponse": "How should Susan Jones' absence be coded: PTO, Sick Leave, or Unpaid?",
+      "startTime": "2026-02-10T16:57:48.665Z",
+      "endTime": "2026-02-10T16:57:49.352Z",
+      "totalDuration": 687,
+      "entries": [
+        {
+          "id": "entry-1770742668666-1",
+          "type": "intent_classification",
+          "name": "Orchestrator Intent Classification",
+          "timestamp": "2026-02-10T16:57:48.666Z",
+          "metadata": {
+            "intent": "answer_question",
+            "classificationMethod": "orchestrator",
+            "confidence": "high"
+          }
+        },
+        {
+          "id": "entry-1770742669352-3",
+          "type": "llm_call",
+          "name": "Gemini Response Generation",
+          "timestamp": "2026-02-10T16:57:49.352Z",
+          "duration": 686,
+          "metadata": {
+            "model": "gemini",
+            "intent": "answer_question",
+            "validated": true
+          }
+        }
+      ],
+      "success": true
+    },
+    {
+      "id": "trace-1770742680051",
+      "sessionId": "83ab6a97-4d83-4e07-bfb7-ed61e2778db4",
+      "userInput": "what is PTO",
+      "agentResponse": "PTO stands for Paid Time Off. Would you like Susan Jones' absence to be coded as PTO, Sick Leave, or Unpaid?",
+      "startTime": "2026-02-10T16:57:58.994Z",
+      "endTime": "2026-02-10T16:58:00.051Z",
+      "totalDuration": 1057,
+      "entries": [
+        {
+          "id": "entry-1770742679403-1",
+          "type": "intent_classification",
+          "name": "Orchestrator Intent Classification",
+          "timestamp": "2026-02-10T16:57:59.403Z",
+          "metadata": {
+            "intent": "answer_question",
+            "classificationMethod": "orchestrator",
+            "confidence": "high"
+          }
+        },
+        {
+          "id": "entry-1770742680051-3",
+          "type": "llm_call",
+          "name": "Gemini Response Generation",
+          "timestamp": "2026-02-10T16:58:00.051Z",
+          "duration": 648,
+          "metadata": {
+            "model": "gemini",
+            "intent": "answer_question",
+            "validated": true
+          }
+        }
+      ],
+      "success": true
     }
   ],
   "stats": {
@@ -317,16 +492,16 @@
     },
     "signalReads": {},
     "intentDistribution": {
-      "answer_question": 9
+      "answer_question": 14
     },
     "classificationMethods": {
-      "orchestrator": 9
+      "orchestrator": 14
     },
-    "avgResponseTime": 593.5555555555555,
-    "totalLlmCalls": 5,
+    "avgResponseTime": 810.6428571428571,
+    "totalLlmCalls": 10,
     "totalTokensUsed": 0,
     "errorCount": 0
   },
   "createdAt": "2026-02-05T20:48:26.888Z",
-  "updatedAt": "2026-02-10T16:56:48.128Z"
+  "updatedAt": "2026-02-10T16:58:00.051Z"
 }
