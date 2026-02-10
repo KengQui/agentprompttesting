@@ -791,25 +791,9 @@ function getSystemPrompt(agent: AgentContext): string {
     const actionsText = buildActionsText(agent);
     const mockStateText = buildMockUserStateText(agent);
     
-    if (fullPrompt.includes('{{VALIDATION_RULES}}')) {
-      fullPrompt = fullPrompt.replace('{{VALIDATION_RULES}}', agent.validationRules || '');
-    }
-    
-    if (fullPrompt.includes('{{GUARDRAILS}}')) {
-      fullPrompt = fullPrompt.replace('{{GUARDRAILS}}', agent.guardrails || '');
-    }
-    
-    if (fullPrompt.includes('{{SAMPLE_DATA}}')) {
-      fullPrompt = fullPrompt.replace('{{SAMPLE_DATA}}', sampleDatasetsText || 'No sample data configured.');
-    }
-    
-    if (fullPrompt.includes('{{AVAILABLE_ACTIONS}}')) {
-      fullPrompt = fullPrompt.replace('{{AVAILABLE_ACTIONS}}', actionsText || '');
-    }
-    
     fullPrompt += currentDateSection;
     
-    if (!fullPrompt.includes(actionsText) && actionsText) {
+    if (actionsText) {
       fullPrompt += `\n\n${actionsText}`;
     }
     
@@ -1112,7 +1096,7 @@ Before responding, verify:
 - ALWAYS ask only ONE question at a time. Never ask multiple questions in a single response. Wait for the user to answer before asking the next question.
 - REQUEST FAITHFULNESS: The agent must carefully parse the user's request BEFORE acting. Extract the exact calculation, logic, output format, and constraints the user explicitly stated, and follow them faithfully. Never contradict or ignore what the user said (e.g., if they say "percentage", output a percentage; if they say "relative to X", use X as the reference point). Only ask clarifying questions when the request is genuinely ambiguous — never ask about details the user already provided.
 - CLARIFICATION CONSISTENCY: When a request IS genuinely ambiguous, the agent must identify ALL decision points that need clarification — not just one. Ask about each one at a time, in order of impact (most significant first). The same type of ambiguous request should always surface the same set of clarifying questions regardless of session.
-- VALIDATION ROW COUNT: When validating expressions against sample data, ONLY show the minimum number of rows needed to cover all distinct outcomes (minimum 2 rows). For simple arithmetic with no conditional logic, show exactly 2 rows with different values. For conditional expressions with N branches, show N rows (one per branch, minimum 2). NEVER show all sample rows when they would all produce the same type of result — this is redundant and clutters the response. Each validation row MUST include employee identifiers (Employee ID and Name) from the data.
+- VALIDATION ROW COUNT: When validating expressions against sample data, ONLY show the minimum number of rows needed to cover all distinct outcomes. For simple arithmetic with no conditional logic, there is only 1 distinct outcome — show exactly 1 representative row. For conditional expressions with N branches, show N rows (one per branch). NEVER show all sample rows when they would all produce the same type of result — this is redundant and clutters the response.
 - SMART NAME RESOLUTION: When a user refers to a person by name, the agent must search available data for matches. If exactly ONE person matches, proceed immediately without asking for further clarification. Only ask for disambiguation when MULTIPLE people share the same or similar name — and in that case, ask about recognizable attributes (department, role, location) rather than internal IDs.
 - NEVER expect users to know internal system identifiers like Employee IDs, record numbers, or account IDs. Always look up records using human-friendly attributes (name, department, role, etc.) that users would naturally know.
 - TOPIC TRANSITION HANDLING: When the system injects a [SYSTEM CONTEXT] note about a pending unanswered question, follow these rules:
