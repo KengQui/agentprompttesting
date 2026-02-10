@@ -14,6 +14,7 @@ import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { ContextProgressBar } from "@/components/context-progress-bar";
 import { SessionSidebar } from "@/components/session-sidebar";
+import { PromptCoach } from "@/components/prompt-coach";
 import type { Agent, ChatMessage, ChatSession, ChatSessionWithPreview, WelcomeConfig } from "@shared/schema";
 
 const MAX_MESSAGE_LENGTH = 2000;
@@ -723,6 +724,8 @@ export default function Chat() {
           </div>
         </div>
       </div>
+
+      <PromptCoach agentId={params.id!} agentName={agent.name} />
     </div>
   );
 }

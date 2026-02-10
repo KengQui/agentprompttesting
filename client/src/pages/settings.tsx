@@ -47,6 +47,7 @@ import { TracingDashboard, SimulationPanel, ConfigHistoryPanel } from "@/compone
 import type { Agent, UpdateAgent, AgentStatus, DomainDocument, SampleDataset, GeminiModel, AgentAction, MockUserState, MockMode, ActionField, ClarifyingInsight, WelcomeConfig, WelcomePrompt } from "@shared/schema";
 import { geminiModelDisplayNames, defaultGenerationModel, mockModeDescriptions } from "@shared/schema";
 import { ClarifyingChatDialog } from "@/components/clarifying-chat-dialog";
+import { PromptCoach } from "@/components/prompt-coach";
 
 interface ExtractionResult {
   extractedContent: string;
@@ -3663,6 +3664,8 @@ export default function SettingsPage() {
         initialQuestion={guardrailsInitialQuestion}
         onComplete={handleGuardrailsChatComplete}
       />
+
+      {agent && <PromptCoach agentId={params.id!} agentName={agent.name} />}
     </div>
   );
 }

@@ -29,7 +29,7 @@ async function requireAuth(req: AuthenticatedRequest, res: Response, next: NextF
   req.user = user;
   next();
 }
-import { generateAgentResponse, generateValidationRules, generateGuardrails, generateSystemPrompt, generateSampleData, evaluateContextSufficiency, processClarifyingChat, generateValidationRulesWithInsights, generateGuardrailsWithInsights, generateActionsAndMockData, parseActionFromResponse, stripActionBlocks, executeSimulatedAction, executeActionWithSampleData, extractBusinessCaseContent, sampleDatasetsToWorkingData, workingDataToSampleDatasets, generateWelcomeConfig, extractPendingQuestion, detectTopicSwitch, type GenerationContext, type SystemPromptContext, type SampleDataGenerationContext, type ClarifyingChatContext, type ActionsGenerationContext, type ExtractionResult, type WelcomeConfigGenerationContext } from "./gemini";
+import { generateAgentResponse, generateValidationRules, generateGuardrails, generateSystemPrompt, generateSampleData, evaluateContextSufficiency, processClarifyingChat, generateValidationRulesWithInsights, generateGuardrailsWithInsights, generateActionsAndMockData, parseActionFromResponse, stripActionBlocks, executeSimulatedAction, executeActionWithSampleData, extractBusinessCaseContent, sampleDatasetsToWorkingData, workingDataToSampleDatasets, generateWelcomeConfig, extractPendingQuestion, detectTopicSwitch, generatePromptCoachResponse, type GenerationContext, type SystemPromptContext, type SampleDataGenerationContext, type ClarifyingChatContext, type ActionsGenerationContext, type ExtractionResult, type WelcomeConfigGenerationContext, type PromptCoachMessage, type PromptCoachContext } from "./gemini";
 import { loadAgentComponents, clearAgentCache, hasCustomComponents } from "./agent-loader";
 import { createRecoveryManager } from "./components/recovery-manager";
 import multer from "multer";
@@ -1942,6 +1942,101 @@ export async function registerRoutes(
     } catch (error: any) {
       console.error("Error getting welcome config:", error);
       res.status(500).json({ message: error?.message || "Failed to get welcome config" });
+    }
+  });
+
+  // ==================== PROMPT COACH ROUTES ====================
+
+  // Send message to prompt coach for an agent
+  app.post("/api/agents/:id/prompt-coach", requireAuth, async (req: AuthenticatedRequest, res) => {
+    try {
+      const agent = await storage.getAgent(req.params.id);
+      if (!agent) return res.status(404).json({ message: "Agent not found" });
+
+      if (agent.userId !== req.user!.id) {
+        return res.status(403).json({ message: "Forbidden" });
+      }
+
+      const { message, chatHistory } = req.body;
+      if (!message || typeof message !== "string") {
+        return res.status(400).json({ message: "Message is required" });
+      }
+
+      const sampleDataSummary = agent.sampleDatasets?.length
+        ? agent.sampleDatasets.map((s: any) => `${s.name} (${s.format}): ${s.description || 'no description'}`).join("; ")
+        : "";
+
+      const welcomeConfigStr = agent.welcomeConfig
+        ? `Greeting: "${agent.welcomeConfig.greeting || ''}", Prompts: ${(agent.welcomeConfig.suggestedPrompts || []).map((p: any) => p.title).join(", ")}`
+        : "";
+
+      const actionsStr = agent.availableActions?.length
+        ? agent.availableActions.map((a: any) => `${a.name}: ${a.description}`).join("; ")
+        : "";
+
+      const context: PromptCoachContext = {
+        agentName: agent.name,
+        businessUseCase: agent.businessUseCase || "",
+        domainKnowledge: agent.domainKnowledge || "",
+        validationRules: agent.validationRules || "",
+        guardrails: agent.guardrails || "",
+        sampleDataSummary,
+        welcomeConfig: welcomeConfigStr,
+        availableActions: actionsStr,
+      };
+
+      const history: PromptCoachMessage[] = Array.isArray(chatHistory) ? chatHistory : [];
+
+      const response = await generatePromptCoachResponse(context, history, message);
+      res.json(response);
+    } catch (error: any) {
+      console.error("Error in prompt coach:", error);
+      res.status(500).json({ message: error?.message || "Failed to get coach response" });
+    }
+  });
+
+  // Apply a suggested change from the prompt coach
+  app.post("/api/agents/:id/prompt-coach/apply", requireAuth, async (req: AuthenticatedRequest, res) => {
+    try {
+      const agent = await storage.getAgent(req.params.id);
+      if (!agent) return res.status(404).json({ message: "Agent not found" });
+
+      if (agent.userId !== req.user!.id) {
+        return res.status(403).json({ message: "Forbidden" });
+      }
+
+      const { field, action, content } = req.body;
+
+      const allowedFields = ["businessUseCase", "domainKnowledge", "validationRules", "guardrails"];
+      if (!allowedFields.includes(field)) {
+        return res.status(400).json({ message: `Invalid field: ${field}. Allowed: ${allowedFields.join(", ")}` });
+      }
+
+      if (!content || typeof content !== "string") {
+        return res.status(400).json({ message: "Content is required" });
+      }
+
+      let newValue: string;
+      const currentValue = (agent as any)[field] || "";
+
+      if (action === "replace") {
+        newValue = content;
+      } else if (action === "append") {
+        newValue = currentValue ? `${currentValue}\n\n${content}` : content;
+      } else {
+        return res.status(400).json({ message: "Invalid action. Must be 'replace' or 'append'" });
+      }
+
+      const update: Record<string, string> = { [field]: newValue };
+      await storage.updateAgent(req.params.id, update as any);
+
+      // Clear agent cache so changes take effect
+      clearAgentCache(req.params.id);
+
+      res.json({ success: true, field, newValue });
+    } catch (error: any) {
+      console.error("Error applying prompt coach change:", error);
+      res.status(500).json({ message: error?.message || "Failed to apply change" });
     }
   });
 
