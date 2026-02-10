@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import ReactMarkdown from "react-markdown";
-import { GraduationCap, Send, X, Loader2, Check, ChevronDown, ChevronUp } from "lucide-react";
+import { GraduationCap, Send, X, Loader2, Check, ChevronDown, ChevronUp, Eraser } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Card } from "@/components/ui/card";
@@ -55,10 +55,40 @@ export function PromptCoachPanel({ agentId, agentName, onClose }: { agentId: str
   const [messages, setMessages] = useState<CoachMessage[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [isLoadingHistory, setIsLoadingHistory] = useState(true);
   const [applyingIndex, setApplyingIndex] = useState<string | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const hasInitialized = useRef(false);
   const { toast } = useToast();
+
+  const serializeMessages = useCallback((msgs: CoachMessage[]) => {
+    return msgs.map((m) => ({
+      role: m.role,
+      content: m.content,
+      suggestedChanges: m.suggestedChanges,
+      appliedChanges: m.appliedChanges ? Array.from(m.appliedChanges) : undefined,
+    }));
+  }, []);
+
+  const deserializeMessages = useCallback((data: any[]): CoachMessage[] => {
+    return data.map((m) => ({
+      role: m.role,
+      content: m.content,
+      suggestedChanges: m.suggestedChanges,
+      appliedChanges: m.appliedChanges ? new Set(m.appliedChanges) : undefined,
+    }));
+  }, []);
+
+  const saveHistory = useCallback(async (msgs: CoachMessage[]) => {
+    try {
+      await apiRequest("PUT", `/api/agents/${agentId}/prompt-coach/history`, {
+        messages: serializeMessages(msgs),
+      });
+    } catch (err) {
+      // Silent fail for save - non-critical
+    }
+  }, [agentId, serializeMessages]);
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -71,15 +101,37 @@ export function PromptCoachPanel({ agentId, agentName, onClose }: { agentId: str
   }, []);
 
   useEffect(() => {
-    if (messages.length === 0) {
+    if (hasInitialized.current) return;
+    hasInitialized.current = true;
+
+    const loadHistory = async () => {
+      try {
+        const response = await fetch(`/api/agents/${agentId}/prompt-coach/history`, {
+          credentials: "include",
+        });
+        if (response.ok) {
+          const data = await response.json();
+          if (Array.isArray(data) && data.length > 0) {
+            setMessages(deserializeMessages(data));
+            setIsLoadingHistory(false);
+            return;
+          }
+        }
+      } catch (err) {
+        // Fall through to default welcome message
+      }
+
       setMessages([
         {
           role: "assistant",
           content: `Hi! I'm your Prompt Coach for **${agentName}**. I can help you improve your agent's configuration — things like the business use case, domain knowledge, validation rules, and guardrails.\n\nWhat would you like to improve? Or say **"review my agent"** and I'll analyze your current setup.`,
         },
       ]);
-    }
-  }, []);
+      setIsLoadingHistory(false);
+    };
+
+    loadHistory();
+  }, [agentId, agentName, deserializeMessages]);
 
   const getChatHistory = useCallback(() => {
     return messages.map((m) => ({
@@ -93,7 +145,8 @@ export function PromptCoachPanel({ agentId, agentName, onClose }: { agentId: str
 
     const userMessage = input.trim();
     setInput("");
-    setMessages((prev) => [...prev, { role: "user", content: userMessage }]);
+    const updatedWithUser = [...messages, { role: "user" as const, content: userMessage }];
+    setMessages(updatedWithUser);
     setIsLoading(true);
 
     try {
@@ -104,23 +157,23 @@ export function PromptCoachPanel({ agentId, agentName, onClose }: { agentId: str
 
       const result = await response.json();
 
-      setMessages((prev) => [
-        ...prev,
-        {
-          role: "assistant",
-          content: result.message,
-          suggestedChanges: result.suggestedChanges,
-          appliedChanges: new Set(),
-        },
-      ]);
+      const assistantMsg: CoachMessage = {
+        role: "assistant",
+        content: result.message,
+        suggestedChanges: result.suggestedChanges,
+        appliedChanges: new Set(),
+      };
+      const finalMessages = [...updatedWithUser, assistantMsg];
+      setMessages(finalMessages);
+      saveHistory(finalMessages);
     } catch (error: any) {
-      setMessages((prev) => [
-        ...prev,
-        {
-          role: "assistant",
-          content: "Sorry, I ran into an issue. Could you try again?",
-        },
-      ]);
+      const errorMsg: CoachMessage = {
+        role: "assistant",
+        content: "Sorry, I ran into an issue. Could you try again?",
+      };
+      const finalMessages = [...updatedWithUser, errorMsg];
+      setMessages(finalMessages);
+      saveHistory(finalMessages);
     } finally {
       setIsLoading(false);
     }
@@ -137,16 +190,16 @@ export function PromptCoachPanel({ agentId, agentName, onClose }: { agentId: str
         content: change.content,
       });
 
-      setMessages((prev) =>
-        prev.map((msg, idx) => {
-          if (idx === messageIndex && msg.appliedChanges) {
-            const newApplied = new Set(msg.appliedChanges);
-            newApplied.add(changeIndex);
-            return { ...msg, appliedChanges: newApplied };
-          }
-          return msg;
-        })
-      );
+      const updatedMessages = messages.map((msg, idx) => {
+        if (idx === messageIndex && msg.appliedChanges) {
+          const newApplied = new Set(msg.appliedChanges);
+          newApplied.add(changeIndex);
+          return { ...msg, appliedChanges: newApplied };
+        }
+        return msg;
+      });
+      setMessages(updatedMessages);
+      saveHistory(updatedMessages);
 
       queryClient.invalidateQueries({ queryKey: ["/api/agents", agentId] });
 
@@ -180,19 +233,43 @@ export function PromptCoachPanel({ agentId, agentName, onClose }: { agentId: str
           <GraduationCap className="h-4 w-4 text-primary" />
           <span className="text-sm font-medium">Prompt Coach</span>
         </div>
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={onClose}
-          data-testid="button-prompt-coach-close"
-        >
-          <ChevronDown className="h-4 w-4" />
-        </Button>
+        <div className="flex items-center gap-1">
+          {messages.length > 1 && (
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={async () => {
+                await apiRequest("DELETE", `/api/agents/${agentId}/prompt-coach/history`);
+                setMessages([
+                  {
+                    role: "assistant",
+                    content: `Hi! I'm your Prompt Coach for **${agentName}**. I can help you improve your agent's configuration — things like the business use case, domain knowledge, validation rules, and guardrails.\n\nWhat would you like to improve? Or say **"review my agent"** and I'll analyze your current setup.`,
+                  },
+                ]);
+              }}
+              data-testid="button-prompt-coach-clear"
+            >
+              <Eraser className="h-4 w-4" />
+            </Button>
+          )}
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={onClose}
+            data-testid="button-prompt-coach-close"
+          >
+            <ChevronDown className="h-4 w-4" />
+          </Button>
+        </div>
       </div>
 
       <div className="flex-1 min-h-0 overflow-y-auto" ref={scrollRef}>
         <div className="space-y-4 p-4">
-          {messages.map((msg, msgIdx) => (
+          {isLoadingHistory ? (
+            <div className="flex items-center justify-center py-8">
+              <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+            </div>
+          ) : messages.map((msg, msgIdx) => (
             <div key={msgIdx}>
               <div className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
                 <div

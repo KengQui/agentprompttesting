@@ -1,0 +1,23 @@
+[
+  {
+    "role": "assistant",
+    "content": "Hi! I'm your Prompt Coach for **SHM2**. I can help you improve your agent's configuration — things like the business use case, domain knowledge, validation rules, and guardrails.\n\nWhat would you like to improve? Or say **\"review my agent\"** and I'll analyze your current setup."
+  },
+  {
+    "role": "user",
+    "content": "Hello, can you help me?"
+  },
+  {
+    "role": "assistant",
+    "content": "Hello there! I can absolutely help you improve your agent.\n\nFirst off, I want to say that your current configuration for **SHM2** is remarkably well-defined!\n\n*   The **Business Use Case** is clear and comprehensive, outlining exactly what the agent does.\n*   Your **Domain Knowledge** is exceptionally detailed, covering all the necessary HCM modules, entities, and processes.\n*   The **Validation Rules** are robust, anticipating many potential issues and guiding the agent on how to handle them.\n*   And your **Guardrails** are very thorough, setting clear boundaries and escalation criteria for safety and compliance.\n\nThis is a fantastic foundation!\n\nBased on this strong setup, my top suggestion would be to add a guardrail around **conciseness**. With such detailed knowledge, agents can sometimes become overly verbose. For frontline managers needing quick resolutions, concise and focused responses are key.\n\nHere's a suggestion to add a conciseness guardrail:\n\nThis change adds a new guardrail that explicitly tells the agent to keep its responses concise and focused. This will help ensure that managers get the information they need quickly and efficiently, aligning with the \"quick resolution\" aspect mentioned in your manager context.\n\nWould you like to apply this change, or would you prefer to discuss another area?",
+    "suggestedChanges": [
+      {
+        "field": "guardrails",
+        "action": "append",
+        "content": "10. **Maintain Conciseness:** Keep responses focused, direct, and under 3-4 sentences unless the manager explicitly asks for more detail or a detailed explanation is required for a crucial decision (e.g., explaining insufficient accrual balances). Prioritize actionable information.",
+        "explanation": "Adding a conciseness rule will help the agent provide quick, to-the-point answers, which is crucial for frontline managers dealing with real-time call-ins. It ensures the agent remains efficient and doesn't overwhelm the user with unnecessary information."
+      }
+    ],
+    "appliedChanges": []
+  }
+]

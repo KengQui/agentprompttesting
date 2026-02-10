@@ -1947,6 +1947,58 @@ export async function registerRoutes(
 
   // ==================== PROMPT COACH ROUTES ====================
 
+  // Get prompt coach chat history
+  app.get("/api/agents/:id/prompt-coach/history", requireAuth, async (req: AuthenticatedRequest, res) => {
+    try {
+      const agent = await storage.getAgent(req.params.id);
+      if (!agent) return res.status(404).json({ message: "Agent not found" });
+      if (agent.userId !== req.user!.id) {
+        return res.status(403).json({ message: "Forbidden" });
+      }
+      const messages = await storage.getPromptCoachHistory(req.params.id);
+      res.json(messages);
+    } catch (error: any) {
+      console.error("Error getting prompt coach history:", error);
+      res.status(500).json({ message: "Failed to get history" });
+    }
+  });
+
+  // Save prompt coach chat history
+  app.put("/api/agents/:id/prompt-coach/history", requireAuth, async (req: AuthenticatedRequest, res) => {
+    try {
+      const agent = await storage.getAgent(req.params.id);
+      if (!agent) return res.status(404).json({ message: "Agent not found" });
+      if (agent.userId !== req.user!.id) {
+        return res.status(403).json({ message: "Forbidden" });
+      }
+      const { messages } = req.body;
+      if (!Array.isArray(messages)) {
+        return res.status(400).json({ message: "Messages must be an array" });
+      }
+      await storage.savePromptCoachHistory(req.params.id, messages);
+      res.json({ success: true });
+    } catch (error: any) {
+      console.error("Error saving prompt coach history:", error);
+      res.status(500).json({ message: "Failed to save history" });
+    }
+  });
+
+  // Clear prompt coach chat history
+  app.delete("/api/agents/:id/prompt-coach/history", requireAuth, async (req: AuthenticatedRequest, res) => {
+    try {
+      const agent = await storage.getAgent(req.params.id);
+      if (!agent) return res.status(404).json({ message: "Agent not found" });
+      if (agent.userId !== req.user!.id) {
+        return res.status(403).json({ message: "Forbidden" });
+      }
+      await storage.clearPromptCoachHistory(req.params.id);
+      res.json({ success: true });
+    } catch (error: any) {
+      console.error("Error clearing prompt coach history:", error);
+      res.status(500).json({ message: "Failed to clear history" });
+    }
+  });
+
   // Send message to prompt coach for an agent
   app.post("/api/agents/:id/prompt-coach", requireAuth, async (req: AuthenticatedRequest, res) => {
     try {

@@ -59,6 +59,10 @@ function getComponentsDir(agentId: string) {
   return path.join(getAgentDir(agentId), "components");
 }
 
+function getPromptCoachPath(agentId: string) {
+  return path.join(getAgentDir(agentId), "prompt-coach-history.json");
+}
+
 // Helper to read a text file safely
 function readTextFile(filePath: string): string {
   if (fs.existsSync(filePath)) {
@@ -194,6 +198,11 @@ export interface IStorage {
 
   // Agent operations with user filtering
   getAgentsByUserId(userId: string): Promise<Agent[]>;
+
+  // Prompt Coach history
+  getPromptCoachHistory(agentId: string): Promise<any[]>;
+  savePromptCoachHistory(agentId: string, messages: any[]): Promise<void>;
+  clearPromptCoachHistory(agentId: string): Promise<void>;
 }
 
 export class MemStorage implements IStorage {
@@ -1349,6 +1358,26 @@ export class MemStorage implements IStorage {
     return Array.from(this.agents.values())
       .filter(agent => agent.userId === userId)
       .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  }
+
+  // ========== Prompt Coach History ==========
+
+  async getPromptCoachHistory(agentId: string): Promise<any[]> {
+    const filePath = getPromptCoachPath(agentId);
+    return readJsonFile<any[]>(filePath, []);
+  }
+
+  async savePromptCoachHistory(agentId: string, messages: any[]): Promise<void> {
+    const filePath = getPromptCoachPath(agentId);
+    ensureDir(getAgentDir(agentId));
+    writeJsonFile(filePath, messages);
+  }
+
+  async clearPromptCoachHistory(agentId: string): Promise<void> {
+    const filePath = getPromptCoachPath(agentId);
+    if (fs.existsSync(filePath)) {
+      fs.unlinkSync(filePath);
+    }
   }
 }
 
