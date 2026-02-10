@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import ReactMarkdown from "react-markdown";
-import { GraduationCap, Send, X, Loader2, Check, ChevronDown, ChevronUp, Eraser } from "lucide-react";
+import { GraduationCap, Send, X, Loader2, Check, ChevronDown, ChevronUp, Eraser, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Card } from "@/components/ui/card";
@@ -265,6 +265,12 @@ export function PromptCoachPanel({ agentId, agentName, onClose }: { agentId: str
 
       <div className="flex-1 min-h-0 overflow-y-auto" ref={scrollRef}>
         <div className="space-y-4 p-4">
+          {!isLoadingHistory && messages.length > 1 && (
+            <div className="flex items-center gap-1.5 text-xs text-muted-foreground px-1" data-testid="text-coach-expiry-warning">
+              <Clock className="h-3 w-3 shrink-0" />
+              <span>Chat history older than 2 weeks is automatically cleared.</span>
+            </div>
+          )}
           {isLoadingHistory ? (
             <div className="flex items-center justify-center py-8">
               <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
