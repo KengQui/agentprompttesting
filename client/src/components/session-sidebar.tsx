@@ -7,10 +7,12 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { PromptCoach } from "@/components/prompt-coach";
 import type { ChatSessionWithPreview } from "@shared/schema";
 
 interface SessionSidebarProps {
   agentId: string;
+  agentName: string;
   activeSessionId: string | null;
   onSessionSelect: (sessionId: string) => void;
   onNewSession: () => void;
@@ -186,6 +188,7 @@ function SessionCard({
 
 export function SessionSidebar({
   agentId,
+  agentName,
   activeSessionId,
   onSessionSelect,
   onNewSession,
@@ -240,7 +243,7 @@ export function SessionSidebar({
   });
 
   return (
-    <div className="w-80 shrink-0 border-r bg-muted/30 flex flex-col h-full">
+    <div className="w-80 shrink-0 border-r bg-muted/30 flex flex-col h-full relative">
       <div className="p-3 border-b">
         <Button
           onClick={onNewSession}
@@ -280,6 +283,7 @@ export function SessionSidebar({
           )}
         </div>
       </ScrollArea>
+      <PromptCoach agentId={agentId} agentName={agentName} />
     </div>
   );
 }

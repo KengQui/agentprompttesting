@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import ReactMarkdown from "react-markdown";
-import { GraduationCap, Send, X, Loader2, Check, Minimize2, Maximize2 } from "lucide-react";
+import { GraduationCap, Send, X, Loader2, Check, Minimize2, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Card } from "@/components/ui/card";
@@ -37,7 +37,6 @@ const FIELD_LABELS: Record<string, string> = {
 
 export function PromptCoach({ agentId, agentName }: PromptCoachProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const [isMinimized, setIsMinimized] = useState(false);
   const [messages, setMessages] = useState<CoachMessage[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -53,10 +52,10 @@ export function PromptCoach({ agentId, agentName }: PromptCoachProps) {
   }, [messages, isLoading]);
 
   useEffect(() => {
-    if (isOpen && !isMinimized && textareaRef.current) {
-      setTimeout(() => textareaRef.current?.focus(), 100);
+    if (isOpen && textareaRef.current) {
+      setTimeout(() => textareaRef.current?.focus(), 300);
     }
-  }, [isOpen, isMinimized]);
+  }, [isOpen]);
 
   const getChatHistory = useCallback(() => {
     return messages.map((m) => ({
@@ -152,7 +151,6 @@ export function PromptCoach({ agentId, agentName }: PromptCoachProps) {
 
   const handleOpen = () => {
     setIsOpen(true);
-    setIsMinimized(false);
     if (messages.length === 0) {
       setMessages([
         {
@@ -163,105 +161,30 @@ export function PromptCoach({ agentId, agentName }: PromptCoachProps) {
     }
   };
 
-  if (!isOpen) {
-    return (
-      <div className="fixed bottom-6 right-6 z-50">
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button
-              onClick={handleOpen}
-              size="icon"
-              className="h-12 w-12 rounded-full shadow-lg"
-              data-testid="button-prompt-coach-open"
-            >
-              <GraduationCap className="h-6 w-6" />
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent side="left">
-            <p>Prompt Coach</p>
-          </TooltipContent>
-        </Tooltip>
-      </div>
-    );
-  }
-
-  if (isMinimized) {
-    return (
-      <div className="fixed bottom-6 right-6 z-50">
-        <Card className="w-72 shadow-lg">
-          <div
-            className="flex items-center justify-between gap-2 p-3 cursor-pointer hover-elevate rounded-xl"
-            onClick={() => setIsMinimized(false)}
-            data-testid="button-prompt-coach-expand"
-          >
-            <div className="flex items-center gap-2">
-              <GraduationCap className="h-4 w-4 text-primary" />
-              <span className="text-sm font-medium">Prompt Coach</span>
-              {isLoading && <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" />}
-            </div>
-            <div className="flex items-center gap-1">
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-6 w-6"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setIsMinimized(false);
-                }}
-                data-testid="button-prompt-coach-maximize"
-              >
-                <Maximize2 className="h-3 w-3" />
-              </Button>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-6 w-6"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setIsOpen(false);
-                }}
-                data-testid="button-prompt-coach-close-minimized"
-              >
-                <X className="h-3 w-3" />
-              </Button>
-            </div>
-          </div>
-        </Card>
-      </div>
-    );
-  }
-
   return (
-    <div className="fixed bottom-6 right-6 z-50 flex flex-col" style={{ maxHeight: "calc(100vh - 6rem)" }}>
-      <Card className="w-96 flex flex-col shadow-lg overflow-hidden" style={{ maxHeight: "calc(100vh - 6rem)" }}>
+    <div className="relative flex flex-col shrink-0">
+      <div
+        className={`absolute bottom-full left-0 right-0 flex flex-col bg-background border-t overflow-hidden transition-all duration-300 ease-in-out ${
+          isOpen ? "max-h-[calc(100vh-10rem)] opacity-100" : "max-h-0 opacity-0"
+        }`}
+        style={{ zIndex: 20 }}
+      >
         <div className="flex items-center justify-between gap-2 p-3 border-b shrink-0">
           <div className="flex items-center gap-2">
             <GraduationCap className="h-4 w-4 text-primary" />
             <span className="text-sm font-medium">Prompt Coach</span>
           </div>
-          <div className="flex items-center gap-1">
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-6 w-6"
-              onClick={() => setIsMinimized(true)}
-              data-testid="button-prompt-coach-minimize"
-            >
-              <Minimize2 className="h-3 w-3" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-6 w-6"
-              onClick={() => setIsOpen(false)}
-              data-testid="button-prompt-coach-close"
-            >
-              <X className="h-3 w-3" />
-            </Button>
-          </div>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setIsOpen(false)}
+            data-testid="button-prompt-coach-close"
+          >
+            <ChevronDown className="h-4 w-4" />
+          </Button>
         </div>
 
-        <div className="flex-1 min-h-0 overflow-y-auto" ref={scrollRef}>
+        <div className="flex-1 min-h-0 overflow-y-auto" ref={scrollRef} style={{ maxHeight: "calc(100vh - 16rem)" }}>
           <div className="space-y-4 p-4">
             {messages.map((msg, msgIdx) => (
               <div key={msgIdx}>
@@ -366,7 +289,18 @@ export function PromptCoach({ agentId, agentName }: PromptCoachProps) {
             </Button>
           </div>
         </div>
-      </Card>
+      </div>
+
+      <div
+        className="flex items-center gap-2 p-3 border-t cursor-pointer hover-elevate"
+        onClick={isOpen ? () => setIsOpen(false) : handleOpen}
+        data-testid="button-prompt-coach-toggle"
+      >
+        <GraduationCap className="h-4 w-4 text-primary" />
+        <span className="text-sm font-medium flex-1">Prompt Coach</span>
+        {isLoading && <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" />}
+        <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform duration-300 ${isOpen ? "rotate-180" : ""}`} />
+      </div>
     </div>
   );
 }
