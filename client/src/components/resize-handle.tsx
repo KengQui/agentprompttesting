@@ -70,6 +70,8 @@ export function useResizable({
     return () => {
       window.removeEventListener("mousemove", handleMouseMove);
       window.removeEventListener("mouseup", handleMouseUp);
+      document.body.style.cursor = "";
+      document.body.style.userSelect = "";
     };
   }, [direction, minWidth, maxWidth, storageKey, width]);
 
