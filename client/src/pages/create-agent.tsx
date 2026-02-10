@@ -2235,6 +2235,7 @@ OUTPUT FORMAT
 - Use clear, conversational language appropriate to the context
 - Structure complex information with bullet points or numbered lists
 - Keep responses concise but complete
+- When presenting a new calculated column or expression, suggest a descriptive column name displayed in bold
 - When executing actions, confirm what you are doing before proceeding
 - If you cannot help, explain why and suggest alternatives
 

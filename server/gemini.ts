@@ -1060,9 +1060,9 @@ TASK
 5. [If actions are available, include step for executing actions when the user requests them]
 
 ### 6. OUTPUT FORMAT
-Define how responses should be structured based on the use case:
+Define how responses should be structured based on the use case. When the agent presents a new calculated column or expression, it should also suggest a descriptive column name displayed in bold.
 OUTPUT FORMAT
-[Specify based on use case - format, tone, structure requirements]
+[Specify based on use case - format, tone, structure requirements. Include instruction to suggest a bolded column name when presenting new expressions or calculated columns]
 
 ### 7. EXAMPLES (REQUIRED - GENERATE THESE)
 Based on the business use case, INFER and CREATE 2-3 realistic example interactions. These should demonstrate:
