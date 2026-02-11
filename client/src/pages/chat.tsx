@@ -30,9 +30,9 @@ function stripActionBlocks(text: string): string {
 }
 
 const COLUMN_ADDED_FALLBACK_PILLS = ["See related expressions", "Create new expression", "I'm done"];
-const EXPRESSION_PRESENTED_FALLBACK_PILLS = ["Use this expression", "Validate with sample data", "Explain this expression"];
+const EXPRESSION_PRESENTED_FALLBACK_PILLS = ["Use this expression", "Test with my data", "Explain this expression"];
 const VALIDATION_DONE_FALLBACK_PILLS = ["Use this expression", "Revise this expression", "Explain this expression"];
-const EXPLANATION_DONE_FALLBACK_PILLS = ["Use this expression", "Revise this expression", "Validate with sample data"];
+const EXPLANATION_DONE_FALLBACK_PILLS = ["Use this expression", "Revise this expression", "Test with my data"];
 
 function parseSuggestedActions(text: string, isHcmAgent?: boolean): { cleanedText: string; actions: string[] } {
   const regex = /\{\{SUGGESTED_ACTIONS:(.*?)\}\}/g;
@@ -319,7 +319,7 @@ interface ValidationRow {
 function isValidationMessage(text: string): boolean {
   const hasRows = /\*{0,2}Row\s+\d+/i.test(text);
   const hasResult = /\*{0,2}Result:?\*{0,2}/i.test(text);
-  const hasValidationContext = /sample\s+data|validation/i.test(text) || /\*{0,2}Inputs?:?\*{0,2}/i.test(text) || /\*{0,2}Calculation:?\*{0,2}/i.test(text);
+  const hasValidationContext = /sample\s+data|report\s+data|validation/i.test(text) || /\*{0,2}Inputs?:?\*{0,2}/i.test(text) || /\*{0,2}Calculation:?\*{0,2}/i.test(text);
   return hasRows && hasResult && hasValidationContext;
 }
 
@@ -472,7 +472,7 @@ function SampleDataValidationCarousel({ content, timestamp }: { content: string;
         <Card className="overflow-visible p-0">
           <div className="flex items-center gap-2 px-4 py-3 border-b border-card-border">
             <FlaskConical className="h-4 w-4 text-muted-foreground" />
-            <span className="text-sm font-semibold">Sample Data Validation</span>
+            <span className="text-sm font-semibold">Report Data Validation</span>
             <span className="ml-auto text-xs text-muted-foreground" data-testid="text-carousel-counter">{currentIdx + 1} / {total}</span>
           </div>
 
