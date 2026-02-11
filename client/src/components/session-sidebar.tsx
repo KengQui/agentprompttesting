@@ -143,7 +143,7 @@ function SessionCard({
           </div>
         </div>
         {!isEditing && (
-          <div className="flex items-center gap-0.5 shrink-0">
+          <div className="flex items-center gap-0.5 shrink-0 invisible group-hover:visible">
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button
