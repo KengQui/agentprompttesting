@@ -27,10 +27,17 @@ function stripActionBlocks(text: string): string {
   return cleaned.trim();
 }
 
+const COLUMN_ADDED_FALLBACK_PILLS = ["See related expressions", "Create new expression", "I'm done"];
+
 function parseSuggestedActions(text: string): { cleanedText: string; actions: string[] } {
   const regex = /\{\{SUGGESTED_ACTIONS:(.*?)\}\}/g;
   const match = regex.exec(text);
-  if (!match) return { cleanedText: text, actions: [] };
+  if (!match) {
+    if (/has been added/i.test(text)) {
+      return { cleanedText: text, actions: COLUMN_ADDED_FALLBACK_PILLS };
+    }
+    return { cleanedText: text, actions: [] };
+  }
   const actions = match[1].split('|').map(a => a.trim()).filter(Boolean);
   const cleanedText = text.replace(regex, '').trim();
   return { cleanedText, actions };
