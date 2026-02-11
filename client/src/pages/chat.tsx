@@ -167,8 +167,12 @@ function SplitMessageBubbles({ message, before, after }: { message: ChatMessage;
 function extractHcmExpression(text: string): string | null {
   const codeBlockMatch = text.match(/```[\s\S]*?\n([\s\S]*?)```/);
   if (codeBlockMatch) return codeBlockMatch[1].trim();
-  const inlineMatch = text.match(/`([^`]{10,})`/);
-  if (inlineMatch) return inlineMatch[1].trim();
+  const inlineMatches = [...text.matchAll(/`([^`]{10,})`/g)];
+  if (inlineMatches.length > 0) {
+    const withParens = inlineMatches.find(m => /\(.*\)/.test(m[1]));
+    if (withParens) return withParens[1].trim();
+    return inlineMatches.reduce((a, b) => a[1].length >= b[1].length ? a : b)[1].trim();
+  }
   return null;
 }
 
