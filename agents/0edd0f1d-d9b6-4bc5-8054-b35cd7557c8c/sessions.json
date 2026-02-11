@@ -98,165 +98,11 @@
     "updatedAt": "2026-02-07T16:42:12.027Z"
   },
   {
-    "id": "5f1b1f0c-806a-4199-83f0-b4887e88609b",
-    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
-    "title": "New Session",
-    "createdAt": "2026-02-07T19:39:20.041Z",
-    "updatedAt": "2026-02-07T21:45:52.995Z"
-  },
-  {
-    "id": "14057417-4468-460c-858a-4225e80d9e2d",
-    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
-    "title": "New Session",
-    "createdAt": "2026-02-07T22:44:00.173Z",
-    "updatedAt": "2026-02-07T22:48:06.801Z"
-  },
-  {
     "id": "35fcbca3-2fff-4006-aff3-0617897254ba",
     "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
     "title": "New Session",
     "createdAt": "2026-02-08T00:14:25.693Z",
     "updatedAt": "2026-02-08T00:14:30.673Z"
-  },
-  {
-    "id": "52bd2845-9363-4978-b113-ae83fd77ec54",
-    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
-    "title": "New Session",
-    "createdAt": "2026-02-08T00:16:19.359Z",
-    "updatedAt": "2026-02-08T00:22:08.428Z"
-  },
-  {
-    "id": "b001c4b5-2f91-4d72-8f33-710553b2754f",
-    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
-    "title": "New Session",
-    "createdAt": "2026-02-08T02:31:44.224Z",
-    "updatedAt": "2026-02-08T02:37:58.131Z"
-  },
-  {
-    "id": "0099e34e-6846-490e-a59c-cd48eb0f931d",
-    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
-    "title": "New Session",
-    "createdAt": "2026-02-08T02:50:58.157Z",
-    "updatedAt": "2026-02-08T02:52:36.543Z"
-  },
-  {
-    "id": "441fb2cc-dbbd-4187-b8f7-5f712ab34fd1",
-    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
-    "title": "New Session",
-    "createdAt": "2026-02-08T03:40:43.521Z",
-    "updatedAt": "2026-02-08T03:42:19.767Z"
-  },
-  {
-    "id": "83180365-1c9d-4cb6-99fc-758bdb98e220",
-    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
-    "title": "New Session",
-    "createdAt": "2026-02-08T03:47:03.882Z",
-    "updatedAt": "2026-02-08T03:47:06.719Z"
-  },
-  {
-    "id": "4364a92e-e405-4c5b-903f-7916418f9514",
-    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
-    "title": "New Session",
-    "createdAt": "2026-02-08T04:04:04.978Z",
-    "updatedAt": "2026-02-08T04:47:20.722Z"
-  },
-  {
-    "id": "e3b8a886-6756-4bb8-9be5-8f94028ea04d",
-    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
-    "title": "New Session",
-    "createdAt": "2026-02-08T16:46:08.072Z",
-    "updatedAt": "2026-02-08T16:47:23.330Z"
-  },
-  {
-    "id": "46a1e87f-b56c-4dda-972c-f2aaf089c227",
-    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
-    "title": "New Session",
-    "createdAt": "2026-02-08T18:40:02.297Z",
-    "updatedAt": "2026-02-08T18:41:12.315Z"
-  },
-  {
-    "id": "1692d704-67b6-4cfa-9d59-c5688d7ce80c",
-    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
-    "title": "New Session",
-    "createdAt": "2026-02-08T18:45:27.245Z",
-    "updatedAt": "2026-02-08T18:45:44.163Z"
-  },
-  {
-    "id": "36ec0495-4dc5-4ffe-95ff-6432d056f9a7",
-    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
-    "title": "New Session",
-    "createdAt": "2026-02-08T18:46:03.871Z",
-    "updatedAt": "2026-02-08T18:46:16.448Z"
-  },
-  {
-    "id": "d3855987-2520-4d0b-80a9-88c410f595fd",
-    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
-    "title": "New Session",
-    "createdAt": "2026-02-08T18:48:12.873Z",
-    "updatedAt": "2026-02-08T18:49:04.935Z"
-  },
-  {
-    "id": "375cd978-2698-4f70-abc9-5d8ebb1d0e64",
-    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
-    "title": "New Session",
-    "createdAt": "2026-02-08T19:07:15.609Z",
-    "updatedAt": "2026-02-08T19:08:16.871Z"
-  },
-  {
-    "id": "2f39ca4a-573f-4d63-8913-4c89541f0c15",
-    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
-    "title": "New Session",
-    "createdAt": "2026-02-08T19:13:30.639Z",
-    "updatedAt": "2026-02-08T19:14:44.814Z"
-  },
-  {
-    "id": "5c4c23c4-516d-4dd1-a596-99fe3a47c5a2",
-    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
-    "title": "New Session",
-    "createdAt": "2026-02-08T20:39:43.711Z",
-    "updatedAt": "2026-02-08T20:45:27.655Z"
-  },
-  {
-    "id": "e778eed9-68d6-4d77-a475-2f92840677db",
-    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
-    "title": "New Session",
-    "createdAt": "2026-02-08T21:37:15.785Z",
-    "updatedAt": "2026-02-08T21:39:47.776Z"
-  },
-  {
-    "id": "016b587e-a7ec-4678-aa71-7bb91ef85a94",
-    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
-    "title": "New Session",
-    "createdAt": "2026-02-08T21:55:38.559Z",
-    "updatedAt": "2026-02-09T12:59:30.093Z"
-  },
-  {
-    "id": "87e77bee-5320-444c-88c8-99d2c2c6ddf7",
-    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
-    "title": "New Session",
-    "createdAt": "2026-02-09T16:13:08.627Z",
-    "updatedAt": "2026-02-09T16:13:30.589Z"
-  },
-  {
-    "id": "93f25bc4-b38d-4d0c-b6a4-8ea1a22ea843",
-    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
-    "title": "New Session",
-    "createdAt": "2026-02-09T16:35:41.378Z",
-    "updatedAt": "2026-02-09T16:36:27.832Z"
-  },
-  {
-    "id": "728763b2-f56f-4a34-82af-366ba5c35ba9",
-    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
-    "title": "New Session",
-    "createdAt": "2026-02-09T16:40:30.914Z",
-    "updatedAt": "2026-02-09T16:42:17.041Z"
-  },
-  {
-    "id": "1523a87d-a00a-4c0c-a560-601a003602ad",
-    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
-    "title": "New Session",
-    "createdAt": "2026-02-09T16:43:15.927Z",
-    "updatedAt": "2026-02-09T17:08:41.029Z"
   },
   {
     "id": "eb18569b-6b5e-4933-81ee-f912b0c6858b",
@@ -565,5 +411,12 @@
     "title": "New Session",
     "createdAt": "2026-02-11T11:59:05.133Z",
     "updatedAt": "2026-02-11T12:01:11.628Z"
+  },
+  {
+    "id": "4278ff32-7f3e-4eba-9bc6-252598573757",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "title": "UC-1.2 Subtraction",
+    "createdAt": "2026-02-11T12:26:08.887Z",
+    "updatedAt": "2026-02-11T13:27:47.129Z"
   }
 ]
