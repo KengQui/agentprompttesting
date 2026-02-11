@@ -3,7 +3,7 @@ import { useParams, useLocation } from "wouter";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-import { ArrowLeft, Send, Bot, User, Settings, Loader2, X, AlertCircle, MessageSquare, Eraser, Plus, PanelLeftClose, PanelLeft } from "lucide-react";
+import { ArrowLeft, Send, Bot, User, Settings, Loader2, X, AlertCircle, MessageSquare, Eraser, Plus, PanelLeftClose, PanelLeft, Target, Columns, FunctionSquare, RefreshCw, Layers, Copy, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Card } from "@/components/ui/card";
@@ -189,6 +189,125 @@ function SuggestedActionPills({ actions, onSelect, disabled }: { actions: string
   );
 }
 
+interface ExplanationSection {
+  title: string;
+  content: string;
+  icon: typeof Target;
+}
+
+const EXPLANATION_SECTION_META: { pattern: RegExp; label: string; icon: typeof Target }[] = [
+  { pattern: /your\s+objective/i, label: "Your Objective", icon: Target },
+  { pattern: /identifying\s+necessary\s+columns/i, label: "Columns Used", icon: Columns },
+  { pattern: /using\s+the\s+/i, label: "Function Logic", icon: FunctionSquare },
+  { pattern: /handling\s+data\s+conversion/i, label: "Data Conversion", icon: RefreshCw },
+  { pattern: /combining\s+everything/i, label: "Final Expression", icon: Layers },
+];
+
+function parseExplanationSections(text: string): ExplanationSection[] | null {
+  const numberedPattern = /(^|\n)\s*\*{0,2}\d+\.\s*\*{0,2}\s*/g;
+  const matches: RegExpExecArray[] = [];
+  let m: RegExpExecArray | null;
+  while ((m = numberedPattern.exec(text)) !== null) {
+    if (/objective|column|function|conversion|combining/i.test(text.slice(m.index, m.index + 80))) {
+      matches.push(m);
+    }
+  }
+  if (matches.length < 3) return null;
+
+  const sections: ExplanationSection[] = [];
+  for (let i = 0; i < matches.length; i++) {
+    const start = matches[i].index!;
+    const end = i + 1 < matches.length ? matches[i + 1].index! : text.length;
+    const chunk = text.slice(start, end).trim();
+
+    const headerMatch = chunk.match(/^\*{0,2}\d+\.\s*\*{0,2}\s*(.+?)(\*{0,2})\s*\n/);
+    const headerText = headerMatch ? headerMatch[1].replace(/\*+/g, "").trim() : "";
+    const body = headerMatch
+      ? chunk.slice(headerMatch[0].length).trim()
+      : chunk.replace(/^\*{0,2}\d+\.\s*\*{0,2}[^\n]*\n?/, "").trim();
+
+    const meta = EXPLANATION_SECTION_META.find(m => m.pattern.test(headerText));
+    sections.push({
+      title: meta?.label || headerText.replace(/[*:#]/g, "").trim(),
+      content: body,
+      icon: meta?.icon || Layers,
+    });
+  }
+
+  return sections.length >= 3 ? sections : null;
+}
+
+function isExplanationMessage(text: string): boolean {
+  return /\*{0,2}1\.\s*\*{0,2}\s*(your\s+)?objective/i.test(text) && /combining\s+everything/i.test(text);
+}
+
+function ExpressionExplanationCard({ content, timestamp }: { content: string; timestamp: string }) {
+  const sections = parseExplanationSections(content);
+  const [copiedIdx, setCopiedIdx] = useState<number | null>(null);
+
+  if (!sections) return null;
+
+  const handleCopy = (text: string, idx: number) => {
+    const codeMatch = text.match(/```[\s\S]*?\n([\s\S]*?)```/);
+    const toCopy = codeMatch ? codeMatch[1].trim() : text.trim();
+    navigator.clipboard.writeText(toCopy);
+    setCopiedIdx(idx);
+    setTimeout(() => setCopiedIdx(null), 2000);
+  };
+
+  return (
+    <div className="flex gap-3" data-testid="explanation-card">
+      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-muted">
+        <Bot className="h-4 w-4" />
+      </div>
+      <div className="max-w-[80%] space-y-0.5">
+        <Card className="overflow-visible p-0">
+          <div className="flex items-center gap-2 px-4 py-3 border-b border-card-border">
+            <FunctionSquare className="h-4 w-4 text-muted-foreground" />
+            <span className="text-sm font-semibold">Expression Breakdown</span>
+          </div>
+          <div className="divide-y divide-card-border">
+            {sections.map((section, idx) => {
+              const Icon = section.icon;
+              const isFinal = idx === sections.length - 1;
+              const hasCode = /```/.test(section.content);
+
+              return (
+                <div key={idx} className="px-4 py-3" data-testid={`explanation-section-${idx}`}>
+                  <div className="flex items-center gap-2 mb-1.5">
+                    <Icon className="h-3.5 w-3.5 text-muted-foreground" />
+                    <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                      {section.title}
+                    </span>
+                    {isFinal && hasCode && (
+                      <button
+                        className="ml-auto p-1 rounded-md text-muted-foreground hover-elevate active-elevate-2"
+                        onClick={() => handleCopy(section.content, idx)}
+                        data-testid={`button-copy-expression-${idx}`}
+                      >
+                        {copiedIdx === idx ? <Check className="h-3.5 w-3.5 text-green-500" /> : <Copy className="h-3.5 w-3.5" />}
+                      </button>
+                    )}
+                  </div>
+                  <div className="text-sm prose prose-sm dark:prose-invert max-w-none chat-markdown pl-5.5">
+                    <ReactMarkdown remarkPlugins={[remarkGfm]}>{section.content}</ReactMarkdown>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </Card>
+        <p className="text-xs text-muted-foreground px-1 pt-1">
+          {new Date(timestamp).toLocaleTimeString([], {
+            hour: "2-digit",
+            minute: "2-digit",
+          })}
+        </p>
+      </div>
+    </div>
+  );
+}
+
 function MessageBubble({ message, agentId, isLastAssistant, onSendMessage }: { message: ChatMessage; agentId?: string; isLastAssistant?: boolean; onSendMessage?: (text: string) => void }) {
   const isUser = message.role === "user";
   const isHcmAgent = agentId === HCM_EXPRESSION_BUILDER_AGENT_ID;
@@ -205,6 +324,19 @@ function MessageBubble({ message, agentId, isLastAssistant, onSendMessage }: { m
           before={splitResult.before}
           after={splitResult.after}
         />
+        {showPills && <SuggestedActionPills actions={actions} onSelect={onSendMessage} />}
+      </>
+    );
+  }
+
+  const explanationSections = !isUser && isHcmAgent && isExplanationMessage(displayContent)
+    ? parseExplanationSections(displayContent)
+    : null;
+
+  if (explanationSections) {
+    return (
+      <>
+        <ExpressionExplanationCard content={displayContent} timestamp={message.timestamp} />
         {showPills && <SuggestedActionPills actions={actions} onSelect={onSendMessage} />}
       </>
     );
