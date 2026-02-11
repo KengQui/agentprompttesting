@@ -62,5 +62,37 @@
     "role": "assistant",
     "content": "I can create a calculated column that adds the Scheduled EE Amount and Scheduled ER Amount.\n\n```\nAdd(Value(ScheduledEEAmount), Value(ScheduledERAmount))\n```\n\nThis expression will produce a **Numeric** output.\n\nSuggested column name: **Total Scheduled Amount**\n\n{{SUGGESTED_ACTIONS:Use this expression|Validate with sample data|Explain this expression}}",
     "timestamp": "2026-02-11T11:59:52.489Z"
+  },
+  {
+    "id": "cbed539a-8d2d-4b99-ac4a-ea8048bbb748",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "sessionId": "0adabc9b-44e7-41d8-9d7f-0d10090a62c2",
+    "role": "user",
+    "content": "Use this expression",
+    "timestamp": "2026-02-11T12:00:24.220Z"
+  },
+  {
+    "id": "158c287c-7271-441a-8beb-b810d458a61a",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "sessionId": "0adabc9b-44e7-41d8-9d7f-0d10090a62c2",
+    "role": "assistant",
+    "content": "Successfully created the calculated column '{Total Scheduled Amount}' and added it to your report.",
+    "timestamp": "2026-02-11T12:00:25.042Z"
+  },
+  {
+    "id": "9888d47e-1117-4754-bf3e-092a051673f7",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "sessionId": "0adabc9b-44e7-41d8-9d7f-0d10090a62c2",
+    "role": "user",
+    "content": "See related expressions",
+    "timestamp": "2026-02-11T12:00:29.457Z"
+  },
+  {
+    "id": "6d84d2d9-9a7c-4aec-928b-d21277b6f8b1",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "sessionId": "0adabc9b-44e7-41d8-9d7f-0d10090a62c2",
+    "role": "assistant",
+    "content": "Here are 3 related expressions you might find useful:\n\n1.  **Total Contribution Percentage** — Calculate the percentage of total scheduled amount contributed by the employee.\n2.  **Scheduled Amount Difference** — Find the difference between the scheduled employee and employer amounts.\n3.  **Combined Name and Amount** — Combine the employee's name with their scheduled EE amount in a text column.\n\nWhich one would you like me to build?",
+    "timestamp": "2026-02-11T12:00:30.694Z"
   }
 ]
