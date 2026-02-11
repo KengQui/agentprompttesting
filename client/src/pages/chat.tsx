@@ -384,7 +384,7 @@ export default function Chat() {
   const { width: sidebarWidth, handleMouseDown: handleSidebarResize } = useResizable({
     initialWidth: 320,
     minWidth: 200,
-    maxWidth: 500,
+    maxWidth: 400,
     direction: "left",
     storageKey: "chat-sidebar-width",
   });

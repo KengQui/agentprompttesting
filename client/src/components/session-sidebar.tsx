@@ -140,7 +140,7 @@ function SessionCard({
                       <Button
                         size="icon"
                         variant="ghost"
-                        className="h-5 w-5 opacity-0 group-hover:opacity-100 transition-opacity"
+                        className="h-5 w-5"
                         onClick={(e) => {
                           e.stopPropagation();
                           setIsEditing(true);
@@ -157,7 +157,7 @@ function SessionCard({
                       <Button
                         size="icon"
                         variant="ghost"
-                        className="h-5 w-5 text-destructive hover:text-destructive"
+                        className="h-5 w-5 text-destructive"
                         onClick={(e) => {
                           e.stopPropagation();
                           onDelete();
@@ -263,7 +263,7 @@ export function SessionSidebar({
   });
 
   return (
-    <div className="shrink-0 border-r bg-muted/30 flex flex-col h-full" style={{ width: `${width}px` }}>
+    <div className="shrink-0 border-r bg-muted/30 flex flex-col h-full" style={{ width: `${width}px`, maxWidth: '400px' }}>
       <div className="p-3 border-b shrink-0">
         <Button
           onClick={onNewSession}
