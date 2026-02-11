@@ -360,16 +360,33 @@ function isValidationMessage(text: string): boolean {
 
 function parseValidationRows(text: string): { rows: ValidationRow[]; footnote: string } | null {
   const rowPattern = /(^|\n)\s*\*{0,2}Row\s+\d+/gi;
-  const rowMatches: number[] = [];
+  const allMatches: number[] = [];
   let rm: RegExpExecArray | null;
   while ((rm = rowPattern.exec(text)) !== null) {
-    rowMatches.push(rm.index);
+    allMatches.push(rm.index);
+  }
+  if (allMatches.length === 0) return null;
+
+  const structuralMarker = /\*{0,2}(?:Inputs?|Calculation|Result):?\*{0,2}/i;
+  const rowMatches: number[] = [];
+  let footnoteStart = -1;
+  for (let i = 0; i < allMatches.length; i++) {
+    const start = allMatches[i];
+    const end = i + 1 < allMatches.length ? allMatches[i + 1] : text.length;
+    const chunk = text.slice(start, end);
+    if (structuralMarker.test(chunk)) {
+      rowMatches.push(start);
+    } else {
+      footnoteStart = start;
+      break;
+    }
   }
   if (rowMatches.length === 0) return null;
 
-  const lastRowEnd = text.length;
   const rows: ValidationRow[] = [];
   let footnote = "";
+
+  const lastRowEnd = footnoteStart >= 0 ? footnoteStart : text.length;
 
   for (let i = 0; i < rowMatches.length; i++) {
     const start = rowMatches[i];
@@ -411,7 +428,11 @@ function parseValidationRows(text: string): { rows: ValidationRow[]; footnote: s
     rows.push({ employeeName, inputs, calculationSteps: calcSteps, result });
   }
 
-  if (rowMatches.length > 0) {
+  if (footnoteStart >= 0) {
+    const raw = text.slice(footnoteStart).trim();
+    const cleaned = raw.replace(/\{\{SUGGESTED_ACTIONS:.*?\}\}/g, "").trim();
+    if (cleaned) footnote = cleaned;
+  } else if (rowMatches.length > 0) {
     const lastRowStart = rowMatches[rowMatches.length - 1];
     const lastRowChunk = text.slice(lastRowStart);
     const resultEnd = lastRowChunk.search(/\*{0,2}Result:?\*{0,2}\s*.+/i);
@@ -421,9 +442,7 @@ function parseValidationRows(text: string): { rows: ValidationRow[]; footnote: s
       if (resultLineEnd > -1) {
         const trailing = afterResult.slice(resultLineEnd).trim();
         const cleaned = trailing.replace(/\{\{SUGGESTED_ACTIONS:.*?\}\}/g, "").trim();
-        if (cleaned && !/^\*{0,2}Row\s+\d+/i.test(cleaned)) {
-          footnote = cleaned;
-        }
+        if (cleaned) footnote = cleaned;
       }
     }
   }
@@ -501,9 +520,12 @@ function SampleDataValidationCarousel({ content, timestamp }: { content: string;
 
   const rowNotes: (string | undefined)[] = rows.map(() => undefined);
   if (footnote) {
-    const errorRowIdx = rows.findIndex(r => /error/i.test(r.result) || r.result.trim() === "—");
-    if (errorRowIdx >= 0) {
-      rowNotes[errorRowIdx] = footnote;
+    const errorRowIndices = rows.reduce<number[]>((acc, r, idx) => {
+      if (/error/i.test(r.result) || r.result.trim() === "—") acc.push(idx);
+      return acc;
+    }, []);
+    if (errorRowIndices.length > 0) {
+      for (const idx of errorRowIndices) rowNotes[idx] = footnote;
     } else {
       const mentionedIdx = rows.findIndex(r =>
         footnote.toLowerCase().includes(r.employeeName.toLowerCase())
