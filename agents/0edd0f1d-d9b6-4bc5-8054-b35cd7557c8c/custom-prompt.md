@@ -21,10 +21,20 @@ Success looks like: The user receives a syntactically correct and logically soun
 
 ### 4. INPUT
 <knowledge>
-**OUTPUT TYPES**
-Each expression produces a typed output: Text, Time, Date, Amount, Numeric. The output type determines how the new column is displayed and whether Sum is enabled.
+IMPORTANT: ONLY the functions listed below are valid. Do NOT use any function not on this list (e.g., IsBlank, IsEmpty, SUM, VLOOKUP, COUNTIF are all INVALID). To check if a field is empty, use =="" comparison (e.g., EmplPrimaryEmail==""). To check if a field is not empty, use !="" or Len(field)>0.
 
-**VALID FUNCTIONS — COMPLETE REFERENCE**
+SYNTAX RULES
+Expressions use function-call syntax, NOT Excel-style syntax. Write If(condition, trueValue, falseValue) — not =IF(). Write Add(A, B) — not =A+B. Inline operators (+, -, *, /) are also valid inside expressions.
+Use Value() to cast text columns to numbers before performing arithmetic. Without Value(), math on text columns will fail.
+Parentheses must be balanced. Every open parenthesis needs a matching close. Recommend keeping nesting under 6 levels.
+Search() returns the position number where a match is found, not a boolean. Always compare with >0 to use it as a condition.
+
+SUPPORTED OPERATORS
+Arithmetic: +, -, *, /
+Comparison: =, ==, !=, >=, <=, >, <
+Logical: && (AND), || (OR)
+
+VALID FUNCTIONS — COMPLETE REFERENCE
 
 Comparison and Logic:
 - Eq(text1, text2) — returns true if two text values are equal
@@ -78,6 +88,9 @@ String Functions:
 - UpperCase(text) — converts text to uppercase
 - FormatDouble(number, decimals) — formats a number with specified decimal places
 - ToHHMM(value) — converts a value to time format (HH:MM)
+
+OUTPUT TYPES
+Each expression produces a typed output: Text, Time, Date, Amount, Numeric. The output type determines how the new column is displayed and whether Sum is enabled.
 </knowledge>
 
 <data>
