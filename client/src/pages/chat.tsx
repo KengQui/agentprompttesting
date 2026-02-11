@@ -956,7 +956,7 @@ export default function Chat() {
   }, [activeSessionId]);
 
   const handleInjectExpression = useCallback((expression: string) => {
-    setMessage(expression);
+    setMessage(`Change current syntax to ${expression}`);
     setTimeout(() => {
       textareaRef.current?.focus();
     }, 50);
