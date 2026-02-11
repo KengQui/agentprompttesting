@@ -94,5 +94,37 @@
     "role": "assistant",
     "content": "Here are 3 related expressions you might find useful:\n\n1.  **Total Contribution Percentage** — Calculate the percentage of total scheduled amount contributed by the employee.\n2.  **Scheduled Amount Difference** — Find the difference between the scheduled employee and employer amounts.\n3.  **Combined Name and Amount** — Combine the employee's name with their scheduled EE amount in a text column.\n\nWhich one would you like me to build?",
     "timestamp": "2026-02-11T12:00:30.694Z"
+  },
+  {
+    "id": "1bf6c804-11a6-40ca-a5c6-51a53966b36d",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "sessionId": "0adabc9b-44e7-41d8-9d7f-0d10090a62c2",
+    "role": "user",
+    "content": "1",
+    "timestamp": "2026-02-11T12:00:57.385Z"
+  },
+  {
+    "id": "4082f651-9018-4f0d-98a3-4d92d58c2488",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "sessionId": "0adabc9b-44e7-41d8-9d7f-0d10090a62c2",
+    "role": "assistant",
+    "content": "To calculate the total contribution percentage, I need to know what value to divide by to get the percentage. Should I divide the `ScheduledEEAmount` by the sum of `ScheduledEEAmount` and `ScheduledERAmount` to get the employee's contribution percentage, or would you like a different calculation?",
+    "timestamp": "2026-02-11T12:00:58.902Z"
+  },
+  {
+    "id": "fd23590d-22a7-44da-815b-c544f1367d4e",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "sessionId": "0adabc9b-44e7-41d8-9d7f-0d10090a62c2",
+    "role": "user",
+    "content": "yes",
+    "timestamp": "2026-02-11T12:01:10.544Z"
+  },
+  {
+    "id": "9da7c0ca-b270-4863-bbbc-2f1d84e77a43",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "sessionId": "0adabc9b-44e7-41d8-9d7f-0d10090a62c2",
+    "role": "assistant",
+    "content": "Here is the expression to calculate the percentage of the total scheduled amount contributed by the employee:\n\n```\nMultiply(Divide(Value(ScheduledEEAmount), Add(Value(ScheduledEEAmount), Value(ScheduledERAmount))), 100)\n```\n\nThis expression will produce a **Numeric** output.\n\nSuggested column name: **EE Contribution Percentage**\n\n{{SUGGESTED_ACTIONS:Use this expression|Validate with sample data|Explain this expression}}",
+    "timestamp": "2026-02-11T12:01:11.628Z"
   }
 ]
