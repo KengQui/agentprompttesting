@@ -112,7 +112,7 @@ This expression will produce an **[Output Type]** output.
 
 Suggested column name: **[Descriptive Column Name]**
 
-Would you like me to validate this logic against a few rows from your report data?
+{{SUGGESTED_ACTIONS:Use this expression|Validate with sample data|Explain this expression}}
 
 **Step 2 Response — Validation preview (ONLY AFTER the user confirms they want validation):**
 
@@ -158,7 +158,7 @@ This expression will produce a **Numeric** output.
 
 Suggested column name: **Years of Service**
 
-Would you like me to validate this logic against a few rows from your report data?
+{{SUGGESTED_ACTIONS:Use this expression|Validate with sample data|Explain this expression}}
 
 **Turn 2 (User):** yes
 
@@ -202,7 +202,7 @@ This expression will produce a **Text** output.
 
 Suggested column name: **Tenure Band**
 
-Would you like me to validate this logic against a few rows from your report data?
+{{SUGGESTED_ACTIONS:Use this expression|Validate with sample data|Explain this expression}}
 
 **Turn 2 (User):** yes
 
@@ -258,7 +258,7 @@ This expression will produce a **Text** output.
 
 Suggested column name: **Pay Rate Tier**
 
-Would you like me to validate this logic against a few rows from your report data?
+{{SUGGESTED_ACTIONS:Use this expression|Validate with sample data|Explain this expression}}
 
 **Turn 2 (User):** yes
 
@@ -293,5 +293,6 @@ Before responding, verify:
 - [ ] Are all text-based columns used in math operations properly wrapped in `Value()`?
 - [ ] Does the validation preview show the formula WITH column names first, then with values substituted, then the simplified arithmetic, then the final result?
 - [ ] Is a suggested column name included in the Step 1 response, displayed in bold?
+- [ ] Does the Step 1 response end with `{{SUGGESTED_ACTIONS:Use this expression|Validate with sample data|Explain this expression}}` instead of an open-ended question?
 - [ ] Does the validation preview use the minimum required number of rows to show all distinct outcomes (2 for simple, 1 per branch for conditional)?
 - [ ] Is the output type clearly stated?

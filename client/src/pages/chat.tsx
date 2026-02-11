@@ -27,6 +27,15 @@ function stripActionBlocks(text: string): string {
   return cleaned.trim();
 }
 
+function parseSuggestedActions(text: string): { cleanedText: string; actions: string[] } {
+  const regex = /\{\{SUGGESTED_ACTIONS:(.*?)\}\}/g;
+  const match = regex.exec(text);
+  if (!match) return { cleanedText: text, actions: [] };
+  const actions = match[1].split('|').map(a => a.trim()).filter(Boolean);
+  const cleanedText = text.replace(regex, '').trim();
+  return { cleanedText, actions };
+}
+
 // PROTOTYPE ONLY: Split-bubble animation for column creation.
 // This simulates a "processing" step between documentation and column confirmation
 // by splitting the AI response into two message bubbles with typing dots in between.
@@ -124,63 +133,95 @@ function SplitMessageBubbles({ message, before, after }: { message: ChatMessage;
   );
 }
 
-function MessageBubble({ message, agentId }: { message: ChatMessage; agentId?: string }) {
-  const isUser = message.role === "user";
-  const displayContent = isUser ? message.content : stripActionBlocks(message.content);
+function SuggestedActionPills({ actions, onSelect, disabled }: { actions: string[]; onSelect: (action: string) => void; disabled?: boolean }) {
+  const [clicked, setClicked] = useState(false);
 
-  // PROTOTYPE ONLY: Apply split-bubble animation for HCM Expression Builder agent only.
-  // This creates a simulated "processing" effect between documentation and confirmation.
+  if (clicked || actions.length === 0) return null;
+
+  return (
+    <div className="flex flex-wrap gap-2 ml-11 mt-1" data-testid="suggested-action-pills">
+      {actions.map((action, index) => (
+        <Badge
+          key={index}
+          variant="outline"
+          className="cursor-pointer px-3 py-1.5 text-xs font-medium"
+          onClick={() => {
+            if (disabled) return;
+            setClicked(true);
+            onSelect(action);
+          }}
+          data-testid={`pill-action-${index}`}
+        >
+          {action}
+        </Badge>
+      ))}
+    </div>
+  );
+}
+
+function MessageBubble({ message, agentId, isLastAssistant, onSendMessage }: { message: ChatMessage; agentId?: string; isLastAssistant?: boolean; onSendMessage?: (text: string) => void }) {
+  const isUser = message.role === "user";
+  const rawContent = isUser ? message.content : stripActionBlocks(message.content);
+  const { cleanedText: displayContent, actions } = isUser ? { cleanedText: rawContent, actions: [] } : parseSuggestedActions(rawContent);
+  const showPills = isLastAssistant && actions.length > 0 && onSendMessage;
+
   const isHcmAgent = agentId === HCM_EXPRESSION_BUILDER_AGENT_ID;
   const splitResult = !isUser && isHcmAgent ? splitColumnBuildResponse(displayContent) : null;
 
   if (splitResult) {
     return (
-      <SplitMessageBubbles
-        message={message}
-        before={splitResult.before}
-        after={splitResult.after}
-      />
+      <>
+        <SplitMessageBubbles
+          message={message}
+          before={splitResult.before}
+          after={splitResult.after}
+        />
+        {showPills && <SuggestedActionPills actions={actions} onSelect={onSendMessage} />}
+      </>
     );
   }
 
   return (
-    <div
-      className={`flex gap-3 ${isUser ? "flex-row-reverse" : ""}`}
-      data-testid={`message-${message.id}`}
-    >
+    <>
       <div
-        className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${
-          isUser ? "bg-primary text-primary-foreground" : "bg-muted"
-        }`}
+        className={`flex gap-3 ${isUser ? "flex-row-reverse" : ""}`}
+        data-testid={`message-${message.id}`}
       >
-        {isUser ? <User className="h-4 w-4" /> : <Bot className="h-4 w-4" />}
-      </div>
-      <div
-        className={`max-w-[80%] rounded-lg px-4 py-2 ${
-          isUser
-            ? "bg-primary text-primary-foreground"
-            : "bg-muted"
-        }`}
-      >
-        {isUser ? (
-          <p className="text-sm whitespace-pre-wrap">{displayContent}</p>
-        ) : (
-          <div className="text-sm prose prose-sm dark:prose-invert max-w-none [&>*:first-child]:mt-0 [&>*:last-child]:mb-0 [&_p]:my-1 [&_ul]:my-1 [&_ol]:my-1 [&_li]:my-0">
-            <ReactMarkdown>{displayContent}</ReactMarkdown>
-          </div>
-        )}
-        <p
-          className={`text-xs mt-1 ${
-            isUser ? "text-primary-foreground/70" : "text-muted-foreground"
+        <div
+          className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${
+            isUser ? "bg-primary text-primary-foreground" : "bg-muted"
           }`}
         >
-          {new Date(message.timestamp).toLocaleTimeString([], {
-            hour: "2-digit",
-            minute: "2-digit",
-          })}
-        </p>
+          {isUser ? <User className="h-4 w-4" /> : <Bot className="h-4 w-4" />}
+        </div>
+        <div
+          className={`max-w-[80%] rounded-lg px-4 py-2 ${
+            isUser
+              ? "bg-primary text-primary-foreground"
+              : "bg-muted"
+          }`}
+        >
+          {isUser ? (
+            <p className="text-sm whitespace-pre-wrap">{displayContent}</p>
+          ) : (
+            <div className="text-sm prose prose-sm dark:prose-invert max-w-none [&>*:first-child]:mt-0 [&>*:last-child]:mb-0 [&_p]:my-1 [&_ul]:my-1 [&_ol]:my-1 [&_li]:my-0">
+              <ReactMarkdown>{displayContent}</ReactMarkdown>
+            </div>
+          )}
+          <p
+            className={`text-xs mt-1 ${
+              isUser ? "text-primary-foreground/70" : "text-muted-foreground"
+            }`}
+          >
+            {new Date(message.timestamp).toLocaleTimeString([], {
+              hour: "2-digit",
+              minute: "2-digit",
+            })}
+          </p>
+        </div>
       </div>
-    </div>
+      {showPills && <SuggestedActionPills actions={actions} onSelect={onSendMessage} />}
+    </>
   );
 }
 
@@ -730,9 +771,18 @@ export default function Chat() {
                 <EmptyChat agentName={agent.name} hasSession={!!activeSessionId} welcomeConfig={welcomeConfig} onSendPrompt={handleSendPrompt} />
               ) : (
                 <div className="space-y-4">
-                  {messages.map((msg, idx) => (
-                    <MessageBubble key={msg.id} message={msg} agentId={params.id} />
-                  ))}
+                  {messages.map((msg, idx) => {
+                    const isLastAssistant = msg.role === "assistant" && !messages.slice(idx + 1).some(m => m.role === "assistant");
+                    return (
+                      <MessageBubble
+                        key={msg.id}
+                        message={msg}
+                        agentId={params.id}
+                        isLastAssistant={isLastAssistant}
+                        onSendMessage={handleSendPrompt}
+                      />
+                    );
+                  })}
                   {sendMutation.isPending && <TypingIndicator onCancel={handleCancel} />}
                   {params.id === HCM_EXPRESSION_BUILDER_AGENT_ID && (
                     <div data-testid="debug-build-anim" style={{ display: 'none' }}>
