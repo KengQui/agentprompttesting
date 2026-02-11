@@ -778,7 +778,7 @@ export async function registerRoutes(
             
             // Add system context for suggested action pill clicks to reinforce correct behavior
             const suggestedActionPrefixes: Record<string, string> = {
-              'Use this expression': '[SYSTEM CONTEXT: The user clicked "Use this expression". You MUST create the column immediately via the create_calculated_column action. Do NOT show any validation examples, row-by-row calculations, or sample data. Confirm the column was created and offer follow-up options.]\n\n',
+              'Create new column': '[SYSTEM CONTEXT: The user clicked "Create new column". You MUST create the column immediately via the create_calculated_column action. Do NOT show any validation examples, row-by-row calculations, or sample data. Confirm the column was created and offer follow-up options.]\n\n',
               'Test with my data': '[SYSTEM CONTEXT: The user clicked "Test with my data". Show a row-by-row validation preview using real rows from the report data.]\n\n',
               'Explain this expression': '[SYSTEM CONTEXT: The user clicked "Explain this expression". Provide a plain-language explanation of how the expression works without showing sample data rows.]\n\n',
               'Revise this expression': '[SYSTEM CONTEXT: The user clicked "Revise this expression". Ask what they would like to change.]\n\n',

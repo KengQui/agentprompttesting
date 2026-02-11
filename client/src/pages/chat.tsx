@@ -30,9 +30,9 @@ function stripActionBlocks(text: string): string {
 }
 
 const COLUMN_ADDED_FALLBACK_PILLS = ["See related expressions", "Create new expression", "I'm done"];
-const EXPRESSION_PRESENTED_FALLBACK_PILLS = ["Use this expression", "Test with my data", "Explain this expression"];
-const VALIDATION_DONE_FALLBACK_PILLS = ["Use this expression", "Revise this expression", "Explain this expression"];
-const EXPLANATION_DONE_FALLBACK_PILLS = ["Use this expression", "Revise this expression", "Test with my data"];
+const EXPRESSION_PRESENTED_FALLBACK_PILLS = ["Create new column", "Test with my data", "Explain this expression"];
+const VALIDATION_DONE_FALLBACK_PILLS = ["Create new column", "Revise this expression", "Explain this expression"];
+const EXPLANATION_DONE_FALLBACK_PILLS = ["Create new column", "Revise this expression", "Test with my data"];
 
 function parseSuggestedActions(text: string, isHcmAgent?: boolean): { cleanedText: string; actions: string[] } {
   const regex = /\{\{SUGGESTED_ACTIONS:(.*?)\}\}/g;
