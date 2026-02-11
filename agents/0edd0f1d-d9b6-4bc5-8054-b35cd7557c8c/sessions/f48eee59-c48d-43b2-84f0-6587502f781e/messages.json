@@ -1,0 +1,18 @@
+[
+  {
+    "id": "022c3800-4fc0-4ef0-8e59-d391460dec50",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "sessionId": "f48eee59-c48d-43b2-84f0-6587502f781e",
+    "role": "user",
+    "content": "Create an expression to add ScheduledEEAmount and ScheduledERAmount",
+    "timestamp": "2026-02-11T21:30:47.690Z"
+  },
+  {
+    "id": "0374ea2f-9ac8-45d2-b304-579a3ff6953a",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "sessionId": "f48eee59-c48d-43b2-84f0-6587502f781e",
+    "role": "assistant",
+    "content": "This expression will add the scheduled employee amount and the scheduled employer amount to give you the total scheduled amount.\n\n```\nAdd(Value(ScheduledEEAmount), Value(ScheduledERAmount))\n```\n\nThis expression will produce a **Numeric** output.\n\nSuggested column name: **Total Scheduled Amount**\n{{SUGGESTED_ACTIONS:Use this expression|Test with my data|Explain this expression}}",
+    "timestamp": "2026-02-11T21:30:48.714Z"
+  }
+]
