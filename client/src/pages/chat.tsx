@@ -3,7 +3,7 @@ import { useParams, useLocation } from "wouter";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-import { ArrowLeft, Send, Bot, User, Settings, Loader2, X, AlertCircle, MessageSquare, Eraser, Plus, PanelLeftClose, PanelLeft, Target, Columns, FunctionSquare, Layers, Copy, Check, FlaskConical, UserCircle, Calculator, CheckCircle2 } from "lucide-react";
+import { ArrowLeft, Send, Bot, User, Settings, Loader2, X, AlertCircle, MessageSquare, Eraser, Plus, PanelLeftClose, PanelLeft, Target, Columns, FunctionSquare, Layers, Copy, Check, FlaskConical } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Card } from "@/components/ui/card";
@@ -434,9 +434,10 @@ function parseValidationRows(text: string): { rows: ValidationRow[]; footnote: s
 function ValidationRowCard({ row, index }: { row: ValidationRow; index: number }) {
   return (
     <div className="px-4 py-3 space-y-3" data-testid={`validation-row-${index}`}>
-      <div className="flex items-center gap-2">
-        <UserCircle className="h-4 w-4 text-muted-foreground" />
-        <span className="text-sm font-medium">{row.employeeName}</span>
+      <div className="flex items-center gap-2 text-sm">
+        <span className="text-muted-foreground">Row {index + 1}</span>
+        <span className="text-muted-foreground">|</span>
+        <span className="font-medium">{row.employeeName}</span>
       </div>
 
       {row.inputs.length > 0 && (
@@ -456,10 +457,7 @@ function ValidationRowCard({ row, index }: { row: ValidationRow; index: number }
 
       {row.calculationSteps.length > 0 && (
         <div className="space-y-1">
-          <div className="flex items-center gap-2">
-            <Calculator className="h-3.5 w-3.5 text-muted-foreground" />
-            <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Calculation</span>
-          </div>
+          <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Calculation</span>
           <div className="rounded-md bg-muted px-3 py-2 font-mono text-xs space-y-0.5">
             {row.calculationSteps.map((step, j) => (
               <div key={j} className={j > 0 ? "text-muted-foreground" : ""}>
@@ -471,8 +469,7 @@ function ValidationRowCard({ row, index }: { row: ValidationRow; index: number }
         </div>
       )}
 
-      <div className="flex items-center gap-2 rounded-md bg-muted px-3 py-2">
-        <CheckCircle2 className="h-4 w-4 text-green-500 dark:text-green-400 shrink-0" />
+      <div className="flex items-center gap-2 rounded-md bg-muted/80 dark:bg-muted/60 border border-border/50 px-3 py-2">
         <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Result</span>
         <span className="ml-auto font-mono text-sm font-semibold">{row.result}</span>
       </div>
