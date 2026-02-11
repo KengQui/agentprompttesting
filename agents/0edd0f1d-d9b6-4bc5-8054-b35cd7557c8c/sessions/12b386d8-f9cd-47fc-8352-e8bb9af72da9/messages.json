@@ -14,5 +14,21 @@
     "role": "assistant",
     "content": "This expression will add the values in the Scheduled EE Amount and Scheduled ER Amount columns to provide a total scheduled amount.\n\n```\nAdd(Value(ScheduledEEAmount), Value(ScheduledERAmount))\n```\n\nThis expression will produce a **Numeric** output.\n\nSuggested column name: **Total Scheduled Amount**\n\n{{SUGGESTED_ACTIONS:Use this expression|Validate with sample data|Explain this expression}}",
     "timestamp": "2026-02-11T00:52:21.426Z"
+  },
+  {
+    "id": "07a87bd6-4427-4bbe-8713-1fc115f3ab70",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "sessionId": "12b386d8-f9cd-47fc-8352-e8bb9af72da9",
+    "role": "user",
+    "content": "Explain this expression",
+    "timestamp": "2026-02-11T00:55:12.033Z"
+  },
+  {
+    "id": "0e5476ff-be8e-48da-bd81-bfa1ec3a3e87",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "sessionId": "12b386d8-f9cd-47fc-8352-e8bb9af72da9",
+    "role": "assistant",
+    "content": "This expression calculates the sum of two amounts: \"Scheduled EE Amount\" and \"Scheduled ER Amount.\"\n\nHere's a breakdown:\n\n1.  **`Value(ScheduledEEAmount)`**: This converts the text value in the \"Scheduled EE Amount\" column to a numeric value so that it can be used in a calculation.\n2.  **`Value(ScheduledERAmount)`**: This does the same conversion for the \"Scheduled ER Amount\" column.\n3.  **`Add(..., ...)`**: This function adds the two numeric values together.\n\nThe result is the total scheduled amount, which represents the sum of the two individual scheduled amounts.\n\n{{SUGGESTED_ACTIONS:Use this expression|Revise this expression|Validate with sample data}}",
+    "timestamp": "2026-02-11T00:55:13.575Z"
   }
 ]
