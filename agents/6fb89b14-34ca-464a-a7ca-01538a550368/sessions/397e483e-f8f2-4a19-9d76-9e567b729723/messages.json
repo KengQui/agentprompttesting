@@ -1,0 +1,18 @@
+[
+  {
+    "id": "9c39fc26-dec2-4e6c-b3a9-173257055bbc",
+    "agentId": "6fb89b14-34ca-464a-a7ca-01538a550368",
+    "sessionId": "397e483e-f8f2-4a19-9d76-9e567b729723",
+    "role": "user",
+    "content": "This is a very long test message to check if the session title truncation is working properly in the sidebar panel",
+    "timestamp": "2026-02-11T14:25:32.379Z"
+  },
+  {
+    "id": "4a8f6f3b-d21b-4a42-8d3d-8f472a911442",
+    "agentId": "6fb89b14-34ca-464a-a7ca-01538a550368",
+    "sessionId": "397e483e-f8f2-4a19-9d76-9e567b729723",
+    "role": "assistant",
+    "content": "Okay. How can I help you today?",
+    "timestamp": "2026-02-11T14:25:33.021Z"
+  }
+]

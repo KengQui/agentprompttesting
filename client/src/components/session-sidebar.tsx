@@ -89,9 +89,9 @@ function SessionCard({
       onClick={!isEditing ? onSelect : undefined}
       data-testid={`session-card-${session.id}`}
     >
-      <div className="flex items-start gap-2">
+      <div className="flex items-start gap-2 min-w-0">
         <MessageSquare className="h-4 w-4 mt-0.5 shrink-0 text-muted-foreground" />
-        <div className="flex-1 min-w-0">
+        <div className="flex-1 min-w-0 overflow-hidden">
           {isEditing ? (
             <div className="flex items-center gap-1">
               <Input
@@ -129,48 +129,46 @@ function SessionCard({
               </Button>
             </div>
           ) : (
-            <div className="flex items-start justify-between gap-1">
-              <p className="text-sm font-medium truncate" data-testid="text-session-title">
+            <div className="flex items-center gap-1">
+              <span className="text-sm font-medium truncate block min-w-0 flex-1" data-testid="text-session-title">
                 {session.title}
-              </p>
-              {!isEditing && (
-                <div className="flex gap-0.5 shrink-0">
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button
-                        size="icon"
-                        variant="ghost"
-                        className="h-5 w-5"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setIsEditing(true);
-                        }}
-                        data-testid="button-rename-session"
-                      >
-                        <Pencil className="h-3 w-3" />
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>Rename session</TooltipContent>
-                  </Tooltip>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button
-                        size="icon"
-                        variant="ghost"
-                        className="h-5 w-5 text-destructive"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          onDelete();
-                        }}
-                        data-testid="button-delete-session"
-                      >
-                        <Trash2 className="h-3 w-3" />
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>Delete session</TooltipContent>
-                  </Tooltip>
-                </div>
-              )}
+              </span>
+              <div className="flex items-center gap-0.5 shrink-0 ml-auto">
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      className="h-6 w-6"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setIsEditing(true);
+                      }}
+                      data-testid="button-rename-session"
+                    >
+                      <Pencil className="h-3 w-3" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Rename session</TooltipContent>
+                </Tooltip>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      className="h-6 w-6 text-destructive"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onDelete();
+                      }}
+                      data-testid="button-delete-session"
+                    >
+                      <Trash2 className="h-3 w-3" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Delete session</TooltipContent>
+                </Tooltip>
+              </div>
             </div>
           )}
           {session.firstMessage && !isEditing && (
