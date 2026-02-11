@@ -3,7 +3,7 @@ import { useParams, useLocation } from "wouter";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-import { ArrowLeft, Send, Bot, User, Settings, Loader2, X, AlertCircle, MessageSquare, Eraser, Plus, PanelLeftClose, PanelLeft, Target, Columns, FunctionSquare, RefreshCw, Layers, Copy, Check } from "lucide-react";
+import { ArrowLeft, Send, Bot, User, Settings, Loader2, X, AlertCircle, MessageSquare, Eraser, Plus, PanelLeftClose, PanelLeft, Target, Columns, FunctionSquare, RefreshCw, Layers, Copy, Check, ChevronLeft, ChevronRight, FlaskConical, UserCircle, Calculator, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Card } from "@/components/ui/card";
@@ -308,6 +308,200 @@ function ExpressionExplanationCard({ content, timestamp }: { content: string; ti
   );
 }
 
+interface ValidationRow {
+  employeeName: string;
+  inputs: { name: string; value: string }[];
+  calculationSteps: string[];
+  result: string;
+}
+
+function isValidationMessage(text: string): boolean {
+  return /\*{0,2}Row\s+1[:\s]/i.test(text) && /\*{0,2}Result:?\*{0,2}/i.test(text) && /\*{0,2}Inputs?:?\*{0,2}/i.test(text);
+}
+
+function parseValidationRows(text: string): { rows: ValidationRow[]; footnote: string } | null {
+  const rowPattern = /(^|\n)\s*\*{0,2}Row\s+\d+/gi;
+  const rowMatches: number[] = [];
+  let rm: RegExpExecArray | null;
+  while ((rm = rowPattern.exec(text)) !== null) {
+    rowMatches.push(rm.index);
+  }
+  if (rowMatches.length === 0) return null;
+
+  const lastRowEnd = text.length;
+  const rows: ValidationRow[] = [];
+  let footnote = "";
+
+  for (let i = 0; i < rowMatches.length; i++) {
+    const start = rowMatches[i];
+    const end = i + 1 < rowMatches.length ? rowMatches[i + 1] : lastRowEnd;
+    const chunk = text.slice(start, end).trim();
+
+    const nameMatch = chunk.match(/Row\s+\d+[:\s]*(?:Employee[:\s]*)?\*{0,2}\s*(.+?)\s*\*{0,2}\s*\n/i);
+    const employeeName = nameMatch ? nameMatch[1].replace(/\*+/g, "").trim() : `Row ${i + 1}`;
+
+    const inputs: { name: string; value: string }[] = [];
+    const inputSection = chunk.match(/\*{0,2}Inputs?:?\*{0,2}\s*([\s\S]*?)(?=\n\s*-?\s*\*{0,2}Calc|\n\s*-?\s*\*{0,2}Result)/i);
+    if (inputSection) {
+      const inputRegex = /`(\w+)`\s*=\s*"?([^",\n]+)"?/g;
+      let ip: RegExpExecArray | null;
+      while ((ip = inputRegex.exec(inputSection[1])) !== null) {
+        inputs.push({ name: ip[1], value: ip[2].replace(/\\"/g, '"').trim() });
+      }
+    }
+
+    const calcSteps: string[] = [];
+    const calcSection = chunk.match(/\*{0,2}Calculation:?\*{0,2}\s*\n([\s\S]*?)(?=\n\s*-?\s*\*{0,2}Result)/i);
+    if (calcSection) {
+      const lines = calcSection[1].split("\n").map(l => l.trim()).filter(l => l.startsWith("`") || l.startsWith("="));
+      for (const line of lines) {
+        calcSteps.push(line.replace(/^=\s*/, "").replace(/`/g, "").trim());
+      }
+    }
+
+    const resultMatch = chunk.match(/\*{0,2}Result:?\*{0,2}\s*(.+)/i);
+    const result = resultMatch ? resultMatch[1].replace(/\*+/g, "").trim() : "";
+
+    rows.push({ employeeName, inputs, calculationSteps: calcSteps, result });
+  }
+
+  const lastRowEndIdx = rowMatches.length > 0
+    ? text.indexOf("\n\n", rowMatches[rowMatches.length - 1] + 50)
+    : -1;
+  if (lastRowEndIdx > -1) {
+    const afterRows = text.slice(lastRowEndIdx).trim();
+    const cleaned = afterRows.replace(/\{\{SUGGESTED_ACTIONS:.*?\}\}/g, "").trim();
+    if (cleaned && !/^\*{0,2}Row\s+\d+/i.test(cleaned)) {
+      footnote = cleaned;
+    }
+  }
+
+  return rows.length > 0 ? { rows, footnote } : null;
+}
+
+function SampleDataValidationCarousel({ content, timestamp }: { content: string; timestamp: string }) {
+  const parsed = parseValidationRows(content);
+  const [currentIdx, setCurrentIdx] = useState(0);
+
+  if (!parsed || parsed.rows.length === 0) return null;
+
+  const { rows, footnote } = parsed;
+  const row = rows[currentIdx];
+  const total = rows.length;
+
+  const goNext = () => setCurrentIdx(i => Math.min(i + 1, total - 1));
+  const goPrev = () => setCurrentIdx(i => Math.max(i - 1, 0));
+
+  return (
+    <div className="flex gap-3" data-testid="validation-carousel">
+      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-muted">
+        <Bot className="h-4 w-4" />
+      </div>
+      <div className="max-w-[80%] space-y-0.5">
+        <Card className="overflow-visible p-0">
+          <div className="flex items-center gap-2 px-4 py-3 border-b border-card-border">
+            <FlaskConical className="h-4 w-4 text-muted-foreground" />
+            <span className="text-sm font-semibold">Sample Data Validation</span>
+            <span className="ml-auto text-xs text-muted-foreground">{currentIdx + 1} / {total}</span>
+          </div>
+
+          <div className="px-4 py-3 space-y-3" data-testid={`validation-row-${currentIdx}`}>
+            <div className="flex items-center gap-2">
+              <UserCircle className="h-4 w-4 text-muted-foreground" />
+              <span className="text-sm font-medium">{row.employeeName}</span>
+            </div>
+
+            {row.inputs.length > 0 && (
+              <div className="space-y-1">
+                <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Inputs</span>
+                <div className="flex flex-wrap gap-2">
+                  {row.inputs.map((input, j) => (
+                    <div key={j} className="rounded-md bg-muted px-2.5 py-1.5 text-xs">
+                      <span className="text-muted-foreground">{input.name}</span>
+                      <span className="mx-1">=</span>
+                      <span className="font-mono font-medium">{input.value}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {row.calculationSteps.length > 0 && (
+              <div className="space-y-1">
+                <div className="flex items-center gap-2">
+                  <Calculator className="h-3.5 w-3.5 text-muted-foreground" />
+                  <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Calculation</span>
+                </div>
+                <div className="rounded-md bg-muted px-3 py-2 font-mono text-xs space-y-0.5">
+                  {row.calculationSteps.map((step, j) => (
+                    <div key={j} className={j > 0 ? "text-muted-foreground" : ""}>
+                      {j > 0 && <span className="mr-1">=</span>}
+                      {step}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <div className="flex items-center gap-2 rounded-md bg-muted px-3 py-2">
+              <CheckCircle2 className="h-4 w-4 text-green-500 dark:text-green-400 shrink-0" />
+              <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Result</span>
+              <span className="ml-auto font-mono text-sm font-semibold">{row.result}</span>
+            </div>
+          </div>
+
+          {total > 1 && (
+            <div className="flex items-center justify-center gap-3 px-4 py-2 border-t border-card-border">
+              <Button
+                size="icon"
+                variant="ghost"
+                onClick={goPrev}
+                disabled={currentIdx === 0}
+                data-testid="button-carousel-prev"
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </Button>
+              <div className="flex gap-1.5">
+                {rows.map((_, i) => (
+                  <button
+                    key={i}
+                    onClick={() => setCurrentIdx(i)}
+                    className={`h-1.5 rounded-full transition-all ${
+                      i === currentIdx ? "w-4 bg-primary" : "w-1.5 bg-muted-foreground/30"
+                    }`}
+                    data-testid={`button-carousel-dot-${i}`}
+                  />
+                ))}
+              </div>
+              <Button
+                size="icon"
+                variant="ghost"
+                onClick={goNext}
+                disabled={currentIdx === total - 1}
+                data-testid="button-carousel-next"
+              >
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+            </div>
+          )}
+
+          {footnote && (
+            <div className="px-4 py-2.5 border-t border-card-border">
+              <p className="text-xs text-muted-foreground">{footnote}</p>
+            </div>
+          )}
+        </Card>
+        <p className="text-xs text-muted-foreground px-1 pt-1">
+          {new Date(timestamp).toLocaleTimeString([], {
+            hour: "2-digit",
+            minute: "2-digit",
+          })}
+        </p>
+      </div>
+    </div>
+  );
+}
+
 function MessageBubble({ message, agentId, isLastAssistant, onSendMessage }: { message: ChatMessage; agentId?: string; isLastAssistant?: boolean; onSendMessage?: (text: string) => void }) {
   const isUser = message.role === "user";
   const isHcmAgent = agentId === HCM_EXPRESSION_BUILDER_AGENT_ID;
@@ -337,6 +531,19 @@ function MessageBubble({ message, agentId, isLastAssistant, onSendMessage }: { m
     return (
       <>
         <ExpressionExplanationCard content={displayContent} timestamp={message.timestamp} />
+        {showPills && <SuggestedActionPills actions={actions} onSelect={onSendMessage} />}
+      </>
+    );
+  }
+
+  const validationRows = !isUser && isHcmAgent && isValidationMessage(displayContent)
+    ? parseValidationRows(displayContent)
+    : null;
+
+  if (validationRows) {
+    return (
+      <>
+        <SampleDataValidationCarousel content={displayContent} timestamp={message.timestamp} />
         {showPills && <SuggestedActionPills actions={actions} onSelect={onSendMessage} />}
       </>
     );
