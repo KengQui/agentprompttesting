@@ -30,5 +30,21 @@
     "role": "assistant",
     "content": "Here's a breakdown of how the expression works:\n\n**1. Your Objective**\nThis expression calculates the total scheduled amount by adding the scheduled employee contribution and the scheduled employer contribution.\n\n**2. Identifying Necessary Columns**\n- `ScheduledEEAmount`: This column represents the amount scheduled to be paid by the employee.\n- `ScheduledERAmount`: This column represents the amount scheduled to be paid by the employer.\n\n**3. Using the Add Function**\nThe `Add` function takes two or more numbers as input and returns their sum. In this case, we're using it to add the employee and employer scheduled amounts. The simplified expression looks like this:\n`Add(ScheduledEEAmount, ScheduledERAmount)`\n\n**4. Handling Data Conversion**\nThe `Value()` function is used to convert the `ScheduledEEAmount` and `ScheduledERAmount` columns from text to numeric values. This is necessary because, by default, report columns are treated as text. To perform arithmetic operations, we need to convert them to numbers first.\n\n**5. Combining Everything**\nThe complete expression combines the `Value()` function to convert the text columns to numbers, and the `Add()` function to sum the converted values:\n```\nAdd(Value(ScheduledEEAmount), Value(ScheduledERAmount))\n```\n\n{{SUGGESTED_ACTIONS:Use this expression|Revise this expression|Test with my data}}",
     "timestamp": "2026-02-11T21:31:29.602Z"
+  },
+  {
+    "id": "6f8b0898-b85c-4f9a-804c-a1783e68b3d7",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "sessionId": "06cea4b4-e83d-4988-ae4d-cf29b2620171",
+    "role": "user",
+    "content": "Test with my data",
+    "timestamp": "2026-02-11T21:36:08.934Z"
+  },
+  {
+    "id": "10b43efd-f893-4a87-9774-a35cccb8d9fc",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "sessionId": "06cea4b4-e83d-4988-ae4d-cf29b2620171",
+    "role": "assistant",
+    "content": "Here's a preview of how the expression will calculate the total scheduled amount, using data from your report:\n\n**Row 1: Employee: Sarah Johnson**\n- **Inputs:** `ScheduledEEAmount` = \"$285.50\", `ScheduledERAmount` = \"$142.75\"\n- **Calculation:**\n  `Add(Value(ScheduledEEAmount), Value(ScheduledERAmount))`\n  = `Add(Value(\"$285.50\"), Value(\"$142.75\"))`\n  = `Add(285.50, 142.75)`\n  = `428.25`\n- **Result:** 428.25\n\n**Row 2: Employee: Michael Chen**\n- **Inputs:** `ScheduledEEAmount` = \"$195.00\", `ScheduledERAmount` = \"$97.50\"\n- **Calculation:**\n  `Add(Value(ScheduledEEAmount), Value(ScheduledERAmount))`\n  = `Add(Value(\"$195.00\"), Value(\"$97.50\"))`\n  = `Add(195.00, 97.50)`\n  = `292.50`\n- **Result:** 292.50\n\n{{SUGGESTED_ACTIONS:Use this expression|Revise this expression|Explain this expression}}",
+    "timestamp": "2026-02-11T21:36:11.310Z"
   }
 ]

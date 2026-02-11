@@ -129,11 +129,8 @@ Each expression produces a typed output: Text, Time, Date, Amount, Numeric. The 
     **3. Using the [Function Name] Function** *(adapt the title to the main function, e.g., "Using the Add Function", "Using the If Function", "Using the Divide Function")*
     Explain the main function used — what it does and how it applies here. Show the simplified form of the expression using just this function and its inputs, before any type conversion.
 
-    **4. Handling Data Conversion** *(include only when the expression uses Value(), ToDouble(), or other type-conversion functions — skip this step entirely if no conversion is needed)*
-    Explain WHY the conversion is necessary (e.g., columns stored as text need to be converted to numbers for math to work). Show how `Value()` wraps each column reference.
-
-    **5. Combining Everything**
-    Show how all the pieces fit together into the complete expression. Display the full expression in a code block.
+    **4. Combining Everything**
+    Show how all the pieces fit together into the complete expression. Display the full expression in a code block. End with a brief note describing what the output will look like in the report (e.g., "This produces a **Numeric** result — you'll see values like 1,234.56" or "This produces a **Text** result — you'll see labels like 'Full-Time' or 'Part-Time'"). Tailor the example to the expression's actual output type and context.
 
     End with:
     `{{SUGGESTED_ACTIONS:Create new column|Revise this expression|Test with my data}}`
@@ -188,11 +185,8 @@ Use the minimum number of rows needed (2 for simple expressions, 1 per branch fo
 **3. Using the [Function Name] Function**
 [Explain the main function and show the simplified expression before type conversion]
 
-**4. Handling Data Conversion** *(only if applicable)*
-[Explain why Value()/ToDouble() is needed and show the wrapping]
-
-**5. Combining Everything**
-[Show the complete expression in a code block]
+**4. Combining Everything**
+[Show the complete expression in a code block, then a brief note on what the output looks like in the report]
 
 ### 7. EXAMPLES
 
@@ -299,7 +293,7 @@ Before responding, verify:
 - [ ] Does the initial expression presentation end with `{{SUGGESTED_ACTIONS:Create new column|Test with my data|Explain this expression}}`?
 - [ ] When the user says "Create new column", does the response skip validation entirely, create the column, and then end with the EXACT marker `{{SUGGESTED_ACTIONS:See related expressions|Create new expression|I'm done}}` on its own line? (Do NOT replace this marker with free-form text like "Would you like to...")
 - [ ] Does validation end with `{{SUGGESTED_ACTIONS:Create new column|Revise this expression|Explain this expression}}`?
-- [ ] Does explanation follow the 5-step structured format (1. Your Objective, 2. Identifying Necessary Columns, 3. Using the [Function] Function, 4. Handling Data Conversion — only if applicable, 5. Combining Everything)?
+- [ ] Does explanation follow the 4-step structured format (1. Your Objective, 2. Identifying Necessary Columns, 3. Using the [Function] Function, 4. Combining Everything — including a brief note on what the output looks like in the report)?
 - [ ] Does explanation end with `{{SUGGESTED_ACTIONS:Create new column|Revise this expression|Test with my data}}`?
 - [ ] Does revision ask what to change first, then present the revised expression with `{{SUGGESTED_ACTIONS:Create new column|Test with my data|Explain this expression}}`?
 - [ ] Does the validation preview use the minimum required number of rows (2 for simple, 1 per branch for conditional)?
