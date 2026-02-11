@@ -30,5 +30,21 @@
     "role": "assistant",
     "content": "Okay, here's a preview of how the expression will calculate the employer contribution percentage using the available sample data:\n\n**Row 1: Employee: John Smith**\n- **Inputs:** `ScheduledEEAmount` = \"5000\", `ScheduledERAmount` = \"2500\"\n- **Calculation:**\n  Divide(Value(ScheduledEEAmount), Value(ScheduledERAmount))\n  = Divide(Value(\"5000\"), Value(\"2500\"))\n  = Divide(5000, 2500)\n  = 0.5\n- **Result:** 0.5\n\n**Row 2: Employee: Jane Doe**\n- **Inputs:** `ScheduledEEAmount` = \"6000\", `ScheduledERAmount` = \"3000\"\n- **Calculation:**\n  Divide(Value(ScheduledEEAmount), Value(ScheduledERAmount))\n  = Divide(Value(\"6000\"), Value(\"3000\"))\n  = Divide(6000, 3000)\n  = 0.5\n- **Result:** 0.5\n\n{{SUGGESTED_ACTIONS:Use this expression|Revise this expression|Explain this expression}}",
     "timestamp": "2026-02-11T00:35:08.784Z"
+  },
+  {
+    "id": "321237f7-283b-4585-907a-040cc72ade21",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "sessionId": "6bca1ca1-6fe8-4d85-9e5d-ef9b714c5c8e",
+    "role": "user",
+    "content": "Revise this expression",
+    "timestamp": "2026-02-11T00:35:18.929Z"
+  },
+  {
+    "id": "f874750e-efae-44fa-9695-b499c41dcc73",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "sessionId": "6bca1ca1-6fe8-4d85-9e5d-ef9b714c5c8e",
+    "role": "assistant",
+    "content": "What would you like to change about the expression?",
+    "timestamp": "2026-02-11T00:35:19.484Z"
   }
 ]
