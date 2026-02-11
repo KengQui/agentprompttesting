@@ -81,17 +81,17 @@ function SessionCard({
 
   return (
     <div
-      className={`group relative p-3 rounded-lg cursor-pointer transition-colors ${
+      className={`group relative p-3 rounded-lg cursor-pointer transition-colors overflow-hidden ${
         isActive
           ? "bg-primary/10 border border-primary/20"
-          : "hover-elevate border border-transparent"
+          : "hover:bg-muted/50 border border-transparent"
       }`}
       onClick={!isEditing ? onSelect : undefined}
       data-testid={`session-card-${session.id}`}
     >
-      <div className="flex items-center gap-2 w-full">
-        <MessageSquare className="h-4 w-4 shrink-0 text-muted-foreground" />
-        <div style={{ width: 'calc(100% - 80px)' }}>
+      <div className="flex items-start gap-1.5">
+        <MessageSquare className="h-4 w-4 mt-0.5 shrink-0 text-muted-foreground" />
+        <div className="flex-1 min-w-0 overflow-hidden">
           {isEditing ? (
             <div className="flex items-center gap-1">
               <Input
@@ -143,7 +143,7 @@ function SessionCard({
           </div>
         </div>
         {!isEditing && (
-          <div className="flex items-center gap-0.5 shrink-0 ml-auto">
+          <div className="flex items-center gap-0.5 shrink-0">
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button
