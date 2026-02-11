@@ -1,0 +1,18 @@
+[
+  {
+    "id": "eb74c791-80cd-4fdc-be36-a4a8e511a196",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "sessionId": "060812f4-c7ea-401e-a665-ca8e6c936129",
+    "role": "user",
+    "content": "Create a compensation column",
+    "timestamp": "2026-02-11T11:58:34.963Z"
+  },
+  {
+    "id": "3f8d20cd-c759-4d41-b421-322d2c69c642",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "sessionId": "060812f4-c7ea-401e-a665-ca8e6c936129",
+    "role": "assistant",
+    "content": "I can help with that! To create a compensation column, I need more information about what kind of compensation you're looking to calculate.\n\nCould you please describe the calculation you'd like to perform? For example, are you looking to add salary and bonus, calculate total compensation with benefits, or something else?",
+    "timestamp": "2026-02-11T11:58:35.919Z"
+  }
+]

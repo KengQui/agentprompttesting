@@ -530,6 +530,26 @@ export function extractPendingQuestion(assistantResponse: string): string | null
   return null;
 }
 
+export function isOpenEndedInvitation(question: string): boolean {
+  const openEndedPatterns = [
+    /what would you like to (build|create|do|make|work on)/i,
+    /how can i help/i,
+    /what can i (help|do|assist)/i,
+    /what('s| is) (next|on your mind)/i,
+    /what do you (need|want)/i,
+    /what are you looking (for|to)/i,
+    /what('s| is) your (next |new )?request/i,
+    /tell me what you('d like| want)/i,
+    /what expression would you like/i,
+    /what column would you like/i,
+    /what would you like me to/i,
+    /^how can i assist you/i,
+    /^what can i do for you/i,
+  ];
+  const cleaned = question.replace(/[*_`]/g, '').trim();
+  return openEndedPatterns.some(p => p.test(cleaned));
+}
+
 export async function detectTopicSwitch(
   pendingQuestion: string,
   userMessage: string
@@ -542,6 +562,10 @@ export async function detectTopicSwitch(
     return false;
   }
 
+  if (isOpenEndedInvitation(pendingQuestion)) {
+    return false;
+  }
+
   try {
     const detectAi = new GoogleGenAI({ apiKey });
     const prompt = `You are analyzing whether a user's message is answering/responding to a specific question, or if they are switching to a completely different topic.
@@ -549,6 +573,8 @@ export async function detectTopicSwitch(
 QUESTION THAT WAS ASKED: "${pendingQuestion}"
 
 USER'S RESPONSE: "${userMessage}"
+
+IMPORTANT: If the question is broad or open-ended (e.g. asking what the user wants to do, what they'd like to build, how you can help), then ANY substantive request from the user should be considered ANSWERING — because they are telling you what they want, which is exactly what was asked.
 
 Is the user answering or responding to the question above, or are they asking about something completely different/unrelated?
 

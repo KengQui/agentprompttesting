@@ -29,7 +29,7 @@ async function requireAuth(req: AuthenticatedRequest, res: Response, next: NextF
   req.user = user;
   next();
 }
-import { generateAgentResponse, generateValidationRules, generateGuardrails, generateSystemPrompt, generateSampleData, evaluateContextSufficiency, processClarifyingChat, generateValidationRulesWithInsights, generateGuardrailsWithInsights, generateActionsAndMockData, parseActionFromResponse, stripActionBlocks, executeSimulatedAction, executeActionWithSampleData, extractBusinessCaseContent, sampleDatasetsToWorkingData, workingDataToSampleDatasets, generateWelcomeConfig, extractPendingQuestion, detectTopicSwitch, generatePromptCoachResponse, type GenerationContext, type SystemPromptContext, type SampleDataGenerationContext, type ClarifyingChatContext, type ActionsGenerationContext, type ExtractionResult, type WelcomeConfigGenerationContext, type PromptCoachMessage, type PromptCoachContext } from "./gemini";
+import { generateAgentResponse, generateValidationRules, generateGuardrails, generateSystemPrompt, generateSampleData, evaluateContextSufficiency, processClarifyingChat, generateValidationRulesWithInsights, generateGuardrailsWithInsights, generateActionsAndMockData, parseActionFromResponse, stripActionBlocks, executeSimulatedAction, executeActionWithSampleData, extractBusinessCaseContent, sampleDatasetsToWorkingData, workingDataToSampleDatasets, generateWelcomeConfig, extractPendingQuestion, detectTopicSwitch, isOpenEndedInvitation, generatePromptCoachResponse, type GenerationContext, type SystemPromptContext, type SampleDataGenerationContext, type ClarifyingChatContext, type ActionsGenerationContext, type ExtractionResult, type WelcomeConfigGenerationContext, type PromptCoachMessage, type PromptCoachContext } from "./gemini";
 import { loadAgentComponents, clearAgentCache, hasCustomComponents } from "./agent-loader";
 import { createRecoveryManager } from "./components/recovery-manager";
 import multer from "multer";
@@ -910,9 +910,15 @@ export async function registerRoutes(
 
       const newPendingQuestion = extractPendingQuestion(responseContent);
       if (newPendingQuestion) {
-        const existingState = pendingQuestionStore.get(pqKey);
-        const preserveNudged = topicSwitchDetected && existingState?.alreadyNudged === true;
-        pendingQuestionStore.set(pqKey, { question: newPendingQuestion, alreadyNudged: preserveNudged });
+        if (isOpenEndedInvitation(newPendingQuestion)) {
+          if (!topicSwitchDetected) {
+            pendingQuestionStore.delete(pqKey);
+          }
+        } else {
+          const existingState = pendingQuestionStore.get(pqKey);
+          const preserveNudged = topicSwitchDetected && existingState?.alreadyNudged === true;
+          pendingQuestionStore.set(pqKey, { question: newPendingQuestion, alreadyNudged: preserveNudged });
+        }
       } else if (!topicSwitchDetected) {
         pendingQuestionStore.delete(pqKey);
       }
