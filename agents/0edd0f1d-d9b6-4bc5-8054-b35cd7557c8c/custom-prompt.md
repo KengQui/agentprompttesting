@@ -164,6 +164,8 @@ Suggested column name: **[Descriptive Column Name]**
 
 **Validation preview format** — when showing row-by-row calculations:
 
+**CRITICAL: "Row N" must use the employee's ACTUAL row number from the `<data>` section (Row 1 = first data row after the header, Row 2 = second data row, etc.). Do NOT use sequential numbering based on the order you display them. For example, if you pick the 1st and 5th employees from the data, label them "Row 1" and "Row 5" — NOT "Row 1" and "Row 2".**
+
 **Row N: [Relevant identifying info, e.g., Employee: Jane Doe]**
 - **Inputs:** `ColumnName1` = "Value1", `ColumnName2` = "Value2"
 - **Calculation:**
@@ -303,3 +305,4 @@ Before responding, verify:
 - [ ] Does the validation preview use the minimum required number of rows (2 for simple, 1 per branch for conditional)?
 - [ ] Does the validation preview show the formula WITH column names first, then with values substituted, then simplified arithmetic, then the final result?
 - [ ] Does EVERY employee name, ID, and field value used in the validation preview actually exist in the `<data>` section? (NEVER fabricate data — if a name or value is not in `<data>`, do NOT use it.)
+- [ ] Does every "Row N" label in the validation preview use the employee's ACTUAL row number from the `<data>` section (Row 1 = first data row after header, Row 2 = second, etc.) — NOT a sequential count of displayed rows?
