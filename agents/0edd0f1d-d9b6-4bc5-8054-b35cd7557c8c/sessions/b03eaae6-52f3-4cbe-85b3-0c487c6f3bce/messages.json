@@ -1,0 +1,98 @@
+[
+  {
+    "id": "7b30b61a-67ff-4c07-8c41-3949533a8702",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "sessionId": "b03eaae6-52f3-4cbe-85b3-0c487c6f3bce",
+    "role": "user",
+    "content": "Create a compensation column.",
+    "timestamp": "2026-02-11T00:39:45.954Z"
+  },
+  {
+    "id": "7124a191-cd0e-4764-b9c9-283e84f33d26",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "sessionId": "b03eaae6-52f3-4cbe-85b3-0c487c6f3bce",
+    "role": "assistant",
+    "content": "Okay, I can help you create a compensation column. To create the compensation column, I need to know which columns to use in the calculation. Can you please tell me what should be included in this compensation column?",
+    "timestamp": "2026-02-11T00:39:46.710Z"
+  },
+  {
+    "id": "ad78bd5b-f438-46a0-b36d-b26f19f2b54d",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "sessionId": "b03eaae6-52f3-4cbe-85b3-0c487c6f3bce",
+    "role": "user",
+    "content": "Calculate tenure in years from Hire Date.",
+    "timestamp": "2026-02-11T00:40:06.970Z"
+  },
+  {
+    "id": "b591af8d-967d-487d-ba86-44144ad736ec",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "sessionId": "b03eaae6-52f3-4cbe-85b3-0c487c6f3bce",
+    "role": "assistant",
+    "content": "Before we move on to the tenure calculation, can you please tell me what should be included in the compensation column?",
+    "timestamp": "2026-02-11T00:40:08.004Z"
+  },
+  {
+    "id": "8fb6122a-1246-4f09-9c95-1ca2be6bb2fa",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "sessionId": "b03eaae6-52f3-4cbe-85b3-0c487c6f3bce",
+    "role": "user",
+    "content": "Calculate tenure in years from Hire Date.",
+    "timestamp": "2026-02-11T00:40:20.845Z"
+  },
+  {
+    "id": "90d69908-b2b1-4ec9-95ef-ff767e271300",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "sessionId": "b03eaae6-52f3-4cbe-85b3-0c487c6f3bce",
+    "role": "assistant",
+    "content": "I can help you with that! This expression calculates the difference between today's date and the hire date, and then divides by 365.25 to get the result in years. The `Round` function is used to round the result to two decimal places.\n\n```\nRound(Divide(DateDiff(Today(), HireDate), 365.25), 2)\n```\n\nThis expression will produce a **Numeric** output.\n\nSuggested column name: **Years of Service**\n\n{{SUGGESTED_ACTIONS:Use this expression|Validate with sample data|Explain this expression}}",
+    "timestamp": "2026-02-11T00:40:22.568Z"
+  },
+  {
+    "id": "24241df6-1c1b-4c3a-9e31-1588e041df2a",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "sessionId": "b03eaae6-52f3-4cbe-85b3-0c487c6f3bce",
+    "role": "user",
+    "content": "Explain this expression",
+    "timestamp": "2026-02-11T00:40:30.333Z"
+  },
+  {
+    "id": "a6226e40-3c81-4efd-a91c-5223915fb53c",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "sessionId": "b03eaae6-52f3-4cbe-85b3-0c487c6f3bce",
+    "role": "assistant",
+    "content": "Okay! Here's how the expression works:\n\n*   `DateDiff(Today(), HireDate)`: This part calculates the difference in days between the current date (`Today()`) and the employee's hire date (`HireDate`).\n*   `Divide(..., 365.25)`: This divides the number of days by 365.25 (the average number of days in a year, accounting for leap years) to convert the difference into years.\n*   `Round(..., 2)`: This rounds the result to two decimal places, giving you a more readable value for years of service.\n\nIn simple terms, the expression subtracts the hire date from today's date to find the number of days between them, converts that number of days into years, and then rounds the result to two decimal places.\n\n{{SUGGESTED_ACTIONS:Use this expression|Revise this expression|Validate with sample data}}",
+    "timestamp": "2026-02-11T00:40:32.353Z"
+  },
+  {
+    "id": "5ac3f868-1674-4918-9bf5-247e62bbeea7",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "sessionId": "b03eaae6-52f3-4cbe-85b3-0c487c6f3bce",
+    "role": "user",
+    "content": "Use this expression",
+    "timestamp": "2026-02-11T00:40:36.737Z"
+  },
+  {
+    "id": "3c6f6a2b-98ba-44e9-8585-f52ea6183eab",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "sessionId": "b03eaae6-52f3-4cbe-85b3-0c487c6f3bce",
+    "role": "assistant",
+    "content": "Successfully created the calculated column '{Years of Service}' and added it to your report.",
+    "timestamp": "2026-02-11T00:40:37.544Z"
+  },
+  {
+    "id": "0287a138-1371-4792-998e-52c5ca6d8523",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "sessionId": "b03eaae6-52f3-4cbe-85b3-0c487c6f3bce",
+    "role": "user",
+    "content": "Create new expression",
+    "timestamp": "2026-02-11T00:40:47.866Z"
+  },
+  {
+    "id": "571eb5b9-83ad-492d-9776-bec4bf2394fd",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "sessionId": "b03eaae6-52f3-4cbe-85b3-0c487c6f3bce",
+    "role": "assistant",
+    "content": "What would you like to build?",
+    "timestamp": "2026-02-11T00:40:48.421Z"
+  }
+]
