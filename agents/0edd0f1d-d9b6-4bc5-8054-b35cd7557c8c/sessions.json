@@ -1,12 +1,5 @@
 [
   {
-    "id": "test-build-anim-1770670924",
-    "title": "Test Build Animation",
-    "createdAt": "2026-02-09T21:02:04.571Z",
-    "lastMessageAt": "2026-02-09T21:02:04.572Z",
-    "updatedAt": "2026-02-10T20:53:02.275Z"
-  },
-  {
     "id": "92776c61-0d24-4078-90e0-1c203cfcb16d",
     "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
     "title": "New Session",
@@ -483,13 +476,6 @@
     "updatedAt": "2026-02-10T19:57:02.755Z"
   },
   {
-    "id": "28af302c-c712-495a-9f22-403ee70f2cac",
-    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
-    "title": "New Session",
-    "createdAt": "2026-02-10T20:57:08.153Z",
-    "updatedAt": "2026-02-10T20:57:08.153Z"
-  },
-  {
     "id": "3839856f-1c02-4f37-8d59-cdfff0315fcd",
     "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
     "title": "New Session",
@@ -509,5 +495,12 @@
     "title": "New Session",
     "createdAt": "2026-02-10T23:27:29.109Z",
     "updatedAt": "2026-02-11T00:01:45.167Z"
+  },
+  {
+    "id": "0cfa800f-2612-4ce0-8c45-4343eec1fedb",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "title": "New Session",
+    "createdAt": "2026-02-11T00:03:45.317Z",
+    "updatedAt": "2026-02-11T00:04:20.806Z"
   }
 ]
