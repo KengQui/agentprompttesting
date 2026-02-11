@@ -46,5 +46,21 @@
     "role": "assistant",
     "content": "I understand you'd like to change the syntax to `Add(ScheduledEEAmount), (ScheduledERAmount))`. However, the `Add()` function requires that you first convert the column names from text to numeric values using the `Value()` function, like this: `Value(ScheduledEEAmount)`. Otherwise, the function can't perform the calculation. Also, the syntax should be `Add(Value(ScheduledEEAmount), Value(ScheduledERAmount))` without the extra parenthesis.\n\nHere's the corrected expression:\n\n```\nAdd(Value(ScheduledEEAmount), Value(ScheduledERAmount))\n```\n\nThis expression will produce a **Numeric** output.\n\nSuggested column name: **Total Scheduled Amount**\n{{SUGGESTED_ACTIONS:Create new column|Test with my data|Explain this expression}}",
     "timestamp": "2026-02-11T22:35:56.655Z"
+  },
+  {
+    "id": "e3d51c6e-b5f1-4e24-abc4-0aba75048176",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "sessionId": "22c3ad56-ec8d-4cad-9f80-2b1212813467",
+    "role": "user",
+    "content": "Test with my data",
+    "timestamp": "2026-02-11T22:39:01.513Z"
+  },
+  {
+    "id": "07340db8-26f9-4a10-9cb4-b07245b864e7",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "sessionId": "22c3ad56-ec8d-4cad-9f80-2b1212813467",
+    "role": "assistant",
+    "content": "Here's a preview of the expression using data from your report:\n\n**Row 1: Employee: Sarah Johnson**\n- **Inputs:** `ScheduledEEAmount` = \"$285.50\", `ScheduledERAmount` = \"$142.75\"\n- **Calculation:**\n  Add(Value(ScheduledEEAmount), Value(ScheduledERAmount))\n  = Add(Value(\"$285.50\"), Value(\"$142.75\"))\n  = Add(285.50, 142.75)\n  = 428.25\n- **Result:** 428.25\n\n**Row 2: Employee: Michael Chen**\n- **Inputs:** `ScheduledEEAmount` = \"$195.00\", `ScheduledERAmount` = \"$97.50\"\n- **Calculation:**\n  Add(Value(ScheduledEEAmount), Value(ScheduledERAmount))\n  = Add(Value(\"$195.00\"), Value(\"$97.50\"))\n  = Add(195.00, 97.50)\n  = 292.50\n- **Result:** 292.50\n{{SUGGESTED_ACTIONS:Create new column|Revise this expression|Explain this expression}}",
+    "timestamp": "2026-02-11T22:39:04.012Z"
   }
 ]
