@@ -1,0 +1,82 @@
+[
+  {
+    "id": "a9c95177-4ab2-4345-8230-848743eaf3d7",
+    "agentId": "6fb89b14-34ca-464a-a7ca-01538a550368",
+    "sessionId": "8f0b6ccc-1de8-4d06-b5b0-1532ce877e14",
+    "role": "user",
+    "content": "maria called in",
+    "timestamp": "2026-02-11T15:02:55.011Z"
+  },
+  {
+    "id": "617b96e1-0cac-45e3-89a7-2d8bbeaed1e4",
+    "agentId": "6fb89b14-34ca-464a-a7ca-01538a550368",
+    "sessionId": "8f0b6ccc-1de8-4d06-b5b0-1532ce877e14",
+    "role": "assistant",
+    "content": "Okay. To confirm, are you referring to Maria Garcia, who works as a Stock Associate at Store 101?",
+    "timestamp": "2026-02-11T15:02:55.777Z"
+  },
+  {
+    "id": "7250d3cd-b6ba-408b-9194-a93fcd9a542d",
+    "agentId": "6fb89b14-34ca-464a-a7ca-01538a550368",
+    "sessionId": "8f0b6ccc-1de8-4d06-b5b0-1532ce877e14",
+    "role": "user",
+    "content": "yes",
+    "timestamp": "2026-02-11T15:03:02.254Z"
+  },
+  {
+    "id": "207ffd1d-59d7-42ca-a7ce-79130cd60ca4",
+    "agentId": "6fb89b14-34ca-464a-a7ca-01538a550368",
+    "sessionId": "8f0b6ccc-1de8-4d06-b5b0-1532ce877e14",
+    "role": "assistant",
+    "content": "Understood. What date is Maria absent?",
+    "timestamp": "2026-02-11T15:03:02.924Z"
+  },
+  {
+    "id": "6dd650d5-4ec1-4d38-a744-4c6ab930dce3",
+    "agentId": "6fb89b14-34ca-464a-a7ca-01538a550368",
+    "sessionId": "8f0b6ccc-1de8-4d06-b5b0-1532ce877e14",
+    "role": "user",
+    "content": "feb 4",
+    "timestamp": "2026-02-11T15:04:00.902Z"
+  },
+  {
+    "id": "a7f2a417-2612-4601-998e-ec20d83910b8",
+    "agentId": "6fb89b14-34ca-464a-a7ca-01538a550368",
+    "sessionId": "8f0b6ccc-1de8-4d06-b5b0-1532ce877e14",
+    "role": "assistant",
+    "content": "I see that Maria Garcia has an assigned shift on February 4, from 2:00 PM to 10:00 PM. What earning code should we use for this absence? Your options are:\n\n1.  Sick Leave (Accrued)\n2.  Vacation (Accrued)\n3.  Unpaid Time Off\n4.  Bereavement Leave\n5.  Jury Duty\n\nPlease select one.",
+    "timestamp": "2026-02-11T15:04:02.646Z"
+  },
+  {
+    "id": "34da52e7-520a-4013-94dd-cde6f6b21c2b",
+    "agentId": "6fb89b14-34ca-464a-a7ca-01538a550368",
+    "sessionId": "8f0b6ccc-1de8-4d06-b5b0-1532ce877e14",
+    "role": "user",
+    "content": "1",
+    "timestamp": "2026-02-11T15:04:14.405Z"
+  },
+  {
+    "id": "9350661a-e506-4af1-9b96-61e2badb281d",
+    "agentId": "6fb89b14-34ca-464a-a7ca-01538a550368",
+    "sessionId": "8f0b6ccc-1de8-4d06-b5b0-1532ce877e14",
+    "role": "assistant",
+    "content": "Okay, you'd like to classify Maria Garcia's absence on February 4th as Sick Leave.\n\nBefore I can proceed, I need to verify that Maria has enough sick leave available to cover the 8-hour shift. Would you like me to check her current sick leave balance?",
+    "timestamp": "2026-02-11T15:04:15.436Z"
+  },
+  {
+    "id": "7840b558-8a69-46a8-a9aa-83b49e7771eb",
+    "agentId": "6fb89b14-34ca-464a-a7ca-01538a550368",
+    "sessionId": "8f0b6ccc-1de8-4d06-b5b0-1532ce877e14",
+    "role": "user",
+    "content": "yes",
+    "timestamp": "2026-02-11T15:04:27.730Z"
+  },
+  {
+    "id": "a52d5341-ba92-4fa6-833c-bffcded6d58b",
+    "agentId": "6fb89b14-34ca-464a-a7ca-01538a550368",
+    "sessionId": "8f0b6ccc-1de8-4d06-b5b0-1532ce877e14",
+    "role": "assistant",
+    "content": "Successfully retrieved accrual balances for employee E99887.",
+    "timestamp": "2026-02-11T15:04:28.339Z"
+  }
+]

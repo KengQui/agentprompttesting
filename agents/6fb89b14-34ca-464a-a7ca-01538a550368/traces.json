@@ -1304,6 +1304,195 @@
         }
       ],
       "success": true
+    },
+    {
+      "id": "trace-1770822175773",
+      "sessionId": "8f0b6ccc-1de8-4d06-b5b0-1532ce877e14",
+      "userInput": "maria called in",
+      "agentResponse": "Okay. To confirm, are you referring to Maria Garcia, who works as a Stock Associate at Store 101?",
+      "startTime": "2026-02-11T15:02:55.011Z",
+      "endTime": "2026-02-11T15:02:55.773Z",
+      "totalDuration": 762,
+      "entries": [
+        {
+          "id": "entry-1770822175012-1",
+          "type": "intent_classification",
+          "name": "Orchestrator Intent Classification",
+          "timestamp": "2026-02-11T15:02:55.012Z",
+          "metadata": {
+            "intent": "answer_question",
+            "classificationMethod": "orchestrator",
+            "confidence": "high"
+          }
+        },
+        {
+          "id": "entry-1770822175773-3",
+          "type": "llm_call",
+          "name": "Gemini Response Generation",
+          "timestamp": "2026-02-11T15:02:55.773Z",
+          "duration": 761,
+          "metadata": {
+            "model": "gemini",
+            "intent": "answer_question",
+            "validated": true
+          }
+        }
+      ],
+      "success": true
+    },
+    {
+      "id": "trace-1770822182922",
+      "sessionId": "8f0b6ccc-1de8-4d06-b5b0-1532ce877e14",
+      "userInput": "yes",
+      "agentResponse": "Understood. What date is Maria absent?",
+      "startTime": "2026-02-11T15:03:02.254Z",
+      "endTime": "2026-02-11T15:03:02.922Z",
+      "totalDuration": 668,
+      "entries": [
+        {
+          "id": "entry-1770822182256-1",
+          "type": "intent_classification",
+          "name": "Orchestrator Intent Classification",
+          "timestamp": "2026-02-11T15:03:02.256Z",
+          "metadata": {
+            "intent": "answer_question",
+            "classificationMethod": "orchestrator",
+            "confidence": "high"
+          }
+        },
+        {
+          "id": "entry-1770822182922-3",
+          "type": "llm_call",
+          "name": "Gemini Response Generation",
+          "timestamp": "2026-02-11T15:03:02.922Z",
+          "duration": 666,
+          "metadata": {
+            "model": "gemini",
+            "intent": "answer_question",
+            "validated": true
+          }
+        }
+      ],
+      "success": true
+    },
+    {
+      "id": "trace-1770822242646",
+      "sessionId": "8f0b6ccc-1de8-4d06-b5b0-1532ce877e14",
+      "userInput": "feb 4",
+      "agentResponse": "I see that Maria Garcia has an assigned shift on February 4, from 2:00 PM to 10:00 PM. What earning code should we use for this absence? Your options are:\n\n1.  Sick Leave (Accrued)\n2.  Vacation (Accrued)\n3.  Unpaid Time Off\n4.  Bereavement Leave\n5.  Jury Duty\n\nPlease select one.",
+      "startTime": "2026-02-11T15:04:00.902Z",
+      "endTime": "2026-02-11T15:04:02.646Z",
+      "totalDuration": 1744,
+      "entries": [
+        {
+          "id": "entry-1770822241345-1",
+          "type": "intent_classification",
+          "name": "Orchestrator Intent Classification",
+          "timestamp": "2026-02-11T15:04:01.345Z",
+          "metadata": {
+            "intent": "answer_question",
+            "classificationMethod": "orchestrator",
+            "confidence": "high"
+          }
+        },
+        {
+          "id": "entry-1770822242646-3",
+          "type": "llm_call",
+          "name": "Gemini Response Generation",
+          "timestamp": "2026-02-11T15:04:02.646Z",
+          "duration": 1301,
+          "metadata": {
+            "model": "gemini",
+            "intent": "answer_question",
+            "validated": true
+          }
+        }
+      ],
+      "success": true
+    },
+    {
+      "id": "trace-1770822255434",
+      "sessionId": "8f0b6ccc-1de8-4d06-b5b0-1532ce877e14",
+      "userInput": "1",
+      "agentResponse": "Okay, you'd like to classify Maria Garcia's absence on February 4th as Sick Leave.\n\nBefore I can proceed, I need to verify that Maria has enough sick leave available to cover the 8-hour shift. Would you like me to check her current sick leave balance?",
+      "startTime": "2026-02-11T15:04:14.405Z",
+      "endTime": "2026-02-11T15:04:15.434Z",
+      "totalDuration": 1029,
+      "entries": [
+        {
+          "id": "entry-1770822254406-1",
+          "type": "intent_classification",
+          "name": "Orchestrator Intent Classification",
+          "timestamp": "2026-02-11T15:04:14.406Z",
+          "metadata": {
+            "intent": "answer_question",
+            "classificationMethod": "orchestrator",
+            "confidence": "high"
+          }
+        },
+        {
+          "id": "entry-1770822255434-3",
+          "type": "llm_call",
+          "name": "Gemini Response Generation",
+          "timestamp": "2026-02-11T15:04:15.434Z",
+          "duration": 1028,
+          "metadata": {
+            "model": "gemini",
+            "intent": "answer_question",
+            "validated": true
+          }
+        }
+      ],
+      "success": true
+    },
+    {
+      "id": "trace-1770822268338",
+      "sessionId": "8f0b6ccc-1de8-4d06-b5b0-1532ce877e14",
+      "userInput": "yes",
+      "agentResponse": "Successfully retrieved accrual balances for employee E99887.",
+      "startTime": "2026-02-11T15:04:27.730Z",
+      "endTime": "2026-02-11T15:04:28.338Z",
+      "totalDuration": 608,
+      "entries": [
+        {
+          "id": "entry-1770822267731-1",
+          "type": "intent_classification",
+          "name": "Orchestrator Intent Classification",
+          "timestamp": "2026-02-11T15:04:27.731Z",
+          "metadata": {
+            "intent": "answer_question",
+            "classificationMethod": "orchestrator",
+            "confidence": "high"
+          }
+        },
+        {
+          "id": "entry-1770822268338-action",
+          "type": "action_simulation",
+          "name": "Action: view_employee_accrual_balances",
+          "timestamp": "2026-02-11T15:04:28.338Z",
+          "metadata": {
+            "actionName": "view_employee_accrual_balances",
+            "fields": {
+              "employee_id": "E99887"
+            },
+            "success": true,
+            "message": "Successfully retrieved accrual balances for employee E99887."
+          }
+        },
+        {
+          "id": "entry-1770822268338-3",
+          "type": "llm_call",
+          "name": "Gemini Response Generation",
+          "timestamp": "2026-02-11T15:04:28.338Z",
+          "duration": 607,
+          "metadata": {
+            "model": "gemini",
+            "intent": "answer_question",
+            "validated": true
+          }
+        }
+      ],
+      "success": true
     }
   ],
   "stats": {
@@ -1312,16 +1501,16 @@
     },
     "signalReads": {},
     "intentDistribution": {
-      "answer_question": 37
+      "answer_question": 42
     },
     "classificationMethods": {
-      "orchestrator": 37
+      "orchestrator": 42
     },
-    "avgResponseTime": 1034.1351351351352,
-    "totalLlmCalls": 30,
+    "avgResponseTime": 1025.5714285714287,
+    "totalLlmCalls": 35,
     "totalTokensUsed": 0,
     "errorCount": 4
   },
   "createdAt": "2026-02-06T01:22:58.868Z",
-  "updatedAt": "2026-02-11T14:45:55.291Z"
+  "updatedAt": "2026-02-11T15:04:28.338Z"
 }
