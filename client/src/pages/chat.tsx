@@ -766,7 +766,7 @@ export default function Chat() {
         </div>
       </header>
 
-      <div className="flex-1 flex overflow-hidden">
+      <div className="flex-1 flex overflow-hidden min-w-0">
         {sidebarOpen && (
           <>
             <SessionSidebar

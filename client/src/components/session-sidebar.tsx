@@ -261,7 +261,7 @@ export function SessionSidebar({
   });
 
   return (
-    <div className="shrink-0 border-r bg-muted/30 flex flex-col h-full" style={{ width: `${width}px`, maxWidth: '400px' }}>
+    <div className="shrink-0 border-r bg-muted/30 flex flex-col h-full overflow-hidden" style={{ width: `${Math.min(width, 400)}px`, maxWidth: '400px' }}>
       <div className="p-3 border-b shrink-0">
         <Button
           onClick={onNewSession}
@@ -276,8 +276,8 @@ export function SessionSidebar({
       {coachOpen ? (
         <PromptCoachPanel agentId={agentId} agentName={agentName} onClose={() => setCoachOpen(false)} onConfigChanged={handleCoachConfigChanged} />
       ) : (
-        <ScrollArea className="flex-1">
-          <div className="p-2 space-y-1">
+        <ScrollArea className="flex-1 w-full">
+          <div className="p-2 space-y-1 overflow-hidden">
             {isLoading ? (
               <div className="flex items-center justify-center py-8">
                 <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />

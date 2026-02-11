@@ -1269,6 +1269,41 @@
         }
       ],
       "success": true
+    },
+    {
+      "id": "trace-1770821155291",
+      "sessionId": "f135c949-36cc-44d0-bc94-b2003a14d29e",
+      "userInput": "This is a very long session title that should definitely be truncated with ellipsis because it exceeds the available width in the sidebar panel",
+      "agentResponse": "Okay. How can I help you today?",
+      "startTime": "2026-02-11T14:45:54.696Z",
+      "endTime": "2026-02-11T14:45:55.291Z",
+      "totalDuration": 595,
+      "entries": [
+        {
+          "id": "entry-1770821154698-1",
+          "type": "intent_classification",
+          "name": "Orchestrator Intent Classification",
+          "timestamp": "2026-02-11T14:45:54.698Z",
+          "metadata": {
+            "intent": "answer_question",
+            "classificationMethod": "orchestrator",
+            "confidence": "high"
+          }
+        },
+        {
+          "id": "entry-1770821155291-3",
+          "type": "llm_call",
+          "name": "Gemini Response Generation",
+          "timestamp": "2026-02-11T14:45:55.291Z",
+          "duration": 593,
+          "metadata": {
+            "model": "gemini",
+            "intent": "answer_question",
+            "validated": true
+          }
+        }
+      ],
+      "success": true
     }
   ],
   "stats": {
@@ -1277,16 +1312,16 @@
     },
     "signalReads": {},
     "intentDistribution": {
-      "answer_question": 36
+      "answer_question": 37
     },
     "classificationMethods": {
-      "orchestrator": 36
+      "orchestrator": 37
     },
-    "avgResponseTime": 1046.3333333333333,
-    "totalLlmCalls": 29,
+    "avgResponseTime": 1034.1351351351352,
+    "totalLlmCalls": 30,
     "totalTokensUsed": 0,
     "errorCount": 4
   },
   "createdAt": "2026-02-06T01:22:58.868Z",
-  "updatedAt": "2026-02-11T14:25:33.019Z"
+  "updatedAt": "2026-02-11T14:45:55.291Z"
 }
