@@ -89,9 +89,9 @@ function SessionCard({
       onClick={!isEditing ? onSelect : undefined}
       data-testid={`session-card-${session.id}`}
     >
-      <div className="flex items-start gap-2 min-w-0">
-        <MessageSquare className="h-4 w-4 mt-0.5 shrink-0 text-muted-foreground" />
-        <div className="flex-1 min-w-0 overflow-hidden">
+      <div className="flex items-center gap-2 w-full">
+        <MessageSquare className="h-4 w-4 shrink-0 text-muted-foreground" />
+        <div style={{ width: 'calc(100% - 80px)' }}>
           {isEditing ? (
             <div className="flex items-center gap-1">
               <Input
@@ -129,57 +129,57 @@ function SessionCard({
               </Button>
             </div>
           ) : (
-            <div className="flex items-center gap-1">
-              <span className="text-sm font-medium truncate block min-w-0 flex-1" data-testid="text-session-title">
-                {session.title}
-              </span>
-              <div className="flex items-center gap-0.5 shrink-0 ml-auto">
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      size="icon"
-                      variant="ghost"
-                      className="h-6 w-6"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setIsEditing(true);
-                      }}
-                      data-testid="button-rename-session"
-                    >
-                      <Pencil className="h-3 w-3" />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>Rename session</TooltipContent>
-                </Tooltip>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      size="icon"
-                      variant="ghost"
-                      className="h-6 w-6 text-destructive"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onDelete();
-                      }}
-                      data-testid="button-delete-session"
-                    >
-                      <Trash2 className="h-3 w-3" />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>Delete session</TooltipContent>
-                </Tooltip>
-              </div>
+            <div className="text-sm font-medium truncate" data-testid="text-session-title">
+              {session.title}
             </div>
           )}
           {session.firstMessage && !isEditing && (
-            <p className="text-xs text-muted-foreground line-clamp-2 mt-0.5">
+            <p className="text-xs text-muted-foreground truncate mt-0.5">
               {session.firstMessage}
             </p>
           )}
-          <div className="flex items-center flex-wrap gap-2 mt-1 text-xs text-muted-foreground">
+          <div className="text-xs text-muted-foreground mt-1">
             <span>{formatDate(session.lastMessageAt || session.updatedAt)}</span>
           </div>
         </div>
+        {!isEditing && (
+          <div className="flex items-center gap-0.5 shrink-0 ml-auto">
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  className="h-6 w-6"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setIsEditing(true);
+                  }}
+                  data-testid="button-rename-session"
+                >
+                  <Pencil className="h-3.5 w-3.5" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Rename session</TooltipContent>
+            </Tooltip>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  className="h-6 w-6 text-destructive"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onDelete();
+                  }}
+                  data-testid="button-delete-session"
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Delete session</TooltipContent>
+            </Tooltip>
+          </div>
+        )}
       </div>
     </div>
   );
