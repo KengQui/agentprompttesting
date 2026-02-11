@@ -29,13 +29,35 @@ function stripActionBlocks(text: string): string {
 }
 
 const COLUMN_ADDED_FALLBACK_PILLS = ["See related expressions", "Create new expression", "I'm done"];
+const EXPRESSION_PRESENTED_FALLBACK_PILLS = ["Use this expression", "Validate with sample data", "Explain this expression"];
+const VALIDATION_DONE_FALLBACK_PILLS = ["Use this expression", "Revise this expression", "Explain this expression"];
+const EXPLANATION_DONE_FALLBACK_PILLS = ["Use this expression", "Revise this expression", "Validate with sample data"];
 
-function parseSuggestedActions(text: string): { cleanedText: string; actions: string[] } {
+function parseSuggestedActions(text: string, isHcmAgent?: boolean): { cleanedText: string; actions: string[] } {
   const regex = /\{\{SUGGESTED_ACTIONS:(.*?)\}\}/g;
   const match = regex.exec(text);
   if (!match) {
     if (/has been added|added it to your report|added to the report|added to your report|successfully created the calculated column/i.test(text)) {
       return { cleanedText: text, actions: COLUMN_ADDED_FALLBACK_PILLS };
+    }
+    if (isHcmAgent) {
+      const knownFns = /\b(Add|If|Value|Subtract|Multiply|Divide|Concat|DateDiff|FormatDate|GetYear|GetMonth|GetDay|In|Eq|Or|And|Not|Min|Max|Len|Search|Today|Round|Truncate)\s*\(/;
+      const hasHcmExpression = (knownFns.test(text) && /`/.test(text)) || /```[\s\S]*?/.test(text) && knownFns.test(text);
+      if (hasHcmExpression && /suggested column name/i.test(text)) {
+        return { cleanedText: text, actions: EXPRESSION_PRESENTED_FALLBACK_PILLS };
+      }
+      if (hasHcmExpression && /will produce a \*?\*?\w+\*?\*? output/i.test(text)) {
+        return { cleanedText: text, actions: EXPRESSION_PRESENTED_FALLBACK_PILLS };
+      }
+      if (hasHcmExpression && /here's (the|a) revised|updated expression|revised expression/i.test(text)) {
+        return { cleanedText: text, actions: EXPRESSION_PRESENTED_FALLBACK_PILLS };
+      }
+      if (hasHcmExpression && /Row \d+.*?[→=]|substitut.*?values|let'?s validate/i.test(text)) {
+        return { cleanedText: text, actions: VALIDATION_DONE_FALLBACK_PILLS };
+      }
+      if (hasHcmExpression && /\b1\.\s*(your )?objective\b/i.test(text) && /\bcombining everything\b/i.test(text)) {
+        return { cleanedText: text, actions: EXPLANATION_DONE_FALLBACK_PILLS };
+      }
     }
     return { cleanedText: text, actions: [] };
   }
@@ -169,11 +191,10 @@ function SuggestedActionPills({ actions, onSelect, disabled }: { actions: string
 
 function MessageBubble({ message, agentId, isLastAssistant, onSendMessage }: { message: ChatMessage; agentId?: string; isLastAssistant?: boolean; onSendMessage?: (text: string) => void }) {
   const isUser = message.role === "user";
-  const rawContent = isUser ? message.content : stripActionBlocks(message.content);
-  const { cleanedText: displayContent, actions } = isUser ? { cleanedText: rawContent, actions: [] } : parseSuggestedActions(rawContent);
-  const showPills = isLastAssistant && actions.length > 0 && onSendMessage;
-
   const isHcmAgent = agentId === HCM_EXPRESSION_BUILDER_AGENT_ID;
+  const rawContent = isUser ? message.content : stripActionBlocks(message.content);
+  const { cleanedText: displayContent, actions } = isUser ? { cleanedText: rawContent, actions: [] } : parseSuggestedActions(rawContent, isHcmAgent);
+  const showPills = isLastAssistant && actions.length > 0 && onSendMessage;
   const splitResult = !isUser && isHcmAgent ? splitColumnBuildResponse(displayContent) : null;
 
   if (splitResult) {
