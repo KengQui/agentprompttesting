@@ -432,7 +432,7 @@ function parseValidationRows(text: string): { rows: ValidationRow[]; footnote: s
 }
 
 function ValidationRowCard({ row, index, note }: { row: ValidationRow; index: number; note?: string }) {
-  const isError = /error/i.test(row.result);
+  const isError = /error/i.test(row.result) || row.result.trim() === "—";
   return (
     <div className="px-4 py-3 space-y-3" data-testid={`validation-row-${index}`}>
       <div className="flex items-center gap-2 text-sm">
@@ -469,7 +469,7 @@ function ValidationRowCard({ row, index, note }: { row: ValidationRow; index: nu
       )}
       <div className={`flex items-center gap-2 rounded-md border px-3 py-2 ${isError ? "border-destructive/30 bg-destructive/5 dark:bg-destructive/10" : "dark:bg-muted/60 border-border/50 bg-[#f3f4f6]"}`}>
         <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Result</span>
-        <span className={`ml-auto font-mono text-sm font-semibold ${isError ? "text-destructive" : "text-[#6b7280]"}`}>{row.result}</span>
+        <span className={`ml-auto font-mono text-sm font-semibold ${isError ? "text-destructive" : "text-[#6b7280]"}`}>{isError ? "—" : row.result}</span>
       </div>
       {note && (
         <div className={`flex items-start gap-2 rounded-md px-3 py-2 text-xs ${isError ? "bg-destructive/5 dark:bg-destructive/10 text-destructive" : "bg-muted text-muted-foreground"}`} data-testid={`validation-row-note-${index}`}>
@@ -501,7 +501,7 @@ function SampleDataValidationCarousel({ content, timestamp }: { content: string;
 
   const rowNotes: (string | undefined)[] = rows.map(() => undefined);
   if (footnote) {
-    const errorRowIdx = rows.findIndex(r => /error/i.test(r.result));
+    const errorRowIdx = rows.findIndex(r => /error/i.test(r.result) || r.result.trim() === "—");
     if (errorRowIdx >= 0) {
       rowNotes[errorRowIdx] = footnote;
     } else {
