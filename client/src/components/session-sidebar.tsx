@@ -142,49 +142,45 @@ function SessionCard({
             <span>{formatDate(session.lastMessageAt || session.updatedAt)}</span>
           </div>
         </div>
+        {!isEditing && (
+          <div className="flex items-center gap-0.5 shrink-0 invisible group-hover:visible">
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  className="h-6 w-6"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setIsEditing(true);
+                  }}
+                  data-testid="button-rename-session"
+                >
+                  <Pencil className="h-3.5 w-3.5" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Rename session</TooltipContent>
+            </Tooltip>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  className="h-6 w-6 text-destructive"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onDelete();
+                  }}
+                  data-testid="button-delete-session"
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Delete session</TooltipContent>
+            </Tooltip>
+          </div>
+        )}
       </div>
-      {!isEditing && (
-        <div className={`absolute right-1 top-1/2 -translate-y-1/2 flex items-center gap-0.5 pl-6 pr-1 invisible group-hover:visible ${
-          isActive
-            ? "bg-gradient-to-l from-[hsl(var(--primary)/0.1)] via-[hsl(var(--primary)/0.1)] to-transparent"
-            : "bg-gradient-to-l from-[hsl(var(--muted)/0.5)] via-[hsl(var(--muted)/0.5)] to-transparent group-hover:from-[hsl(var(--muted)/0.5)] group-hover:via-[hsl(var(--muted)/0.5)]"
-        }`}>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                size="icon"
-                variant="ghost"
-                className="h-6 w-6"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setIsEditing(true);
-                }}
-                data-testid="button-rename-session"
-              >
-                <Pencil className="h-3.5 w-3.5" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>Rename session</TooltipContent>
-          </Tooltip>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                size="icon"
-                variant="ghost"
-                className="h-6 w-6 text-destructive"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onDelete();
-                }}
-                data-testid="button-delete-session"
-              >
-                <Trash2 className="h-3.5 w-3.5" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>Delete session</TooltipContent>
-          </Tooltip>
-        </div>
-      )}
     </div>
   );
 }
