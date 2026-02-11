@@ -33,7 +33,7 @@ function parseSuggestedActions(text: string): { cleanedText: string; actions: st
   const regex = /\{\{SUGGESTED_ACTIONS:(.*?)\}\}/g;
   const match = regex.exec(text);
   if (!match) {
-    if (/has been added/i.test(text)) {
+    if (/has been added|added it to your report|added to the report|added to your report|successfully created the calculated column/i.test(text)) {
       return { cleanedText: text, actions: COLUMN_ADDED_FALLBACK_PILLS };
     }
     return { cleanedText: text, actions: [] };
