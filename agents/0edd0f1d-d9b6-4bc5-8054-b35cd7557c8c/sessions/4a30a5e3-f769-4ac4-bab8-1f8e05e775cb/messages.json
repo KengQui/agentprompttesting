@@ -1,0 +1,34 @@
+[
+  {
+    "id": "b4d5cb80-71ea-413d-b51d-5929d5504bde",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "sessionId": "4a30a5e3-f769-4ac4-bab8-1f8e05e775cb",
+    "role": "user",
+    "content": "Create a compensation column",
+    "timestamp": "2026-02-11T16:07:43.357Z"
+  },
+  {
+    "id": "6c4e6520-f6fa-4985-a9e3-23d3eb541ce9",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "sessionId": "4a30a5e3-f769-4ac4-bab8-1f8e05e775cb",
+    "role": "assistant",
+    "content": "I can create a compensation column. To proceed, I need to know how you would like to calculate compensation. Would you like to add the annual salary and hourly pay, or would you like to use a different calculation?",
+    "timestamp": "2026-02-11T16:07:44.258Z"
+  },
+  {
+    "id": "95886a55-bb1e-4e52-b248-02c3e4cb71d1",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "sessionId": "4a30a5e3-f769-4ac4-bab8-1f8e05e775cb",
+    "role": "user",
+    "content": "hourly pay column is a rate not agg amount",
+    "timestamp": "2026-02-11T16:15:04.600Z"
+  },
+  {
+    "id": "763e08ce-e319-449f-afa6-ae144e10e278",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "sessionId": "4a30a5e3-f769-4ac4-bab8-1f8e05e775cb",
+    "role": "assistant",
+    "content": "Thanks for clarifying that the \"Hourly Pay\" column represents an hourly rate. To create the compensation column, I need to know how many hours per year an hourly employee works. What is the standard number of hours per year for hourly employees?",
+    "timestamp": "2026-02-11T16:15:05.996Z"
+  }
+]
