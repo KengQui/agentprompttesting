@@ -46,5 +46,21 @@
     "role": "assistant",
     "content": "```\nAdd(Value(ScheduledEEAmount), Value(ScheduledERAmount))\n```\nThis expression will produce a **Numeric** output.\n\nSuggested column name: **Total Scheduled Amount**\n{{SUGGESTED_ACTIONS:Create new column|Test with my data|Explain this expression}}",
     "timestamp": "2026-02-11T22:21:13.446Z"
+  },
+  {
+    "id": "07617dd8-8319-4421-9e9c-2fe734e83a98",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "sessionId": "c4ea71bf-2285-40a9-acd3-1dcdc47ba62d",
+    "role": "user",
+    "content": "Explain this expression",
+    "timestamp": "2026-02-11T22:22:09.880Z"
+  },
+  {
+    "id": "4ef9542b-fd58-4ecf-bf07-b323af1255ba",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "sessionId": "c4ea71bf-2285-40a9-acd3-1dcdc47ba62d",
+    "role": "assistant",
+    "content": "**1. Your Objective**\nThis expression calculates the total scheduled amount by adding the scheduled employee (EE) amount and the scheduled employer (ER) amount.\n\n**2. Identifying Necessary Columns**\n- `ScheduledEEAmount`: This column contains the amount scheduled to be paid by the employee.\n- `ScheduledERAmount`: This column contains the amount scheduled to be paid by the employer.\n\n**3. Using the Add Function**\nThe `Add` function is used to sum two or more numbers. In this case, we're using it to add the scheduled employee amount and the scheduled employer amount. The simplified expression looks like this before type conversion:\n\n`Add(ScheduledEEAmount, ScheduledERAmount)`\n\n**4. Combining Everything**\nThe complete expression is:\n\n```\nAdd(Value(ScheduledEEAmount), Value(ScheduledERAmount))\n```\n\nThe `Value()` function converts the text values in the `ScheduledEEAmount` and `ScheduledERAmount` columns to numbers so that they can be added together correctly. This produces a **Numeric** result — you'll see values like 123.45 in your report column.\n{{SUGGESTED_ACTIONS:Create new column|Revise this expression|Test with my data}}",
+    "timestamp": "2026-02-11T22:22:11.754Z"
   }
 ]
