@@ -435,11 +435,10 @@ function ValidationRowCard({ row, index }: { row: ValidationRow; index: number }
   return (
     <div className="px-4 py-3 space-y-3" data-testid={`validation-row-${index}`}>
       <div className="flex items-center gap-2 text-sm">
-        <span className="text-muted-foreground">Row {index + 1}</span>
+        <span className="text-muted-foreground font-medium">Row {index + 1}</span>
         <span className="text-muted-foreground">|</span>
         <span className="font-medium">{row.employeeName}</span>
       </div>
-
       {row.inputs.length > 0 && (
         <div className="space-y-1">
           <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Inputs</span>
@@ -454,7 +453,6 @@ function ValidationRowCard({ row, index }: { row: ValidationRow; index: number }
           </div>
         </div>
       )}
-
       {row.calculationSteps.length > 0 && (
         <div className="space-y-1">
           <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Calculation</span>
@@ -468,7 +466,6 @@ function ValidationRowCard({ row, index }: { row: ValidationRow; index: number }
           </div>
         </div>
       )}
-
       <div className="flex items-center gap-2 rounded-md bg-muted/80 dark:bg-muted/60 border border-border/50 px-3 py-2">
         <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Result</span>
         <span className="ml-auto font-mono text-sm font-semibold">{row.result}</span>
