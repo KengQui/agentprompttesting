@@ -431,7 +431,8 @@ function parseValidationRows(text: string): { rows: ValidationRow[]; footnote: s
   return rows.length > 0 ? { rows, footnote } : null;
 }
 
-function ValidationRowCard({ row, index }: { row: ValidationRow; index: number }) {
+function ValidationRowCard({ row, index, note }: { row: ValidationRow; index: number; note?: string }) {
+  const isError = /error/i.test(row.result);
   return (
     <div className="px-4 py-3 space-y-3" data-testid={`validation-row-${index}`}>
       <div className="flex items-center gap-2 text-sm">
@@ -466,10 +467,16 @@ function ValidationRowCard({ row, index }: { row: ValidationRow; index: number }
           </div>
         </div>
       )}
-      <div className="flex items-center gap-2 rounded-md dark:bg-muted/60 border border-border/50 px-3 py-2 text-[#e0e0e0] bg-[#f3f4f6]">
+      <div className={`flex items-center gap-2 rounded-md border px-3 py-2 ${isError ? "border-destructive/30 bg-destructive/5 dark:bg-destructive/10" : "dark:bg-muted/60 border-border/50 bg-[#f3f4f6]"}`}>
         <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Result</span>
-        <span className="ml-auto font-mono text-sm font-semibold text-[#6b7280]">{row.result}</span>
+        <span className={`ml-auto font-mono text-sm font-semibold ${isError ? "text-destructive" : "text-[#6b7280]"}`}>{row.result}</span>
       </div>
+      {note && (
+        <div className={`flex items-start gap-2 rounded-md px-3 py-2 text-xs ${isError ? "bg-destructive/5 dark:bg-destructive/10 text-destructive" : "bg-muted text-muted-foreground"}`} data-testid={`validation-row-note-${index}`}>
+          <AlertCircle className="h-3.5 w-3.5 shrink-0 mt-0.5" />
+          <span>{note}</span>
+        </div>
+      )}
     </div>
   );
 }
@@ -492,6 +499,19 @@ function SampleDataValidationCarousel({ content, timestamp }: { content: string;
   const { rows, footnote } = parsed;
   const total = rows.length;
 
+  const rowNotes: (string | undefined)[] = rows.map(() => undefined);
+  if (footnote) {
+    const errorRowIdx = rows.findIndex(r => /error/i.test(r.result));
+    if (errorRowIdx >= 0) {
+      rowNotes[errorRowIdx] = footnote;
+    } else {
+      const mentionedIdx = rows.findIndex(r =>
+        footnote.toLowerCase().includes(r.employeeName.toLowerCase())
+      );
+      rowNotes[mentionedIdx >= 0 ? mentionedIdx : rows.length - 1] = footnote;
+    }
+  }
+
   return (
     <div className="flex gap-3" data-testid="validation-carousel">
       <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-muted">
@@ -512,7 +532,7 @@ function SampleDataValidationCarousel({ content, timestamp }: { content: string;
             <CarouselContent className="-ml-0">
               {rows.map((row, i) => (
                 <CarouselItem key={i} className="pl-0">
-                  <ValidationRowCard row={row} index={i} />
+                  <ValidationRowCard row={row} index={i} note={rowNotes[i]} />
                 </CarouselItem>
               ))}
             </CarouselContent>
@@ -544,12 +564,6 @@ function SampleDataValidationCarousel({ content, timestamp }: { content: string;
               </div>
             )}
           </Carousel>
-
-          {footnote && (
-            <div className="px-4 py-2.5 border-t border-card-border">
-              <p className="text-xs text-muted-foreground">{footnote}</p>
-            </div>
-          )}
         </Card>
         <p className="text-xs text-muted-foreground px-1 pt-1">
           {new Date(timestamp).toLocaleTimeString([], {
