@@ -3,7 +3,7 @@ import { useParams, useLocation } from "wouter";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-import { ArrowLeft, Send, Bot, User, Settings, Loader2, X, AlertCircle, MessageSquare, Eraser, Plus, PanelLeftClose, PanelLeft, Target, Columns, FunctionSquare, Layers, Copy, Check, FlaskConical } from "lucide-react";
+import { ArrowLeft, Send, Bot, User, Settings, Loader2, X, AlertCircle, MessageSquare, Eraser, Plus, PanelLeftClose, PanelLeft, Target, Columns, FunctionSquare, Layers, Copy, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Card } from "@/components/ui/card";
@@ -500,7 +500,6 @@ function SampleDataValidationCarousel({ content, timestamp }: { content: string;
       <div className="max-w-[80%] space-y-0.5">
         <Card className="overflow-visible p-0">
           <div className="flex items-center gap-2 px-4 py-3 border-b border-card-border">
-            <FlaskConical className="h-4 w-4 text-muted-foreground" />
             <span className="text-sm font-semibold">Report Data Validation</span>
             <span className="ml-auto text-xs text-muted-foreground" data-testid="text-carousel-counter">{currentIdx + 1} / {total}</span>
           </div>
