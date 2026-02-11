@@ -452,28 +452,28 @@
     "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
     "title": "!! Auto-Test: UC-1.5 - Date Difference (Tenure)",
     "createdAt": "2026-02-11T14:04:36.580Z",
-    "updatedAt": "2026-02-11T15:03:08.481Z"
+    "updatedAt": "2026-02-11T15:31:48.771Z"
   },
   {
     "id": "0d5552c7-9d9c-4621-9b25-c3ce0d70477c",
     "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
-    "title": "Auto-Test: UC-1.6 - String Concatenation",
+    "title": "FAIL Auto-Test: UC-1.6 - String Concatenation",
     "createdAt": "2026-02-11T14:04:39.661Z",
-    "updatedAt": "2026-02-11T14:04:41.004Z"
+    "updatedAt": "2026-02-11T15:34:29.830Z"
   },
   {
     "id": "ca66320b-3798-4362-92e9-fc75b444a2eb",
     "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
     "title": "Auto-Test: UC-1.7 - Simple Conditional (If)",
     "createdAt": "2026-02-11T14:04:43.009Z",
-    "updatedAt": "2026-02-11T14:04:44.232Z"
+    "updatedAt": "2026-02-11T15:44:14.718Z"
   },
   {
     "id": "5c76aa43-6a76-49d1-b792-e7ca4d4b9a2d",
     "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
     "title": "Auto-Test: UC-1.8 - Nested Conditional (Tenure Bands)",
     "createdAt": "2026-02-11T14:04:46.239Z",
-    "updatedAt": "2026-02-11T14:04:47.636Z"
+    "updatedAt": "2026-02-11T15:45:50.482Z"
   },
   {
     "id": "88550cbd-2316-4622-ac94-fb409e640182",

@@ -30,5 +30,21 @@
     "role": "assistant",
     "content": "Here's a breakdown of how the \"Years of Service\" expression works:\n\n**1. Your Objective**\nThis expression calculates the number of years an employee has been with the company, based on their hire date.\n\n**2. Identifying Necessary Columns**\n- `HireDate`: This column contains the date the employee was hired.\n\n**3. Using the DateDiff Function**\nThe `DateDiff` function calculates the difference in days between two dates. In this case, it finds the difference between today's date (`Today()`) and the employee's `HireDate`. The simplified expression is:\n   `DateDiff(Today(), HireDate)`\n\n**4. Using the Divide Function**\nSince `DateDiff` returns the difference in days, we divide by 365.25 (the average number of days in a year, accounting for leap years) to convert the result into years. The simplified expression is:\n   `Divide(DateDiff(Today(), HireDate), 365.25)`\n\n**5. Using the Round Function**\nThe `Round` function rounds the result to a specified number of decimal places, making it more readable. In this case, we round to two decimal places. The simplified expression is:\n   `Round(Divide(DateDiff(Today(), HireDate), 365.25), 2)`\n\n**6. Combining Everything**\nThe complete expression combines all these steps to calculate and round the years of service:\n\n```\nRound(Divide(DateDiff(Today(), HireDate), 365.25), 2)\n```\n\n{{SUGGESTED_ACTIONS:Use this expression|Revise this expression|Validate with sample data}}",
     "timestamp": "2026-02-11T14:21:26.901Z"
+  },
+  {
+    "id": "962be196-5128-4b17-a56e-06c126a4e684",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "sessionId": "bcc65b51-e5c8-4678-a5df-741563ed5714",
+    "role": "user",
+    "content": "Validate with sample data",
+    "timestamp": "2026-02-11T15:31:45.710Z"
+  },
+  {
+    "id": "0f86e834-40ee-41a5-a00c-55dc88964cd8",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "sessionId": "bcc65b51-e5c8-4678-a5df-741563ed5714",
+    "role": "assistant",
+    "content": "Here's a validation preview of the \"Years of Service\" expression using data from your report:\n\n**Row 1: Employee: Sarah Johnson**\n- **Inputs:** `HireDate` = \"2021-01-15\"\n- **Calculation:**\n  `Round(Divide(DateDiff(Today(), HireDate), 365.25), 2)`\n  = `Round(Divide(DateDiff(\"2026-02-11\", \"2021-01-15\"), 365.25), 2)`\n  = `Round(Divide(1853, 365.25), 2)`\n  = `Round(5.07323, 2)`\n  = `5.07`\n- **Result:** 5.07\n\n**Row 2: Employee: Lisa Park**\n- **Inputs:** `HireDate` = \"2016-02-02\"\n- **Calculation:**\n  `Round(Divide(DateDiff(Today(), HireDate), 365.25), 2)`\n  = `Round(Divide(DateDiff(\"2026-02-11\", \"2016-02-02\"), 365.25), 2)`\n  = `Round(Divide(3651, 365.25), 2)`\n  = `Round(9.99589, 2)`\n  = `10.00`\n- **Result:** 10.00\n\n{{SUGGESTED_ACTIONS:Use this expression|Revise this expression|Explain this expression}}",
+    "timestamp": "2026-02-11T15:31:48.771Z"
   }
 ]
