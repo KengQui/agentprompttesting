@@ -1,0 +1,18 @@
+[
+  {
+    "id": "10e92473-f07f-45c8-bbc5-d1e0462c0911",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "sessionId": "6eb21656-7e71-4fce-8b94-76d2bdc3eec1",
+    "role": "user",
+    "content": "Calculate weekly pay — but some employees have no Hourly Pay.",
+    "timestamp": "2026-02-11T14:05:08.285Z"
+  },
+  {
+    "id": "772b9ea4-e9e9-4d15-bdef-0730d2b05a20",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "sessionId": "6eb21656-7e71-4fce-8b94-76d2bdc3eec1",
+    "role": "assistant",
+    "content": "I apologize, but I'm having trouble generating a response. Please try again.",
+    "timestamp": "2026-02-11T14:05:08.627Z"
+  }
+]

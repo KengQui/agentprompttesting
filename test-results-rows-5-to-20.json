@@ -1,0 +1,178 @@
+[
+  {
+    "rowNum": 5,
+    "useCaseId": "UC-1.4",
+    "title": "Division",
+    "prompt": "Divide Annual Salary by 12 to get monthly pay.",
+    "expectedBehavior": "Agent produces `Divide(Value(Annual Salary), 12)` and acknowledges that some employees have blank Annual Salary.",
+    "aiResponse": "[{\"id\":\"58b61ead-bc31-4399-8252-73c1de24bc1a\",\"agentId\":\"0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c\",\"sessionId\":\"bb60ac16-704a-4dd1-92ad-cbcad15e95b3\",\"role\":\"user\",\"content\":\"Divide Annual Salary by 12 to get monthly pay.\",\"timestamp\":\"2026-02-11T14:04:33.485Z\"},{\"id\":\"6fa0a6bc-05a5-4ee3-ae88-244ab22a2b41\",\"agentId\":\"0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c\",\"sessionId\":\"bb60ac16-704a-4dd1-92ad-cbcad15e95b3\",\"role\":\"assistant\",\"content\":\"Okay! I can create a calculated column that divides the annual salary by 12 to calculate the monthly pay.\\n\\n```\\nDivide(Value(AnnualSalary), 12)\\n```\\n\\nThis expression will produce a **Numeric** output.\\n\\nSuggested column name: **Monthly Salary**\\n\\n{{SUGGESTED_ACTIONS:Use this expression|Validate with sample data|Explain this expression}}\",\"timestamp\":\"2026-02-11T14:04:34.573Z\"}]",
+    "sessionId": "bb60ac16-704a-4dd1-92ad-cbcad15e95b3",
+    "status": "completed",
+    "error": null
+  },
+  {
+    "rowNum": 6,
+    "useCaseId": "UC-1.5",
+    "title": "Date Difference (Tenure)",
+    "prompt": "Show me employee tenure in years.",
+    "expectedBehavior": "Agent uses `Divide(DateDiff(Today(), Hire Date), 365.25)`, mentions the 365.25 divisor accounts for leap years, declares Numeric output type.",
+    "aiResponse": "[{\"id\":\"29b529b4-aa09-45ee-b26e-120cfe4728cd\",\"agentId\":\"0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c\",\"sessionId\":\"bcc65b51-e5c8-4678-a5df-741563ed5714\",\"role\":\"user\",\"content\":\"Show me employee tenure in years.\",\"timestamp\":\"2026-02-11T14:04:36.582Z\"},{\"id\":\"1272ad14-307a-46f8-b09d-75a3c11bee1c\",\"agentId\":\"0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c\",\"sessionId\":\"bcc65b51-e5c8-4678-a5df-741563ed5714\",\"role\":\"assistant\",\"content\":\"This expression calculates the number of years between the employee's hire date and today's date.\\n\\n```\\nRound(Divide(DateDiff(Today(), HireDate), 365.25), 2)\\n```\\nThis expression will produce a **Numeric** output.\\n\\nSuggested column name: **Years of Service**\\n\\n{{SUGGESTED_ACTIONS:Use this expression|Validate with sample data|Explain this expression}}\",\"timestamp\":\"2026-02-11T14:04:37.655Z\"}]",
+    "sessionId": "bcc65b51-e5c8-4678-a5df-741563ed5714",
+    "status": "completed",
+    "error": null
+  },
+  {
+    "rowNum": 7,
+    "useCaseId": "UC-1.6",
+    "title": "String Concatenation",
+    "prompt": "Combine Employee Name and Primary Email into one column like 'Name (email)'.",
+    "expectedBehavior": "Agent produces `Concat(Employee Name, \" (\", Primary Email, \")\")`, declares Text output type, and during validation notes that EMP004 and EMP005 have blank Primary Email.",
+    "aiResponse": "[{\"id\":\"059aa3fb-3c31-496e-856a-73ec312ae2c6\",\"agentId\":\"0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c\",\"sessionId\":\"0d5552c7-9d9c-4621-9b25-c3ce0d70477c\",\"role\":\"user\",\"content\":\"Combine Employee Name and Primary Email into one column like 'Name (email)'.\",\"timestamp\":\"2026-02-11T14:04:39.663Z\"},{\"id\":\"5aeaf127-0a1c-4cf1-9918-cf3133d28104\",\"agentId\":\"0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c\",\"sessionId\":\"0d5552c7-9d9c-4621-9b25-c3ce0d70477c\",\"role\":\"assistant\",\"content\":\"```\\nConcat(EmployeeName, \\\" (\\\", PrimaryEmail, \\\")\\\")\\n```\\nThis expression will produce a **Text** output.\\n\\nSuggested column name: **Contact Information**\\n\\nSuccessfully created the calculated column 'Contact Information' and added it to your report.\\n{{SUGGESTED_ACTIONS:See related expressions|Create new expression|I'm done}}\",\"timestamp\":\"2026-02-11T14:04:41.004Z\"}]",
+    "sessionId": "0d5552c7-9d9c-4621-9b25-c3ce0d70477c",
+    "status": "completed",
+    "error": null
+  },
+  {
+    "rowNum": 8,
+    "useCaseId": "UC-1.7",
+    "title": "Simple Conditional (If)",
+    "prompt": "If Pay Type is 'Hourly', show 'Hourly Worker', otherwise show 'Salaried Worker'.",
+    "expectedBehavior": "Agent produces `If(Eq(Pay Type, \"Hourly\"), \"Hourly Worker\", \"Salaried Worker\")` with exactly 3 arguments.",
+    "aiResponse": "[{\"id\":\"51e2c540-950f-443c-a36c-00b0acda27ec\",\"agentId\":\"0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c\",\"sessionId\":\"ca66320b-3798-4362-92e9-fc75b444a2eb\",\"role\":\"user\",\"content\":\"If Pay Type is 'Hourly', show 'Hourly Worker', otherwise show 'Salaried Worker'.\",\"timestamp\":\"2026-02-11T14:04:43.012Z\"},{\"id\":\"74fbd8d5-f122-4b4f-9e48-de4f712a3e67\",\"agentId\":\"0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c\",\"sessionId\":\"ca66320b-3798-4362-92e9-fc75b444a2eb\",\"role\":\"assistant\",\"content\":\"This expression will check the Pay Type and return 'Hourly Worker' if the employee is paid hourly, and 'Salaried Worker' otherwise.\\n\\n```\\nIf(Eq(PayType, \\\"Hourly\\\"), \\\"Hourly Worker\\\", \\\"Salaried Worker\\\")\\n```\\n\\nThis expression will produce a **Text** output.\\n\\nSuggested column name: **Worker Type**\\n{{SUGGESTED_ACTIONS:Use this expression|Validate with sample data|Explain this expression}}\",\"timestamp\":\"2026-02-11T14:04:44.232Z\"}]",
+    "sessionId": "ca66320b-3798-4362-92e9-fc75b444a2eb",
+    "status": "completed",
+    "error": null
+  },
+  {
+    "rowNum": 9,
+    "useCaseId": "UC-1.8",
+    "title": "Nested Conditional (Tenure Bands)",
+    "prompt": "Create tenure bands: Under 1 Year, 1-5 Years, Over 5 Years based on Hire Date.",
+    "expectedBehavior": "Agent builds nested `If()` statements checking tenure thresholds in order, declares Text output type.",
+    "aiResponse": "[{\"id\":\"b526b697-63cb-452c-b2b0-28391259a70d\",\"agentId\":\"0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c\",\"sessionId\":\"5c76aa43-6a76-49d1-b792-e7ca4d4b9a2d\",\"role\":\"user\",\"content\":\"Create tenure bands: Under 1 Year, 1-5 Years, Over 5 Years based on Hire Date.\",\"timestamp\":\"2026-02-11T14:04:46.242Z\"},{\"id\":\"1b46202d-8f73-412b-9c50-d819f8ddd767\",\"agentId\":\"0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c\",\"sessionId\":\"5c76aa43-6a76-49d1-b792-e7ca4d4b9a2d\",\"role\":\"assistant\",\"content\":\"Okay! I can create tenure bands based on hire date. Here's the expression:\\n\\n```\\nIf(Divide(DateDiff(Today(),HireDate), 365.25) < 1, \\\"Under 1 Year\\\", If(Divide(DateDiff(Today(),HireDate), 365.25) <= 5, \\\"1-5 Years\\\", \\\"Over 5 Years\\\"))\\n```\\n\\nThis expression will produce a **Text** output.\\n\\nSuggested column name: **Tenure Band**\\n\\n{{SUGGESTED_ACTIONS:Use this expression|Validate with sample data|Explain this expression}}\",\"timestamp\":\"2026-02-11T14:04:47.636Z\"}]",
+    "sessionId": "5c76aa43-6a76-49d1-b792-e7ca4d4b9a2d",
+    "status": "completed",
+    "error": null
+  },
+  {
+    "rowNum": 10,
+    "useCaseId": "UC-1.9",
+    "title": "Date Formatting",
+    "prompt": "Show the Hire Date in 'MMMM dd' format.",
+    "expectedBehavior": "Agent produces `FormatDate(Hire Date, \"MMMM dd\")`, declares Date output type.",
+    "aiResponse": "[{\"id\":\"2176fea4-6553-4776-a30e-7494199407b0\",\"agentId\":\"0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c\",\"sessionId\":\"88550cbd-2316-4622-ac94-fb409e640182\",\"role\":\"user\",\"content\":\"Show the Hire Date in 'MMMM dd' format.\",\"timestamp\":\"2026-02-11T14:04:49.643Z\"},{\"id\":\"efa6bcae-31cc-479e-ae59-06f17d15a197\",\"agentId\":\"0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c\",\"sessionId\":\"88550cbd-2316-4622-ac94-fb409e640182\",\"role\":\"assistant\",\"content\":\"I apologize, but I'm having trouble generating a response. Please try again.\",\"timestamp\":\"2026-02-11T14:04:51.208Z\"}]",
+    "sessionId": "88550cbd-2316-4622-ac94-fb409e640182",
+    "status": "completed",
+    "error": null
+  },
+  {
+    "rowNum": 11,
+    "useCaseId": "UC-1.10",
+    "title": "Text Search as Condition",
+    "prompt": "If Training Profile contains 'LOTO', label as 'Safety Certified', otherwise 'Standard'.",
+    "expectedBehavior": "Agent produces `If(Search(\"LOTO\", Training Profile, 1) > 0, \"Safety Certified\", \"Standard\")`.",
+    "aiResponse": "[{\"id\":\"142f7139-9e4c-4ab3-819b-615ce4fde369\",\"agentId\":\"0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c\",\"sessionId\":\"8e36f5d2-91d4-4540-9655-5acc501d6de8\",\"role\":\"user\",\"content\":\"If Training Profile contains 'LOTO', label as 'Safety Certified', otherwise 'Standard'.\",\"timestamp\":\"2026-02-11T14:04:53.218Z\"},{\"id\":\"0f7cf6c9-03da-41e5-8814-fc431c7ccf8c\",\"agentId\":\"0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c\",\"sessionId\":\"8e36f5d2-91d4-4540-9655-5acc501d6de8\",\"role\":\"assistant\",\"content\":\"Here's an expression that checks if the TrainingProfile contains \\\"LOTO\\\" and labels it accordingly:\\n\\n```\\nIf(Search(\\\"LOTO\\\", TrainingProfile) > 0, \\\"Safety Certified\\\", \\\"Standard\\\")\\n```\\n\\nThis expression will produce a **Text** output.\\n\\nSuggested column name: **Certification Status**\\n{{SUGGESTED_ACTIONS:Use this expression|Validate with sample data|Explain this expression}}\",\"timestamp\":\"2026-02-11T14:04:54.446Z\"}]",
+    "sessionId": "8e36f5d2-91d4-4540-9655-5acc501d6de8",
+    "status": "completed",
+    "error": null
+  },
+  {
+    "rowNum": 12,
+    "useCaseId": "UC-2.1",
+    "title": "Math on Text Column Without Prompting",
+    "prompt": "Multiply Hourly Pay by 2080 to get estimated annual pay.",
+    "expectedBehavior": "Agent writes `Multiply(Value(Hourly Pay), 2080)` — never `Multiply(Hourly Pay, 2080)`.",
+    "aiResponse": "[{\"id\":\"23223f48-2efd-4cd7-855a-cddc9f0a08e8\",\"agentId\":\"0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c\",\"sessionId\":\"cd477d71-f691-4593-ac60-57b96063774e\",\"role\":\"user\",\"content\":\"Multiply Hourly Pay by 2080 to get estimated annual pay.\",\"timestamp\":\"2026-02-11T14:04:56.452Z\"},{\"id\":\"eb1768c7-33cb-40a5-b6cb-8f3a9b62055e\",\"agentId\":\"0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c\",\"sessionId\":\"cd477d71-f691-4593-ac60-57b96063774e\",\"role\":\"assistant\",\"content\":\"Okay, I can create a calculated column that estimates annual pay by multiplying the hourly pay by 2080.\\n\\n```\\nMultiply(Value(HourlyPay), 2080)\\n```\\n\\nThis expression will produce a **Numeric** output.\\n\\nSuggested column name: **Estimated Annual Pay**\\n\\n{{SUGGESTED_ACTIONS:Use this expression|Validate with sample data|Explain this expression}}\",\"timestamp\":\"2026-02-11T14:04:57.564Z\"}]",
+    "sessionId": "cd477d71-f691-4593-ac60-57b96063774e",
+    "status": "completed",
+    "error": null
+  },
+  {
+    "rowNum": 13,
+    "useCaseId": "UC-2.2",
+    "title": "Math on Currency-Formatted Column",
+    "prompt": "Add Annual Salary and Scheduled EE Amount together.",
+    "expectedBehavior": "Agent wraps both in `Value()` since they contain currency formatting.",
+    "aiResponse": "[{\"id\":\"bdb9cabf-109e-450b-b49a-6207effb82ae\",\"agentId\":\"0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c\",\"sessionId\":\"27ae1a9a-94df-4114-b368-976187f00aec\",\"role\":\"user\",\"content\":\"Add Annual Salary and Scheduled EE Amount together.\",\"timestamp\":\"2026-02-11T14:04:59.571Z\"},{\"id\":\"72a44924-a769-4a90-b76d-c3e100e1a40d\",\"agentId\":\"0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c\",\"sessionId\":\"27ae1a9a-94df-4114-b368-976187f00aec\",\"role\":\"assistant\",\"content\":\"I apologize, but I'm having trouble generating a response. Please try again.\",\"timestamp\":\"2026-02-11T14:04:59.818Z\"}]",
+    "sessionId": "27ae1a9a-94df-4114-b368-976187f00aec",
+    "status": "completed",
+    "error": null
+  },
+  {
+    "rowNum": 14,
+    "useCaseId": "UC-2.3",
+    "title": "Mixed Numeric and Text Columns",
+    "prompt": "Divide Annual Salary by 365.25 to get a daily rate.",
+    "expectedBehavior": "Agent wraps Annual Salary in `Value()` but does not wrap the literal number 365.25.",
+    "aiResponse": "[{\"id\":\"97797cfb-3901-49d8-b5a6-b4211ad45cbf\",\"agentId\":\"0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c\",\"sessionId\":\"6884b913-e12f-41bd-8511-b910488d5fc3\",\"role\":\"user\",\"content\":\"Divide Annual Salary by 365.25 to get a daily rate.\",\"timestamp\":\"2026-02-11T14:05:01.825Z\"},{\"id\":\"cd479b52-da94-4f68-bf56-cf30fe98bf83\",\"agentId\":\"0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c\",\"sessionId\":\"6884b913-e12f-41bd-8511-b910488d5fc3\",\"role\":\"assistant\",\"content\":\"Okay! I can create a calculated column that divides the annual salary by 365.25 to calculate the daily rate.\\n\\n```\\nDivide(Value(AnnualSalary), 365.25)\\n```\\nThis expression will produce a **Numeric** output.\\n\\nSuggested column name: **Daily Rate**\\n\\n{{SUGGESTED_ACTIONS:Use this expression|Validate with sample data|Explain this expression}}\",\"timestamp\":\"2026-02-11T14:05:03.125Z\"}]",
+    "sessionId": "6884b913-e12f-41bd-8511-b910488d5fc3",
+    "status": "completed",
+    "error": null
+  },
+  {
+    "rowNum": 15,
+    "useCaseId": "UC-3.1",
+    "title": "Conditional on Potentially Blank Column",
+    "prompt": "Show Primary Email if available, otherwise show 'No Email'.",
+    "expectedBehavior": "Agent produces `If(Primary Email == \"\", \"No Email\", Primary Email)` or `If(Len(Primary Email) > 0, Primary Email, \"No Email\")`.",
+    "aiResponse": "[{\"id\":\"f58b2d6e-206a-4bd2-a3bf-1b63dca67a2c\",\"agentId\":\"0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c\",\"sessionId\":\"063f97c1-bd4c-424a-a8bb-4bfff6c7bf3b\",\"role\":\"user\",\"content\":\"Show Primary Email if available, otherwise show 'No Email'.\",\"timestamp\":\"2026-02-11T14:05:05.132Z\"},{\"id\":\"e87fcec4-969d-46ec-bedf-114158c1cc81\",\"agentId\":\"0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c\",\"sessionId\":\"063f97c1-bd4c-424a-a8bb-4bfff6c7bf3b\",\"role\":\"assistant\",\"content\":\"Okay, I can create an expression that shows the Primary Email if it's available, and if not, it will display \\\"No Email\\\".\\n\\n```\\nIf(Len(PrimaryEmail) > 0, PrimaryEmail, \\\"No Email\\\")\\n```\\n\\nThis expression will produce a **Text** output.\\n\\nSuggested column name: **Email Display**\",\"timestamp\":\"2026-02-11T14:05:06.279Z\"}]",
+    "sessionId": "063f97c1-bd4c-424a-a8bb-4bfff6c7bf3b",
+    "status": "completed",
+    "error": null
+  },
+  {
+    "rowNum": 16,
+    "useCaseId": "UC-3.2",
+    "title": "Math on Column With Blank Values",
+    "prompt": "Calculate weekly pay — but some employees have no Hourly Pay.",
+    "expectedBehavior": "Agent builds the expression and during validation explicitly shows what happens when Hourly Pay is blank (e.g., Value(\"\") = 0, so result = 0), and asks the user if that is acceptable.",
+    "aiResponse": "[{\"id\":\"10e92473-f07f-45c8-bbc5-d1e0462c0911\",\"agentId\":\"0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c\",\"sessionId\":\"6eb21656-7e71-4fce-8b94-76d2bdc3eec1\",\"role\":\"user\",\"content\":\"Calculate weekly pay — but some employees have no Hourly Pay.\",\"timestamp\":\"2026-02-11T14:05:08.285Z\"},{\"id\":\"772b9ea4-e9e9-4d15-bdef-0730d2b05a20\",\"agentId\":\"0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c\",\"sessionId\":\"6eb21656-7e71-4fce-8b94-76d2bdc3eec1\",\"role\":\"assistant\",\"content\":\"I apologize, but I'm having trouble generating a response. Please try again.\",\"timestamp\":\"2026-02-11T14:05:08.627Z\"}]",
+    "sessionId": "6eb21656-7e71-4fce-8b94-76d2bdc3eec1",
+    "status": "completed",
+    "error": null
+  },
+  {
+    "rowNum": 17,
+    "useCaseId": "UC-3.3",
+    "title": "Concatenation With Blank Column",
+    "prompt": "Combine Employee Name and Secondary Email. If no secondary email, just show the name.",
+    "expectedBehavior": "Agent uses an `If()` check for blank Secondary Email before concatenating, so the output doesn't look like \"James Williams ()\".",
+    "aiResponse": "[{\"id\":\"847bf6cf-1612-44e8-91b2-62a0f1b31188\",\"agentId\":\"0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c\",\"sessionId\":\"949b4338-87b7-4369-a18f-5cb270843997\",\"role\":\"user\",\"content\":\"Combine Employee Name and Secondary Email. If no secondary email, just show the name.\",\"timestamp\":\"2026-02-11T14:05:10.633Z\"},{\"id\":\"5192fcf3-6538-4da9-90e0-4dee8c1b842b\",\"agentId\":\"0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c\",\"sessionId\":\"949b4338-87b7-4369-a18f-5cb270843997\",\"role\":\"assistant\",\"content\":\"Okay, I can help you create an expression that combines the Employee Name and Secondary Email. If there's no secondary email, it will just display the employee's name.\\n\\n```\\nIf(Len(SecondaryEmail) > 0, Concat(EmployeeName, \\\" (\\\", SecondaryEmail, \\\")\\\"), EmployeeName)\\n```\\n\\nThis expression will produce a **Text** output.\\n\\nSuggested column name: **Employee Contact Info**\\n\\n{{SUGGESTED_ACTIONS:Use this expression|Validate with sample data|Explain this expression}}\",\"timestamp\":\"2026-02-11T14:05:11.904Z\"}]",
+    "sessionId": "949b4338-87b7-4369-a18f-5cb270843997",
+    "status": "completed",
+    "error": null
+  },
+  {
+    "rowNum": 18,
+    "useCaseId": "UC-3.4",
+    "title": "Blank-Field Row in Validation",
+    "prompt": "*(Any expression request that uses a column with blanks)*",
+    "expectedBehavior": "When running validation, agent always picks a row with blank data for that column and explains what the expression produces and why.",
+    "aiResponse": "[{\"id\":\"ca15aee0-a508-4d79-a844-92bf8050e16c\",\"agentId\":\"0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c\",\"sessionId\":\"5764c511-d260-4ec0-a295-e749c894b417\",\"role\":\"user\",\"content\":\"*(Any expression request that uses a column with blanks)*\",\"timestamp\":\"2026-02-11T14:05:13.911Z\"},{\"id\":\"9f5e0a91-b58a-4a0b-9491-a1fbda892cf9\",\"agentId\":\"0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c\",\"sessionId\":\"5764c511-d260-4ec0-a295-e749c894b417\",\"role\":\"assistant\",\"content\":\"Okay, I can help you with that. I need to know what you'd like the expression to do. Please describe the calculation or logic you want to implement. Be sure to include the column names involved.\",\"timestamp\":\"2026-02-11T14:05:14.847Z\"}]",
+    "sessionId": "5764c511-d260-4ec0-a295-e749c894b417",
+    "status": "completed",
+    "error": null
+  },
+  {
+    "rowNum": 19,
+    "useCaseId": "UC-4.1",
+    "title": "Excel-Style IF",
+    "prompt": "=IF(Pay Type='Hourly', Hourly Pay*40, Annual Salary/52)",
+    "expectedBehavior": "Agent explains that Excel-style syntax is not supported, then provides the equivalent expression using `If()`, `Multiply()`, `Divide()`, and `Value()`.",
+    "aiResponse": "[{\"id\":\"b5975f05-6e80-4680-9eba-621c320b4c57\",\"agentId\":\"0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c\",\"sessionId\":\"b3f006c0-2439-4424-986f-deb4fa55c262\",\"role\":\"user\",\"content\":\"=IF(Pay Type='Hourly', Hourly Pay*40, Annual Salary/52)\",\"timestamp\":\"2026-02-11T14:05:16.855Z\"},{\"id\":\"84742c8d-8dab-4c0d-9d0e-48824c8438d6\",\"agentId\":\"0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c\",\"sessionId\":\"b3f006c0-2439-4424-986f-deb4fa55c262\",\"role\":\"assistant\",\"content\":\"That looks like an Excel-style formula. I can convert it into the correct format for you.\\n\\nHere's the expression in the required function-call syntax:\\n\\n```\\nIf(Eq(PayType, \\\"Hourly\\\"), Multiply(Value(HourlyPay), 40), Divide(Value(AnnualSalary), 52))\\n```\\n\\nNote that I've also added `Value()` around `HourlyPay` and `AnnualSalary`. This is needed because, by default, columns are treated as text. To perform math on them, you must explicitly convert them to numbers using the `Value()` function.\\n\\nThis expression will produce a **Numeric** output.\\n\\nSuggested column name: **Calculated Pay**\\n\\n{{SUGGESTED_ACTIONS:Use this expression|Validate with sample data|Explain this expression}}\",\"timestamp\":\"2026-02-11T14:05:18.599Z\"}]",
+    "sessionId": "b3f006c0-2439-4424-986f-deb4fa55c262",
+    "status": "completed",
+    "error": null
+  },
+  {
+    "rowNum": 20,
+    "useCaseId": "UC-4.2",
+    "title": "Excel-Style SUM",
+    "prompt": "=SUM(Scheduled EE Amount, Scheduled ER Amount)",
+    "expectedBehavior": "Agent corrects to `Add(Value(Scheduled EE Amount), Value(Scheduled ER Amount))`.",
+    "aiResponse": "[{\"id\":\"a93c44aa-5cd2-4899-aeb0-f1d707b89e48\",\"agentId\":\"0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c\",\"sessionId\":\"2f5580a1-f308-42a0-8136-2d6e5929f6b4\",\"role\":\"user\",\"content\":\"=SUM(Scheduled EE Amount, Scheduled ER Amount)\",\"timestamp\":\"2026-02-11T14:05:20.607Z\"},{\"id\":\"be3acfce-640d-4d65-bdb0-b401fcb7d142\",\"agentId\":\"0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c\",\"sessionId\":\"2f5580a1-f308-42a0-8136-2d6e5929f6b4\",\"role\":\"assistant\",\"content\":\"That looks like an Excel-style formula. To create a calculated column, you'll need to use function-call syntax. The equivalent expression would be `Add(ScheduledEEAmount, ScheduledERAmount)`. Also, because \\\"Scheduled EE Amount\\\" and \\\"Scheduled ER Amount\\\" are text columns, you'll need to convert them to numbers using the `Value()` function.\\n\\nHere's the expression:\\n```\\nAdd(Value(ScheduledEEAmount), Value(ScheduledERAmount))\\n```\\nThis expression will produce a **Numeric** output.\\n\\nSuggested column name: **Total Scheduled Amount**\\n{{SUGGESTED_ACTIONS:Use this expression|Validate with sample data|Explain this expression}}\",\"timestamp\":\"2026-02-11T14:05:22.054Z\"}]",
+    "sessionId": "2f5580a1-f308-42a0-8136-2d6e5929f6b4",
+    "status": "completed",
+    "error": null
+  }
+]

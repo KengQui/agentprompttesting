@@ -1,0 +1,18 @@
+[
+  {
+    "id": "b526b697-63cb-452c-b2b0-28391259a70d",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "sessionId": "5c76aa43-6a76-49d1-b792-e7ca4d4b9a2d",
+    "role": "user",
+    "content": "Create tenure bands: Under 1 Year, 1-5 Years, Over 5 Years based on Hire Date.",
+    "timestamp": "2026-02-11T14:04:46.242Z"
+  },
+  {
+    "id": "1b46202d-8f73-412b-9c50-d819f8ddd767",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "sessionId": "5c76aa43-6a76-49d1-b792-e7ca4d4b9a2d",
+    "role": "assistant",
+    "content": "Okay! I can create tenure bands based on hire date. Here's the expression:\n\n```\nIf(Divide(DateDiff(Today(),HireDate), 365.25) < 1, \"Under 1 Year\", If(Divide(DateDiff(Today(),HireDate), 365.25) <= 5, \"1-5 Years\", \"Over 5 Years\"))\n```\n\nThis expression will produce a **Text** output.\n\nSuggested column name: **Tenure Band**\n\n{{SUGGESTED_ACTIONS:Use this expression|Validate with sample data|Explain this expression}}",
+    "timestamp": "2026-02-11T14:04:47.636Z"
+  }
+]

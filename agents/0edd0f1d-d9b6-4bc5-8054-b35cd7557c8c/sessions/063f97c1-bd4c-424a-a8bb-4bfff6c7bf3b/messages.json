@@ -1,0 +1,18 @@
+[
+  {
+    "id": "f58b2d6e-206a-4bd2-a3bf-1b63dca67a2c",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "sessionId": "063f97c1-bd4c-424a-a8bb-4bfff6c7bf3b",
+    "role": "user",
+    "content": "Show Primary Email if available, otherwise show 'No Email'.",
+    "timestamp": "2026-02-11T14:05:05.132Z"
+  },
+  {
+    "id": "e87fcec4-969d-46ec-bedf-114158c1cc81",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "sessionId": "063f97c1-bd4c-424a-a8bb-4bfff6c7bf3b",
+    "role": "assistant",
+    "content": "Okay, I can create an expression that shows the Primary Email if it's available, and if not, it will display \"No Email\".\n\n```\nIf(Len(PrimaryEmail) > 0, PrimaryEmail, \"No Email\")\n```\n\nThis expression will produce a **Text** output.\n\nSuggested column name: **Email Display**",
+    "timestamp": "2026-02-11T14:05:06.279Z"
+  }
+]

@@ -439,5 +439,117 @@
     "title": "New Session",
     "createdAt": "2026-02-11T13:57:09.915Z",
     "updatedAt": "2026-02-11T13:57:09.915Z"
+  },
+  {
+    "id": "bb60ac16-704a-4dd1-92ad-cbcad15e95b3",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "title": "Auto-Test: UC-1.4 - Division",
+    "createdAt": "2026-02-11T14:04:33.482Z",
+    "updatedAt": "2026-02-11T14:04:34.573Z"
+  },
+  {
+    "id": "bcc65b51-e5c8-4678-a5df-741563ed5714",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "title": "Auto-Test: UC-1.5 - Date Difference (Tenure)",
+    "createdAt": "2026-02-11T14:04:36.580Z",
+    "updatedAt": "2026-02-11T14:04:37.655Z"
+  },
+  {
+    "id": "0d5552c7-9d9c-4621-9b25-c3ce0d70477c",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "title": "Auto-Test: UC-1.6 - String Concatenation",
+    "createdAt": "2026-02-11T14:04:39.661Z",
+    "updatedAt": "2026-02-11T14:04:41.004Z"
+  },
+  {
+    "id": "ca66320b-3798-4362-92e9-fc75b444a2eb",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "title": "Auto-Test: UC-1.7 - Simple Conditional (If)",
+    "createdAt": "2026-02-11T14:04:43.009Z",
+    "updatedAt": "2026-02-11T14:04:44.232Z"
+  },
+  {
+    "id": "5c76aa43-6a76-49d1-b792-e7ca4d4b9a2d",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "title": "Auto-Test: UC-1.8 - Nested Conditional (Tenure Bands)",
+    "createdAt": "2026-02-11T14:04:46.239Z",
+    "updatedAt": "2026-02-11T14:04:47.636Z"
+  },
+  {
+    "id": "88550cbd-2316-4622-ac94-fb409e640182",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "title": "Auto-Test: UC-1.9 - Date Formatting",
+    "createdAt": "2026-02-11T14:04:49.640Z",
+    "updatedAt": "2026-02-11T14:04:51.208Z"
+  },
+  {
+    "id": "8e36f5d2-91d4-4540-9655-5acc501d6de8",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "title": "Auto-Test: UC-1.10 - Text Search as Condition",
+    "createdAt": "2026-02-11T14:04:53.215Z",
+    "updatedAt": "2026-02-11T14:04:54.446Z"
+  },
+  {
+    "id": "cd477d71-f691-4593-ac60-57b96063774e",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "title": "Auto-Test: UC-2.1 - Math on Text Column Without Prompting",
+    "createdAt": "2026-02-11T14:04:56.450Z",
+    "updatedAt": "2026-02-11T14:04:57.564Z"
+  },
+  {
+    "id": "27ae1a9a-94df-4114-b368-976187f00aec",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "title": "Auto-Test: UC-2.2 - Math on Currency-Formatted Column",
+    "createdAt": "2026-02-11T14:04:59.570Z",
+    "updatedAt": "2026-02-11T14:04:59.818Z"
+  },
+  {
+    "id": "6884b913-e12f-41bd-8511-b910488d5fc3",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "title": "Auto-Test: UC-2.3 - Mixed Numeric and Text Columns",
+    "createdAt": "2026-02-11T14:05:01.823Z",
+    "updatedAt": "2026-02-11T14:05:03.125Z"
+  },
+  {
+    "id": "063f97c1-bd4c-424a-a8bb-4bfff6c7bf3b",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "title": "Auto-Test: UC-3.1 - Conditional on Potentially Blank Column",
+    "createdAt": "2026-02-11T14:05:05.130Z",
+    "updatedAt": "2026-02-11T14:05:06.279Z"
+  },
+  {
+    "id": "6eb21656-7e71-4fce-8b94-76d2bdc3eec1",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "title": "Auto-Test: UC-3.2 - Math on Column With Blank Values",
+    "createdAt": "2026-02-11T14:05:08.283Z",
+    "updatedAt": "2026-02-11T14:05:08.627Z"
+  },
+  {
+    "id": "949b4338-87b7-4369-a18f-5cb270843997",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "title": "Auto-Test: UC-3.3 - Concatenation With Blank Column",
+    "createdAt": "2026-02-11T14:05:10.631Z",
+    "updatedAt": "2026-02-11T14:05:11.904Z"
+  },
+  {
+    "id": "5764c511-d260-4ec0-a295-e749c894b417",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "title": "Auto-Test: UC-3.4 - Blank-Field Row in Validation",
+    "createdAt": "2026-02-11T14:05:13.908Z",
+    "updatedAt": "2026-02-11T14:05:14.847Z"
+  },
+  {
+    "id": "b3f006c0-2439-4424-986f-deb4fa55c262",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "title": "Auto-Test: UC-4.1 - Excel-Style IF",
+    "createdAt": "2026-02-11T14:05:16.852Z",
+    "updatedAt": "2026-02-11T14:05:18.599Z"
+  },
+  {
+    "id": "2f5580a1-f308-42a0-8136-2d6e5929f6b4",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "title": "Auto-Test: UC-4.2 - Excel-Style SUM",
+    "createdAt": "2026-02-11T14:05:20.605Z",
+    "updatedAt": "2026-02-11T14:05:22.054Z"
   }
 ]

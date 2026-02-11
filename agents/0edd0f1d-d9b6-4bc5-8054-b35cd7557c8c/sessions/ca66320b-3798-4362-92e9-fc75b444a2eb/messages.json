@@ -1,0 +1,18 @@
+[
+  {
+    "id": "51e2c540-950f-443c-a36c-00b0acda27ec",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "sessionId": "ca66320b-3798-4362-92e9-fc75b444a2eb",
+    "role": "user",
+    "content": "If Pay Type is 'Hourly', show 'Hourly Worker', otherwise show 'Salaried Worker'.",
+    "timestamp": "2026-02-11T14:04:43.012Z"
+  },
+  {
+    "id": "74fbd8d5-f122-4b4f-9e48-de4f712a3e67",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "sessionId": "ca66320b-3798-4362-92e9-fc75b444a2eb",
+    "role": "assistant",
+    "content": "This expression will check the Pay Type and return 'Hourly Worker' if the employee is paid hourly, and 'Salaried Worker' otherwise.\n\n```\nIf(Eq(PayType, \"Hourly\"), \"Hourly Worker\", \"Salaried Worker\")\n```\n\nThis expression will produce a **Text** output.\n\nSuggested column name: **Worker Type**\n{{SUGGESTED_ACTIONS:Use this expression|Validate with sample data|Explain this expression}}",
+    "timestamp": "2026-02-11T14:04:44.232Z"
+  }
+]

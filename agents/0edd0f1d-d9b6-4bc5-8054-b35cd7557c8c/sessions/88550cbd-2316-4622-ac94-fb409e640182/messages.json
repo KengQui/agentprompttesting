@@ -1,0 +1,18 @@
+[
+  {
+    "id": "2176fea4-6553-4776-a30e-7494199407b0",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "sessionId": "88550cbd-2316-4622-ac94-fb409e640182",
+    "role": "user",
+    "content": "Show the Hire Date in 'MMMM dd' format.",
+    "timestamp": "2026-02-11T14:04:49.643Z"
+  },
+  {
+    "id": "efa6bcae-31cc-479e-ae59-06f17d15a197",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "sessionId": "88550cbd-2316-4622-ac94-fb409e640182",
+    "role": "assistant",
+    "content": "I apologize, but I'm having trouble generating a response. Please try again.",
+    "timestamp": "2026-02-11T14:04:51.208Z"
+  }
+]

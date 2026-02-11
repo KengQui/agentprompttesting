@@ -1,0 +1,18 @@
+[
+  {
+    "id": "847bf6cf-1612-44e8-91b2-62a0f1b31188",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "sessionId": "949b4338-87b7-4369-a18f-5cb270843997",
+    "role": "user",
+    "content": "Combine Employee Name and Secondary Email. If no secondary email, just show the name.",
+    "timestamp": "2026-02-11T14:05:10.633Z"
+  },
+  {
+    "id": "5192fcf3-6538-4da9-90e0-4dee8c1b842b",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "sessionId": "949b4338-87b7-4369-a18f-5cb270843997",
+    "role": "assistant",
+    "content": "Okay, I can help you create an expression that combines the Employee Name and Secondary Email. If there's no secondary email, it will just display the employee's name.\n\n```\nIf(Len(SecondaryEmail) > 0, Concat(EmployeeName, \" (\", SecondaryEmail, \")\"), EmployeeName)\n```\n\nThis expression will produce a **Text** output.\n\nSuggested column name: **Employee Contact Info**\n\n{{SUGGESTED_ACTIONS:Use this expression|Validate with sample data|Explain this expression}}",
+    "timestamp": "2026-02-11T14:05:11.904Z"
+  }
+]

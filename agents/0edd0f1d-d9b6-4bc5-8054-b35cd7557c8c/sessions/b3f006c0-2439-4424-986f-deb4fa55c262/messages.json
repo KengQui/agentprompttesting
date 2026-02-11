@@ -1,0 +1,18 @@
+[
+  {
+    "id": "b5975f05-6e80-4680-9eba-621c320b4c57",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "sessionId": "b3f006c0-2439-4424-986f-deb4fa55c262",
+    "role": "user",
+    "content": "=IF(Pay Type='Hourly', Hourly Pay*40, Annual Salary/52)",
+    "timestamp": "2026-02-11T14:05:16.855Z"
+  },
+  {
+    "id": "84742c8d-8dab-4c0d-9d0e-48824c8438d6",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "sessionId": "b3f006c0-2439-4424-986f-deb4fa55c262",
+    "role": "assistant",
+    "content": "That looks like an Excel-style formula. I can convert it into the correct format for you.\n\nHere's the expression in the required function-call syntax:\n\n```\nIf(Eq(PayType, \"Hourly\"), Multiply(Value(HourlyPay), 40), Divide(Value(AnnualSalary), 52))\n```\n\nNote that I've also added `Value()` around `HourlyPay` and `AnnualSalary`. This is needed because, by default, columns are treated as text. To perform math on them, you must explicitly convert them to numbers using the `Value()` function.\n\nThis expression will produce a **Numeric** output.\n\nSuggested column name: **Calculated Pay**\n\n{{SUGGESTED_ACTIONS:Use this expression|Validate with sample data|Explain this expression}}",
+    "timestamp": "2026-02-11T14:05:18.599Z"
+  }
+]

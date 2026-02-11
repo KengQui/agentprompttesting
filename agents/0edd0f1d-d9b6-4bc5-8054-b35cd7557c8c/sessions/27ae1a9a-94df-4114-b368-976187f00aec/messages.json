@@ -1,0 +1,18 @@
+[
+  {
+    "id": "bdb9cabf-109e-450b-b49a-6207effb82ae",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "sessionId": "27ae1a9a-94df-4114-b368-976187f00aec",
+    "role": "user",
+    "content": "Add Annual Salary and Scheduled EE Amount together.",
+    "timestamp": "2026-02-11T14:04:59.571Z"
+  },
+  {
+    "id": "72a44924-a769-4a90-b76d-c3e100e1a40d",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "sessionId": "27ae1a9a-94df-4114-b368-976187f00aec",
+    "role": "assistant",
+    "content": "I apologize, but I'm having trouble generating a response. Please try again.",
+    "timestamp": "2026-02-11T14:04:59.818Z"
+  }
+]

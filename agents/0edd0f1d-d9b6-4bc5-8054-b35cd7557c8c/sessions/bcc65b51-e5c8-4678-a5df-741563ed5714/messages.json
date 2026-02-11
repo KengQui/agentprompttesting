@@ -1,0 +1,18 @@
+[
+  {
+    "id": "29b529b4-aa09-45ee-b26e-120cfe4728cd",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "sessionId": "bcc65b51-e5c8-4678-a5df-741563ed5714",
+    "role": "user",
+    "content": "Show me employee tenure in years.",
+    "timestamp": "2026-02-11T14:04:36.582Z"
+  },
+  {
+    "id": "1272ad14-307a-46f8-b09d-75a3c11bee1c",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "sessionId": "bcc65b51-e5c8-4678-a5df-741563ed5714",
+    "role": "assistant",
+    "content": "This expression calculates the number of years between the employee's hire date and today's date.\n\n```\nRound(Divide(DateDiff(Today(), HireDate), 365.25), 2)\n```\nThis expression will produce a **Numeric** output.\n\nSuggested column name: **Years of Service**\n\n{{SUGGESTED_ACTIONS:Use this expression|Validate with sample data|Explain this expression}}",
+    "timestamp": "2026-02-11T14:04:37.655Z"
+  }
+]

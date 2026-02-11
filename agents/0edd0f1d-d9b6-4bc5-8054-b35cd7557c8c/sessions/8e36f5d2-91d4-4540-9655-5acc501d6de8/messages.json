@@ -1,0 +1,18 @@
+[
+  {
+    "id": "142f7139-9e4c-4ab3-819b-615ce4fde369",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "sessionId": "8e36f5d2-91d4-4540-9655-5acc501d6de8",
+    "role": "user",
+    "content": "If Training Profile contains 'LOTO', label as 'Safety Certified', otherwise 'Standard'.",
+    "timestamp": "2026-02-11T14:04:53.218Z"
+  },
+  {
+    "id": "0f7cf6c9-03da-41e5-8814-fc431c7ccf8c",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "sessionId": "8e36f5d2-91d4-4540-9655-5acc501d6de8",
+    "role": "assistant",
+    "content": "Here's an expression that checks if the TrainingProfile contains \"LOTO\" and labels it accordingly:\n\n```\nIf(Search(\"LOTO\", TrainingProfile) > 0, \"Safety Certified\", \"Standard\")\n```\n\nThis expression will produce a **Text** output.\n\nSuggested column name: **Certification Status**\n{{SUGGESTED_ACTIONS:Use this expression|Validate with sample data|Explain this expression}}",
+    "timestamp": "2026-02-11T14:04:54.446Z"
+  }
+]

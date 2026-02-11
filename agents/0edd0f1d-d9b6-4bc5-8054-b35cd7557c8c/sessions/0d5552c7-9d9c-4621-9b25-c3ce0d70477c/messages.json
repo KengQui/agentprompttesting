@@ -1,0 +1,18 @@
+[
+  {
+    "id": "059aa3fb-3c31-496e-856a-73ec312ae2c6",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "sessionId": "0d5552c7-9d9c-4621-9b25-c3ce0d70477c",
+    "role": "user",
+    "content": "Combine Employee Name and Primary Email into one column like 'Name (email)'.",
+    "timestamp": "2026-02-11T14:04:39.663Z"
+  },
+  {
+    "id": "5aeaf127-0a1c-4cf1-9918-cf3133d28104",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "sessionId": "0d5552c7-9d9c-4621-9b25-c3ce0d70477c",
+    "role": "assistant",
+    "content": "```\nConcat(EmployeeName, \" (\", PrimaryEmail, \")\")\n```\nThis expression will produce a **Text** output.\n\nSuggested column name: **Contact Information**\n\nSuccessfully created the calculated column 'Contact Information' and added it to your report.\n{{SUGGESTED_ACTIONS:See related expressions|Create new expression|I'm done}}",
+    "timestamp": "2026-02-11T14:04:41.004Z"
+  }
+]
