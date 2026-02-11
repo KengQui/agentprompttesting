@@ -167,16 +167,30 @@ function SplitMessageBubbles({ message, before, after }: { message: ChatMessage;
 function extractHcmExpression(text: string): string | null {
   const codeBlockMatch = text.match(/```[\s\S]*?\n([\s\S]*?)```/);
   if (codeBlockMatch) return codeBlockMatch[1].trim();
-  const inlineMatches = [...text.matchAll(/`([^`]{10,})`/g)];
-  if (inlineMatches.length > 0) {
-    const withParens = inlineMatches.find(m => /\(.*\)/.test(m[1]));
-    if (withParens) return withParens[1].trim();
-    return inlineMatches.reduce((a, b) => a[1].length >= b[1].length ? a : b)[1].trim();
+  const inlineRegex = /`([^`]{10,})`/g;
+  let match: RegExpExecArray | null;
+  let withParens: string | null = null;
+  let longest: string | null = null;
+  while ((match = inlineRegex.exec(text)) !== null) {
+    const val = match[1].trim();
+    if (!withParens && /\(.*\)/.test(val)) withParens = val;
+    if (!longest || val.length > longest.length) longest = val;
+  }
+  if (withParens) return withParens;
+  if (longest) return longest;
+  return null;
+}
+
+function extractHcmExpressionFromMessages(messages: Array<{ role: string; content: string }>): string | null {
+  const assistantMsgs = messages.filter(m => m.role === "assistant");
+  for (let i = assistantMsgs.length - 1; i >= 0; i--) {
+    const expr = extractHcmExpression(assistantMsgs[i].content);
+    if (expr) return expr;
   }
   return null;
 }
 
-function SuggestedActionPills({ actions, onSelect, onInjectExpression, assistantContent, disabled }: { actions: string[]; onSelect: (action: string) => void; onInjectExpression?: (expression: string) => void; assistantContent?: string; disabled?: boolean }) {
+function SuggestedActionPills({ actions, onSelect, onInjectExpression, disabled }: { actions: string[]; onSelect: (action: string) => void; onInjectExpression?: () => void; disabled?: boolean }) {
   const [clicked, setClicked] = useState(false);
 
   if (clicked || actions.length === 0) return null;
@@ -190,13 +204,10 @@ function SuggestedActionPills({ actions, onSelect, onInjectExpression, assistant
           className="cursor-pointer px-3 py-1.5 text-xs font-medium"
           onClick={() => {
             if (disabled) return;
-            if (/revise this expression/i.test(action) && onInjectExpression && assistantContent) {
-              const expr = extractHcmExpression(assistantContent);
-              if (expr) {
-                setClicked(true);
-                onInjectExpression(expr);
-                return;
-              }
+            if (/revise this expression/i.test(action) && onInjectExpression) {
+              setClicked(true);
+              onInjectExpression();
+              return;
             }
             setClicked(true);
             onSelect(action);
@@ -553,7 +564,7 @@ function SampleDataValidationCarousel({ content, timestamp }: { content: string;
   );
 }
 
-function MessageBubble({ message, agentId, isLastAssistant, onSendMessage, onInjectExpression }: { message: ChatMessage; agentId?: string; isLastAssistant?: boolean; onSendMessage?: (text: string) => void; onInjectExpression?: (expression: string) => void }) {
+function MessageBubble({ message, agentId, isLastAssistant, onSendMessage, onInjectExpression }: { message: ChatMessage; agentId?: string; isLastAssistant?: boolean; onSendMessage?: (text: string) => void; onInjectExpression?: () => void }) {
   const isUser = message.role === "user";
   const isHcmAgent = agentId === HCM_EXPRESSION_BUILDER_AGENT_ID;
   const rawContent = isUser ? message.content : stripActionBlocks(message.content);
@@ -569,7 +580,7 @@ function MessageBubble({ message, agentId, isLastAssistant, onSendMessage, onInj
           before={splitResult.before}
           after={splitResult.after}
         />
-        {showPills && <SuggestedActionPills actions={actions} onSelect={onSendMessage} onInjectExpression={onInjectExpression} assistantContent={displayContent} />}
+        {showPills && <SuggestedActionPills actions={actions} onSelect={onSendMessage} onInjectExpression={onInjectExpression} />}
       </>
     );
   }
@@ -582,7 +593,7 @@ function MessageBubble({ message, agentId, isLastAssistant, onSendMessage, onInj
     return (
       <>
         <ExpressionExplanationCard content={displayContent} timestamp={message.timestamp} />
-        {showPills && <SuggestedActionPills actions={actions} onSelect={onSendMessage} onInjectExpression={onInjectExpression} assistantContent={displayContent} />}
+        {showPills && <SuggestedActionPills actions={actions} onSelect={onSendMessage} onInjectExpression={onInjectExpression} />}
       </>
     );
   }
@@ -595,7 +606,7 @@ function MessageBubble({ message, agentId, isLastAssistant, onSendMessage, onInj
     return (
       <>
         <SampleDataValidationCarousel content={displayContent} timestamp={message.timestamp} />
-        {showPills && <SuggestedActionPills actions={actions} onSelect={onSendMessage} onInjectExpression={onInjectExpression} assistantContent={displayContent} />}
+        {showPills && <SuggestedActionPills actions={actions} onSelect={onSendMessage} onInjectExpression={onInjectExpression} />}
       </>
     );
   }
@@ -639,7 +650,7 @@ function MessageBubble({ message, agentId, isLastAssistant, onSendMessage, onInj
           </p>
         </div>
       </div>
-      {showPills && <SuggestedActionPills actions={actions} onSelect={onSendMessage} onInjectExpression={onInjectExpression} assistantContent={displayContent} />}
+      {showPills && <SuggestedActionPills actions={actions} onSelect={onSendMessage} onInjectExpression={onInjectExpression} />}
     </>
   );
 }
@@ -959,12 +970,15 @@ export default function Chat() {
     }
   }, [activeSessionId]);
 
-  const handleInjectExpression = useCallback((expression: string) => {
-    setMessage(`Change current syntax to ${expression}`);
-    setTimeout(() => {
-      textareaRef.current?.focus();
-    }, 50);
-  }, []);
+  const handleInjectExpression = useCallback(() => {
+    const expr = extractHcmExpressionFromMessages(messages);
+    if (expr) {
+      setMessage(`Change current syntax to ${expr}`);
+      setTimeout(() => {
+        textareaRef.current?.focus();
+      }, 50);
+    }
+  }, [messages]);
 
   const handleSendPrompt = async (prompt: string) => {
     if (sendMutation.isPending) return;
