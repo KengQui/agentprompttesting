@@ -1,0 +1,18 @@
+[
+  {
+    "id": "1db78b04-b8dd-4087-b83c-d9dd774495ed",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "sessionId": "c4ea71bf-2285-40a9-acd3-1dcdc47ba62d",
+    "role": "user",
+    "content": "Create an expression to add Scheduled EE Amount and Scheduled ER Amount",
+    "timestamp": "2026-02-11T22:19:54.732Z"
+  },
+  {
+    "id": "2dcff097-38e2-4a13-97db-51e359749e0e",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "sessionId": "c4ea71bf-2285-40a9-acd3-1dcdc47ba62d",
+    "role": "assistant",
+    "content": "```\nAdd(Value(ScheduledEEAmount), Value(ScheduledERAmount))\n```\nThis expression will produce a **Numeric** output.\n\nSuggested column name: **Total Scheduled Amount**\n{{SUGGESTED_ACTIONS:Create new column|Test with my data|Explain this expression}}",
+    "timestamp": "2026-02-11T22:19:55.604Z"
+  }
+]
