@@ -3,7 +3,7 @@ import { useParams, useLocation } from "wouter";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-import { ArrowLeft, Send, Bot, User, Settings, Loader2, X, AlertCircle, MessageSquare, Eraser, Plus, PanelLeftClose, PanelLeft, Target, Columns, FunctionSquare, RefreshCw, Layers, Copy, Check, FlaskConical, UserCircle, Calculator, CheckCircle2 } from "lucide-react";
+import { ArrowLeft, Send, Bot, User, Settings, Loader2, X, AlertCircle, MessageSquare, Eraser, Plus, PanelLeftClose, PanelLeft, Target, Columns, FunctionSquare, Layers, Copy, Check, FlaskConical, UserCircle, Calculator, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Card } from "@/components/ui/card";
@@ -200,7 +200,6 @@ const EXPLANATION_SECTION_META: { pattern: RegExp; label: string; icon: typeof T
   { pattern: /your\s+objective/i, label: "Your Objective", icon: Target },
   { pattern: /identifying\s+necessary\s+columns/i, label: "Columns Used", icon: Columns },
   { pattern: /using\s+the\s+/i, label: "Function Logic", icon: FunctionSquare },
-  { pattern: /handling\s+data\s+conversion/i, label: "Data Conversion", icon: RefreshCw },
   { pattern: /combining\s+everything/i, label: "Final Expression", icon: Layers },
 ];
 
@@ -209,7 +208,7 @@ function parseExplanationSections(text: string): ExplanationSection[] | null {
   const matches: RegExpExecArray[] = [];
   let m: RegExpExecArray | null;
   while ((m = numberedPattern.exec(text)) !== null) {
-    if (/objective|column|function|conversion|combining/i.test(text.slice(m.index, m.index + 80))) {
+    if (/objective|column|function|combining/i.test(text.slice(m.index, m.index + 80))) {
       matches.push(m);
     }
   }
