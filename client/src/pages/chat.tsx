@@ -468,7 +468,7 @@ function ValidationRowCard({ row, index }: { row: ValidationRow; index: number }
       )}
       <div className="flex items-center gap-2 rounded-md dark:bg-muted/60 border border-border/50 px-3 py-2 text-[#e0e0e0] bg-[#f3f4f6]">
         <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Result</span>
-        <span className="ml-auto font-mono text-sm font-semibold">{row.result}</span>
+        <span className="ml-auto font-mono text-sm font-semibold text-[#6b7280]">{row.result}</span>
       </div>
     </div>
   );
