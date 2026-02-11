@@ -501,7 +501,7 @@
     "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
     "title": "Auto-Test: UC-2.2 - Math on Currency-Formatted Column",
     "createdAt": "2026-02-11T14:04:59.570Z",
-    "updatedAt": "2026-02-11T14:04:59.818Z"
+    "updatedAt": "2026-02-11T19:07:48.108Z"
   },
   {
     "id": "6884b913-e12f-41bd-8511-b910488d5fc3",
@@ -555,8 +555,8 @@
   {
     "id": "4a30a5e3-f769-4ac4-bab8-1f8e05e775cb",
     "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
-    "title": "New Session",
+    "title": "Need to test further",
     "createdAt": "2026-02-11T16:07:35.129Z",
-    "updatedAt": "2026-02-11T16:15:05.996Z"
+    "updatedAt": "2026-02-11T19:06:39.671Z"
   }
 ]
