@@ -543,6 +543,13 @@
     "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
     "title": "New Session",
     "createdAt": "2026-02-11T01:28:39.025Z",
-    "updatedAt": "2026-02-11T01:28:43.182Z"
+    "updatedAt": "2026-02-11T01:36:56.132Z"
+  },
+  {
+    "id": "7018f301-16e0-4b04-8676-17487848788c",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "title": "New Session",
+    "createdAt": "2026-02-11T01:45:34.899Z",
+    "updatedAt": "2026-02-11T01:45:39.178Z"
   }
 ]
