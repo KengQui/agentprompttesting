@@ -435,7 +435,7 @@ function ValidationRowCard({ row, index }: { row: ValidationRow; index: number }
   return (
     <div className="px-4 py-3 space-y-3" data-testid={`validation-row-${index}`}>
       <div className="flex items-center gap-2 text-sm">
-        <span className="text-muted-foreground font-bold">Row {index + 1}</span>
+        <span className="text-[#0f1729] font-medium">Row {index + 1}</span>
         <span className="text-muted-foreground">|</span>
         <span className="font-medium">{row.employeeName}</span>
       </div>
