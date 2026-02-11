@@ -430,10 +430,28 @@ The agent is configured with the following sample employee data:
 - **Scenario:** Any expression response
 - **Expected Behavior:** The formula is always displayed inside a code block (``` ``` ```).
 
-### UC-12.8: Step-by-Step Logic Explanation
-- **What to Test:** Agent explains what the expression does in simple terms after presenting it
-- **Scenario:** Complex nested `If()` expression
-- **Expected Behavior:** Agent walks through the logic: "First it checks X. If that's true, it returns Y. If not, it then checks Z..."
+### UC-12.8: Structured 5-Step Explanation Format
+- **What to Test:** When user clicks "Explain this expression", agent uses the structured 5-step explanation format
+- **Scenario:** Any expression followed by clicking "Explain this expression"
+- **Expected Behavior:** Agent responds with a numbered breakdown following this structure:
+  1. **Understanding the Goal** — States the business objective in plain language
+  2. **Identifying Necessary Columns** — Lists each column used and what it contains
+  3. **Using the [Function] Function** — Explains the main function (step title adapts to the function used, e.g., "Using the Add Function", "Using the If Function")
+  4. **Handling Data Conversion** — Explains why Value()/ToDouble() is needed (only included when type conversion is used — skipped entirely if not needed)
+  5. **Combining Everything** — Shows the complete expression in a code block
+- **Additional Checks:**
+  - No real data values are shown (explanation stays conceptual)
+  - Response ends with `{{SUGGESTED_ACTIONS:Use this expression|Revise this expression|Validate with sample data}}`
+
+### UC-12.8a: 5-Step Explanation Adapts Step Titles
+- **What to Test:** Step 3 title dynamically changes based on the main function used
+- **Scenario:** Explain a `Divide()` expression, then explain a `Concat()` expression
+- **Expected Behavior:** Step 3 reads "Using the Divide Function" for the first, "Using the Concat Function" for the second
+
+### UC-12.8b: 5-Step Explanation Skips Data Conversion When Not Needed
+- **What to Test:** Step 4 (Handling Data Conversion) is omitted when the expression doesn't use Value() or ToDouble()
+- **Scenario:** Explain a `Concat(FirstName, " ", LastName)` expression (no type conversion)
+- **Expected Behavior:** Explanation goes directly from Step 3 to Step 5, skipping Step 4 entirely
 
 ### UC-12.9: Always Offers Validation — Never Skips
 - **What to Test:** Every expression response ends with an offer to validate against real data
