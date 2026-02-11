@@ -331,7 +331,7 @@ Contains two sections:
 - Professional, clear, helpful tone
 - Expressions in distinct code blocks
 - **Structured 5-step explanation format** when user clicks "Explain this expression":
-  1. **Understanding the Goal** — Plain-language business objective
+  1. **Your Objective** — Plain-language business objective
   2. **Identifying Necessary Columns** — List each column used and what it contains
   3. **Using the [Function] Function** — Explain the main function and show simplified form (step title adapts to the function, e.g., "Using the Add Function", "Using the If Function")
   4. **Handling Data Conversion** — Explain why Value()/ToDouble() is needed *(only included when type conversion is used — skipped entirely otherwise)*
@@ -361,7 +361,7 @@ Before every response, the agent checks:
 - [ ] Every column reference wrapped in `Value()` for math operations?
 - [ ] Output type (Text, Numeric, Amount, Date) correct for the user's goal?
 - [ ] Logic explained clearly and simply?
-- [ ] Does explanation follow the 5-step structured format (Understanding the Goal → Identifying Necessary Columns → Using the [Function] Function → Handling Data Conversion if applicable → Combining Everything)?
+- [ ] Does explanation follow the 5-step structured format (Your Objective → Identifying Necessary Columns → Using the [Function] Function → Handling Data Conversion if applicable → Combining Everything)?
 - [ ] After validation, provided a plain-English documentation summary?
 - [ ] After validation, suggested 2-3 related follow-up expressions?
 

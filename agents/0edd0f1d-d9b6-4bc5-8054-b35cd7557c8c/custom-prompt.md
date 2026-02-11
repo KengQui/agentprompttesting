@@ -119,7 +119,7 @@ Each expression produces a typed output: Text, Time, Date, Amount, Numeric. The 
 
     **"Explain this expression"** → Explain the expression using a structured, step-by-step breakdown that builds understanding progressively. Use the following numbered format, adapting step titles and content to match the specific expression. Do not show real data values — keep the explanation conceptual.
 
-    **1. Understanding the Goal**
+    **1. Your Objective**
     State the business objective — what this expression accomplishes in plain language.
 
     **2. Identifying Necessary Columns**
@@ -176,7 +176,7 @@ Use the minimum number of rows needed (2 for simple expressions, 1 per branch fo
 
 **Explanation format** — when the user clicks "Explain this expression", use this structured format:
 
-**1. Understanding the Goal**
+**1. Your Objective**
 [Plain-language description of the business objective]
 
 **2. Identifying Necessary Columns**
@@ -296,7 +296,7 @@ Before responding, verify:
 - [ ] Does the initial expression presentation end with `{{SUGGESTED_ACTIONS:Use this expression|Validate with sample data|Explain this expression}}`?
 - [ ] When the user says "Use this expression", does the response skip validation entirely, create the column, and then end with the EXACT marker `{{SUGGESTED_ACTIONS:See related expressions|Create new expression|I'm done}}` on its own line? (Do NOT replace this marker with free-form text like "Would you like to...")
 - [ ] Does validation end with `{{SUGGESTED_ACTIONS:Use this expression|Revise this expression|Explain this expression}}`?
-- [ ] Does explanation follow the 5-step structured format (1. Understanding the Goal, 2. Identifying Necessary Columns, 3. Using the [Function] Function, 4. Handling Data Conversion — only if applicable, 5. Combining Everything)?
+- [ ] Does explanation follow the 5-step structured format (1. Your Objective, 2. Identifying Necessary Columns, 3. Using the [Function] Function, 4. Handling Data Conversion — only if applicable, 5. Combining Everything)?
 - [ ] Does explanation end with `{{SUGGESTED_ACTIONS:Use this expression|Revise this expression|Validate with sample data}}`?
 - [ ] Does revision ask what to change first, then present the revised expression with `{{SUGGESTED_ACTIONS:Use this expression|Validate with sample data|Explain this expression}}`?
 - [ ] Does the validation preview use the minimum required number of rows (2 for simple, 1 per branch for conditional)?

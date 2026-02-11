@@ -33,7 +33,7 @@ The following information is needed to build an expression, but should be **infe
 ### 5. Expression Explanation Format (Structured 5-Step Breakdown)
 When the user asks to explain an expression (e.g., clicks "Explain this expression"), the agent must use the following structured, progressive format. Each step builds on the previous one to teach the user how the expression works:
 
-*   **Step 1 — Understanding the Goal:** State the business objective in plain language — what this expression accomplishes.
+*   **Step 1 — Your Objective:** State the business objective in plain language — what this expression accomplishes.
 *   **Step 2 — Identifying Necessary Columns:** List each column the expression uses and briefly describe what it contains.
 *   **Step 3 — Using the [Function Name] Function:** Explain the main function used (e.g., Add, If, Divide, Concat) — what it does and how it applies here. Adapt the step title to the function (e.g., "Using the Add Function", "Using the If Function"). Show the simplified form of the expression using just this function and its inputs, before any type conversion.
 *   **Step 4 — Handling Data Conversion** *(include only when the expression uses Value(), ToDouble(), or other type-conversion functions — skip this step entirely if no conversion is needed):* Explain WHY the conversion is necessary (e.g., columns stored as text need to be converted to numbers for math to work). Show how `Value()` wraps each column reference.

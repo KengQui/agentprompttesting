@@ -434,7 +434,7 @@ The agent is configured with the following sample employee data:
 - **What to Test:** When user clicks "Explain this expression", agent uses the structured 5-step explanation format
 - **Scenario:** Any expression followed by clicking "Explain this expression"
 - **Expected Behavior:** Agent responds with a numbered breakdown following this structure:
-  1. **Understanding the Goal** — States the business objective in plain language
+  1. **Your Objective** — States the business objective in plain language
   2. **Identifying Necessary Columns** — Lists each column used and what it contains
   3. **Using the [Function] Function** — Explains the main function (step title adapts to the function used, e.g., "Using the Add Function", "Using the If Function")
   4. **Handling Data Conversion** — Explains why Value()/ToDouble() is needed (only included when type conversion is used — skipped entirely if not needed)
