@@ -316,7 +316,10 @@ interface ValidationRow {
 }
 
 function isValidationMessage(text: string): boolean {
-  return /\*{0,2}Row\s+1[:\s]/i.test(text) && /\*{0,2}Result:?\*{0,2}/i.test(text) && /\*{0,2}Inputs?:?\*{0,2}/i.test(text);
+  const hasRows = /\*{0,2}Row\s+\d+/i.test(text);
+  const hasResult = /\*{0,2}Result:?\*{0,2}/i.test(text);
+  const hasValidationContext = /sample\s+data|validation/i.test(text) || /\*{0,2}Inputs?:?\*{0,2}/i.test(text) || /\*{0,2}Calculation:?\*{0,2}/i.test(text);
+  return hasRows && hasResult && hasValidationContext;
 }
 
 function parseValidationRows(text: string): { rows: ValidationRow[]; footnote: string } | null {
@@ -343,17 +346,24 @@ function parseValidationRows(text: string): { rows: ValidationRow[]; footnote: s
     const inputs: { name: string; value: string }[] = [];
     const inputSection = chunk.match(/\*{0,2}Inputs?:?\*{0,2}\s*([\s\S]*?)(?=\n\s*-?\s*\*{0,2}Calc|\n\s*-?\s*\*{0,2}Result)/i);
     if (inputSection) {
-      const inputRegex = /`(\w+)`\s*=\s*"?([^",\n]+)"?/g;
+      const backtickRegex = /`([^`]+)`\s*=\s*"?([^",\n]+)"?/g;
       let ip: RegExpExecArray | null;
-      while ((ip = inputRegex.exec(inputSection[1])) !== null) {
+      while ((ip = backtickRegex.exec(inputSection[1])) !== null) {
         inputs.push({ name: ip[1], value: ip[2].replace(/\\"/g, '"').trim() });
+      }
+      if (inputs.length === 0) {
+        const colonRegex = /[-*]\s*\*{0,2}([^:*]+)\*{0,2}:\s*(.+)/g;
+        let cp: RegExpExecArray | null;
+        while ((cp = colonRegex.exec(inputSection[1])) !== null) {
+          inputs.push({ name: cp[1].trim(), value: cp[2].trim() });
+        }
       }
     }
 
     const calcSteps: string[] = [];
     const calcSection = chunk.match(/\*{0,2}Calculation:?\*{0,2}\s*\n([\s\S]*?)(?=\n\s*-?\s*\*{0,2}Result)/i);
     if (calcSection) {
-      const lines = calcSection[1].split("\n").map(l => l.trim()).filter(l => l.startsWith("`") || l.startsWith("="));
+      const lines = calcSection[1].split("\n").map(l => l.trim()).filter(l => l.length > 0 && l !== "-");
       for (const line of lines) {
         calcSteps.push(line.replace(/^=\s*/, "").replace(/`/g, "").trim());
       }
@@ -365,14 +375,20 @@ function parseValidationRows(text: string): { rows: ValidationRow[]; footnote: s
     rows.push({ employeeName, inputs, calculationSteps: calcSteps, result });
   }
 
-  const lastRowEndIdx = rowMatches.length > 0
-    ? text.indexOf("\n\n", rowMatches[rowMatches.length - 1] + 50)
-    : -1;
-  if (lastRowEndIdx > -1) {
-    const afterRows = text.slice(lastRowEndIdx).trim();
-    const cleaned = afterRows.replace(/\{\{SUGGESTED_ACTIONS:.*?\}\}/g, "").trim();
-    if (cleaned && !/^\*{0,2}Row\s+\d+/i.test(cleaned)) {
-      footnote = cleaned;
+  if (rowMatches.length > 0) {
+    const lastRowStart = rowMatches[rowMatches.length - 1];
+    const lastRowChunk = text.slice(lastRowStart);
+    const resultEnd = lastRowChunk.search(/\*{0,2}Result:?\*{0,2}\s*.+/i);
+    if (resultEnd > -1) {
+      const afterResult = lastRowChunk.slice(resultEnd);
+      const resultLineEnd = afterResult.indexOf("\n");
+      if (resultLineEnd > -1) {
+        const trailing = afterResult.slice(resultLineEnd).trim();
+        const cleaned = trailing.replace(/\{\{SUGGESTED_ACTIONS:.*?\}\}/g, "").trim();
+        if (cleaned && !/^\*{0,2}Row\s+\d+/i.test(cleaned)) {
+          footnote = cleaned;
+        }
+      }
     }
   }
 
