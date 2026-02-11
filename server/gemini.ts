@@ -1090,10 +1090,10 @@ TASK
 5. [If actions are available, include step for executing actions when the user requests them]
 
 ### 6. OUTPUT FORMAT
-Define how responses should be structured based on the use case. When the agent presents a new calculated column or expression, it should also suggest a descriptive column name displayed in bold.
+Define how responses should be structured based on the use case. When the agent presents a NEW calculated column or expression (initial proposal, revised, or related suggestion), it should also suggest a descriptive column name displayed in bold and include the output type. However, when the agent is CORRECTING a user's syntax error or explaining what was wrong with their expression, it should NOT include the output type or suggested column name — those metadata lines only belong on new/finalized proposals. In that case, just explain the issue and show the corrected expression.
 If the validation rules define a structured explanation format (e.g., a multi-step breakdown for explaining expressions), include that format in the OUTPUT FORMAT section so the agent follows it consistently.
 OUTPUT FORMAT
-[Specify based on use case - format, tone, structure requirements. Include instruction to suggest a bolded column name when presenting new expressions or calculated columns. If validation rules specify an explanation format, include the full format template here.]
+[Specify based on use case - format, tone, structure requirements. Include instruction to suggest a bolded column name and output type when presenting NEW expressions or calculated columns. Include a separate format for syntax corrections that omits the column name and output type metadata. If validation rules specify an explanation format, include the full format template here.]
 
 ### 7. EXAMPLES (REQUIRED - GENERATE THESE)
 Based on the business use case, INFER and CREATE 2-3 realistic example interactions. These should demonstrate:
