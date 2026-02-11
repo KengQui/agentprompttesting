@@ -3,10 +3,11 @@ import { useParams, useLocation } from "wouter";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-import { ArrowLeft, Send, Bot, User, Settings, Loader2, X, AlertCircle, MessageSquare, Eraser, Plus, PanelLeftClose, PanelLeft, Target, Columns, FunctionSquare, RefreshCw, Layers, Copy, Check, ChevronLeft, ChevronRight, FlaskConical, UserCircle, Calculator, CheckCircle2 } from "lucide-react";
+import { ArrowLeft, Send, Bot, User, Settings, Loader2, X, AlertCircle, MessageSquare, Eraser, Plus, PanelLeftClose, PanelLeft, Target, Columns, FunctionSquare, RefreshCw, Layers, Copy, Check, FlaskConical, UserCircle, Calculator, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Card } from "@/components/ui/card";
+import { Carousel, CarouselContent, CarouselItem, CarouselPrevious, CarouselNext, type CarouselApi } from "@/components/ui/carousel";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
@@ -395,18 +396,72 @@ function parseValidationRows(text: string): { rows: ValidationRow[]; footnote: s
   return rows.length > 0 ? { rows, footnote } : null;
 }
 
+function ValidationRowCard({ row, index }: { row: ValidationRow; index: number }) {
+  return (
+    <div className="px-4 py-3 space-y-3" data-testid={`validation-row-${index}`}>
+      <div className="flex items-center gap-2">
+        <UserCircle className="h-4 w-4 text-muted-foreground" />
+        <span className="text-sm font-medium">{row.employeeName}</span>
+      </div>
+
+      {row.inputs.length > 0 && (
+        <div className="space-y-1">
+          <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Inputs</span>
+          <div className="flex flex-wrap gap-2">
+            {row.inputs.map((input, j) => (
+              <div key={j} className="rounded-md bg-muted px-2.5 py-1.5 text-xs">
+                <span className="text-muted-foreground">{input.name}</span>
+                <span className="mx-1">=</span>
+                <span className="font-mono font-medium">{input.value}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {row.calculationSteps.length > 0 && (
+        <div className="space-y-1">
+          <div className="flex items-center gap-2">
+            <Calculator className="h-3.5 w-3.5 text-muted-foreground" />
+            <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Calculation</span>
+          </div>
+          <div className="rounded-md bg-muted px-3 py-2 font-mono text-xs space-y-0.5">
+            {row.calculationSteps.map((step, j) => (
+              <div key={j} className={j > 0 ? "text-muted-foreground" : ""}>
+                {j > 0 && <span className="mr-1">=</span>}
+                {step}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      <div className="flex items-center gap-2 rounded-md bg-muted px-3 py-2">
+        <CheckCircle2 className="h-4 w-4 text-green-500 dark:text-green-400 shrink-0" />
+        <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Result</span>
+        <span className="ml-auto font-mono text-sm font-semibold">{row.result}</span>
+      </div>
+    </div>
+  );
+}
+
 function SampleDataValidationCarousel({ content, timestamp }: { content: string; timestamp: string }) {
   const parsed = parseValidationRows(content);
+  const [api, setApi] = useState<CarouselApi>();
   const [currentIdx, setCurrentIdx] = useState(0);
+
+  useEffect(() => {
+    if (!api) return;
+    setCurrentIdx(api.selectedScrollSnap());
+    const onSelect = () => setCurrentIdx(api.selectedScrollSnap());
+    api.on("select", onSelect);
+    return () => { api.off("select", onSelect); };
+  }, [api]);
 
   if (!parsed || parsed.rows.length === 0) return null;
 
   const { rows, footnote } = parsed;
-  const row = rows[currentIdx];
   const total = rows.length;
-
-  const goNext = () => setCurrentIdx(i => Math.min(i + 1, total - 1));
-  const goPrev = () => setCurrentIdx(i => Math.max(i - 1, 0));
 
   return (
     <div className="flex gap-3" data-testid="validation-carousel">
@@ -418,88 +473,49 @@ function SampleDataValidationCarousel({ content, timestamp }: { content: string;
           <div className="flex items-center gap-2 px-4 py-3 border-b border-card-border">
             <FlaskConical className="h-4 w-4 text-muted-foreground" />
             <span className="text-sm font-semibold">Sample Data Validation</span>
-            <span className="ml-auto text-xs text-muted-foreground">{currentIdx + 1} / {total}</span>
+            <span className="ml-auto text-xs text-muted-foreground" data-testid="text-carousel-counter">{currentIdx + 1} / {total}</span>
           </div>
 
-          <div className="px-4 py-3 space-y-3" data-testid={`validation-row-${currentIdx}`}>
-            <div className="flex items-center gap-2">
-              <UserCircle className="h-4 w-4 text-muted-foreground" />
-              <span className="text-sm font-medium">{row.employeeName}</span>
-            </div>
+          <Carousel
+            setApi={setApi}
+            opts={{ align: "start", loop: false }}
+            className="w-full"
+          >
+            <CarouselContent className="-ml-0">
+              {rows.map((row, i) => (
+                <CarouselItem key={i} className="pl-0">
+                  <ValidationRowCard row={row} index={i} />
+                </CarouselItem>
+              ))}
+            </CarouselContent>
 
-            {row.inputs.length > 0 && (
-              <div className="space-y-1">
-                <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Inputs</span>
-                <div className="flex flex-wrap gap-2">
-                  {row.inputs.map((input, j) => (
-                    <div key={j} className="rounded-md bg-muted px-2.5 py-1.5 text-xs">
-                      <span className="text-muted-foreground">{input.name}</span>
-                      <span className="mx-1">=</span>
-                      <span className="font-mono font-medium">{input.value}</span>
-                    </div>
+            {total > 1 && (
+              <div className="flex items-center justify-center gap-3 px-4 py-2 border-t border-card-border">
+                <CarouselPrevious
+                  className="static translate-y-0 h-8 w-8"
+                  variant="ghost"
+                  data-testid="button-carousel-prev"
+                />
+                <div className="flex gap-1.5">
+                  {rows.map((_, i) => (
+                    <button
+                      key={i}
+                      onClick={() => api?.scrollTo(i)}
+                      className={`h-1.5 rounded-full transition-all ${
+                        i === currentIdx ? "w-4 bg-primary" : "w-1.5 bg-muted-foreground/30"
+                      }`}
+                      data-testid={`button-carousel-dot-${i}`}
+                    />
                   ))}
                 </div>
+                <CarouselNext
+                  className="static translate-y-0 h-8 w-8"
+                  variant="ghost"
+                  data-testid="button-carousel-next"
+                />
               </div>
             )}
-
-            {row.calculationSteps.length > 0 && (
-              <div className="space-y-1">
-                <div className="flex items-center gap-2">
-                  <Calculator className="h-3.5 w-3.5 text-muted-foreground" />
-                  <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Calculation</span>
-                </div>
-                <div className="rounded-md bg-muted px-3 py-2 font-mono text-xs space-y-0.5">
-                  {row.calculationSteps.map((step, j) => (
-                    <div key={j} className={j > 0 ? "text-muted-foreground" : ""}>
-                      {j > 0 && <span className="mr-1">=</span>}
-                      {step}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            <div className="flex items-center gap-2 rounded-md bg-muted px-3 py-2">
-              <CheckCircle2 className="h-4 w-4 text-green-500 dark:text-green-400 shrink-0" />
-              <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Result</span>
-              <span className="ml-auto font-mono text-sm font-semibold">{row.result}</span>
-            </div>
-          </div>
-
-          {total > 1 && (
-            <div className="flex items-center justify-center gap-3 px-4 py-2 border-t border-card-border">
-              <Button
-                size="icon"
-                variant="ghost"
-                onClick={goPrev}
-                disabled={currentIdx === 0}
-                data-testid="button-carousel-prev"
-              >
-                <ChevronLeft className="h-4 w-4" />
-              </Button>
-              <div className="flex gap-1.5">
-                {rows.map((_, i) => (
-                  <button
-                    key={i}
-                    onClick={() => setCurrentIdx(i)}
-                    className={`h-1.5 rounded-full transition-all ${
-                      i === currentIdx ? "w-4 bg-primary" : "w-1.5 bg-muted-foreground/30"
-                    }`}
-                    data-testid={`button-carousel-dot-${i}`}
-                  />
-                ))}
-              </div>
-              <Button
-                size="icon"
-                variant="ghost"
-                onClick={goNext}
-                disabled={currentIdx === total - 1}
-                data-testid="button-carousel-next"
-              >
-                <ChevronRight className="h-4 w-4" />
-              </Button>
-            </div>
-          )}
+          </Carousel>
 
           {footnote && (
             <div className="px-4 py-2.5 border-t border-card-border">
