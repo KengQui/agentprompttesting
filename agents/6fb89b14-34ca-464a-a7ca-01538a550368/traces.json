@@ -1493,6 +1493,146 @@
         }
       ],
       "success": true
+    },
+    {
+      "id": "trace-1770822975837",
+      "sessionId": "f76c3f4e-3534-40e3-a8bc-c5e70975dca3",
+      "userInput": "Maria has called in for her shift",
+      "agentResponse": "Okay, I can help with that. To confirm, is the employee Maria Garcia (Employee ID: E99887) the correct employee? Please confirm with 'yes' or provide her employee ID.",
+      "startTime": "2026-02-11T15:16:15.244Z",
+      "endTime": "2026-02-11T15:16:15.837Z",
+      "totalDuration": 593,
+      "entries": [
+        {
+          "id": "entry-1770822975246-1",
+          "type": "intent_classification",
+          "name": "Orchestrator Intent Classification",
+          "timestamp": "2026-02-11T15:16:15.246Z",
+          "metadata": {
+            "intent": "answer_question",
+            "classificationMethod": "orchestrator",
+            "confidence": "high"
+          }
+        },
+        {
+          "id": "entry-1770822975837-3",
+          "type": "llm_call",
+          "name": "Gemini Response Generation",
+          "timestamp": "2026-02-11T15:16:15.837Z",
+          "duration": 591,
+          "metadata": {
+            "model": "gemini",
+            "intent": "answer_question",
+            "validated": true
+          }
+        }
+      ],
+      "success": true
+    },
+    {
+      "id": "trace-1770822985148",
+      "sessionId": "f76c3f4e-3534-40e3-a8bc-c5e70975dca3",
+      "userInput": "yes",
+      "agentResponse": "Okay, I've located an assigned shift for Maria Garcia (ID: E99887) on February 4, 2026, from 2:00 PM - 10:00 PM (8 hours). What earning code should we use for this absence? Common options include:\n1. Sick Leave (accrual required)\n2. Vacation (accrual required)\n3. Unpaid Time Off (no accrual)\n4. Bereavement Leave (no accrual)\n5. Jury Duty (no accrual)\nPlease select one by number or name, or specify another code if available.",
+      "startTime": "2026-02-11T15:16:23.944Z",
+      "endTime": "2026-02-11T15:16:25.148Z",
+      "totalDuration": 1204,
+      "entries": [
+        {
+          "id": "entry-1770822983945-1",
+          "type": "intent_classification",
+          "name": "Orchestrator Intent Classification",
+          "timestamp": "2026-02-11T15:16:23.945Z",
+          "metadata": {
+            "intent": "answer_question",
+            "classificationMethod": "orchestrator",
+            "confidence": "high"
+          }
+        },
+        {
+          "id": "entry-1770822985148-3",
+          "type": "llm_call",
+          "name": "Gemini Response Generation",
+          "timestamp": "2026-02-11T15:16:25.148Z",
+          "duration": 1203,
+          "metadata": {
+            "model": "gemini",
+            "intent": "answer_question",
+            "validated": true
+          }
+        }
+      ],
+      "success": true
+    },
+    {
+      "id": "trace-1770822997815",
+      "sessionId": "f76c3f4e-3534-40e3-a8bc-c5e70975dca3",
+      "userInput": "1",
+      "agentResponse": "Okay, processing Maria Garcia's 8-hour absence for February 4th as Sick Leave.\n\nChecking accrual balance... Maria Garcia currently has 5.5 hours of Sick Leave accrual available. This is not enough to cover the 8-hour shift.\n\nCompany policy prevents a negative Sick Leave balance. Would you like to:\n1. Use the available 5.5 hours of Sick Leave and classify the remaining 2.5 hours as Unpaid Time Off?\n2. Classify the entire 8 hours as Unpaid Time Off?\n3. Select a different earning code entirely?\n\nPlease choose an option or provide a different earning code.",
+      "startTime": "2026-02-11T15:16:36.309Z",
+      "endTime": "2026-02-11T15:16:37.815Z",
+      "totalDuration": 1506,
+      "entries": [
+        {
+          "id": "entry-1770822996310-1",
+          "type": "intent_classification",
+          "name": "Orchestrator Intent Classification",
+          "timestamp": "2026-02-11T15:16:36.310Z",
+          "metadata": {
+            "intent": "answer_question",
+            "classificationMethod": "orchestrator",
+            "confidence": "high"
+          }
+        },
+        {
+          "id": "entry-1770822997815-3",
+          "type": "llm_call",
+          "name": "Gemini Response Generation",
+          "timestamp": "2026-02-11T15:16:37.815Z",
+          "duration": 1505,
+          "metadata": {
+            "model": "gemini",
+            "intent": "answer_question",
+            "validated": true
+          }
+        }
+      ],
+      "success": true
+    },
+    {
+      "id": "trace-1770823024325",
+      "sessionId": "f76c3f4e-3534-40e3-a8bc-c5e70975dca3",
+      "userInput": "1",
+      "agentResponse": "Okay, so you want to use 5.5 hours of Sick Leave and 2.5 hours of Unpaid Time Off.\n\nYou are about to report an absence for employee E99887 on 2026-02-04 for the shift starting at 14:00, classified as Sick Leave (5.5 hours) and Unpaid Time Off (2.5 hours). This will deduct 5.5 hours from the Sick Leave accrual, convert the shift to an open shift, and record for payroll. Do you wish to proceed?",
+      "startTime": "2026-02-11T15:17:02.806Z",
+      "endTime": "2026-02-11T15:17:04.325Z",
+      "totalDuration": 1519,
+      "entries": [
+        {
+          "id": "entry-1770823023155-1",
+          "type": "intent_classification",
+          "name": "Orchestrator Intent Classification",
+          "timestamp": "2026-02-11T15:17:03.155Z",
+          "metadata": {
+            "intent": "answer_question",
+            "classificationMethod": "orchestrator",
+            "confidence": "high"
+          }
+        },
+        {
+          "id": "entry-1770823024325-3",
+          "type": "llm_call",
+          "name": "Gemini Response Generation",
+          "timestamp": "2026-02-11T15:17:04.325Z",
+          "duration": 1170,
+          "metadata": {
+            "model": "gemini",
+            "intent": "answer_question",
+            "validated": true
+          }
+        }
+      ],
+      "success": true
     }
   ],
   "stats": {
@@ -1501,16 +1641,16 @@
     },
     "signalReads": {},
     "intentDistribution": {
-      "answer_question": 42
+      "answer_question": 46
     },
     "classificationMethods": {
-      "orchestrator": 42
+      "orchestrator": 46
     },
-    "avgResponseTime": 1025.5714285714287,
-    "totalLlmCalls": 35,
+    "avgResponseTime": 1041.2173913043478,
+    "totalLlmCalls": 39,
     "totalTokensUsed": 0,
     "errorCount": 4
   },
   "createdAt": "2026-02-06T01:22:58.868Z",
-  "updatedAt": "2026-02-11T15:04:28.338Z"
+  "updatedAt": "2026-02-11T15:17:04.325Z"
 }
