@@ -817,6 +817,10 @@ function getSystemPrompt(agent: AgentContext): string {
     const actionsText = buildActionsText(agent);
     const mockStateText = buildMockUserStateText(agent);
     
+    fullPrompt = fullPrompt.replace(/\{\{SAMPLE_DATA\}\}/g, sampleDatasetsText || '(No sample data provided)');
+    fullPrompt = fullPrompt.replace(/\{\{VALIDATION_RULES\}\}/g, agent.validationRules || '(No validation rules provided)');
+    fullPrompt = fullPrompt.replace(/\{\{GUARDRAILS\}\}/g, agent.guardrails || '(No guardrails provided)');
+    
     fullPrompt += currentDateSection;
     
     if (actionsText) {

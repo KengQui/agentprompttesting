@@ -415,8 +415,15 @@
   {
     "id": "4278ff32-7f3e-4eba-9bc6-252598573757",
     "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
-    "title": "UC-1.2 Subtraction",
+    "title": "UC-1.2 Subtraction Fail, DB in correct",
     "createdAt": "2026-02-11T12:26:08.887Z",
-    "updatedAt": "2026-02-11T13:27:47.129Z"
+    "updatedAt": "2026-02-11T13:39:30.464Z"
+  },
+  {
+    "id": "c900b6ec-bc87-4da1-a162-ee72864a7303",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "title": "UC-1.2 Subtraction",
+    "createdAt": "2026-02-11T13:39:11.303Z",
+    "updatedAt": "2026-02-11T13:39:56.124Z"
   }
 ]
