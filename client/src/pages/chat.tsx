@@ -184,10 +184,15 @@ function extractHcmExpression(text: string): string | null {
 function extractHcmExpressionFromMessages(messages: Array<{ role: string; content: string }>): string | null {
   const assistantMsgs = messages.filter(m => m.role === "assistant");
   for (let i = assistantMsgs.length - 1; i >= 0; i--) {
-    const expr = extractHcmExpression(assistantMsgs[i].content);
-    if (expr) return expr;
+    const codeBlockMatch = assistantMsgs[i].content.match(/```[\s\S]*?\n([\s\S]*?)```/);
+    if (codeBlockMatch) return codeBlockMatch[1].trim();
   }
-  return null;
+  let fallback: string | null = null;
+  for (let i = assistantMsgs.length - 1; i >= 0; i--) {
+    const expr = extractHcmExpression(assistantMsgs[i].content);
+    if (expr) { fallback = expr; break; }
+  }
+  return fallback;
 }
 
 function SuggestedActionPills({ actions, onSelect, onInjectExpression, disabled }: { actions: string[]; onSelect: (action: string) => void; onInjectExpression?: () => void; disabled?: boolean }) {
