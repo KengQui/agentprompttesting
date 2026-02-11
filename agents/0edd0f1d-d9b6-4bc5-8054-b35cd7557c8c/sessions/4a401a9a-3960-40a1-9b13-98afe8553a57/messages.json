@@ -1,0 +1,34 @@
+[
+  {
+    "id": "3f1264a7-df83-4ca4-90cf-fb0ed84c42b2",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "sessionId": "4a401a9a-3960-40a1-9b13-98afe8553a57",
+    "role": "user",
+    "content": "Create an expression to add ScheduledEEAmount and ScheduledERAmount",
+    "timestamp": "2026-02-11T20:21:59.134Z"
+  },
+  {
+    "id": "0bb3258e-17ac-44c1-a0be-f99beba38b5a",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "sessionId": "4a401a9a-3960-40a1-9b13-98afe8553a57",
+    "role": "assistant",
+    "content": "This expression will add the scheduled employee amount and the scheduled employer amount to calculate a total scheduled amount.\n\n```\nAdd(Value(ScheduledEEAmount), Value(ScheduledERAmount))\n```\nThis expression will produce a **Numeric** output.\n\nSuggested column name: **Total Scheduled Amount**\n{{SUGGESTED_ACTIONS:Use this expression|Validate with sample data|Explain this expression}}",
+    "timestamp": "2026-02-11T20:22:00.146Z"
+  },
+  {
+    "id": "0e0ea7c5-3836-4ad1-af7b-d9dab7ffe2a3",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "sessionId": "4a401a9a-3960-40a1-9b13-98afe8553a57",
+    "role": "user",
+    "content": "Validate with sample data",
+    "timestamp": "2026-02-11T20:22:05.253Z"
+  },
+  {
+    "id": "37dc742e-ada5-4f28-af3e-a680535f0db8",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "sessionId": "4a401a9a-3960-40a1-9b13-98afe8553a57",
+    "role": "assistant",
+    "content": "Here's a validation of the expression using sample data:\n\n**Row 1: Employee: Sarah Johnson**\n- **Inputs:** `ScheduledEEAmount` = \"$285.50\", `ScheduledERAmount` = \"$142.75\"\n- **Calculation:**\n  Add(Value(ScheduledEEAmount), Value(ScheduledERAmount))\n  = Add(Value(\"$285.50\"), Value(\"$142.75\"))\n  = Add(285.50, 142.75)\n  = 428.25\n- **Result:** 428.25\n\n**Row 2: Employee: Michael Chen**\n- **Inputs:** `ScheduledEEAmount` = \"$195.00\", `ScheduledERAmount` = \"$97.50\"\n- **Calculation:**\n  Add(Value(ScheduledEEAmount), Value(ScheduledERAmount))\n  = Add(Value(\"$195.00\"), Value(\"$97.50\"))\n  = Add(195.00, 97.50)\n  = 292.50\n- **Result:** 292.50\n{{SUGGESTED_ACTIONS:Use this expression|Revise this expression|Explain this expression}}",
+    "timestamp": "2026-02-11T20:22:07.681Z"
+  }
+]

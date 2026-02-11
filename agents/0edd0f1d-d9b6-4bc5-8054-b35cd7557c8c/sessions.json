@@ -558,5 +558,12 @@
     "title": "Need to test further",
     "createdAt": "2026-02-11T16:07:35.129Z",
     "updatedAt": "2026-02-11T19:06:39.671Z"
+  },
+  {
+    "id": "4a401a9a-3960-40a1-9b13-98afe8553a57",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "title": "New Session",
+    "createdAt": "2026-02-11T20:21:43.952Z",
+    "updatedAt": "2026-02-11T20:22:07.681Z"
   }
 ]
