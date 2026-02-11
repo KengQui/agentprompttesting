@@ -30,5 +30,37 @@
     "role": "assistant",
     "content": "Here are a couple of rows from your data, showing the calculation in action:\n\n**Row 1: Employee: Elijah Moore**\n- **Inputs:** `ScheduledEEAmount` = \"250.00\", `ScheduledERAmount` = \"125.00\"\n- **Calculation:**\n  Add(Value(ScheduledEEAmount), Value(ScheduledERAmount))\n  = Add(Value(\"250.00\"), Value(\"125.00\"))\n  = Add(250, 125)\n  = 375\n- **Result:** 375\n\n**Row 2: Employee: Olivia Baker**\n- **Inputs:** `ScheduledEEAmount` = \"300.00\", `ScheduledERAmount` = \"150.00\"\n- **Calculation:**\n  Add(Value(ScheduledEEAmount), Value(ScheduledERAmount))\n  = Add(Value(\"300.00\"), Value(\"150.00\"))\n  = Add(300, 150)\n  = 450\n- **Result:** 450\n\nDoes this look correct?",
     "timestamp": "2026-02-11T00:04:20.806Z"
+  },
+  {
+    "id": "8e73d0b8-a44c-4826-aa39-98affc99935e",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "sessionId": "0cfa800f-2612-4ce0-8c45-4343eec1fedb",
+    "role": "user",
+    "content": "Create an expression to add ScheduledEEAmount and ScheduledERAmount",
+    "timestamp": "2026-02-11T00:19:23.281Z"
+  },
+  {
+    "id": "0e5cfa60-83b2-46b3-bf64-69be4de1a300",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "sessionId": "0cfa800f-2612-4ce0-8c45-4343eec1fedb",
+    "role": "assistant",
+    "content": "I can create a calculated column that adds the Scheduled EE Amount and Scheduled ER Amount.\n\n```\nAdd(Value(ScheduledEEAmount), Value(ScheduledERAmount))\n```\n\nThis expression will produce a **Numeric** output.\n\nSuggested column name: **Total Scheduled Amount**\n\n{{SUGGESTED_ACTIONS:Use this expression|Validate with sample data|Explain this expression}}",
+    "timestamp": "2026-02-11T00:19:24.168Z"
+  },
+  {
+    "id": "ef413c01-851b-4484-8c88-ef2dc84d5a77",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "sessionId": "0cfa800f-2612-4ce0-8c45-4343eec1fedb",
+    "role": "user",
+    "content": "Use this expression",
+    "timestamp": "2026-02-11T00:19:32.906Z"
+  },
+  {
+    "id": "b92d264d-70fc-49d4-8333-7e0f247c73fb",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "sessionId": "0cfa800f-2612-4ce0-8c45-4343eec1fedb",
+    "role": "assistant",
+    "content": "Successfully created the calculated column '{Total Scheduled Amount}' and added it to your report.",
+    "timestamp": "2026-02-11T00:19:33.626Z"
   }
 ]

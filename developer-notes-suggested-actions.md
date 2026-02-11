@@ -34,11 +34,39 @@ Suggested column name: **Years of Service**
 
 ## Pill Behavior
 
+Each pill sends its label text as the user's next message. The agent uses different pill sets at different stages of the conversation:
+
+**After presenting an expression (initial, revised, or from a suggestion):**
+
 | Pill Label | On Click |
 |---|---|
 | Use this expression | Sends "Use this expression" as the user's next message |
 | Validate with sample data | Sends "Validate with sample data" as the user's next message |
 | Explain this expression | Sends "Explain this expression" as the user's next message |
+
+**After the user accepts an expression ("Use this expression"):**
+
+| Pill Label | On Click |
+|---|---|
+| See related expressions | Sends "See related expressions" as the user's next message |
+| Create new expression | Sends "Create new expression" as the user's next message |
+| I'm done | Sends "I'm done" as the user's next message |
+
+**After validation preview:**
+
+| Pill Label | On Click |
+|---|---|
+| Use this expression | Sends "Use this expression" as the user's next message |
+| Revise this expression | Sends "Revise this expression" as the user's next message |
+| Explain this expression | Sends "Explain this expression" as the user's next message |
+
+**After explanation:**
+
+| Pill Label | On Click |
+|---|---|
+| Use this expression | Sends "Use this expression" as the user's next message |
+| Revise this expression | Sends "Revise this expression" as the user's next message |
+| Validate with sample data | Sends "Validate with sample data" as the user's next message |
 
 ## Display Rules
 - Only render pills on the **most recent** assistant message (not on older messages in the thread).

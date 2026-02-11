@@ -1,0 +1,34 @@
+[
+  {
+    "id": "4e8dad6e-1162-4755-b6ca-4ef5d59edcfc",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "sessionId": "e4460863-e1b8-4d02-b4ed-42192efe9a97",
+    "role": "user",
+    "content": "Create an expression to add ScheduledEEAmount and ScheduledERAmount",
+    "timestamp": "2026-02-11T00:23:58.310Z"
+  },
+  {
+    "id": "8942bcc2-b1c3-45ed-8a29-b131a600d298",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "sessionId": "e4460863-e1b8-4d02-b4ed-42192efe9a97",
+    "role": "assistant",
+    "content": "This expression will add the values in the ScheduledEEAmount and ScheduledERAmount columns together.\n\n```\nAdd(Value(ScheduledEEAmount), Value(ScheduledERAmount))\n```\nThis expression will produce a **Numeric** output.\n\nSuggested column name: **Total Scheduled Amount**\n\n{{SUGGESTED_ACTIONS:Use this expression|Validate with sample data|Explain this expression}}",
+    "timestamp": "2026-02-11T00:23:59.388Z"
+  },
+  {
+    "id": "a9e77c72-8d1c-447c-bb3a-2c0bcde04062",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "sessionId": "e4460863-e1b8-4d02-b4ed-42192efe9a97",
+    "role": "user",
+    "content": "Use this expression",
+    "timestamp": "2026-02-11T00:24:08.662Z"
+  },
+  {
+    "id": "29f45475-d0ff-4019-8431-7ff580895075",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "sessionId": "e4460863-e1b8-4d02-b4ed-42192efe9a97",
+    "role": "assistant",
+    "content": "Successfully created the calculated column '{Total Scheduled Amount}' and added it to your report.",
+    "timestamp": "2026-02-11T00:24:09.529Z"
+  }
+]

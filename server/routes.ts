@@ -776,7 +776,18 @@ export async function registerRoutes(
               ? `[The user's intent appears to be: ${turnResult.intent}. Please respond accordingly.]\n\n`
               : '';
             
-            intentPrefix = topicSwitchPrefix + intentPrefix;
+            // Add system context for suggested action pill clicks to reinforce correct behavior
+            const suggestedActionPrefixes: Record<string, string> = {
+              'Use this expression': '[SYSTEM CONTEXT: The user clicked "Use this expression". You MUST create the column immediately via the create_calculated_column action. Do NOT show any validation examples, row-by-row calculations, or sample data. Confirm the column was created and offer follow-up options.]\n\n',
+              'Validate with sample data': '[SYSTEM CONTEXT: The user clicked "Validate with sample data". Show a row-by-row validation preview using sample data rows.]\n\n',
+              'Explain this expression': '[SYSTEM CONTEXT: The user clicked "Explain this expression". Provide a plain-language explanation of how the expression works without showing sample data rows.]\n\n',
+              'Revise this expression': '[SYSTEM CONTEXT: The user clicked "Revise this expression". Ask what they would like to change.]\n\n',
+              'See related expressions': '[SYSTEM CONTEXT: The user clicked "See related expressions". Suggest 3 related expressions they might find useful.]\n\n',
+              'Create new expression': '[SYSTEM CONTEXT: The user clicked "Create new expression". Ask what they would like to build.]\n\n',
+              "I'm done": '[SYSTEM CONTEXT: The user clicked "I\'m done". Give a brief friendly sign-off.]\n\n',
+            };
+            const actionPrefix = suggestedActionPrefixes[userInput.trim()] || '';
+            intentPrefix = topicSwitchPrefix + actionPrefix + intentPrefix;
             
             const llmStartTime = Date.now();
             const rawResponse = await generateAgentResponse(
