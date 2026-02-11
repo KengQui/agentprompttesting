@@ -560,48 +560,6 @@
     "updatedAt": "2026-02-11T21:28:44.812Z"
   },
   {
-    "id": "06cea4b4-e83d-4988-ae4d-cf29b2620171",
-    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
-    "title": "New Session",
-    "createdAt": "2026-02-11T21:31:14.358Z",
-    "updatedAt": "2026-02-11T21:37:12.607Z"
-  },
-  {
-    "id": "7af8eea6-c923-43d1-901c-9abd649a2883",
-    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
-    "title": "New Session",
-    "createdAt": "2026-02-11T21:37:24.260Z",
-    "updatedAt": "2026-02-11T21:37:34.899Z"
-  },
-  {
-    "id": "f9c58ded-443b-4589-bb0a-169e382fcdaa",
-    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
-    "title": "New Session",
-    "createdAt": "2026-02-11T21:40:35.659Z",
-    "updatedAt": "2026-02-11T21:40:45.736Z"
-  },
-  {
-    "id": "28247a82-1581-4e13-a127-8a94596971fd",
-    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
-    "title": "New Session",
-    "createdAt": "2026-02-11T21:43:02.197Z",
-    "updatedAt": "2026-02-11T21:43:11.246Z"
-  },
-  {
-    "id": "e75ed72a-5f7d-4b7f-a8c9-dd798f78da23",
-    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
-    "title": "New Session",
-    "createdAt": "2026-02-11T21:45:21.039Z",
-    "updatedAt": "2026-02-11T21:55:17.394Z"
-  },
-  {
-    "id": "e88d1e2b-dbde-41c0-bd95-39113946a7e3",
-    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
-    "title": "New Session",
-    "createdAt": "2026-02-11T21:58:07.022Z",
-    "updatedAt": "2026-02-11T22:10:02.887Z"
-  },
-  {
     "id": "c4ea71bf-2285-40a9-acd3-1dcdc47ba62d",
     "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
     "title": "New Session",
@@ -609,10 +567,10 @@
     "updatedAt": "2026-02-11T22:22:11.754Z"
   },
   {
-    "id": "22c3ad56-ec8d-4cad-9f80-2b1212813467",
+    "id": "0cf2a3c1-a86f-44ca-b96d-c44bef789805",
     "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
     "title": "New Session",
-    "createdAt": "2026-02-11T22:35:03.107Z",
-    "updatedAt": "2026-02-11T22:39:04.012Z"
+    "createdAt": "2026-02-11T22:56:49.653Z",
+    "updatedAt": "2026-02-11T23:00:31.410Z"
   }
 ]
