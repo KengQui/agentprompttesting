@@ -851,7 +851,23 @@ export async function registerRoutes(
                   });
                   
                   responseContent = parsedAction.cleanedResponse;
-                  if (!responseContent.trim()) {
+                  if (!responseContent.trim() && actionResult.success) {
+                    try {
+                      const actionFollowUp = `[SYSTEM: You just executed the action "${actionResult.actionName}" with these parameters: ${JSON.stringify(actionResult.fields)}. The action was successful: "${actionResult.message}". Now, based on the user data you have access to, provide a helpful response that: 1) Summarizes what you found or did (include specific data values), 2) Explains what this means in context of the user's request, 3) Suggests a logical next step. Do NOT just repeat the success message. Be specific and actionable.]`;
+                      const followUpHistory = [
+                        ...chatHistory,
+                        { role: "user" as const, content: userInput },
+                      ];
+                      responseContent = await generateAgentResponse(
+                        agentConfig,
+                        actionFollowUp,
+                        followUpHistory
+                      );
+                    } catch (followUpErr) {
+                      console.error("Action follow-up AI call failed:", followUpErr);
+                      responseContent = actionResult.message;
+                    }
+                  } else if (!responseContent.trim()) {
                     responseContent = actionResult.message;
                   } else if (!actionResult.success) {
                     responseContent += `\n\n(Action failed: ${actionResult.message})`;
@@ -1118,7 +1134,23 @@ export async function registerRoutes(
                   });
                   
                   responseContent = parsedAction.cleanedResponse;
-                  if (!responseContent.trim()) {
+                  if (!responseContent.trim() && actionResult.success) {
+                    try {
+                      const actionFollowUp = `[SYSTEM: You just executed the action "${actionResult.actionName}" with these parameters: ${JSON.stringify(actionResult.fields)}. The action was successful: "${actionResult.message}". Now, based on the user data you have access to, provide a helpful response that: 1) Summarizes what you found or did (include specific data values), 2) Explains what this means in context of the user's request, 3) Suggests a logical next step. Do NOT just repeat the success message. Be specific and actionable.]`;
+                      const followUpHistory = [
+                        ...chatHistory,
+                        { role: "user" as const, content: userInput },
+                      ];
+                      responseContent = await generateAgentResponse(
+                        agentConfig,
+                        actionFollowUp,
+                        followUpHistory
+                      );
+                    } catch (followUpErr) {
+                      console.error("Action follow-up AI call failed:", followUpErr);
+                      responseContent = actionResult.message;
+                    }
+                  } else if (!responseContent.trim()) {
                     responseContent = actionResult.message;
                   } else if (!actionResult.success) {
                     responseContent += `\n\n(Action failed: ${actionResult.message})`;
