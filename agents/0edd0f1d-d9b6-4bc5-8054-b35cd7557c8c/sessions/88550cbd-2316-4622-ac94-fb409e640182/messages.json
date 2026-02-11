@@ -14,5 +14,37 @@
     "role": "assistant",
     "content": "I apologize, but I'm having trouble generating a response. Please try again.",
     "timestamp": "2026-02-11T14:04:51.208Z"
+  },
+  {
+    "id": "a84ab417-fb0d-481a-ac44-041b5060c8b0",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "sessionId": "88550cbd-2316-4622-ac94-fb409e640182",
+    "role": "user",
+    "content": "Show the Hire Date in 'MMMM dd' format.",
+    "timestamp": "2026-02-11T15:46:35.018Z"
+  },
+  {
+    "id": "396d3b8d-a36a-40ec-bca6-68495a3872d4",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "sessionId": "88550cbd-2316-4622-ac94-fb409e640182",
+    "role": "assistant",
+    "content": "```\nFormatDate(HireDate, \"MMMM dd\")\n```\nThis expression will produce a **Text** output.\n\nSuggested column name: **Formatted Hire Date**",
+    "timestamp": "2026-02-11T15:46:35.765Z"
+  },
+  {
+    "id": "73a7befd-7693-4aad-8e7f-9f85945de7b8",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "sessionId": "88550cbd-2316-4622-ac94-fb409e640182",
+    "role": "user",
+    "content": "Validate with sample data",
+    "timestamp": "2026-02-11T15:50:02.236Z"
+  },
+  {
+    "id": "b13bb934-74fe-4cd5-a4ec-22fd2747d98f",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "sessionId": "88550cbd-2316-4622-ac94-fb409e640182",
+    "role": "assistant",
+    "content": "Here's how the expression will look using some sample data from your report:\n\n**Row 1: Employee: Sarah Johnson**\n- **Inputs:** `HireDate` = \"2021-01-15\"\n- **Calculation:**\n  `FormatDate(HireDate, \"MMMM dd\")`\n  = `FormatDate(\"2021-01-15\", \"MMMM dd\")`\n  = January 15\n- **Result:** January 15\n\n**Row 2: Employee: Michael Chen**\n- **Inputs:** `HireDate` = \"2024-11-05\"\n- **Calculation:**\n  `FormatDate(HireDate, \"MMMM dd\")`\n  = `FormatDate(\"2024-11-05\", \"MMMM dd\")`\n  = November 05\n- **Result:** November 05\n\n{{SUGGESTED_ACTIONS:Use this expression|Revise this expression|Explain this expression}}",
+    "timestamp": "2026-02-11T15:50:04.219Z"
   }
 ]

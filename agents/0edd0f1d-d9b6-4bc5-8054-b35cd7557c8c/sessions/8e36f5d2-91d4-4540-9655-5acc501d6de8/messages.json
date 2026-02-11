@@ -14,5 +14,53 @@
     "role": "assistant",
     "content": "Here's an expression that checks if the TrainingProfile contains \"LOTO\" and labels it accordingly:\n\n```\nIf(Search(\"LOTO\", TrainingProfile) > 0, \"Safety Certified\", \"Standard\")\n```\n\nThis expression will produce a **Text** output.\n\nSuggested column name: **Certification Status**\n{{SUGGESTED_ACTIONS:Use this expression|Validate with sample data|Explain this expression}}",
     "timestamp": "2026-02-11T14:04:54.446Z"
+  },
+  {
+    "id": "6762a2a2-4c1f-47e8-9341-12aaa1957dcf",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "sessionId": "8e36f5d2-91d4-4540-9655-5acc501d6de8",
+    "role": "user",
+    "content": "Validate with sample data",
+    "timestamp": "2026-02-11T15:51:06.168Z"
+  },
+  {
+    "id": "64363ead-ebef-45a0-8780-79b1bec28ee7",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "sessionId": "8e36f5d2-91d4-4540-9655-5acc501d6de8",
+    "role": "assistant",
+    "content": "Here's how the expression works with your sample data:\n\n**Row 1: Employee: Sarah Johnson**\n- **Inputs:** `TrainingProfile` = \"Full Time - LOTO Authorized\"\n- **Calculation:**\n  `If(Search(\"LOTO\", TrainingProfile) > 0, \"Safety Certified\", \"Standard\")`\n  = `If(Search(\"LOTO\", \"Full Time - LOTO Authorized\") > 0, \"Safety Certified\", \"Standard\")`\n  = `If(12 > 0, \"Safety Certified\", \"Standard\")`\n  = `If(True, \"Safety Certified\", \"Standard\")`\n- **Result:** Safety Certified\n\n**Row 2: Employee: Michael Chen**\n- **Inputs:** `TrainingProfile` = \"Part Time\"\n- **Calculation:**\n  `If(Search(\"LOTO\", TrainingProfile) > 0, \"Safety Certified\", \"Standard\")`\n  = `If(Search(\"LOTO\", \"Part Time\") > 0, \"Safety Certified\", \"Standard\")`\n  = `If(0 > 0, \"Safety Certified\", \"Standard\")`\n  = `If(False, \"Safety Certified\", \"Standard\")`\n- **Result:** Standard\n\n{{SUGGESTED_ACTIONS:Use this expression|Revise this expression|Explain this expression}}",
+    "timestamp": "2026-02-11T15:51:08.550Z"
+  },
+  {
+    "id": "8f4f67a7-3719-4671-9b03-b55f11df3a2e",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "sessionId": "8e36f5d2-91d4-4540-9655-5acc501d6de8",
+    "role": "user",
+    "content": "Use this expression",
+    "timestamp": "2026-02-11T15:51:30.364Z"
+  },
+  {
+    "id": "485e991d-6870-4f5b-ac6e-637ea5af7b85",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "sessionId": "8e36f5d2-91d4-4540-9655-5acc501d6de8",
+    "role": "assistant",
+    "content": "OK. I've created a new column called **Certification Status** in your report. This column checks each employee's `Training Profile` and assigns them a status of \"Safety Certified\" if their profile contains \"LOTO\", or \"Standard\" if it doesn't. For example, Sarah Johnson, whose training profile is \"Full Time - LOTO Authorized\", is now listed as \"Safety Certified\". Michael Chen, whose training profile is \"Part Time\", is listed as \"Standard\".\n\nWhat would you like to do next?\n{{SUGGESTED_ACTIONS:See related expressions|Create new expression|I'm done}}",
+    "timestamp": "2026-02-11T15:51:32.767Z"
+  },
+  {
+    "id": "f2528af6-4174-41b5-8647-0140503f4a3a",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "sessionId": "8e36f5d2-91d4-4540-9655-5acc501d6de8",
+    "role": "user",
+    "content": "See related expressions",
+    "timestamp": "2026-02-11T15:51:40.538Z"
+  },
+  {
+    "id": "a3daa263-b220-4854-a9dd-e74c60c34bc7",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "sessionId": "8e36f5d2-91d4-4540-9655-5acc501d6de8",
+    "role": "assistant",
+    "content": "Here are 3 related expressions you might find useful:\n\n1.  **LOTO Expiration Date** — Shows the expiration date of the LOTO certification if an employee is safety certified\n2.  **Safety Certification Status (Yes/No)** — Outputs \"Yes\" if safety certified, \"No\" if not\n3.  **Safety Training Due** — Checks if safety certification is expiring within 90 days and flags those employees\n\nWhich one would you like me to build?",
+    "timestamp": "2026-02-11T15:51:41.934Z"
   }
 ]
