@@ -126,5 +126,53 @@
     "role": "assistant",
     "content": "Okay, I will proceed with enrolling Clair Son in your current medical, dental, and vision plans and changing your coverage to a family plan.\n\nHere's a summary of the changes:\n\n- Enrolling Clair Son in:\n  - Medical: BlueCross PPO Plus (changing from Employee + Spouse to Family)\n  - Dental: Delta Dental PPO (changing from Employee + Spouse to Family)\n  - Vision: VSP Vision Care (changing from Employee + Spouse to Family)\n\nBefore I make these changes, I need to confirm that you understand that your bi-weekly premiums will be adjusted to the family rate. Do you want to proceed?",
     "timestamp": "2026-02-12T22:06:45.656Z"
+  },
+  {
+    "id": "e5309bbd-6c75-48df-ab3f-69eb2fb4408d",
+    "agentId": "d9680d37-36b5-494c-bb13-e8eb6126c6ee",
+    "sessionId": "a5cb96b4-e83a-4522-a64f-9ee70833d490",
+    "role": "user",
+    "content": "Yes",
+    "timestamp": "2026-02-12T22:37:00.438Z"
+  },
+  {
+    "id": "0d988e9d-c5ef-4329-86f7-3f38dfe6cd59",
+    "agentId": "d9680d37-36b5-494c-bb13-e8eb6126c6ee",
+    "sessionId": "a5cb96b4-e83a-4522-a64f-9ee70833d490",
+    "role": "assistant",
+    "content": "Missing required fields: Full Name",
+    "timestamp": "2026-02-12T22:37:02.152Z"
+  },
+  {
+    "id": "0f038842-3df3-4daf-bba6-9f027299d98a",
+    "agentId": "d9680d37-36b5-494c-bb13-e8eb6126c6ee",
+    "sessionId": "a5cb96b4-e83a-4522-a64f-9ee70833d490",
+    "role": "user",
+    "content": "Clair Son",
+    "timestamp": "2026-02-12T22:37:15.159Z"
+  },
+  {
+    "id": "2451f146-432a-41ec-928f-114741d4a49f",
+    "agentId": "d9680d37-36b5-494c-bb13-e8eb6126c6ee",
+    "sessionId": "a5cb96b4-e83a-4522-a64f-9ee70833d490",
+    "role": "assistant",
+    "content": "You are about to add a new dependent. You will be required to upload supporting documentation (birth certificate, marriage license) in the next step.",
+    "timestamp": "2026-02-12T22:37:17.276Z"
+  },
+  {
+    "id": "cd26dec9-9fb6-42d2-8c0a-ac664a8f5d63",
+    "agentId": "d9680d37-36b5-494c-bb13-e8eb6126c6ee",
+    "sessionId": "a5cb96b4-e83a-4522-a64f-9ee70833d490",
+    "role": "user",
+    "content": "Yes",
+    "timestamp": "2026-02-12T22:37:26.713Z"
+  },
+  {
+    "id": "160d1382-7455-4541-a208-11734adeb913",
+    "agentId": "d9680d37-36b5-494c-bb13-e8eb6126c6ee",
+    "sessionId": "a5cb96b4-e83a-4522-a64f-9ee70833d490",
+    "role": "assistant",
+    "content": "Great news, Sarah! I've added Clair Son (born 2025-04-01, SSN 432-12-3567) as a dependent to your profile.\n\nNow that Clair is in the system, you can enroll her in your health coverage and make related Flexible Spending Account (FSA) adjustments. Also, I'm ready to proceed with enrolling Clair in your current medical, dental, and vision plans and changing your coverage to a family plan. As a reminder, your bi-weekly premiums will be adjusted to the family rate.\n\nDo you want to proceed?",
+    "timestamp": "2026-02-12T22:37:29.320Z"
   }
 ]

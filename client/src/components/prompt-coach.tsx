@@ -278,7 +278,6 @@ export function PromptCoachPanel({ agentId, agentName, onClose, onConfigChanged 
           </Button>
         </div>
       </div>
-
       <div className="flex-1 min-h-0 overflow-y-auto" ref={scrollRef}>
         <div className="space-y-4 p-4">
           {!isLoadingHistory && messages.length > 1 && (
@@ -345,7 +344,7 @@ export function PromptCoachPanel({ agentId, agentName, onClose, onConfigChanged 
                                 )}
                               </Button>
                             </div>
-                            <p className="text-[11px] text-muted-foreground/70 mt-1">
+                            <p className="text-[11px] text-muted-foreground/70 mt-1 text-right">
                               {change.action === "append"
                                 ? `Will add to existing ${(FIELD_LABELS[change.field] || change.field).toLowerCase()}`
                                 : `Will replace existing ${(FIELD_LABELS[change.field] || change.field).toLowerCase()}`}
@@ -400,7 +399,6 @@ export function PromptCoachPanel({ agentId, agentName, onClose, onConfigChanged 
           )}
         </div>
       </div>
-
       <div className="border-t p-3 shrink-0">
         <div className="flex gap-2">
           <Textarea

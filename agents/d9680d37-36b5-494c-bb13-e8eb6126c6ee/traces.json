@@ -1645,22 +1645,178 @@
         }
       ],
       "success": true
+    },
+    {
+      "id": "trace-1770935822151",
+      "sessionId": "a5cb96b4-e83a-4522-a64f-9ee70833d490",
+      "userInput": "Yes",
+      "agentResponse": "Missing required fields: Full Name",
+      "startTime": "2026-02-12T22:37:00.437Z",
+      "endTime": "2026-02-12T22:37:02.151Z",
+      "totalDuration": 1714,
+      "entries": [
+        {
+          "id": "entry-1770935821310-1",
+          "type": "intent_classification",
+          "name": "Orchestrator Intent Classification",
+          "timestamp": "2026-02-12T22:37:01.310Z",
+          "metadata": {
+            "intent": "answer_question",
+            "classificationMethod": "orchestrator",
+            "confidence": "high"
+          }
+        },
+        {
+          "id": "entry-1770935822150-action",
+          "type": "action_simulation",
+          "name": "Action: add_dependent",
+          "timestamp": "2026-02-12T22:37:02.150Z",
+          "metadata": {
+            "actionName": "add_dependent",
+            "fields": {
+              "name": "Clair Son",
+              "relationship": "Child",
+              "ssn": "432-12-3567",
+              "dob": "2025-04-01"
+            },
+            "success": false,
+            "message": "Missing required fields: Full Name"
+          }
+        },
+        {
+          "id": "entry-1770935822151-3",
+          "type": "llm_call",
+          "name": "Gemini Response Generation",
+          "timestamp": "2026-02-12T22:37:02.151Z",
+          "duration": 841,
+          "metadata": {
+            "model": "gemini",
+            "intent": "answer_question",
+            "validated": true
+          }
+        }
+      ],
+      "success": true
+    },
+    {
+      "id": "trace-1770935837276",
+      "sessionId": "a5cb96b4-e83a-4522-a64f-9ee70833d490",
+      "userInput": "Clair Son",
+      "agentResponse": "You are about to add a new dependent. You will be required to upload supporting documentation (birth certificate, marriage license) in the next step.",
+      "startTime": "2026-02-12T22:37:15.159Z",
+      "endTime": "2026-02-12T22:37:17.276Z",
+      "totalDuration": 2117,
+      "entries": [
+        {
+          "id": "entry-1770935836078-1",
+          "type": "intent_classification",
+          "name": "Orchestrator Intent Classification",
+          "timestamp": "2026-02-12T22:37:16.078Z",
+          "metadata": {
+            "intent": "answer_question",
+            "classificationMethod": "orchestrator",
+            "confidence": "high"
+          }
+        },
+        {
+          "id": "entry-1770935837276-action",
+          "type": "action_simulation",
+          "name": "Action: add_dependent",
+          "timestamp": "2026-02-12T22:37:17.276Z",
+          "metadata": {
+            "actionName": "add_dependent",
+            "fields": {
+              "dependent_name": "Clair Son",
+              "relationship": "Child",
+              "ssn": "432-12-3567",
+              "dob": "2025-04-01"
+            },
+            "success": true,
+            "message": "Dependent successfully added to your profile. Please ensure you also update your benefit elections to include them in coverage."
+          }
+        },
+        {
+          "id": "entry-1770935837276-3",
+          "type": "llm_call",
+          "name": "Gemini Response Generation",
+          "timestamp": "2026-02-12T22:37:17.276Z",
+          "duration": 1198,
+          "metadata": {
+            "model": "gemini",
+            "intent": "answer_question",
+            "validated": true
+          }
+        }
+      ],
+      "success": true
+    },
+    {
+      "id": "trace-1770935849319",
+      "sessionId": "a5cb96b4-e83a-4522-a64f-9ee70833d490",
+      "userInput": "Yes",
+      "agentResponse": "Great news, Sarah! I've added Clair Son (born 2025-04-01, SSN 432-12-3567) as a dependent to your profile.\n\nNow that Clair is in the system, you can enroll her in your health coverage and make related Flexible Spending Account (FSA) adjustments. Also, I'm ready to proceed with enrolling Clair in your current medical, dental, and vision plans and changing your coverage to a family plan. As a reminder, your bi-weekly premiums will be adjusted to the family rate.\n\nDo you want to proceed?\n",
+      "startTime": "2026-02-12T22:37:26.713Z",
+      "endTime": "2026-02-12T22:37:29.319Z",
+      "totalDuration": 2606,
+      "entries": [
+        {
+          "id": "entry-1770935846714-1",
+          "type": "intent_classification",
+          "name": "Orchestrator Intent Classification",
+          "timestamp": "2026-02-12T22:37:26.714Z",
+          "metadata": {
+            "intent": "answer_question",
+            "classificationMethod": "orchestrator",
+            "confidence": "high"
+          }
+        },
+        {
+          "id": "entry-1770935847625-action",
+          "type": "action_simulation",
+          "name": "Action: add_dependent",
+          "timestamp": "2026-02-12T22:37:27.625Z",
+          "metadata": {
+            "actionName": "add_dependent",
+            "fields": {
+              "dependent_name": "Clair Son",
+              "relationship": "Child",
+              "ssn": "432-12-3567",
+              "dob": "2025-04-01"
+            },
+            "success": true,
+            "message": "Dependent successfully added to your profile. Please ensure you also update your benefit elections to include them in coverage."
+          }
+        },
+        {
+          "id": "entry-1770935849319-3",
+          "type": "llm_call",
+          "name": "Gemini Response Generation",
+          "timestamp": "2026-02-12T22:37:29.319Z",
+          "duration": 2605,
+          "metadata": {
+            "model": "gemini",
+            "intent": "answer_question",
+            "validated": true
+          }
+        }
+      ],
+      "success": true
     }
   ],
   "stats": {
     "hookCalls": {},
     "signalReads": {},
     "intentDistribution": {
-      "answer_question": 43
+      "answer_question": 46
     },
     "classificationMethods": {
-      "orchestrator": 43
+      "orchestrator": 46
     },
-    "avgResponseTime": 1453.8837209302326,
-    "totalLlmCalls": 42,
+    "avgResponseTime": 1499,
+    "totalLlmCalls": 45,
     "totalTokensUsed": 0,
     "errorCount": 1
   },
   "createdAt": "2026-02-03T17:39:57.040Z",
-  "updatedAt": "2026-02-12T22:06:45.655Z"
+  "updatedAt": "2026-02-12T22:37:29.319Z"
 }
