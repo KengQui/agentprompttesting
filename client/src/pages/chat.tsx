@@ -30,7 +30,7 @@ function stripActionBlocks(text: string): string {
 }
 
 const COLUMN_ADDED_FALLBACK_PILLS = ["See related expressions", "Create new expression", "I'm done"];
-const EXPRESSION_PRESENTED_FALLBACK_PILLS = ["Create new column", "Test with my data", "Explain this expression"];
+const EXPRESSION_PRESENTED_FALLBACK_PILLS = ["Edit this expression", "Create new column", "Test with my data", "Explain this expression"];
 const VALIDATION_DONE_FALLBACK_PILLS = ["Create new column", "Revise this expression", "Explain this expression"];
 const EXPLANATION_DONE_FALLBACK_PILLS = ["Create new column", "Revise this expression", "Test with my data"];
 
@@ -209,7 +209,7 @@ function SuggestedActionPills({ actions, onSelect, onInjectExpression, disabled 
           className="cursor-pointer px-3 py-1.5 text-xs font-medium"
           onClick={() => {
             if (disabled) return;
-            if (/revise this expression/i.test(action) && onInjectExpression) {
+            if (/revise this expression|edit this expression/i.test(action) && onInjectExpression) {
               setClicked(true);
               onInjectExpression();
               return;
