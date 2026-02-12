@@ -1,0 +1,18 @@
+[
+  {
+    "id": "e3ec2cca-6122-4f03-a6aa-abaa86fabd2b",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "sessionId": "bfd6c354-ddeb-4b6a-8e89-3325d27034ff",
+    "role": "user",
+    "content": "Scheduled ER Amount as Percentage of Total",
+    "timestamp": "2026-02-12T21:27:59.658Z"
+  },
+  {
+    "id": "a42931c7-0482-4e6c-9586-018ec97a1c6c",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "sessionId": "bfd6c354-ddeb-4b6a-8e89-3325d27034ff",
+    "role": "assistant",
+    "content": "This expression will calculate the Scheduled ER Amount as a percentage of the Annual Salary.\n\n```\nIf(AnnualSalary==\"\" || Value(AnnualSalary)==0, 0, Multiply(Divide(Value(ScheduledERAmount), Value(AnnualSalary)), 100))\n```\nThis expression will produce a **Numeric** output.\n\nSuggested column name: **ER Amount as Percent of Salary**\n\n{{SUGGESTED_ACTIONS:Edit this expression|Create new column|Test with my data|Explain this expression}}",
+    "timestamp": "2026-02-12T21:28:00.934Z"
+  }
+]
