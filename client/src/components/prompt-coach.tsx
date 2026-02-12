@@ -322,30 +322,34 @@ export function PromptCoachPanel({ agentId, agentName, onClose, onConfigChanged 
                       <Card key={changeIdx} className="p-3" data-testid={`coach-change-${msgIdx}-${changeIdx}`}>
                         {isLifeAgent8 ? (
                           <>
-                            <p className="text-xs text-muted-foreground mb-2">
+                            <div className="flex items-center justify-between gap-2 flex-wrap">
+                              <Badge variant="outline" className="text-xs">
+                                {FIELD_LABELS[change.field] || change.field}
+                              </Badge>
+                              <Button
+                                variant={isApplied ? "outline" : "default"}
+                                size="sm"
+                                disabled={isApplied || isApplying}
+                                onClick={() => handleApplyChange(msgIdx, changeIdx, change)}
+                                data-testid={`button-apply-change-${msgIdx}-${changeIdx}`}
+                              >
+                                {isApplying ? (
+                                  <Loader2 className="h-3 w-3 animate-spin" />
+                                ) : isApplied ? (
+                                  <>
+                                    <Check className="h-3 w-3" />
+                                    Applied
+                                  </>
+                                ) : (
+                                  "Apply"
+                                )}
+                              </Button>
+                            </div>
+                            <p className="text-[11px] text-muted-foreground/70 mt-1">
                               {change.action === "append"
                                 ? `Will add to existing ${(FIELD_LABELS[change.field] || change.field).toLowerCase()}`
                                 : `Will replace existing ${(FIELD_LABELS[change.field] || change.field).toLowerCase()}`}
                             </p>
-                            <Button
-                              variant={isApplied ? "outline" : "default"}
-                              size="sm"
-                              className="w-full"
-                              disabled={isApplied || isApplying}
-                              onClick={() => handleApplyChange(msgIdx, changeIdx, change)}
-                              data-testid={`button-apply-change-${msgIdx}-${changeIdx}`}
-                            >
-                              {isApplying ? (
-                                <Loader2 className="h-3 w-3 animate-spin" />
-                              ) : isApplied ? (
-                                <>
-                                  <Check className="h-3 w-3" />
-                                  Applied
-                                </>
-                              ) : (
-                                "Apply"
-                              )}
-                            </Button>
                           </>
                         ) : (
                           <div className="flex items-start justify-between gap-2">
