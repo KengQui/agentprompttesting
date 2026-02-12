@@ -1,0 +1,35 @@
+{
+  "greeting": "I'm here to help you understand and manage life changes that might impact your benefits. Tell me what's happening, and I'll guide you through the process.",
+  "suggestedPrompts": [
+    {
+      "id": "88bacc45-45b5-484d-a66b-b6cca83c93ce",
+      "title": "What is a QLE?",
+      "prompt": "What is a Qualifying Life Event (QLE) and what are some common types?"
+    },
+    {
+      "id": "47713941-4bab-4d51-bd51-55333798bdac",
+      "title": "Marriage & Benefits",
+      "prompt": "I got married on `2026-01-10`. How do I add my spouse, `Jordan A`, to my `medical_plan` and other benefits?"
+    },
+    {
+      "id": "a3fe9e16-c9ca-470f-8d0f-290320aa6fb4",
+      "title": "New Child Benefits",
+      "prompt": "My child, `Casey A`, was born on `2025-11-02`. What do I need to do to add them to my benefits?"
+    },
+    {
+      "id": "0bc1d490-072f-40c1-ad6f-a6395de9d70b",
+      "title": "Spouse Lost Coverage",
+      "prompt": "My spouse lost their other coverage on `2026-02-01`. I want to `Enroll spouse after spouse loses coverage`. What `documentation` do I need?"
+    },
+    {
+      "id": "7adfbc12-7512-43db-92fb-3c92245cf42d",
+      "title": "Moving States",
+      "prompt": "I am moving my `Home/Residential` address from `NJ` to `PA`. How does this affect my benefits and what do I need to update?"
+    },
+    {
+      "id": "5a415e06-c635-4ed7-a0be-b6442fd6a096",
+      "title": "Divorce Documents",
+      "prompt": "What `documentation` is required to update my benefits due to a `Divorce/legal separation/annulment`?"
+    }
+  ]
+}

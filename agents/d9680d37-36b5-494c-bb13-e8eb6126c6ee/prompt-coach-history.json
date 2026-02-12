@@ -1,0 +1,50 @@
+{
+  "messages": [
+    {
+      "role": "assistant",
+      "content": "Hi! I'm your Prompt Coach for **life agent 8**. I can help you improve your agent's configuration — things like the business use case, domain knowledge, validation rules, and guardrails.\n\nWhat would you like to improve? Or say **\"review my agent\"** and I'll analyze your current setup.",
+      "timestamp": "2026-02-12T21:54:15.347Z"
+    },
+    {
+      "role": "user",
+      "content": "Review my agent",
+      "timestamp": "2026-02-12T21:54:20.694Z"
+    },
+    {
+      "role": "assistant",
+      "content": "This is an incredibly well-configured agent! You've done an excellent job with the `domainKnowledge`, `validationRules`, and `guardrails` — they are exceptionally detailed and comprehensive, covering a vast array of scenarios and safety measures. This will make your agent very robust and reliable.\n\nMy main suggestion would be to make the `businessUseCase` a bit more concise, as much of the detailed listing of what the agent handles is already covered in depth by your excellent `domainKnowledge`. A more focused `businessUseCase` helps the AI quickly grasp its core purpose without redundancy.\n\nHere's my suggestion for improving the `businessUseCase`:\n\n\nThis updated `businessUseCase` provides a clear and concise overview, highlighting the agent's core function while allowing your detailed `domainKnowledge` to provide the comprehensive specifics.\n\nAfter this, we can also look at aligning your `Welcome Screen` prompts with your `Available Actions` to ensure a seamless user experience!",
+      "suggestedChanges": [
+        {
+          "field": "businessUseCase",
+          "action": "replace",
+          "content": "This AI agent assists employees in reporting and processing qualifying life events that necessitate updates to their HR records, benefits, and payroll. It manages the complete lifecycle of these changes, from initial reporting and documentation to eligibility verification, benefit enrollment adjustments, and compliance validation. Supported life events include marriage, divorce, birth, adoption, death, loss of coverage, employment status changes, address changes, retirement, and disability status changes.",
+          "explanation": "This change condenses the business use case, making it more impactful and less redundant with the extensive details already provided in your 'Domain Knowledge' field. It focuses on the core purpose and types of events without listing every single sub-process, which is better suited for 'Domain Knowledge'."
+        }
+      ],
+      "appliedChanges": [
+        0
+      ],
+      "timestamp": "2026-02-12T21:54:30.203Z"
+    },
+    {
+      "role": "user",
+      "content": "Review my agent agein",
+      "timestamp": "2026-02-12T22:01:25.738Z"
+    },
+    {
+      "role": "assistant",
+      "content": "Great! Let's take another look.\n\nYour agent configuration is still looking incredibly strong, especially the detailed `domainKnowledge`, `validationRules`, and `guardrails`. They are truly excellent and provide a very solid foundation for your agent.\n\nMy previous suggestion was to make the `businessUseCase` more concise, as much of its detail is already covered in your comprehensive `domainKnowledge`. This helps the AI quickly grasp its core purpose.\n\n\nThis change would make the `businessUseCase` more focused. Would you like to apply this change, or would you prefer to move on to another area?\n\nIf you'd like to explore another area, my next recommendation would be to refine the `Welcome Screen` prompts to directly align with your `Available Actions`. This creates a smoother and more intuitive user experience, guiding users straight to what the agent can do.",
+      "suggestedChanges": [
+        {
+          "field": "businessUseCase",
+          "action": "replace",
+          "content": "This AI agent assists employees in reporting, processing, and managing qualifying life events (QLEs) that necessitate updates to their HR records, benefits, and payroll. It guides users through the complete lifecycle of these changes, from initial reporting and documentation to eligibility verification, benefit enrollment adjustments, and compliance validation for events such as marriage, birth, divorce, and loss of coverage.",
+          "explanation": "This updated business use case provides a clear and concise overview, highlighting the agent's core function without listing every single life event, as that level of detail is already covered in your excellent domain knowledge. This helps the AI quickly understand its core mission."
+        }
+      ],
+      "appliedChanges": [],
+      "timestamp": "2026-02-12T22:01:29.284Z"
+    }
+  ],
+  "savedAt": "2026-02-12T22:01:29.326Z"
+}

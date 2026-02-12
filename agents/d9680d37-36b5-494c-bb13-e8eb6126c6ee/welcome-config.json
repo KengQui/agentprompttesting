@@ -1,0 +1,30 @@
+{
+  "greeting": "I'm here to help you navigate and process life events that impact your HR records, benefits, and payroll. Tell me what's changed, and I'll guide you through the necessary updates.",
+  "suggestedPrompts": [
+    {
+      "id": "dd1f96ac-8763-44ab-becf-70af7fa84fcf",
+      "title": "Report New Life Event",
+      "prompt": "I need to report a 'Divorce/Legal Separation'. What steps do I need to take to remove 'David Antonio Martinez' from my 'Medical Insurance' and 'Dental Insurance', and what about updating my 'Life Insurance' and '401(k) Plan' beneficiaries?"
+    },
+    {
+      "id": "c0a94183-fa70-43e4-96e9-e16951c50cca",
+      "title": "Review Current Benefits",
+      "prompt": "Can you show me a summary of my current 'Medical Insurance' and 'Dental Insurance' coverage, including the 'Coverage Level', 'Employee Premium (bi-weekly)', and 'Effective Date' for each?"
+    },
+    {
+      "id": "df8e6463-b14a-458b-8267-a987ddaf46c6",
+      "title": "Update Beneficiaries",
+      "prompt": "I want to update my 'Primary Beneficiary' and 'Contingent Beneficiary' for both my 'Life Insurance' and '401(k) Plan'. What information do you need to process this change?"
+    },
+    {
+      "id": "d88f7469-fe64-4c37-bcab-b50d83d36e2f",
+      "title": "Adjust Tax Withholding",
+      "prompt": "I need to change my 'Federal Tax Withholding (W-4 2020 or later)'. How can I update my 'Filing Status' and adjust the number of 'Dependents' I claim?"
+    },
+    {
+      "id": "953ca1eb-3fbb-4ff9-b863-c0e3bc6b7ae0",
+      "title": "Update Contact Info",
+      "prompt": "I need to update my 'Mobile Phone' number and 'Personal Email'. What is the process for making these changes, and should I also review my 'Primary Emergency Contact' 'Phone' number?"
+    }
+  ]
+}

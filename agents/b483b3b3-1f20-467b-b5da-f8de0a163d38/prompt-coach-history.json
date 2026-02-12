@@ -1,0 +1,29 @@
+{
+  "messages": [
+    {
+      "role": "assistant",
+      "content": "Hi! I'm your Prompt Coach for **Life event**. I can help you improve your agent's configuration — things like the business use case, domain knowledge, validation rules, and guardrails.\n\nWhat would you like to improve? Or say **\"review my agent\"** and I'll analyze your current setup.",
+      "timestamp": "2026-02-12T21:40:19.867Z"
+    },
+    {
+      "role": "user",
+      "content": "Review my agent",
+      "timestamp": "2026-02-12T21:40:35.883Z"
+    },
+    {
+      "role": "assistant",
+      "content": "Okay, I've reviewed your \"Life event\" agent configuration.\n\nOverall, this is a very well-structured and comprehensive agent setup!\n\nHere's what's working particularly well:\n\n*   **Business Use Case:** It's incredibly detailed, clearly defining the objective, problem, users, agent capabilities, business value, and success metrics. This provides a strong foundation.\n*   **Domain Knowledge:** The structured sections for Purpose/Scope, Core Definitions, Common QLE Types, and Typical Documentation are excellent and leave little ambiguity. The emphasis on \"customer policy as source of truth\" is crucial.\n*   **Validation Rules:** These are exceptionally thorough, covering all required information, specific validation criteria, and clear instructions for what to do when validation fails. This is key for a robust, reliable agent.\n*   **Guardrails:** The principles, clear \"What NOT to do\" boundaries, and comprehensive escalation criteria are very strong, ensuring the agent operates safely and within its defined scope.\n\n---\n\nWhile your agent is in great shape, here are a couple of high-impact improvements I recommend to make it even more effective:\n\n### Improvement 1: Add a Guardrail for Response Conciseness\n\nYour current guardrails focus heavily on *what* the agent should and shouldn't do regarding information and actions. Adding a guideline for *how* it communicates can significantly improve the user experience by making interactions more efficient and to the point.\n\n\nThis change adds explicit instructions to your guardrails about maintaining a concise and professional communication style. This will help ensure the agent provides direct, helpful answers without being overly verbose, improving the employee's experience.\n\n---\n\nLet's start with this one. Would you like to apply this change?",
+      "suggestedChanges": [
+        {
+          "field": "guardrails",
+          "action": "append",
+          "content": "\n\n### Communication Style\n1.  **Conciseness:** Provide clear, direct answers. Keep responses concise, typically under 3-4 sentences, unless the user explicitly asks for more detail or a more comprehensive explanation is genuinely required (e.g., explaining a complex policy rule or multiple steps). Avoid conversational filler.\n2.  **Helpful & Professional Tone:** Maintain a friendly, empathetic, and professional tone at all times. Avoid jargon where simpler language can be used.",
+          "explanation": "This change adds explicit instructions to your guardrails about maintaining a concise and professional communication style. This will help ensure the agent provides direct, helpful answers without being overly verbose, improving the employee's experience."
+        }
+      ],
+      "appliedChanges": [],
+      "timestamp": "2026-02-12T21:40:43.079Z"
+    }
+  ],
+  "savedAt": "2026-02-12T21:40:43.140Z"
+}
