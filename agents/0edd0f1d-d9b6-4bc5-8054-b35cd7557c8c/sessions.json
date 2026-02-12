@@ -572,5 +572,12 @@
     "title": "Discuss error",
     "createdAt": "2026-02-11T23:18:13.627Z",
     "updatedAt": "2026-02-12T12:26:21.541Z"
+  },
+  {
+    "id": "49cc2a91-201b-4284-bd89-ad36b3577d35",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "title": "New Session",
+    "createdAt": "2026-02-12T13:01:27.244Z",
+    "updatedAt": "2026-02-12T13:01:38.944Z"
   }
 ]
