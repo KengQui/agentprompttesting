@@ -322,17 +322,11 @@ export function PromptCoachPanel({ agentId, agentName, onClose, onConfigChanged 
                       <Card key={changeIdx} className="p-3" data-testid={`coach-change-${msgIdx}-${changeIdx}`}>
                         {isLifeAgent8 ? (
                           <>
-                            <div className="flex items-center gap-2 mb-2 flex-wrap">
-                              <Badge variant="outline" className="text-xs">
-                                {FIELD_LABELS[change.field] || change.field}
-                              </Badge>
-                              <span className="text-xs text-muted-foreground">
-                                {change.action === "append"
-                                  ? `Will add to existing ${(FIELD_LABELS[change.field] || change.field).toLowerCase()}`
-                                  : `Will replace existing ${(FIELD_LABELS[change.field] || change.field).toLowerCase()}`}
-                              </span>
-                            </div>
-                            <p className="text-xs text-muted-foreground mb-3">{change.explanation}</p>
+                            <p className="text-xs text-muted-foreground mb-2">
+                              {change.action === "append"
+                                ? `Will add to existing ${(FIELD_LABELS[change.field] || change.field).toLowerCase()}`
+                                : `Will replace existing ${(FIELD_LABELS[change.field] || change.field).toLowerCase()}`}
+                            </p>
                             <Button
                               variant={isApplied ? "outline" : "default"}
                               size="sm"
