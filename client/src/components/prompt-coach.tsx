@@ -319,37 +319,36 @@ export function PromptCoachPanel({ agentId, agentName, onClose, onConfigChanged 
                     const isApplying = applyingIndex === `${msgIdx}-${changeIdx}`;
                     return (
                       <Card key={changeIdx} className="p-3" data-testid={`coach-change-${msgIdx}-${changeIdx}`}>
-                        <div className="flex items-start justify-between gap-2">
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2 mb-1 flex-wrap">
-                              <Badge variant="outline" className="text-xs">
-                                {FIELD_LABELS[change.field] || change.field}
-                              </Badge>
-                              <span className="text-xs text-muted-foreground">
-                                {change.action === "append" ? "Add to" : "Replace"}
-                              </span>
-                            </div>
-                            <p className="text-xs text-muted-foreground line-clamp-2">{change.explanation}</p>
-                          </div>
-                          <Button
-                            variant={isApplied ? "outline" : "default"}
-                            size="sm"
-                            disabled={isApplied || isApplying}
-                            onClick={() => handleApplyChange(msgIdx, changeIdx, change)}
-                            data-testid={`button-apply-change-${msgIdx}-${changeIdx}`}
-                          >
-                            {isApplying ? (
-                              <Loader2 className="h-3 w-3 animate-spin" />
-                            ) : isApplied ? (
-                              <>
-                                <Check className="h-3 w-3" />
-                                Applied
-                              </>
-                            ) : (
-                              "Apply"
-                            )}
-                          </Button>
+                        <div className="flex items-center gap-2 mb-2 flex-wrap">
+                          <Badge variant="outline" className="text-xs">
+                            {FIELD_LABELS[change.field] || change.field}
+                          </Badge>
+                          <span className="text-xs text-muted-foreground">
+                            {change.action === "append"
+                              ? `Will add to existing ${(FIELD_LABELS[change.field] || change.field).toLowerCase()}`
+                              : `Will replace existing ${(FIELD_LABELS[change.field] || change.field).toLowerCase()}`}
+                          </span>
                         </div>
+                        <p className="text-xs text-muted-foreground mb-3">{change.explanation}</p>
+                        <Button
+                          variant={isApplied ? "outline" : "default"}
+                          size="sm"
+                          className="w-full"
+                          disabled={isApplied || isApplying}
+                          onClick={() => handleApplyChange(msgIdx, changeIdx, change)}
+                          data-testid={`button-apply-change-${msgIdx}-${changeIdx}`}
+                        >
+                          {isApplying ? (
+                            <Loader2 className="h-3 w-3 animate-spin" />
+                          ) : isApplied ? (
+                            <>
+                              <Check className="h-3 w-3" />
+                              Applied
+                            </>
+                          ) : (
+                            "Apply"
+                          )}
+                        </Button>
                       </Card>
                     );
                   })}
