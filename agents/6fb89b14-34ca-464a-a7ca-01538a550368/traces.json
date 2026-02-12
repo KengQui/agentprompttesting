@@ -1633,6 +1633,41 @@
         }
       ],
       "success": true
+    },
+    {
+      "id": "trace-1770907216814",
+      "sessionId": "e84a34e6-55d8-4512-98b6-880bc632fa3d",
+      "userInput": "Maria has called in for her shift",
+      "agentResponse": "Okay, I can help you process Maria's call-in. Could you please provide the date of her absence?",
+      "startTime": "2026-02-12T14:40:16.197Z",
+      "endTime": "2026-02-12T14:40:16.814Z",
+      "totalDuration": 617,
+      "entries": [
+        {
+          "id": "entry-1770907216198-1",
+          "type": "intent_classification",
+          "name": "Orchestrator Intent Classification",
+          "timestamp": "2026-02-12T14:40:16.198Z",
+          "metadata": {
+            "intent": "answer_question",
+            "classificationMethod": "orchestrator",
+            "confidence": "high"
+          }
+        },
+        {
+          "id": "entry-1770907216814-3",
+          "type": "llm_call",
+          "name": "Gemini Response Generation",
+          "timestamp": "2026-02-12T14:40:16.814Z",
+          "duration": 616,
+          "metadata": {
+            "model": "gemini",
+            "intent": "answer_question",
+            "validated": true
+          }
+        }
+      ],
+      "success": true
     }
   ],
   "stats": {
@@ -1641,16 +1676,16 @@
     },
     "signalReads": {},
     "intentDistribution": {
-      "answer_question": 46
+      "answer_question": 47
     },
     "classificationMethods": {
-      "orchestrator": 46
+      "orchestrator": 47
     },
-    "avgResponseTime": 1041.2173913043478,
-    "totalLlmCalls": 39,
+    "avgResponseTime": 1032.1914893617022,
+    "totalLlmCalls": 40,
     "totalTokensUsed": 0,
     "errorCount": 4
   },
   "createdAt": "2026-02-06T01:22:58.868Z",
-  "updatedAt": "2026-02-11T15:17:04.325Z"
+  "updatedAt": "2026-02-12T14:40:16.814Z"
 }

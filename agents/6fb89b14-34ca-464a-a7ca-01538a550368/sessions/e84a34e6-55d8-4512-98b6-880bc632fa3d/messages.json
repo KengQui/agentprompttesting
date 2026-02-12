@@ -1,0 +1,18 @@
+[
+  {
+    "id": "7eb3c7f0-40d9-4dfe-91f1-a33255c263d8",
+    "agentId": "6fb89b14-34ca-464a-a7ca-01538a550368",
+    "sessionId": "e84a34e6-55d8-4512-98b6-880bc632fa3d",
+    "role": "user",
+    "content": "Maria has called in for her shift",
+    "timestamp": "2026-02-12T14:40:16.197Z"
+  },
+  {
+    "id": "06923826-6c88-4a6a-90d6-0e526ee881e3",
+    "agentId": "6fb89b14-34ca-464a-a7ca-01538a550368",
+    "sessionId": "e84a34e6-55d8-4512-98b6-880bc632fa3d",
+    "role": "assistant",
+    "content": "Okay, I can help you process Maria's call-in. Could you please provide the date of her absence?",
+    "timestamp": "2026-02-12T14:40:16.818Z"
+  }
+]
