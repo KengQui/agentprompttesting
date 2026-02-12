@@ -64,8 +64,12 @@ function parseSuggestedActions(text: string, isHcmAgent?: boolean): { cleanedTex
   }
   let actions = match[1].split('|').map(a => a.trim()).filter(Boolean);
   const cleanedText = text.replace(regex, '').trim();
-  if (isHcmAgent && actions.some(a => /create new column/i.test(a)) && actions.some(a => /explain this expression/i.test(a)) && !actions.some(a => /edit this expression/i.test(a))) {
-    actions = ["Edit this expression", ...actions];
+  if (isHcmAgent) {
+    const hasEdit = actions.some(a => /edit this expression/i.test(a));
+    const hasRevise = actions.some(a => /revise this expression/i.test(a));
+    if (hasEdit && hasRevise) {
+      actions = actions.filter(a => !/edit this expression/i.test(a));
+    }
   }
   return { cleanedText, actions };
 }
@@ -198,7 +202,7 @@ function extractHcmExpressionFromMessages(messages: Array<{ role: string; conten
   return fallback;
 }
 
-function SuggestedActionPills({ actions, onSelect, onInjectExpression, disabled }: { actions: string[]; onSelect: (action: string) => void; onInjectExpression?: () => void; disabled?: boolean }) {
+function SuggestedActionPills({ actions, onSelect, onInjectExpression, onReviseExpression, disabled }: { actions: string[]; onSelect: (action: string) => void; onInjectExpression?: () => void; onReviseExpression?: () => void; disabled?: boolean }) {
   const [clicked, setClicked] = useState(false);
 
   if (clicked || actions.length === 0) return null;
@@ -212,9 +216,14 @@ function SuggestedActionPills({ actions, onSelect, onInjectExpression, disabled 
           className="cursor-pointer px-3 py-1.5 text-xs font-medium"
           onClick={() => {
             if (disabled) return;
-            if (/revise this expression|edit this expression/i.test(action) && onInjectExpression) {
+            if (/edit this expression/i.test(action) && onInjectExpression) {
               setClicked(true);
               onInjectExpression();
+              return;
+            }
+            if (/revise this expression/i.test(action) && onReviseExpression) {
+              setClicked(true);
+              onReviseExpression();
               return;
             }
             setClicked(true);
@@ -601,7 +610,7 @@ function SampleDataValidationCarousel({ content, timestamp }: { content: string;
   );
 }
 
-function MessageBubble({ message, agentId, isLastAssistant, onSendMessage, onInjectExpression }: { message: ChatMessage; agentId?: string; isLastAssistant?: boolean; onSendMessage?: (text: string) => void; onInjectExpression?: () => void }) {
+function MessageBubble({ message, agentId, isLastAssistant, onSendMessage, onInjectExpression, onReviseExpression }: { message: ChatMessage; agentId?: string; isLastAssistant?: boolean; onSendMessage?: (text: string) => void; onInjectExpression?: () => void; onReviseExpression?: () => void }) {
   const isUser = message.role === "user";
   const isHcmAgent = agentId === HCM_EXPRESSION_BUILDER_AGENT_ID;
   const rawContent = isUser ? message.content : stripActionBlocks(message.content);
@@ -617,7 +626,7 @@ function MessageBubble({ message, agentId, isLastAssistant, onSendMessage, onInj
           before={splitResult.before}
           after={splitResult.after}
         />
-        {showPills && <SuggestedActionPills actions={actions} onSelect={onSendMessage} onInjectExpression={onInjectExpression} />}
+        {showPills && <SuggestedActionPills actions={actions} onSelect={onSendMessage} onInjectExpression={onInjectExpression} onReviseExpression={onReviseExpression} />}
       </>
     );
   }
@@ -630,7 +639,7 @@ function MessageBubble({ message, agentId, isLastAssistant, onSendMessage, onInj
     return (
       <>
         <ExpressionExplanationCard content={displayContent} timestamp={message.timestamp} />
-        {showPills && <SuggestedActionPills actions={actions} onSelect={onSendMessage} onInjectExpression={onInjectExpression} />}
+        {showPills && <SuggestedActionPills actions={actions} onSelect={onSendMessage} onInjectExpression={onInjectExpression} onReviseExpression={onReviseExpression} />}
       </>
     );
   }
@@ -643,7 +652,7 @@ function MessageBubble({ message, agentId, isLastAssistant, onSendMessage, onInj
     return (
       <>
         <SampleDataValidationCarousel content={displayContent} timestamp={message.timestamp} />
-        {showPills && <SuggestedActionPills actions={actions} onSelect={onSendMessage} onInjectExpression={onInjectExpression} />}
+        {showPills && <SuggestedActionPills actions={actions} onSelect={onSendMessage} onInjectExpression={onInjectExpression} onReviseExpression={onReviseExpression} />}
       </>
     );
   }
@@ -687,7 +696,7 @@ function MessageBubble({ message, agentId, isLastAssistant, onSendMessage, onInj
           </p>
         </div>
       </div>
-      {showPills && <SuggestedActionPills actions={actions} onSelect={onSendMessage} onInjectExpression={onInjectExpression} />}
+      {showPills && <SuggestedActionPills actions={actions} onSelect={onSendMessage} onInjectExpression={onInjectExpression} onReviseExpression={onReviseExpression} />}
     </>
   );
 }
@@ -1017,6 +1026,12 @@ export default function Chat() {
     }
   }, [messages]);
 
+  const handleReviseExpression = useCallback(() => {
+    if (sendMutation.isPending || !activeSessionId) return;
+    const revisePrompt = "I'd like to revise this expression. Can you review it, suggest possible improvements, and ask me what I'd like to change? Also let me know if I can manually edit it instead.";
+    sendMutation.mutate(revisePrompt);
+  }, [activeSessionId, sendMutation]);
+
   const handleSendPrompt = async (prompt: string) => {
     if (sendMutation.isPending) return;
     const trimmed = prompt.trim();
@@ -1258,6 +1273,7 @@ export default function Chat() {
                         isLastAssistant={isLastAssistant}
                         onSendMessage={handleSendPrompt}
                         onInjectExpression={handleInjectExpression}
+                        onReviseExpression={handleReviseExpression}
                       />
                     );
                   })}
