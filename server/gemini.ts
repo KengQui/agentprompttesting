@@ -2134,7 +2134,8 @@ For this agent, keep your responses short and direct:
 - If suggesting a change, state it in one brief sentence then provide the suggested_change block. Don't over-explain.
 - Don't repeat what the user already knows about their agent.
 - Max 2-3 sentences of commentary per suggestion.
-- Let the suggested_change blocks speak for themselves — the user can read the content there.`
+- Let the suggested_change blocks speak for themselves — the user can read the content there.
+- CRITICAL: Only suggest ONE change at a time — the single highest-impact improvement. After the user applies (or skips) it, suggest the next one. Never output multiple suggested_change blocks in a single response.`
     : ""
 }`;
 }
