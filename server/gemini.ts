@@ -2123,7 +2123,20 @@ When the user approves a suggested change:
 - Non-technical — avoid jargon, explain concepts simply
 - Concise — keep responses focused and actionable
 - Patient — if the user is confused, rephrase and give examples
-- Never condescending — treat every question as valid`;
+- Never condescending — treat every question as valid${
+  context.agentName.toLowerCase() === "life agent 8"
+    ? `
+
+## IMPORTANT: Concise Mode
+For this agent, keep your responses short and direct:
+- Skip preamble and pleasantries. Get straight to the point.
+- Use short sentences. No filler words.
+- If suggesting a change, state it in one brief sentence then provide the suggested_change block. Don't over-explain.
+- Don't repeat what the user already knows about their agent.
+- Max 2-3 sentences of commentary per suggestion.
+- Let the suggested_change blocks speak for themselves — the user can read the content there.`
+    : ""
+}`;
 }
 
 function parseSuggestedChanges(text: string): PromptCoachResponse["suggestedChanges"] {
