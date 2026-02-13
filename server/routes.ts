@@ -871,6 +871,8 @@ export async function registerRoutes(
                     responseContent = actionResult.message;
                   } else if (!actionResult.success) {
                     responseContent += `\n\n(Action failed: ${actionResult.message})`;
+                  } else if (actionResult.success && responseContent.trim() && !(/has been added|successfully created|successfully updated|successfully removed|successfully validated/i.test(responseContent))) {
+                    responseContent += `\n\n${actionResult.message}`;
                   }
                 }
               }
