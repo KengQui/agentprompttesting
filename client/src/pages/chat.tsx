@@ -952,7 +952,8 @@ export default function Chat() {
     },
   });
 
-  const editExpressionTriggeredRef = useRef<string | null>(null);
+  const prevMessageCountRef = useRef<number>(0);
+  const prevSessionIdRef = useRef<string | null>(null);
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -961,8 +962,18 @@ export default function Chat() {
   }, [messages, sendMutation.isPending]);
 
   useEffect(() => {
+    if (activeSessionId !== prevSessionIdRef.current) {
+      prevSessionIdRef.current = activeSessionId;
+      prevMessageCountRef.current = messages.length;
+      return;
+    }
+
+    const prevCount = prevMessageCountRef.current;
+    prevMessageCountRef.current = messages.length;
+
     if (params.id !== HCM_EXPRESSION_BUILDER_AGENT_ID) return;
     if (messages.length < 4 || sendMutation.isPending) return;
+    if (messages.length <= prevCount) return;
 
     const lastMsg = messages[messages.length - 1];
     const prevMsg = messages[messages.length - 2];
@@ -986,10 +997,6 @@ export default function Chat() {
     const expr = extractHcmExpression(stripActionBlocks(lastMsg.content));
     if (!expr) return;
 
-    const msgKey = lastMsg.id + lastMsg.timestamp;
-    if (editExpressionTriggeredRef.current === msgKey) return;
-    editExpressionTriggeredRef.current = msgKey;
-
     setMessage(expr);
     setTimeout(() => {
       if (textareaRef.current) {
@@ -997,7 +1004,7 @@ export default function Chat() {
         textareaRef.current.setSelectionRange(expr.length, expr.length);
       }
     }, 100);
-  }, [messages, params.id, sendMutation.isPending]);
+  }, [messages, params.id, sendMutation.isPending, activeSessionId]);
 
   useEffect(() => {
     if (lastMessageTime === 0) return;
