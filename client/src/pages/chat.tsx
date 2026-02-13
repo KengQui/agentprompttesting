@@ -75,7 +75,7 @@ function parseSuggestedActions(text: string, isHcmAgent?: boolean): { cleanedTex
 // logical steps (documentation → confirmation → suggestions). Your product UI can
 // insert its own processing animation (spinner, progress bar, etc.) between them.
 function splitColumnBuildResponse(content: string): { before: string; after: string } | null {
-  const buildMarker = /I'll now (?:add|create) this as a new (?:calculated )?column (?:in|to) your report\./i;
+  const buildMarker = /I'll now add this as a new column to your report\./i;
   const match = content.match(buildMarker);
   if (!match || match.index === undefined) return null;
 
@@ -83,7 +83,7 @@ function splitColumnBuildResponse(content: string): { before: string; after: str
   const before = content.slice(0, splitPoint).trim();
   const after = content.slice(splitPoint).trim();
 
-  if (!after || !/has been added|successfully created/i.test(after)) return null;
+  if (!after || !/has been added/i.test(after)) return null;
 
   return { before, after };
 }

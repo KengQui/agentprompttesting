@@ -700,7 +700,7 @@ You can execute the following actions directly for users. Do NOT ask users to na
 
 1. **Acknowledge the request** - Confirm you understand what they want to do
 2. **Gather information** - If any required fields are missing, ask for them conversationally (one question at a time if needed)
-3. **Confirm before executing** - If the user has NOT already explicitly requested this exact action (e.g., they clicked a button, said "go ahead", "create it", "yes do it"), summarize what you're about to do and ask for confirmation. If the user already explicitly requested it, skip the confirmation and proceed directly to execution.
+3. **Confirm before executing** - Summarize what you're about to do and ask for confirmation
 4. **Execute the action** - Output the action block in this format (this is processed by the system):
 
 \`\`\`action
