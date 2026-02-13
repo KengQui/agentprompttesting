@@ -64,9 +64,6 @@ function parseSuggestedActions(text: string, isHcmAgent?: boolean): { cleanedTex
   }
   let actions = match[1].split('|').map(a => a.trim()).filter(Boolean);
   const cleanedText = text.replace(regex, '').trim();
-  if (isHcmAgent) {
-    actions = actions.filter(a => !/edit this expression/i.test(a));
-  }
   return { cleanedText, actions };
 }
 
