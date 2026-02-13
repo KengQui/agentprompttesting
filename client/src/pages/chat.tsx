@@ -33,6 +33,7 @@ const COLUMN_ADDED_FALLBACK_PILLS = ["See related expressions", "Create new expr
 const EXPRESSION_PRESENTED_FALLBACK_PILLS = ["Revise this expression", "Create new column", "Test with my data", "Explain this expression"];
 const VALIDATION_DONE_FALLBACK_PILLS = ["Create new column", "Revise this expression", "Explain this expression"];
 const EXPLANATION_DONE_FALLBACK_PILLS = ["Create new column", "Revise this expression", "Test with my data"];
+const REVISE_CHOICE_PILLS = ["Edit it yourself", "Describe your changes"];
 
 function parseSuggestedActions(text: string, isHcmAgent?: boolean): { cleanedText: string; actions: string[] } {
   const regex = /\{\{SUGGESTED_ACTIONS:(.*?)\}\}/g;
@@ -59,6 +60,9 @@ function parseSuggestedActions(text: string, isHcmAgent?: boolean): { cleanedTex
       if (hasHcmExpression && /\b1\.\s*(your )?objective\b/i.test(text) && /\bcombining everything\b/i.test(text)) {
         return { cleanedText: text, actions: EXPLANATION_DONE_FALLBACK_PILLS };
       }
+    }
+    if (isHcmAgent && /edit it yourself|modify it directly|describe the changes|describe.*changes.*you'd like/i.test(text) && /revise/i.test(text)) {
+      return { cleanedText: text, actions: REVISE_CHOICE_PILLS };
     }
     return { cleanedText: text, actions: [] };
   }
@@ -181,7 +185,7 @@ function extractHcmExpression(text: string): string | null {
   return null;
 }
 
-function SuggestedActionPills({ actions, onSelect, onReviseExpression, disabled }: { actions: string[]; onSelect: (action: string) => void; onReviseExpression?: () => void; disabled?: boolean }) {
+function SuggestedActionPills({ actions, onSelect, onReviseExpression, onEditExpression, disabled }: { actions: string[]; onSelect: (action: string) => void; onReviseExpression?: () => void; onEditExpression?: () => void; disabled?: boolean }) {
   const [clicked, setClicked] = useState(false);
 
   if (clicked || actions.length === 0) return null;
@@ -198,6 +202,11 @@ function SuggestedActionPills({ actions, onSelect, onReviseExpression, disabled 
             if (/revise this expression/i.test(action) && onReviseExpression) {
               setClicked(true);
               onReviseExpression();
+              return;
+            }
+            if (/edit it yourself/i.test(action) && onEditExpression) {
+              setClicked(true);
+              onEditExpression();
               return;
             }
             setClicked(true);
@@ -584,7 +593,7 @@ function SampleDataValidationCarousel({ content, timestamp }: { content: string;
   );
 }
 
-function MessageBubble({ message, agentId, isLastAssistant, onSendMessage, onReviseExpression }: { message: ChatMessage; agentId?: string; isLastAssistant?: boolean; onSendMessage?: (text: string) => void; onReviseExpression?: () => void }) {
+function MessageBubble({ message, agentId, isLastAssistant, onSendMessage, onReviseExpression, onEditExpression }: { message: ChatMessage; agentId?: string; isLastAssistant?: boolean; onSendMessage?: (text: string) => void; onReviseExpression?: () => void; onEditExpression?: () => void }) {
   const isUser = message.role === "user";
   const isHcmAgent = agentId === HCM_EXPRESSION_BUILDER_AGENT_ID;
   const rawContent = isUser ? message.content : stripActionBlocks(message.content);
@@ -600,7 +609,7 @@ function MessageBubble({ message, agentId, isLastAssistant, onSendMessage, onRev
           before={splitResult.before}
           after={splitResult.after}
         />
-        {showPills && <SuggestedActionPills actions={actions} onSelect={onSendMessage} onReviseExpression={onReviseExpression} />}
+        {showPills && <SuggestedActionPills actions={actions} onSelect={onSendMessage} onReviseExpression={onReviseExpression} onEditExpression={onEditExpression} />}
       </>
     );
   }
@@ -613,7 +622,7 @@ function MessageBubble({ message, agentId, isLastAssistant, onSendMessage, onRev
     return (
       <>
         <ExpressionExplanationCard content={displayContent} timestamp={message.timestamp} />
-        {showPills && <SuggestedActionPills actions={actions} onSelect={onSendMessage} onReviseExpression={onReviseExpression} />}
+        {showPills && <SuggestedActionPills actions={actions} onSelect={onSendMessage} onReviseExpression={onReviseExpression} onEditExpression={onEditExpression} />}
       </>
     );
   }
@@ -626,7 +635,7 @@ function MessageBubble({ message, agentId, isLastAssistant, onSendMessage, onRev
     return (
       <>
         <SampleDataValidationCarousel content={displayContent} timestamp={message.timestamp} />
-        {showPills && <SuggestedActionPills actions={actions} onSelect={onSendMessage} onReviseExpression={onReviseExpression} />}
+        {showPills && <SuggestedActionPills actions={actions} onSelect={onSendMessage} onReviseExpression={onReviseExpression} onEditExpression={onEditExpression} />}
       </>
     );
   }
@@ -670,7 +679,7 @@ function MessageBubble({ message, agentId, isLastAssistant, onSendMessage, onRev
           </p>
         </div>
       </div>
-      {showPills && <SuggestedActionPills actions={actions} onSelect={onSendMessage} onReviseExpression={onReviseExpression} />}
+      {showPills && <SuggestedActionPills actions={actions} onSelect={onSendMessage} onReviseExpression={onReviseExpression} onEditExpression={onEditExpression} />}
     </>
   );
 }
@@ -996,6 +1005,29 @@ export default function Chat() {
     sendMutation.mutate(revisePrompt);
   }, [activeSessionId, sendMutation]);
 
+  const handleEditExpression = useCallback(() => {
+    for (let i = messages.length - 1; i >= 0; i--) {
+      if (messages[i].role === "assistant") {
+        const expr = extractHcmExpression(stripActionBlocks(messages[i].content));
+        if (expr) {
+          setMessage(expr);
+          setTimeout(() => {
+            if (textareaRef.current) {
+              textareaRef.current.focus();
+              textareaRef.current.setSelectionRange(expr.length, expr.length);
+            }
+          }, 50);
+          return;
+        }
+      }
+    }
+    toast({
+      title: "No expression found",
+      description: "Could not find an expression to edit in the conversation.",
+      duration: 3000,
+    });
+  }, [messages, toast]);
+
   const handleSendPrompt = async (prompt: string) => {
     if (sendMutation.isPending) return;
     const trimmed = prompt.trim();
@@ -1237,6 +1269,7 @@ export default function Chat() {
                         isLastAssistant={isLastAssistant}
                         onSendMessage={handleSendPrompt}
                         onReviseExpression={handleReviseExpression}
+                        onEditExpression={handleEditExpression}
                       />
                     );
                   })}
