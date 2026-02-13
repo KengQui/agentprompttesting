@@ -67,7 +67,49 @@
         0
       ],
       "timestamp": "2026-02-12T22:35:23.941Z"
+    },
+    {
+      "role": "user",
+      "content": "It doesn't look like my agent remembers the context.\n\nI gave it some information, and it require me the info again",
+      "timestamp": "2026-02-12T22:38:46.923Z"
+    },
+    {
+      "role": "assistant",
+      "content": "That's a key aspect of a helpful agent – remembering what you've already said!\n\nThis often happens when the agent isn't explicitly instructed to maintain conversational context. We can address this by adding a guardrail that tells the agent to remember information provided earlier in the session.\n\nHere's a suggestion for your `guardrails`:\n\n\n\nThis will help the agent keep track of details you provide, making your interactions much more efficient. How does that sound?",
+      "suggestedChanges": [
+        {
+          "field": "guardrails",
+          "action": "append",
+          "content": "Maintain conversational context: Remember and utilize information previously provided by the user within the current session to avoid repetitive questioning or re-requesting details.",
+          "explanation": "This guardrail will instruct the agent to retain information you've already given it, leading to a smoother and less repetitive conversation."
+        }
+      ],
+      "appliedChanges": [
+        0
+      ],
+      "timestamp": "2026-02-12T22:38:50.749Z"
+    },
+    {
+      "role": "user",
+      "content": "I want this agent to help user guide more step by step not intimidating them by enormous text. How can I do it?",
+      "timestamp": "2026-02-13T01:31:52.275Z"
+    },
+    {
+      "role": "assistant",
+      "content": "You're right, breaking down information into manageable steps makes a huge difference in user experience! While your agent already has a guardrail for conciseness, it sounds like we need to emphasize a **step-by-step guidance approach** to prevent overwhelming users with too much text at once.\n\nThis can be achieved by adding a new instruction to your `guardrails` that encourages the agent to guide users progressively through a process.\n\nHere's my suggestion:\n\n\n\nThis addition will encourage your agent to deliver information in smaller, more digestible chunks, making the process feel less intimidating and more guided. How does that sound?",
+      "suggestedChanges": [
+        {
+          "field": "guardrails",
+          "action": "append",
+          "content": "GUIDANCE STYLE\n\n33. Step-by-Step Guidance\n    - Break down complex processes or information into smaller, actionable steps.\n    - Present information incrementally, asking for user input or confirmation before moving to the next step.\n    - Avoid presenting all details at once, especially for initial inquiries.\n    - Use bullet points or numbered lists for clarity when outlining options or requirements.",
+          "explanation": "This guardrail will instruct your agent to adopt a more guided, step-by-step interaction style, making complex information easier to digest and follow for the user."
+        }
+      ],
+      "appliedChanges": [
+        0
+      ],
+      "timestamp": "2026-02-13T01:31:58.474Z"
     }
   ],
-  "savedAt": "2026-02-12T22:37:35.402Z"
+  "savedAt": "2026-02-13T01:33:48.637Z"
 }

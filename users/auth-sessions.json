@@ -1,50 +1,5 @@
 [
   {
-    "id": "f37d9074-6fde-4d3d-846b-83a6a64ade1a",
-    "userId": "b96e4232-68cd-4d57-959b-9f5e5db895cb",
-    "expiresAt": "2026-02-12T22:31:49.512Z"
-  },
-  {
-    "id": "604515eb-b36e-429c-b796-d215a9bb173d",
-    "userId": "1e6b1848-a359-4cd8-ab92-d79ca82075c9",
-    "expiresAt": "2026-02-12T22:47:29.319Z"
-  },
-  {
-    "id": "860fc922-1373-4e2c-bc57-1d619b87c884",
-    "userId": "bba0618a-48fa-4ba5-b2ef-76f17463272c",
-    "expiresAt": "2026-02-12T23:18:07.968Z"
-  },
-  {
-    "id": "e1e690b7-c120-422f-9eb8-8073a8d8b111",
-    "userId": "b0ac71c7-30d5-4410-9223-dc0b95e6b8a3",
-    "expiresAt": "2026-02-12T23:34:43.809Z"
-  },
-  {
-    "id": "1150cb4c-8a3b-4c53-8fdc-1d531c0f97b5",
-    "userId": "b0ac71c7-30d5-4410-9223-dc0b95e6b8a3",
-    "expiresAt": "2026-02-12T23:34:50.189Z"
-  },
-  {
-    "id": "3ddbb9bc-a47f-4270-8d4f-7c60c08a3b4d",
-    "userId": "5cb289be-f94c-4754-b0e8-941ecb3cbd86",
-    "expiresAt": "2026-02-12T23:39:48.893Z"
-  },
-  {
-    "id": "54f91521-0370-44d3-8f38-635ba5e446c5",
-    "userId": "5cb289be-f94c-4754-b0e8-941ecb3cbd86",
-    "expiresAt": "2026-02-12T23:39:57.761Z"
-  },
-  {
-    "id": "3811537f-e9e6-441d-b89b-96f45bc64498",
-    "userId": "2a928846-d043-4a7b-b343-3b154f4ff7c0",
-    "expiresAt": "2026-02-12T23:53:16.121Z"
-  },
-  {
-    "id": "209eabb6-999f-43b7-bc4d-94bcea396e04",
-    "userId": "2a928846-d043-4a7b-b343-3b154f4ff7c0",
-    "expiresAt": "2026-02-12T23:53:16.219Z"
-  },
-  {
     "id": "8905329e-05fd-4efa-929e-07f16ef732c0",
     "userId": "4c14d0d5-dcc9-45b5-a2cd-10a72f572c1e",
     "expiresAt": "2026-02-13T01:06:44.791Z"
