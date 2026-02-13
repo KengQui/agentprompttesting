@@ -14,5 +14,53 @@
     "role": "assistant",
     "content": "Okay! I can create a new column to categorize employees into salary range bands based on their annual salary. What salary ranges would you like to use for each band? For example:\n\n*   Entry Level: \\$0 - \\$60,000\n*   Mid Level: \\$60,001 - \\$100,000\n*   Senior Level: Over \\$100,000",
     "timestamp": "2026-02-13T15:16:37.564Z"
+  },
+  {
+    "id": "b5fff6d4-1c27-48b0-9263-bea2edde6e18",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "sessionId": "e2cbf526-81c4-4d07-811b-3a49d64d4692",
+    "role": "user",
+    "content": "Entry Level: $0 - $60,000\nMid Level: $60,001 - $100,000\nSenior Level: Over $100,000",
+    "timestamp": "2026-02-13T15:16:53.548Z"
+  },
+  {
+    "id": "26177782-6712-4003-a844-0722866e3ff2",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "sessionId": "e2cbf526-81c4-4d07-811b-3a49d64d4692",
+    "role": "assistant",
+    "content": "Okay, I can create an expression to categorize employees into \"Entry Level\", \"Mid Level\", and \"Senior Level\" based on those salary ranges. I noticed some employees have a blank Annual Salary, so the expression includes a check to avoid errors for those rows.\n\n```\nIf(AnnualSalary==\"\", \"N/A\", If(Value(AnnualSalary) <= 60000, \"Entry Level\", If(Value(AnnualSalary) <= 100000, \"Mid Level\", \"Senior Level\")))\n```\n\nThis expression will produce a **Text** output.\n\nSuggested column name: **Salary Level**\n\n{{SUGGESTED_ACTIONS:Revise this expression|Create new column|Test with my data|Explain this expression}}",
+    "timestamp": "2026-02-13T15:16:55.175Z"
+  },
+  {
+    "id": "4434e5d1-9a72-4a3b-9fd6-fbfe98b73d06",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "sessionId": "e2cbf526-81c4-4d07-811b-3a49d64d4692",
+    "role": "user",
+    "content": "Revise this expression",
+    "timestamp": "2026-02-13T15:16:58.076Z"
+  },
+  {
+    "id": "e547db48-7186-41a5-9053-18f1e888c1eb",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "sessionId": "e2cbf526-81c4-4d07-811b-3a49d64d4692",
+    "role": "assistant",
+    "content": "Would you like to:\n\n1.  **Edit it yourself** — I'll put the expression in the input so you can modify it directly\n2.  **Describe the changes** — Tell me what you'd like different and I'll revise it for you",
+    "timestamp": "2026-02-13T15:16:58.757Z"
+  },
+  {
+    "id": "1dc8e951-fd44-4429-8fca-668f7c10de38",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "sessionId": "e2cbf526-81c4-4d07-811b-3a49d64d4692",
+    "role": "user",
+    "content": "1",
+    "timestamp": "2026-02-13T15:17:04.770Z"
+  },
+  {
+    "id": "679aeef1-621f-4fc1-94a2-06ad516bf20b",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "sessionId": "e2cbf526-81c4-4d07-811b-3a49d64d4692",
+    "role": "assistant",
+    "content": "```\nIf(AnnualSalary==\"\", \"N/A\", If(Value(AnnualSalary) <= 60000, \"Entry Level\", If(Value(AnnualSalary) <= 100000, \"Mid Level\", \"Senior Level\")))\n```",
+    "timestamp": "2026-02-13T15:17:05.677Z"
   }
 ]

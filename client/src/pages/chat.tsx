@@ -952,11 +952,52 @@ export default function Chat() {
     },
   });
 
+  const editExpressionTriggeredRef = useRef<string | null>(null);
+
   useEffect(() => {
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
   }, [messages, sendMutation.isPending]);
+
+  useEffect(() => {
+    if (params.id !== HCM_EXPRESSION_BUILDER_AGENT_ID) return;
+    if (messages.length < 4 || sendMutation.isPending) return;
+
+    const lastMsg = messages[messages.length - 1];
+    const prevMsg = messages[messages.length - 2];
+    if (lastMsg.role !== "assistant" || prevMsg.role !== "user") return;
+
+    const userChose = /^(1|edit it yourself)$/i.test(prevMsg.content.trim());
+    if (!userChose) return;
+
+    let reviseChoiceFound = false;
+    for (let i = messages.length - 3; i >= 0; i--) {
+      if (messages[i].role === "assistant") {
+        const content = messages[i].content.toLowerCase();
+        if (content.includes("edit it yourself") && content.includes("describe the changes")) {
+          reviseChoiceFound = true;
+        }
+        break;
+      }
+    }
+    if (!reviseChoiceFound) return;
+
+    const expr = extractHcmExpression(stripActionBlocks(lastMsg.content));
+    if (!expr) return;
+
+    const msgKey = lastMsg.id + lastMsg.timestamp;
+    if (editExpressionTriggeredRef.current === msgKey) return;
+    editExpressionTriggeredRef.current = msgKey;
+
+    setMessage(expr);
+    setTimeout(() => {
+      if (textareaRef.current) {
+        textareaRef.current.focus();
+        textareaRef.current.setSelectionRange(expr.length, expr.length);
+      }
+    }, 100);
+  }, [messages, params.id, sendMutation.isPending]);
 
   useEffect(() => {
     if (lastMessageTime === 0) return;
