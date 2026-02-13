@@ -995,7 +995,7 @@ export default function Chat() {
 
   const handleReviseExpression = useCallback(() => {
     if (sendMutation.isPending || !activeSessionId) return;
-    const revisePrompt = "I'd like to revise this expression. Can you review it, suggest possible improvements, and ask me what I'd like to change? Also let me know if I can manually edit it instead.";
+    const revisePrompt = "Revise this expression";
     sendMutation.mutate(revisePrompt);
   }, [activeSessionId, sendMutation]);
 
