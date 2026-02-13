@@ -1,0 +1,34 @@
+[
+  {
+    "id": "f453d011-ca67-44cf-9251-0764b1c54c72",
+    "agentId": "d9680d37-36b5-494c-bb13-e8eb6126c6ee",
+    "sessionId": "a21d9233-9398-44d5-99b9-52f1c64eda30",
+    "role": "user",
+    "content": "I have some life change event and not sure if I'm eligible to change the benefits options",
+    "timestamp": "2026-02-13T02:00:12.157Z"
+  },
+  {
+    "id": "4bc471fe-a6d0-4f12-b41b-f3afcf9385ab",
+    "agentId": "d9680d37-36b5-494c-bb13-e8eb6126c6ee",
+    "sessionId": "a21d9233-9398-44d5-99b9-52f1c64eda30",
+    "role": "assistant",
+    "content": "I can help you determine if you're eligible to change your benefits. Could you please tell me what qualifying life event you experienced and the date it occurred?",
+    "timestamp": "2026-02-13T02:00:14.025Z"
+  },
+  {
+    "id": "050ef14d-3f9f-46ad-b3b3-f3cbe38bf446",
+    "agentId": "d9680d37-36b5-494c-bb13-e8eb6126c6ee",
+    "sessionId": "a21d9233-9398-44d5-99b9-52f1c64eda30",
+    "role": "user",
+    "content": "I adopted a baby on Feb 19, 2026",
+    "timestamp": "2026-02-13T02:00:23.144Z"
+  },
+  {
+    "id": "7dd265c4-a5ae-4bc6-a127-3a52647f981c",
+    "agentId": "d9680d37-36b5-494c-bb13-e8eb6126c6ee",
+    "sessionId": "a21d9233-9398-44d5-99b9-52f1c64eda30",
+    "role": "assistant",
+    "content": "Congratulations on your adoption! Because you reported the adoption within 31 days of the event date (Feb 19, 2026), you are eligible to make changes to your benefits. You have until March 22, 2026, to make these changes.\n\nWhat benefits would you like to update? For example, you can add your baby to your medical, dental, and vision coverage, and/or adjust your FSA contributions.",
+    "timestamp": "2026-02-13T02:00:24.734Z"
+  }
+]

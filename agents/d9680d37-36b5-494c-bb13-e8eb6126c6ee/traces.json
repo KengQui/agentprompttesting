@@ -1801,22 +1801,92 @@
         }
       ],
       "success": true
+    },
+    {
+      "id": "trace-1770948014021",
+      "sessionId": "a21d9233-9398-44d5-99b9-52f1c64eda30",
+      "userInput": "I have some life change event and not sure if I'm eligible to change the benefits options",
+      "agentResponse": "I can help you determine if you're eligible to change your benefits. Could you please tell me what qualifying life event you experienced and the date it occurred?",
+      "startTime": "2026-02-13T02:00:12.156Z",
+      "endTime": "2026-02-13T02:00:14.021Z",
+      "totalDuration": 1865,
+      "entries": [
+        {
+          "id": "entry-1770948013266-1",
+          "type": "intent_classification",
+          "name": "Orchestrator Intent Classification",
+          "timestamp": "2026-02-13T02:00:13.266Z",
+          "metadata": {
+            "intent": "answer_question",
+            "classificationMethod": "orchestrator",
+            "confidence": "high"
+          }
+        },
+        {
+          "id": "entry-1770948014021-3",
+          "type": "llm_call",
+          "name": "Gemini Response Generation",
+          "timestamp": "2026-02-13T02:00:14.021Z",
+          "duration": 755,
+          "metadata": {
+            "model": "gemini",
+            "intent": "answer_question",
+            "validated": true
+          }
+        }
+      ],
+      "success": true
+    },
+    {
+      "id": "trace-1770948024732",
+      "sessionId": "a21d9233-9398-44d5-99b9-52f1c64eda30",
+      "userInput": "I adopted a baby on Feb 19, 2026",
+      "agentResponse": "Congratulations on your adoption! Because you reported the adoption within 31 days of the event date (Feb 19, 2026), you are eligible to make changes to your benefits. You have until March 22, 2026, to make these changes.\n\nWhat benefits would you like to update? For example, you can add your baby to your medical, dental, and vision coverage, and/or adjust your FSA contributions.",
+      "startTime": "2026-02-13T02:00:23.144Z",
+      "endTime": "2026-02-13T02:00:24.732Z",
+      "totalDuration": 1588,
+      "entries": [
+        {
+          "id": "entry-1770948023593-1",
+          "type": "intent_classification",
+          "name": "Orchestrator Intent Classification",
+          "timestamp": "2026-02-13T02:00:23.593Z",
+          "metadata": {
+            "intent": "answer_question",
+            "classificationMethod": "orchestrator",
+            "confidence": "high"
+          }
+        },
+        {
+          "id": "entry-1770948024732-3",
+          "type": "llm_call",
+          "name": "Gemini Response Generation",
+          "timestamp": "2026-02-13T02:00:24.732Z",
+          "duration": 1138,
+          "metadata": {
+            "model": "gemini",
+            "intent": "answer_question",
+            "validated": true
+          }
+        }
+      ],
+      "success": true
     }
   ],
   "stats": {
     "hookCalls": {},
     "signalReads": {},
     "intentDistribution": {
-      "answer_question": 46
+      "answer_question": 48
     },
     "classificationMethods": {
-      "orchestrator": 46
+      "orchestrator": 48
     },
-    "avgResponseTime": 1499,
-    "totalLlmCalls": 45,
+    "avgResponseTime": 1508.4791666666667,
+    "totalLlmCalls": 47,
     "totalTokensUsed": 0,
     "errorCount": 1
   },
   "createdAt": "2026-02-03T17:39:57.040Z",
-  "updatedAt": "2026-02-12T22:37:29.319Z"
+  "updatedAt": "2026-02-13T02:00:24.732Z"
 }
