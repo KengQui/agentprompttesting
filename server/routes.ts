@@ -823,14 +823,24 @@ export async function registerRoutes(
             
             if (!actionPrefix) {
               const normalizedInput = userInput.trim().replace(/[.!,?]+$/, '');
-              const oneShotCreationIntent = /\b(create|build|add|make)\b.*\b(column|calculated column|new column|custom column)\b/i;
-              const reverseOneShotIntent = /\b(column|calculated column|new column|custom column)\b.*\b(that|which|for|to|from)\b/i;
+              const oneShotCreationIntent = /\b(create|build|add|make)\b.{0,30}\b(column|calculated column|new column|custom column)\b/i;
               
-              const hasPendingExpression = chatHistory.some(
-                msg => msg.role === 'assistant' && /SUGGESTED_ACTIONS:[^\n]*Create new column/.test(msg.content)
-              );
+              const pendingExpressionMarker = /SUGGESTED_ACTIONS:[^\n]*Create new column/;
+              const postCreationMarker = /SUGGESTED_ACTIONS:[^\n]*(?:See related|Create new expression|I'm done)/;
+              let hasPendingExpression = false;
+              for (let i = chatHistory.length - 1; i >= 0; i--) {
+                const msg = chatHistory[i];
+                if (msg.role !== 'assistant') continue;
+                if (pendingExpressionMarker.test(msg.content)) {
+                  hasPendingExpression = true;
+                  break;
+                }
+                if (postCreationMarker.test(msg.content) && !pendingExpressionMarker.test(msg.content)) {
+                  break;
+                }
+              }
               
-              if (!hasPendingExpression && (oneShotCreationIntent.test(normalizedInput) || reverseOneShotIntent.test(normalizedInput))) {
+              if (!hasPendingExpression && oneShotCreationIntent.test(normalizedInput)) {
                 console.log(`[one-shot-creation] Direct column creation intent detected: "${normalizedInput}" → AI will generate expression and create column in one turn`);
                 actionPrefix = '[SYSTEM CONTEXT: The user wants to create a new calculated column directly. Generate the expression based on their description, then IMMEDIATELY execute the create_calculated_column action to create it — all in this single response. Do NOT present the expression for review first. Show the expression briefly, confirm it was created, and offer follow-up options.]\n\n';
               }
