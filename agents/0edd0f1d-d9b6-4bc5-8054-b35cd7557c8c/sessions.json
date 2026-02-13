@@ -588,20 +588,6 @@
     "updatedAt": "2026-02-13T02:37:04.447Z"
   },
   {
-    "id": "9df6ae0c-1737-451c-b4e0-e9a1b18a47da",
-    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
-    "title": "New Session",
-    "createdAt": "2026-02-13T11:52:17.741Z",
-    "updatedAt": "2026-02-13T11:52:40.980Z"
-  },
-  {
-    "id": "4cf4469e-a0bb-444f-94c5-0ab288377ba7",
-    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
-    "title": "New Session",
-    "createdAt": "2026-02-13T11:53:36.128Z",
-    "updatedAt": "2026-02-13T11:54:10.462Z"
-  },
-  {
     "id": "21e40041-678a-4a18-a1c2-cd0155c74bc3",
     "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
     "title": "New Session",
@@ -625,8 +611,15 @@
   {
     "id": "871e849d-3d97-4fe9-ac0e-498976463a02",
     "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
-    "title": "New Session",
+    "title": "do not delete",
     "createdAt": "2026-02-13T12:41:10.339Z",
-    "updatedAt": "2026-02-13T12:41:35.897Z"
+    "updatedAt": "2026-02-13T13:17:20.593Z"
+  },
+  {
+    "id": "1266310c-7d67-45f1-9afb-f3ea74fa464e",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "title": "New Session",
+    "createdAt": "2026-02-13T12:44:54.425Z",
+    "updatedAt": "2026-02-13T13:25:51.337Z"
   }
 ]
