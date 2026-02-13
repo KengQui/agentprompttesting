@@ -786,7 +786,41 @@ export async function registerRoutes(
               'Create new expression': '[SYSTEM CONTEXT: The user clicked "Create new expression". Ask what they would like to build.]\n\n',
               "I'm done": '[SYSTEM CONTEXT: The user clicked "I\'m done". Give a brief friendly sign-off.]\n\n',
             };
-            const actionPrefix = suggestedActionPrefixes[userInput.trim()] || '';
+            let actionPrefix = suggestedActionPrefixes[userInput.trim()] || '';
+            
+            if (!actionPrefix) {
+              const approvalKeywords = /\b(approved?|approve this|go ahead|looks good|do it|create it|create that|make it|build it|add it|yes,? please|please create|please add|that works|perfect|i approve|ship it|lgtm|go for it|let'?s (create|do|go|make|build|add)|confirm(ed)?|sounds good|i'?m good|good to go|proceed|all good|that'?s? (good|great|correct|right|fine)|absolutely|definitely|for sure)\b/i;
+              const negationCheck = /\b(don'?t|do not|cancel|stop|wait|hold on|never|not yet)\b/i;
+              const negationExceptions = /\b(no (issues?|problems?|worries|complaints?|objections?|concerns?))\b/i;
+              const normalizedInput = userInput.trim().replace(/[.!,?]+$/, '');
+              
+              const hasNegation = negationCheck.test(normalizedInput) && !negationExceptions.test(normalizedInput);
+              const isApproval = approvalKeywords.test(normalizedInput) && !hasNegation;
+              
+              if (isApproval) {
+                const pendingExpressionMarker = /SUGGESTED_ACTIONS:[^\n]*Create new column/;
+                const postCreationMarker = /SUGGESTED_ACTIONS:[^\n]*(?:See related|Create new expression|I'm done)/;
+                
+                let hasPendingExpression = false;
+                for (let i = chatHistory.length - 1; i >= 0; i--) {
+                  const msg = chatHistory[i];
+                  if (msg.role !== 'assistant') continue;
+                  if (pendingExpressionMarker.test(msg.content)) {
+                    hasPendingExpression = true;
+                    break;
+                  }
+                  if (postCreationMarker.test(msg.content) && !pendingExpressionMarker.test(msg.content)) {
+                    break;
+                  }
+                }
+                
+                if (hasPendingExpression) {
+                  console.log(`[approval-detection] Natural approval phrase detected: "${normalizedInput}" → treating as "Create new column"`);
+                  actionPrefix = suggestedActionPrefixes['Create new column'];
+                }
+              }
+            }
+            
             intentPrefix = topicSwitchPrefix + actionPrefix + intentPrefix;
             
             const llmStartTime = Date.now();

@@ -600,5 +600,19 @@
     "title": "New Session",
     "createdAt": "2026-02-13T10:58:02.763Z",
     "updatedAt": "2026-02-13T11:29:09.172Z"
+  },
+  {
+    "id": "9df6ae0c-1737-451c-b4e0-e9a1b18a47da",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "title": "New Session",
+    "createdAt": "2026-02-13T11:52:17.741Z",
+    "updatedAt": "2026-02-13T11:52:40.980Z"
+  },
+  {
+    "id": "4cf4469e-a0bb-444f-94c5-0ab288377ba7",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "title": "New Session",
+    "createdAt": "2026-02-13T11:53:36.128Z",
+    "updatedAt": "2026-02-13T11:54:10.462Z"
   }
 ]
