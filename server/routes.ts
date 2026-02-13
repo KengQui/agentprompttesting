@@ -781,7 +781,7 @@ export async function registerRoutes(
               'Create new column': '[SYSTEM CONTEXT: The user clicked "Create new column". You MUST create the column immediately via the create_calculated_column action. Do NOT show any validation examples, row-by-row calculations, or sample data. Confirm the column was created and offer follow-up options.]\n\n',
               'Test with my data': '[SYSTEM CONTEXT: The user clicked "Test with my data". Show a row-by-row validation preview using real rows from the report data.]\n\n',
               'Explain this expression': '[SYSTEM CONTEXT: The user clicked "Explain this expression". Provide a plain-language explanation of how the expression works without showing sample data rows.]\n\n',
-              'Revise this expression': '[SYSTEM CONTEXT: The user clicked "Revise this expression". Ask what they would like to change.]\n\n',
+              'Revise this expression': '[SYSTEM CONTEXT: The user clicked "Revise this expression". Do NOT review, analyze, or suggest improvements to the expression on your own — the user has not asked for that. Simply ask the user whether they would like to (1) manually edit the expression themselves, or (2) describe the changes they want and let you make the revisions. Keep your response brief — just present these two options and wait for the user to choose.]\n\n',
               'See related expressions': '[SYSTEM CONTEXT: The user clicked "See related expressions". Suggest 3 related expressions they might find useful.]\n\n',
               'Create new expression': '[SYSTEM CONTEXT: The user clicked "Create new expression". Ask what they would like to build.]\n\n',
               "I'm done": '[SYSTEM CONTEXT: The user clicked "I\'m done". Give a brief friendly sign-off.]\n\n',
