@@ -1,0 +1,18 @@
+[
+  {
+    "id": "a2307f38-f0e3-4723-91c9-e832fa261544",
+    "agentId": "6fb89b14-34ca-464a-a7ca-01538a550368",
+    "sessionId": "2ad93fa4-3036-4f43-a207-b0d2671734cb",
+    "role": "user",
+    "content": "An employee, John Doe, called in sick for his 8 AM - 4 PM shift on 2024-07-15. Please process this as a sick day.",
+    "timestamp": "2026-02-13T22:06:03.697Z"
+  },
+  {
+    "id": "f8492231-2520-477b-acaf-567a2b8be932",
+    "agentId": "6fb89b14-34ca-464a-a7ca-01538a550368",
+    "sessionId": "2ad93fa4-3036-4f43-a207-b0d2671734cb",
+    "role": "assistant",
+    "content": "I cannot find an employee named John Doe. Could you please provide the name of an employee at Store 101?",
+    "timestamp": "2026-02-13T22:06:04.405Z"
+  }
+]

@@ -1,0 +1,114 @@
+[
+  {
+    "id": "413cab50-ede1-4236-9c34-6ec95e48eb88",
+    "agentId": "6fb89b14-34ca-464a-a7ca-01538a550368",
+    "sessionId": "c05e95ca-0503-491c-a51b-5b5e6e7d7a79",
+    "role": "user",
+    "content": "Maria called in",
+    "timestamp": "2026-02-13T21:51:33.783Z"
+  },
+  {
+    "id": "006a19e5-63e3-41d9-b523-4bfcf9a29d99",
+    "agentId": "6fb89b14-34ca-464a-a7ca-01538a550368",
+    "sessionId": "c05e95ca-0503-491c-a51b-5b5e6e7d7a79",
+    "role": "assistant",
+    "content": "Okay. I found one employee named Maria Garcia. Is she calling in for today, February 13th?",
+    "timestamp": "2026-02-13T21:51:35.418Z"
+  },
+  {
+    "id": "954b2dd0-8975-476c-8b87-a6177364daa5",
+    "agentId": "6fb89b14-34ca-464a-a7ca-01538a550368",
+    "sessionId": "c05e95ca-0503-491c-a51b-5b5e6e7d7a79",
+    "role": "user",
+    "content": "feb 4th",
+    "timestamp": "2026-02-13T21:52:03.215Z"
+  },
+  {
+    "id": "ad0764f2-93dc-40cf-9abf-d1bb33242787",
+    "agentId": "6fb89b14-34ca-464a-a7ca-01538a550368",
+    "sessionId": "c05e95ca-0503-491c-a51b-5b5e6e7d7a79",
+    "role": "assistant",
+    "content": "Before we move on to your new request, is Maria Garcia calling in for February 4th?",
+    "timestamp": "2026-02-13T21:52:04.258Z"
+  },
+  {
+    "id": "1aae4b80-23b0-4740-a647-3baf41c0a701",
+    "agentId": "6fb89b14-34ca-464a-a7ca-01538a550368",
+    "sessionId": "c05e95ca-0503-491c-a51b-5b5e6e7d7a79",
+    "role": "user",
+    "content": "yes",
+    "timestamp": "2026-02-13T21:52:08.949Z"
+  },
+  {
+    "id": "b98267f5-14ac-40ab-9c86-48c7231262bd",
+    "agentId": "6fb89b14-34ca-464a-a7ca-01538a550368",
+    "sessionId": "c05e95ca-0503-491c-a51b-5b5e6e7d7a79",
+    "role": "assistant",
+    "content": "Okay, I see Maria Garcia (E99887) is scheduled for an 8-hour shift on February 4th, from 14:00 to 22:00. What is the reason for her absence?",
+    "timestamp": "2026-02-13T21:52:09.742Z"
+  },
+  {
+    "id": "45e4e5b4-f031-4d30-83fb-95ce71f783b2",
+    "agentId": "6fb89b14-34ca-464a-a7ca-01538a550368",
+    "sessionId": "c05e95ca-0503-491c-a51b-5b5e6e7d7a79",
+    "role": "user",
+    "content": "Car didn't start",
+    "timestamp": "2026-02-13T21:52:23.843Z"
+  },
+  {
+    "id": "e82fb5f4-99ed-44c7-ae15-7eb50d4fd901",
+    "agentId": "6fb89b14-34ca-464a-a7ca-01538a550368",
+    "sessionId": "c05e95ca-0503-491c-a51b-5b5e6e7d7a79",
+    "role": "assistant",
+    "content": "Okay, I can understand that Maria needs to call in due to her car not starting. Would you like to classify this absence as **Unpaid Time Off** (Type: Earning Code)? If not, I can offer other earning code options.",
+    "timestamp": "2026-02-13T21:52:25.065Z"
+  },
+  {
+    "id": "aaf1f1cb-6d84-4b6e-9473-6ebcd3902de6",
+    "agentId": "6fb89b14-34ca-464a-a7ca-01538a550368",
+    "sessionId": "c05e95ca-0503-491c-a51b-5b5e6e7d7a79",
+    "role": "user",
+    "content": "PTO",
+    "timestamp": "2026-02-13T21:52:42.820Z"
+  },
+  {
+    "id": "f95ec755-d75b-4c69-b968-919090979bf6",
+    "agentId": "6fb89b14-34ca-464a-a7ca-01538a550368",
+    "sessionId": "c05e95ca-0503-491c-a51b-5b5e6e7d7a79",
+    "role": "assistant",
+    "content": "Okay. Maria Garcia (E99887) is scheduled for an 8-hour shift on February 4th, from 14:00 to 22:00. You'd like to classify this as **Paid Time Off** (Type: Earning Code).\n\nHer current PTO accrual balance is 16 hours. This 8-hour absence would leave her with 8 hours.\n\nI will process this call-in by:\n*   Converting her assigned shift (SFT1005) for February 4th to an open shift.\n*   Applying the 'PTO' earning code for 8 hours.\n*   Deducting 8 hours from her PTO accrual balance.\n\nPlease confirm if you would like to proceed with these changes.",
+    "timestamp": "2026-02-13T21:52:44.417Z"
+  },
+  {
+    "id": "8652e96e-76d3-4d39-a81d-16be214678ab",
+    "agentId": "6fb89b14-34ca-464a-a7ca-01538a550368",
+    "sessionId": "c05e95ca-0503-491c-a51b-5b5e6e7d7a79",
+    "role": "user",
+    "content": "yes",
+    "timestamp": "2026-02-13T21:53:09.346Z"
+  },
+  {
+    "id": "fbfe5343-a64d-4c17-802a-0e2e1bf3c586",
+    "agentId": "6fb89b14-34ca-464a-a7ca-01538a550368",
+    "sessionId": "c05e95ca-0503-491c-a51b-5b5e6e7d7a79",
+    "role": "assistant",
+    "content": "Okay, I have reported Maria Garcia's absence for her February 4th shift from 14:00 to 22:00 and classified it as Vacation (Accrued). Her shift is now open and available to be assigned to another employee. Would you like me to assign coverage to that open shift?",
+    "timestamp": "2026-02-13T21:53:11.847Z"
+  },
+  {
+    "id": "bdac21f2-1820-4227-aa1f-cf3184d37f74",
+    "agentId": "6fb89b14-34ca-464a-a7ca-01538a550368",
+    "sessionId": "c05e95ca-0503-491c-a51b-5b5e6e7d7a79",
+    "role": "user",
+    "content": "yes",
+    "timestamp": "2026-02-13T21:53:27.515Z"
+  },
+  {
+    "id": "e6f123a9-299b-4fc6-ac76-00d624a73c0b",
+    "agentId": "6fb89b14-34ca-464a-a7ca-01538a550368",
+    "sessionId": "c05e95ca-0503-491c-a51b-5b5e6e7d7a79",
+    "role": "assistant",
+    "content": "To assign coverage for the open shift, I need the employee ID of the employee you would like to assign to cover the shift on February 4th at 14:00.",
+    "timestamp": "2026-02-13T21:53:28.277Z"
+  }
+]

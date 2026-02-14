@@ -1,0 +1,82 @@
+[
+  {
+    "id": "f13046a9-f126-4dd8-9251-775ae808d19c",
+    "agentId": "6fb89b14-34ca-464a-a7ca-01538a550368",
+    "sessionId": "ee8257f3-3cf3-404c-ae4b-130fc81b3260",
+    "role": "user",
+    "content": "Mike called in",
+    "timestamp": "2026-02-13T21:55:56.023Z"
+  },
+  {
+    "id": "05e0ae0b-4847-451c-8f19-ebda7c58632a",
+    "agentId": "6fb89b14-34ca-464a-a7ca-01538a550368",
+    "sessionId": "ee8257f3-3cf3-404c-ae4b-130fc81b3260",
+    "role": "assistant",
+    "content": "Okay, I can help process a call-in. I found one employee named Michael Reed. Is that correct?",
+    "timestamp": "2026-02-13T21:55:57.525Z"
+  },
+  {
+    "id": "0b915ffb-b8d1-4a5c-90bf-a5b2ce49cdec",
+    "agentId": "6fb89b14-34ca-464a-a7ca-01538a550368",
+    "sessionId": "ee8257f3-3cf3-404c-ae4b-130fc81b3260",
+    "role": "user",
+    "content": "yes",
+    "timestamp": "2026-02-13T21:56:01.230Z"
+  },
+  {
+    "id": "2c79cda9-1536-43c8-9912-9f95e2752420",
+    "agentId": "6fb89b14-34ca-464a-a7ca-01538a550368",
+    "sessionId": "ee8257f3-3cf3-404c-ae4b-130fc81b3260",
+    "role": "assistant",
+    "content": "Okay. To process Michael Reed's call-in, I need the date of his absence and the reason for the absence. Let's start with the date. What date is Michael Reed absent?",
+    "timestamp": "2026-02-13T21:56:02.022Z"
+  },
+  {
+    "id": "e97fdb1a-9214-4d6a-82d5-5ce8145e8beb",
+    "agentId": "6fb89b14-34ca-464a-a7ca-01538a550368",
+    "sessionId": "ee8257f3-3cf3-404c-ae4b-130fc81b3260",
+    "role": "user",
+    "content": "2/3",
+    "timestamp": "2026-02-13T21:56:27.442Z"
+  },
+  {
+    "id": "295b5838-e3e7-48a2-a196-fc2e08b01d0e",
+    "agentId": "6fb89b14-34ca-464a-a7ca-01538a550368",
+    "sessionId": "ee8257f3-3cf3-404c-ae4b-130fc81b3260",
+    "role": "assistant",
+    "content": "And what is the reason for Michael Reed's absence on February 3rd?",
+    "timestamp": "2026-02-13T21:56:28.439Z"
+  },
+  {
+    "id": "5f66d5f2-a23c-4844-a50c-c099d903e33e",
+    "agentId": "6fb89b14-34ca-464a-a7ca-01538a550368",
+    "sessionId": "ee8257f3-3cf3-404c-ae4b-130fc81b3260",
+    "role": "user",
+    "content": "sick",
+    "timestamp": "2026-02-13T21:56:33.592Z"
+  },
+  {
+    "id": "f63d0b49-d5c1-43db-abf6-4615230f4628",
+    "agentId": "6fb89b14-34ca-464a-a7ca-01538a550368",
+    "sessionId": "ee8257f3-3cf3-404c-ae4b-130fc81b3260",
+    "role": "assistant",
+    "content": "Okay, I'm ready to process a call-in for Michael Reed on 2026-02-03.\nHere are the details:\n*   **Employee:** Michael Reed (E54321), Shift Supervisor\n*   **Absence Date:** 2026-02-03\n*   **Scheduled Shift:** 09:00 - 17:00 (8 hours)\n*   **Earning Code:** SICK (Sick Leave) - This will deduct 8 hours from his SICK balance. His remaining SICK balance will be 16.5 hours.\n*   **Shift Status:** The 09:00 - 17:00 shift will be converted to an open shift.\n\nDoes this look correct? Please confirm 'yes' or 'no' to proceed.",
+    "timestamp": "2026-02-13T21:56:35.409Z"
+  },
+  {
+    "id": "bd63dd79-b31b-465a-b011-5d8cd75a671e",
+    "agentId": "6fb89b14-34ca-464a-a7ca-01538a550368",
+    "sessionId": "ee8257f3-3cf3-404c-ae4b-130fc81b3260",
+    "role": "user",
+    "content": "yes",
+    "timestamp": "2026-02-13T21:57:07.323Z"
+  },
+  {
+    "id": "30e9a48e-0370-4d05-89dd-962914ab3118",
+    "agentId": "6fb89b14-34ca-464a-a7ca-01538a550368",
+    "sessionId": "ee8257f3-3cf3-404c-ae4b-130fc81b3260",
+    "role": "assistant",
+    "content": "Acknowledged. I have successfully processed Michael Reed's call-in for February 3rd, using Sick Leave.\n\nHere's what that means:\n*   Michael's SICK balance has been reduced by 8 hours, leaving him with 16.5 hours.\n*   Payroll will reflect 8 hours of Sick Leave for Michael on February 3rd.\n*   The shift from 09:00 to 17:00 on February 3rd is now an open shift.\n\nWould you like me to assign coverage to this open shift?",
+    "timestamp": "2026-02-13T21:57:09.419Z"
+  }
+]

@@ -1,4 +1,5 @@
 {
+  "enabled": true,
   "greeting": "I can help you efficiently manage employee call-ins and absences. Just tell me what you need, and I'll handle all the necessary scheduling, accrual, and payroll updates.",
   "suggestedPrompts": [
     {

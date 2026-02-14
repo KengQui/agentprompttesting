@@ -1,0 +1,66 @@
+[
+  {
+    "id": "cb233872-d75b-4a66-8df0-5dafbc394048",
+    "agentId": "6fb89b14-34ca-464a-a7ca-01538a550368",
+    "sessionId": "403b20c8-ac71-4b65-9eb7-e4882d5e31b9",
+    "role": "user",
+    "content": "Susie Jones has called in sick",
+    "timestamp": "2026-02-13T21:59:51.772Z"
+  },
+  {
+    "id": "f8bca9e2-60b0-480f-a97e-a65c3fcae0b4",
+    "agentId": "6fb89b14-34ca-464a-a7ca-01538a550368",
+    "sessionId": "403b20c8-ac71-4b65-9eb7-e4882d5e31b9",
+    "role": "assistant",
+    "content": "I found two employees with similar names:\n*   **Susan Jones** (E12345) - Cashier at Store 101\n*   **Susanne Jones** (E67890) - Cashier at Store 101\n\nWhich employee is calling in sick? Please provide a bit more detail, like the full name or employee ID.",
+    "timestamp": "2026-02-13T21:59:53.478Z"
+  },
+  {
+    "id": "6dfb6fcf-85e5-4661-ae3e-516e42d29270",
+    "agentId": "6fb89b14-34ca-464a-a7ca-01538a550368",
+    "sessionId": "403b20c8-ac71-4b65-9eb7-e4882d5e31b9",
+    "role": "user",
+    "content": "SHe's working at 9am on 2/3",
+    "timestamp": "2026-02-13T22:00:44.705Z"
+  },
+  {
+    "id": "8013a715-a64e-46c5-ad3b-f4ce6e582a06",
+    "agentId": "6fb89b14-34ca-464a-a7ca-01538a550368",
+    "sessionId": "403b20c8-ac71-4b65-9eb7-e4882d5e31b9",
+    "role": "assistant",
+    "content": "Okay, that clarifies that you're referring to Susan Jones (E12345). I see that Susan has a scheduled shift on 2026-02-03 starting at 9:00 AM. To process this call-in, I need to know what earning code to use. Would you like to classify this absence as **SICK** (Sick Leave), or **UNPAID** (Unpaid Absence)? Please let me know your preferred earning code.",
+    "timestamp": "2026-02-13T22:00:45.835Z"
+  },
+  {
+    "id": "22c08881-e936-48fa-bc45-2413437dae8c",
+    "agentId": "6fb89b14-34ca-464a-a7ca-01538a550368",
+    "sessionId": "403b20c8-ac71-4b65-9eb7-e4882d5e31b9",
+    "role": "user",
+    "content": "sick leave",
+    "timestamp": "2026-02-13T22:01:05.860Z"
+  },
+  {
+    "id": "f2f84767-a49e-4842-865b-006320099e0b",
+    "agentId": "6fb89b14-34ca-464a-a7ca-01538a550368",
+    "sessionId": "403b20c8-ac71-4b65-9eb7-e4882d5e31b9",
+    "role": "assistant",
+    "content": "Okay, I can process a sick call-in for Susan Jones for her shift on 2026-02-03, from 09:00 to 15:00.\n\nHere's a summary of the proposed changes:\n*   **Employee:** Susan Jones (E12345)\n*   **Absence Date:** 2026-02-03\n*   **Shift Time:** 09:00 - 15:00 (6 hours)\n*   **Earning Code:** SICK (Sick Leave)\n*   **Accrual Impact:** Susan currently has 12 hours of SICK leave. This call-in will deduct 6 hours, leaving a balance of 6 hours.\n*   **Schedule Update:** Susan's assigned shift will be converted to an open shift.\n\nPlease confirm if you wish to proceed with these changes.",
+    "timestamp": "2026-02-13T22:01:07.583Z"
+  },
+  {
+    "id": "8e553cb6-d71a-4de9-b726-eb6e76daaa77",
+    "agentId": "6fb89b14-34ca-464a-a7ca-01538a550368",
+    "sessionId": "403b20c8-ac71-4b65-9eb7-e4882d5e31b9",
+    "role": "user",
+    "content": "proceed",
+    "timestamp": "2026-02-13T22:01:46.232Z"
+  },
+  {
+    "id": "e5763e0e-c755-4f8d-8ba2-31e5f0734514",
+    "agentId": "6fb89b14-34ca-464a-a7ca-01538a550368",
+    "sessionId": "403b20c8-ac71-4b65-9eb7-e4882d5e31b9",
+    "role": "assistant",
+    "content": "Great! I've successfully reported Susan Jones' absence for her shift on 2026-02-03, and the schedule has been updated. The shift is now open for coverage.\n\nSince Susan's shift is now open, would you like me to help you assign coverage to that shift?",
+    "timestamp": "2026-02-13T22:01:48.416Z"
+  }
+]

@@ -110,5 +110,40 @@
     "title": "New Session",
     "createdAt": "2026-02-12T14:40:11.134Z",
     "updatedAt": "2026-02-12T14:40:16.818Z"
+  },
+  {
+    "id": "c05e95ca-0503-491c-a51b-5b5e6e7d7a79",
+    "agentId": "6fb89b14-34ca-464a-a7ca-01538a550368",
+    "title": "New Session",
+    "createdAt": "2026-02-13T21:51:27.014Z",
+    "updatedAt": "2026-02-13T21:53:28.277Z"
+  },
+  {
+    "id": "ee8257f3-3cf3-404c-ae4b-130fc81b3260",
+    "agentId": "6fb89b14-34ca-464a-a7ca-01538a550368",
+    "title": "New Session",
+    "createdAt": "2026-02-13T21:55:39.820Z",
+    "updatedAt": "2026-02-13T21:57:09.419Z"
+  },
+  {
+    "id": "403b20c8-ac71-4b65-9eb7-e4882d5e31b9",
+    "agentId": "6fb89b14-34ca-464a-a7ca-01538a550368",
+    "title": "New Session",
+    "createdAt": "2026-02-13T21:59:43.322Z",
+    "updatedAt": "2026-02-13T22:01:48.416Z"
+  },
+  {
+    "id": "2ad93fa4-3036-4f43-a207-b0d2671734cb",
+    "agentId": "6fb89b14-34ca-464a-a7ca-01538a550368",
+    "title": "New Session",
+    "createdAt": "2026-02-13T22:05:56.319Z",
+    "updatedAt": "2026-02-13T22:06:04.405Z"
+  },
+  {
+    "id": "48d55cce-db0e-45cd-8394-75471174ce35",
+    "agentId": "6fb89b14-34ca-464a-a7ca-01538a550368",
+    "title": "New Session",
+    "createdAt": "2026-02-13T22:06:10.380Z",
+    "updatedAt": "2026-02-13T22:09:18.158Z"
   }
 ]

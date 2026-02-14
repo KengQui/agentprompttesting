@@ -1668,6 +1668,918 @@
         }
       ],
       "success": true
+    },
+    {
+      "id": "trace-1771019495415",
+      "sessionId": "c05e95ca-0503-491c-a51b-5b5e6e7d7a79",
+      "userInput": "Maria called in",
+      "agentResponse": "Okay. I found one employee named Maria Garcia. Is she calling in for today, February 13th?",
+      "startTime": "2026-02-13T21:51:33.783Z",
+      "endTime": "2026-02-13T21:51:35.415Z",
+      "totalDuration": 1632,
+      "entries": [
+        {
+          "id": "entry-1771019494732-1",
+          "type": "intent_classification",
+          "name": "Orchestrator Intent Classification",
+          "timestamp": "2026-02-13T21:51:34.732Z",
+          "metadata": {
+            "intent": "answer_question",
+            "classificationMethod": "orchestrator",
+            "confidence": "high"
+          }
+        },
+        {
+          "id": "entry-1771019495415-3",
+          "type": "llm_call",
+          "name": "Gemini Response Generation",
+          "timestamp": "2026-02-13T21:51:35.415Z",
+          "duration": 683,
+          "metadata": {
+            "model": "gemini",
+            "intent": "answer_question",
+            "validated": true
+          }
+        }
+      ],
+      "success": true
+    },
+    {
+      "id": "trace-1771019524257",
+      "sessionId": "c05e95ca-0503-491c-a51b-5b5e6e7d7a79",
+      "userInput": "feb 4th",
+      "agentResponse": "Before we move on to your new request, is Maria Garcia calling in for February 4th?",
+      "startTime": "2026-02-13T21:52:03.215Z",
+      "endTime": "2026-02-13T21:52:04.257Z",
+      "totalDuration": 1042,
+      "entries": [
+        {
+          "id": "entry-1771019523574-1",
+          "type": "intent_classification",
+          "name": "Orchestrator Intent Classification",
+          "timestamp": "2026-02-13T21:52:03.575Z",
+          "metadata": {
+            "intent": "answer_question",
+            "classificationMethod": "orchestrator",
+            "confidence": "high"
+          }
+        },
+        {
+          "id": "entry-1771019524257-3",
+          "type": "llm_call",
+          "name": "Gemini Response Generation",
+          "timestamp": "2026-02-13T21:52:04.257Z",
+          "duration": 682,
+          "metadata": {
+            "model": "gemini",
+            "intent": "answer_question",
+            "validated": true
+          }
+        }
+      ],
+      "success": true
+    },
+    {
+      "id": "trace-1771019529741",
+      "sessionId": "c05e95ca-0503-491c-a51b-5b5e6e7d7a79",
+      "userInput": "yes",
+      "agentResponse": "Okay, I see Maria Garcia (E99887) is scheduled for an 8-hour shift on February 4th, from 14:00 to 22:00. What is the reason for her absence?",
+      "startTime": "2026-02-13T21:52:08.949Z",
+      "endTime": "2026-02-13T21:52:09.741Z",
+      "totalDuration": 792,
+      "entries": [
+        {
+          "id": "entry-1771019528950-1",
+          "type": "intent_classification",
+          "name": "Orchestrator Intent Classification",
+          "timestamp": "2026-02-13T21:52:08.950Z",
+          "metadata": {
+            "intent": "answer_question",
+            "classificationMethod": "orchestrator",
+            "confidence": "high"
+          }
+        },
+        {
+          "id": "entry-1771019529741-3",
+          "type": "llm_call",
+          "name": "Gemini Response Generation",
+          "timestamp": "2026-02-13T21:52:09.741Z",
+          "duration": 791,
+          "metadata": {
+            "model": "gemini",
+            "intent": "answer_question",
+            "validated": true
+          }
+        }
+      ],
+      "success": true
+    },
+    {
+      "id": "trace-1771019545064",
+      "sessionId": "c05e95ca-0503-491c-a51b-5b5e6e7d7a79",
+      "userInput": "Car didn't start",
+      "agentResponse": "Okay, I can understand that Maria needs to call in due to her car not starting. Would you like to classify this absence as **Unpaid Time Off** (Type: Earning Code)? If not, I can offer other earning code options.",
+      "startTime": "2026-02-13T21:52:23.843Z",
+      "endTime": "2026-02-13T21:52:25.064Z",
+      "totalDuration": 1221,
+      "entries": [
+        {
+          "id": "entry-1771019544261-1",
+          "type": "intent_classification",
+          "name": "Orchestrator Intent Classification",
+          "timestamp": "2026-02-13T21:52:24.261Z",
+          "metadata": {
+            "intent": "answer_question",
+            "classificationMethod": "orchestrator",
+            "confidence": "high"
+          }
+        },
+        {
+          "id": "entry-1771019545064-3",
+          "type": "llm_call",
+          "name": "Gemini Response Generation",
+          "timestamp": "2026-02-13T21:52:25.064Z",
+          "duration": 803,
+          "metadata": {
+            "model": "gemini",
+            "intent": "answer_question",
+            "validated": true
+          }
+        }
+      ],
+      "success": true
+    },
+    {
+      "id": "trace-1771019564416",
+      "sessionId": "c05e95ca-0503-491c-a51b-5b5e6e7d7a79",
+      "userInput": "PTO",
+      "agentResponse": "Okay. Maria Garcia (E99887) is scheduled for an 8-hour shift on February 4th, from 14:00 to 22:00. You'd like to classify this as **Paid Time Off** (Type: Earning Code).\n\nHer current PTO accrual balance is 16 hours. This 8-hour absence would leave her with 8 hours.\n\nI will process this call-in by:\n*   Converting her assigned shift (SFT1005) for February 4th to an open shift.\n*   Applying the 'PTO' earning code for 8 hours.\n*   Deducting 8 hours from her PTO accrual balance.\n\nPlease confirm if you would like to proceed with these changes.",
+      "startTime": "2026-02-13T21:52:42.820Z",
+      "endTime": "2026-02-13T21:52:44.416Z",
+      "totalDuration": 1596,
+      "entries": [
+        {
+          "id": "entry-1771019562821-1",
+          "type": "intent_classification",
+          "name": "Orchestrator Intent Classification",
+          "timestamp": "2026-02-13T21:52:42.821Z",
+          "metadata": {
+            "intent": "answer_question",
+            "classificationMethod": "orchestrator",
+            "confidence": "high"
+          }
+        },
+        {
+          "id": "entry-1771019564416-3",
+          "type": "llm_call",
+          "name": "Gemini Response Generation",
+          "timestamp": "2026-02-13T21:52:44.416Z",
+          "duration": 1595,
+          "metadata": {
+            "model": "gemini",
+            "intent": "answer_question",
+            "validated": true
+          }
+        }
+      ],
+      "success": true
+    },
+    {
+      "id": "trace-1771019591846",
+      "sessionId": "c05e95ca-0503-491c-a51b-5b5e6e7d7a79",
+      "userInput": "yes",
+      "agentResponse": "```action\nACTION: report_employee_absence\nFIELDS: {\"employee_id\": \"E99887\", \"absence_date\": \"2026-02-04\", \"shift_start_time\": \"14:00\", \"earning_code\": \"Vacation (Accrued)\", \"notes\": \"Car didn't start\"}\n```\nOkay, I have reported Maria Garcia's absence for her February 4th shift from 14:00 to 22:00 and classified it as Vacation (Accrued). Her shift is now open and available to be assigned to another employee. Would you like me to assign coverage to that open shift?\n",
+      "startTime": "2026-02-13T21:53:09.346Z",
+      "endTime": "2026-02-13T21:53:11.846Z",
+      "totalDuration": 2500,
+      "entries": [
+        {
+          "id": "entry-1771019589347-1",
+          "type": "intent_classification",
+          "name": "Orchestrator Intent Classification",
+          "timestamp": "2026-02-13T21:53:09.347Z",
+          "metadata": {
+            "intent": "answer_question",
+            "classificationMethod": "orchestrator",
+            "confidence": "high"
+          }
+        },
+        {
+          "id": "entry-1771019590310-action",
+          "type": "action_simulation",
+          "name": "Action: report_employee_absence",
+          "timestamp": "2026-02-13T21:53:10.310Z",
+          "metadata": {
+            "actionName": "report_employee_absence",
+            "fields": {
+              "employee_id": "E99887",
+              "absence_date": "2026-02-04",
+              "shift_start_time": "14:00",
+              "earning_code": "Vacation (Accrued)",
+              "notes": "Car didn't start"
+            },
+            "success": true,
+            "message": "Successfully reported absence for employee E99887 on 2026-02-04 and updated the schedule. The shift is now open for coverage."
+          }
+        },
+        {
+          "id": "entry-1771019591846-3",
+          "type": "llm_call",
+          "name": "Gemini Response Generation",
+          "timestamp": "2026-02-13T21:53:11.846Z",
+          "duration": 2499,
+          "metadata": {
+            "model": "gemini",
+            "intent": "answer_question",
+            "validated": true
+          }
+        }
+      ],
+      "success": true
+    },
+    {
+      "id": "trace-1771019608276",
+      "sessionId": "c05e95ca-0503-491c-a51b-5b5e6e7d7a79",
+      "userInput": "yes",
+      "agentResponse": "To assign coverage for the open shift, I need the employee ID of the employee you would like to assign to cover the shift on February 4th at 14:00.",
+      "startTime": "2026-02-13T21:53:27.514Z",
+      "endTime": "2026-02-13T21:53:28.276Z",
+      "totalDuration": 762,
+      "entries": [
+        {
+          "id": "entry-1771019607516-1",
+          "type": "intent_classification",
+          "name": "Orchestrator Intent Classification",
+          "timestamp": "2026-02-13T21:53:27.516Z",
+          "metadata": {
+            "intent": "answer_question",
+            "classificationMethod": "orchestrator",
+            "confidence": "high"
+          }
+        },
+        {
+          "id": "entry-1771019608276-3",
+          "type": "llm_call",
+          "name": "Gemini Response Generation",
+          "timestamp": "2026-02-13T21:53:28.276Z",
+          "duration": 760,
+          "metadata": {
+            "model": "gemini",
+            "intent": "answer_question",
+            "validated": true
+          }
+        }
+      ],
+      "success": true
+    },
+    {
+      "id": "trace-1771019757524",
+      "sessionId": "ee8257f3-3cf3-404c-ae4b-130fc81b3260",
+      "userInput": "Mike called in",
+      "agentResponse": "Okay, I can help process a call-in. I found one employee named Michael Reed. Is that correct?",
+      "startTime": "2026-02-13T21:55:56.023Z",
+      "endTime": "2026-02-13T21:55:57.524Z",
+      "totalDuration": 1501,
+      "entries": [
+        {
+          "id": "entry-1771019756888-1",
+          "type": "intent_classification",
+          "name": "Orchestrator Intent Classification",
+          "timestamp": "2026-02-13T21:55:56.888Z",
+          "metadata": {
+            "intent": "answer_question",
+            "classificationMethod": "orchestrator",
+            "confidence": "high"
+          }
+        },
+        {
+          "id": "entry-1771019757524-3",
+          "type": "llm_call",
+          "name": "Gemini Response Generation",
+          "timestamp": "2026-02-13T21:55:57.524Z",
+          "duration": 636,
+          "metadata": {
+            "model": "gemini",
+            "intent": "answer_question",
+            "validated": true
+          }
+        }
+      ],
+      "success": true
+    },
+    {
+      "id": "trace-1771019762021",
+      "sessionId": "ee8257f3-3cf3-404c-ae4b-130fc81b3260",
+      "userInput": "yes",
+      "agentResponse": "Okay. To process Michael Reed's call-in, I need the date of his absence and the reason for the absence. Let's start with the date. What date is Michael Reed absent?",
+      "startTime": "2026-02-13T21:56:01.229Z",
+      "endTime": "2026-02-13T21:56:02.021Z",
+      "totalDuration": 792,
+      "entries": [
+        {
+          "id": "entry-1771019761230-1",
+          "type": "intent_classification",
+          "name": "Orchestrator Intent Classification",
+          "timestamp": "2026-02-13T21:56:01.230Z",
+          "metadata": {
+            "intent": "answer_question",
+            "classificationMethod": "orchestrator",
+            "confidence": "high"
+          }
+        },
+        {
+          "id": "entry-1771019762021-3",
+          "type": "llm_call",
+          "name": "Gemini Response Generation",
+          "timestamp": "2026-02-13T21:56:02.021Z",
+          "duration": 791,
+          "metadata": {
+            "model": "gemini",
+            "intent": "answer_question",
+            "validated": true
+          }
+        }
+      ],
+      "success": true
+    },
+    {
+      "id": "trace-1771019788438",
+      "sessionId": "ee8257f3-3cf3-404c-ae4b-130fc81b3260",
+      "userInput": "2/3",
+      "agentResponse": "And what is the reason for Michael Reed's absence on February 3rd?",
+      "startTime": "2026-02-13T21:56:27.442Z",
+      "endTime": "2026-02-13T21:56:28.438Z",
+      "totalDuration": 996,
+      "entries": [
+        {
+          "id": "entry-1771019787836-1",
+          "type": "intent_classification",
+          "name": "Orchestrator Intent Classification",
+          "timestamp": "2026-02-13T21:56:27.836Z",
+          "metadata": {
+            "intent": "answer_question",
+            "classificationMethod": "orchestrator",
+            "confidence": "high"
+          }
+        },
+        {
+          "id": "entry-1771019788438-3",
+          "type": "llm_call",
+          "name": "Gemini Response Generation",
+          "timestamp": "2026-02-13T21:56:28.438Z",
+          "duration": 602,
+          "metadata": {
+            "model": "gemini",
+            "intent": "answer_question",
+            "validated": true
+          }
+        }
+      ],
+      "success": true
+    },
+    {
+      "id": "trace-1771019795408",
+      "sessionId": "ee8257f3-3cf3-404c-ae4b-130fc81b3260",
+      "userInput": "sick",
+      "agentResponse": "Okay, I'm ready to process a call-in for Michael Reed on 2026-02-03.\nHere are the details:\n*   **Employee:** Michael Reed (E54321), Shift Supervisor\n*   **Absence Date:** 2026-02-03\n*   **Scheduled Shift:** 09:00 - 17:00 (8 hours)\n*   **Earning Code:** SICK (Sick Leave) - This will deduct 8 hours from his SICK balance. His remaining SICK balance will be 16.5 hours.\n*   **Shift Status:** The 09:00 - 17:00 shift will be converted to an open shift.\n\nDoes this look correct? Please confirm 'yes' or 'no' to proceed.",
+      "startTime": "2026-02-13T21:56:33.592Z",
+      "endTime": "2026-02-13T21:56:35.408Z",
+      "totalDuration": 1816,
+      "entries": [
+        {
+          "id": "entry-1771019793920-1",
+          "type": "intent_classification",
+          "name": "Orchestrator Intent Classification",
+          "timestamp": "2026-02-13T21:56:33.920Z",
+          "metadata": {
+            "intent": "answer_question",
+            "classificationMethod": "orchestrator",
+            "confidence": "high"
+          }
+        },
+        {
+          "id": "entry-1771019795408-3",
+          "type": "llm_call",
+          "name": "Gemini Response Generation",
+          "timestamp": "2026-02-13T21:56:35.408Z",
+          "duration": 1488,
+          "metadata": {
+            "model": "gemini",
+            "intent": "answer_question",
+            "validated": true
+          }
+        }
+      ],
+      "success": true
+    },
+    {
+      "id": "trace-1771019829417",
+      "sessionId": "ee8257f3-3cf3-404c-ae4b-130fc81b3260",
+      "userInput": "yes",
+      "agentResponse": "Acknowledged. I have successfully processed Michael Reed's call-in for February 3rd, using Sick Leave.\n\nHere's what that means:\n*   Michael's SICK balance has been reduced by 8 hours, leaving him with 16.5 hours.\n*   Payroll will reflect 8 hours of Sick Leave for Michael on February 3rd.\n*   The shift from 09:00 to 17:00 on February 3rd is now an open shift.\n\nWould you like me to assign coverage to this open shift?\n",
+      "startTime": "2026-02-13T21:57:07.323Z",
+      "endTime": "2026-02-13T21:57:09.417Z",
+      "totalDuration": 2094,
+      "entries": [
+        {
+          "id": "entry-1771019827324-1",
+          "type": "intent_classification",
+          "name": "Orchestrator Intent Classification",
+          "timestamp": "2026-02-13T21:57:07.324Z",
+          "metadata": {
+            "intent": "answer_question",
+            "classificationMethod": "orchestrator",
+            "confidence": "high"
+          }
+        },
+        {
+          "id": "entry-1771019828211-action",
+          "type": "action_simulation",
+          "name": "Action: report_employee_absence",
+          "timestamp": "2026-02-13T21:57:08.211Z",
+          "metadata": {
+            "actionName": "report_employee_absence",
+            "fields": {
+              "employee_id": "E54321",
+              "absence_date": "2026-02-03",
+              "shift_start_time": "09:00",
+              "earning_code": "Sick Leave (Accrued)",
+              "notes": "sick"
+            },
+            "success": true,
+            "message": "Successfully reported absence for employee E54321 on 2026-02-03 and updated the schedule. The shift is now open for coverage."
+          }
+        },
+        {
+          "id": "entry-1771019829417-3",
+          "type": "llm_call",
+          "name": "Gemini Response Generation",
+          "timestamp": "2026-02-13T21:57:09.417Z",
+          "duration": 2093,
+          "metadata": {
+            "model": "gemini",
+            "intent": "answer_question",
+            "validated": true
+          }
+        }
+      ],
+      "success": true
+    },
+    {
+      "id": "trace-1771019993477",
+      "sessionId": "403b20c8-ac71-4b65-9eb7-e4882d5e31b9",
+      "userInput": "Susie Jones has called in sick",
+      "agentResponse": "I found two employees with similar names:\n*   **Susan Jones** (E12345) - Cashier at Store 101\n*   **Susanne Jones** (E67890) - Cashier at Store 101\n\nWhich employee is calling in sick? Please provide a bit more detail, like the full name or employee ID.",
+      "startTime": "2026-02-13T21:59:51.772Z",
+      "endTime": "2026-02-13T21:59:53.477Z",
+      "totalDuration": 1705,
+      "entries": [
+        {
+          "id": "entry-1771019992508-1",
+          "type": "intent_classification",
+          "name": "Orchestrator Intent Classification",
+          "timestamp": "2026-02-13T21:59:52.508Z",
+          "metadata": {
+            "intent": "answer_question",
+            "classificationMethod": "orchestrator",
+            "confidence": "high"
+          }
+        },
+        {
+          "id": "entry-1771019993477-3",
+          "type": "llm_call",
+          "name": "Gemini Response Generation",
+          "timestamp": "2026-02-13T21:59:53.477Z",
+          "duration": 969,
+          "metadata": {
+            "model": "gemini",
+            "intent": "answer_question",
+            "validated": true
+          }
+        }
+      ],
+      "success": true
+    },
+    {
+      "id": "trace-1771020045835",
+      "sessionId": "403b20c8-ac71-4b65-9eb7-e4882d5e31b9",
+      "userInput": "SHe's working at 9am on 2/3",
+      "agentResponse": "Okay, that clarifies that you're referring to Susan Jones (E12345). I see that Susan has a scheduled shift on 2026-02-03 starting at 9:00 AM. To process this call-in, I need to know what earning code to use. Would you like to classify this absence as **SICK** (Sick Leave), or **UNPAID** (Unpaid Absence)? Please let me know your preferred earning code.",
+      "startTime": "2026-02-13T22:00:44.705Z",
+      "endTime": "2026-02-13T22:00:45.835Z",
+      "totalDuration": 1130,
+      "entries": [
+        {
+          "id": "entry-1771020044705-1",
+          "type": "intent_classification",
+          "name": "Orchestrator Intent Classification",
+          "timestamp": "2026-02-13T22:00:44.705Z",
+          "metadata": {
+            "intent": "answer_question",
+            "classificationMethod": "orchestrator",
+            "confidence": "high"
+          }
+        },
+        {
+          "id": "entry-1771020045835-3",
+          "type": "llm_call",
+          "name": "Gemini Response Generation",
+          "timestamp": "2026-02-13T22:00:45.835Z",
+          "duration": 1130,
+          "metadata": {
+            "model": "gemini",
+            "intent": "answer_question",
+            "validated": true
+          }
+        }
+      ],
+      "success": true
+    },
+    {
+      "id": "trace-1771020067582",
+      "sessionId": "403b20c8-ac71-4b65-9eb7-e4882d5e31b9",
+      "userInput": "sick leave",
+      "agentResponse": "Okay, I can process a sick call-in for Susan Jones for her shift on 2026-02-03, from 09:00 to 15:00.\n\nHere's a summary of the proposed changes:\n*   **Employee:** Susan Jones (E12345)\n*   **Absence Date:** 2026-02-03\n*   **Shift Time:** 09:00 - 15:00 (6 hours)\n*   **Earning Code:** SICK (Sick Leave)\n*   **Accrual Impact:** Susan currently has 12 hours of SICK leave. This call-in will deduct 6 hours, leaving a balance of 6 hours.\n*   **Schedule Update:** Susan's assigned shift will be converted to an open shift.\n\nPlease confirm if you wish to proceed with these changes.",
+      "startTime": "2026-02-13T22:01:05.860Z",
+      "endTime": "2026-02-13T22:01:07.582Z",
+      "totalDuration": 1722,
+      "entries": [
+        {
+          "id": "entry-1771020065863-1",
+          "type": "intent_classification",
+          "name": "Orchestrator Intent Classification",
+          "timestamp": "2026-02-13T22:01:05.863Z",
+          "metadata": {
+            "intent": "answer_question",
+            "classificationMethod": "orchestrator",
+            "confidence": "high"
+          }
+        },
+        {
+          "id": "entry-1771020067582-3",
+          "type": "llm_call",
+          "name": "Gemini Response Generation",
+          "timestamp": "2026-02-13T22:01:07.582Z",
+          "duration": 1719,
+          "metadata": {
+            "model": "gemini",
+            "intent": "answer_question",
+            "validated": true
+          }
+        }
+      ],
+      "success": true
+    },
+    {
+      "id": "trace-1771020108415",
+      "sessionId": "403b20c8-ac71-4b65-9eb7-e4882d5e31b9",
+      "userInput": "proceed",
+      "agentResponse": "Great! I've successfully reported Susan Jones' absence for her shift on 2026-02-03, and the schedule has been updated. The shift is now open for coverage.\n\nSince Susan's shift is now open, would you like me to help you assign coverage to that shift?\n",
+      "startTime": "2026-02-13T22:01:46.232Z",
+      "endTime": "2026-02-13T22:01:48.415Z",
+      "totalDuration": 2183,
+      "entries": [
+        {
+          "id": "entry-1771020106233-1",
+          "type": "intent_classification",
+          "name": "Orchestrator Intent Classification",
+          "timestamp": "2026-02-13T22:01:46.233Z",
+          "metadata": {
+            "intent": "answer_question",
+            "classificationMethod": "orchestrator",
+            "confidence": "high"
+          }
+        },
+        {
+          "id": "entry-1771020107383-action",
+          "type": "action_simulation",
+          "name": "Action: report_employee_absence",
+          "timestamp": "2026-02-13T22:01:47.383Z",
+          "metadata": {
+            "actionName": "report_employee_absence",
+            "fields": {
+              "employee_id": "E12345",
+              "absence_date": "2026-02-03",
+              "shift_start_time": "09:00",
+              "earning_code": "SICK",
+              "notes": "Sick Leave"
+            },
+            "success": true,
+            "message": "Successfully reported absence for employee E12345 on 2026-02-03 and updated the schedule. The shift is now open for coverage."
+          }
+        },
+        {
+          "id": "entry-1771020108415-3",
+          "type": "llm_call",
+          "name": "Gemini Response Generation",
+          "timestamp": "2026-02-13T22:01:48.415Z",
+          "duration": 2182,
+          "metadata": {
+            "model": "gemini",
+            "intent": "answer_question",
+            "validated": true
+          }
+        }
+      ],
+      "success": true
+    },
+    {
+      "id": "trace-1771020364404",
+      "sessionId": "2ad93fa4-3036-4f43-a207-b0d2671734cb",
+      "userInput": "An employee, John Doe, called in sick for his 8 AM - 4 PM shift on 2024-07-15. Please process this as a sick day.",
+      "agentResponse": "I cannot find an employee named John Doe. Could you please provide the name of an employee at Store 101?",
+      "startTime": "2026-02-13T22:06:03.697Z",
+      "endTime": "2026-02-13T22:06:04.404Z",
+      "totalDuration": 707,
+      "entries": [
+        {
+          "id": "entry-1771020363698-1",
+          "type": "intent_classification",
+          "name": "Orchestrator Intent Classification",
+          "timestamp": "2026-02-13T22:06:03.698Z",
+          "metadata": {
+            "intent": "answer_question",
+            "classificationMethod": "orchestrator",
+            "confidence": "high"
+          }
+        },
+        {
+          "id": "entry-1771020364404-3",
+          "type": "llm_call",
+          "name": "Gemini Response Generation",
+          "timestamp": "2026-02-13T22:06:04.404Z",
+          "duration": 706,
+          "metadata": {
+            "model": "gemini",
+            "intent": "answer_question",
+            "validated": true
+          }
+        }
+      ],
+      "success": true
+    },
+    {
+      "id": "trace-1771020379780",
+      "sessionId": "48d55cce-db0e-45cd-8394-75471174ce35",
+      "userInput": "Susie is sick",
+      "agentResponse": "I found two employees with a similar name:\n*   Susan Jones (E12345, Cashier, Store 101)\n*   Susanne Jones (E67890, Cashier, Store 101)\n\nWhich employee are you referring to?",
+      "startTime": "2026-02-13T22:06:18.923Z",
+      "endTime": "2026-02-13T22:06:19.780Z",
+      "totalDuration": 857,
+      "entries": [
+        {
+          "id": "entry-1771020378926-1",
+          "type": "intent_classification",
+          "name": "Orchestrator Intent Classification",
+          "timestamp": "2026-02-13T22:06:18.926Z",
+          "metadata": {
+            "intent": "answer_question",
+            "classificationMethod": "orchestrator",
+            "confidence": "high"
+          }
+        },
+        {
+          "id": "entry-1771020379780-3",
+          "type": "llm_call",
+          "name": "Gemini Response Generation",
+          "timestamp": "2026-02-13T22:06:19.780Z",
+          "duration": 854,
+          "metadata": {
+            "model": "gemini",
+            "intent": "answer_question",
+            "validated": true
+          }
+        }
+      ],
+      "success": true
+    },
+    {
+      "id": "trace-1771020399938",
+      "sessionId": "48d55cce-db0e-45cd-8394-75471174ce35",
+      "userInput": "9am casier shift",
+      "agentResponse": "Before we move on to your new request — Which employee are you referring to?",
+      "startTime": "2026-02-13T22:06:38.985Z",
+      "endTime": "2026-02-13T22:06:39.938Z",
+      "totalDuration": 953,
+      "entries": [
+        {
+          "id": "entry-1771020399376-1",
+          "type": "intent_classification",
+          "name": "Orchestrator Intent Classification",
+          "timestamp": "2026-02-13T22:06:39.376Z",
+          "metadata": {
+            "intent": "answer_question",
+            "classificationMethod": "orchestrator",
+            "confidence": "high"
+          }
+        },
+        {
+          "id": "entry-1771020399938-3",
+          "type": "llm_call",
+          "name": "Gemini Response Generation",
+          "timestamp": "2026-02-13T22:06:39.938Z",
+          "duration": 562,
+          "metadata": {
+            "model": "gemini",
+            "intent": "answer_question",
+            "validated": true
+          }
+        }
+      ],
+      "success": true
+    },
+    {
+      "id": "trace-1771020414561",
+      "sessionId": "48d55cce-db0e-45cd-8394-75471174ce35",
+      "userInput": "that's the shift for susie",
+      "agentResponse": "I found two employees with a similar name:\n\n*   Susan Jones (E12345, Cashier, Store 101)\n*   Susanne Jones (E67890, Cashier, Store 101)\n\nCan you specify which employee you are referring to with the 9 am cashier shift? Is it Susan or Susanne?",
+      "startTime": "2026-02-13T22:06:53.237Z",
+      "endTime": "2026-02-13T22:06:54.561Z",
+      "totalDuration": 1324,
+      "entries": [
+        {
+          "id": "entry-1771020413605-1",
+          "type": "intent_classification",
+          "name": "Orchestrator Intent Classification",
+          "timestamp": "2026-02-13T22:06:53.605Z",
+          "metadata": {
+            "intent": "answer_question",
+            "classificationMethod": "orchestrator",
+            "confidence": "high"
+          }
+        },
+        {
+          "id": "entry-1771020414561-3",
+          "type": "llm_call",
+          "name": "Gemini Response Generation",
+          "timestamp": "2026-02-13T22:06:54.561Z",
+          "duration": 956,
+          "metadata": {
+            "model": "gemini",
+            "intent": "answer_question",
+            "validated": true
+          }
+        }
+      ],
+      "success": true
+    },
+    {
+      "id": "trace-1771020427690",
+      "sessionId": "48d55cce-db0e-45cd-8394-75471174ce35",
+      "userInput": "Susan",
+      "agentResponse": "It sounds like Susan Jones called in sick. To confirm, are we processing an absence for Susan Jones (E12345, Cashier) for February 3rd, 2026 for her shift that starts at 9:00 AM?\n\nAnd which earning code should we apply for her absence? Based on company policy, common options are:\n\n*   **SICK**: Sick Leave (requires accrual balance)\n*   **PTO**: Paid Time Off (requires accrual balance)\n*   **UNPAID**: Unpaid Absence (no accrual required)",
+      "startTime": "2026-02-13T22:07:06.382Z",
+      "endTime": "2026-02-13T22:07:07.690Z",
+      "totalDuration": 1308,
+      "entries": [
+        {
+          "id": "entry-1771020426662-1",
+          "type": "intent_classification",
+          "name": "Orchestrator Intent Classification",
+          "timestamp": "2026-02-13T22:07:06.662Z",
+          "metadata": {
+            "intent": "answer_question",
+            "classificationMethod": "orchestrator",
+            "confidence": "high"
+          }
+        },
+        {
+          "id": "entry-1771020427690-3",
+          "type": "llm_call",
+          "name": "Gemini Response Generation",
+          "timestamp": "2026-02-13T22:07:07.690Z",
+          "duration": 1028,
+          "metadata": {
+            "model": "gemini",
+            "intent": "answer_question",
+            "validated": true
+          }
+        }
+      ],
+      "success": true
+    },
+    {
+      "id": "trace-1771020509521",
+      "sessionId": "48d55cce-db0e-45cd-8394-75471174ce35",
+      "userInput": "sick",
+      "agentResponse": "Okay, so you would like to classify Susan Jones' absence on February 3rd as Sick Leave. Just to confirm, before I report the absence:\n\n*   Employee: Susan Jones (E12345, Cashier)\n*   Date: February 3rd, 2026\n*   Shift Start Time: 9:00 AM\n*   Earning Code: SICK (Sick Leave)\n*   This will deduct from her accrual balance and convert the shift to an open shift\n\nDo you wish to proceed?",
+      "startTime": "2026-02-13T22:08:28.259Z",
+      "endTime": "2026-02-13T22:08:29.521Z",
+      "totalDuration": 1262,
+      "entries": [
+        {
+          "id": "entry-1771020508260-1",
+          "type": "intent_classification",
+          "name": "Orchestrator Intent Classification",
+          "timestamp": "2026-02-13T22:08:28.260Z",
+          "metadata": {
+            "intent": "answer_question",
+            "classificationMethod": "orchestrator",
+            "confidence": "high"
+          }
+        },
+        {
+          "id": "entry-1771020509521-3",
+          "type": "llm_call",
+          "name": "Gemini Response Generation",
+          "timestamp": "2026-02-13T22:08:29.521Z",
+          "duration": 1261,
+          "metadata": {
+            "model": "gemini",
+            "intent": "answer_question",
+            "validated": true
+          }
+        }
+      ],
+      "success": true
+    },
+    {
+      "id": "trace-1771020540691",
+      "sessionId": "48d55cce-db0e-45cd-8394-75471174ce35",
+      "userInput": "yes",
+      "agentResponse": "Okay, I have successfully reported Susan Jones' (E12345) absence for today, February 3rd, and updated the schedule. The shift that starts at 9:00 AM is now open for coverage, and 6 hours have been deducted from her Sick Leave balance.\n",
+      "startTime": "2026-02-13T22:08:58.823Z",
+      "endTime": "2026-02-13T22:09:00.691Z",
+      "totalDuration": 1868,
+      "entries": [
+        {
+          "id": "entry-1771020538824-1",
+          "type": "intent_classification",
+          "name": "Orchestrator Intent Classification",
+          "timestamp": "2026-02-13T22:08:58.824Z",
+          "metadata": {
+            "intent": "answer_question",
+            "classificationMethod": "orchestrator",
+            "confidence": "high"
+          }
+        },
+        {
+          "id": "entry-1771020539782-action",
+          "type": "action_simulation",
+          "name": "Action: report_employee_absence",
+          "timestamp": "2026-02-13T22:08:59.782Z",
+          "metadata": {
+            "actionName": "report_employee_absence",
+            "fields": {
+              "employee_id": "E12345",
+              "absence_date": "2026-02-03",
+              "shift_start_time": "09:00",
+              "earning_code": "SICK",
+              "notes": "Employee called in sick"
+            },
+            "success": true,
+            "message": "Successfully reported absence for employee E12345 on 2026-02-03 and updated the schedule. The shift is now open for coverage."
+          }
+        },
+        {
+          "id": "entry-1771020540691-3",
+          "type": "llm_call",
+          "name": "Gemini Response Generation",
+          "timestamp": "2026-02-13T22:09:00.691Z",
+          "duration": 1867,
+          "metadata": {
+            "model": "gemini",
+            "intent": "answer_question",
+            "validated": true
+          }
+        }
+      ],
+      "success": true
+    },
+    {
+      "id": "trace-1771020558157",
+      "sessionId": "48d55cce-db0e-45cd-8394-75471174ce35",
+      "userInput": "thank you",
+      "agentResponse": "You're welcome! Is there anything else I can help you with today?",
+      "startTime": "2026-02-13T22:09:17.624Z",
+      "endTime": "2026-02-13T22:09:18.157Z",
+      "totalDuration": 533,
+      "entries": [
+        {
+          "id": "entry-1771020557624-1",
+          "type": "intent_classification",
+          "name": "Orchestrator Intent Classification",
+          "timestamp": "2026-02-13T22:09:17.624Z",
+          "metadata": {
+            "intent": "answer_question",
+            "classificationMethod": "orchestrator",
+            "confidence": "high"
+          }
+        },
+        {
+          "id": "entry-1771020558157-3",
+          "type": "llm_call",
+          "name": "Gemini Response Generation",
+          "timestamp": "2026-02-13T22:09:18.157Z",
+          "duration": 533,
+          "metadata": {
+            "model": "gemini",
+            "intent": "answer_question",
+            "validated": true
+          }
+        }
+      ],
+      "success": true
     }
   ],
   "stats": {
@@ -1676,16 +2588,16 @@
     },
     "signalReads": {},
     "intentDistribution": {
-      "answer_question": 47
+      "answer_question": 71
     },
     "classificationMethods": {
-      "orchestrator": 47
+      "orchestrator": 71
     },
-    "avgResponseTime": 1032.1914893617022,
-    "totalLlmCalls": 40,
+    "avgResponseTime": 1138.1549295774648,
+    "totalLlmCalls": 64,
     "totalTokensUsed": 0,
     "errorCount": 4
   },
   "createdAt": "2026-02-06T01:22:58.868Z",
-  "updatedAt": "2026-02-12T14:40:16.814Z"
+  "updatedAt": "2026-02-13T22:09:18.157Z"
 }

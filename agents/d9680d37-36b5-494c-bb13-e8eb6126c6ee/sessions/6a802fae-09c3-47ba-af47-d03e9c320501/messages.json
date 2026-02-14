@@ -1,0 +1,82 @@
+[
+  {
+    "id": "52294beb-b1c1-438a-bbb3-11a2e8d417c8",
+    "agentId": "d9680d37-36b5-494c-bb13-e8eb6126c6ee",
+    "sessionId": "6a802fae-09c3-47ba-af47-d03e9c320501",
+    "role": "user",
+    "content": "I have some life change event and not sure if I'm eligible to change the benefits options",
+    "timestamp": "2026-02-13T15:38:34.753Z"
+  },
+  {
+    "id": "63ed8bac-f59f-4e5d-8ca0-f942b77e27fa",
+    "agentId": "d9680d37-36b5-494c-bb13-e8eb6126c6ee",
+    "sessionId": "6a802fae-09c3-47ba-af47-d03e9c320501",
+    "role": "assistant",
+    "content": "I can help you determine if you're eligible to change your benefits. Could you please tell me what life event occurred and the date it happened?",
+    "timestamp": "2026-02-13T15:38:35.546Z"
+  },
+  {
+    "id": "a88563d3-bcb5-478f-ad69-b537682b54eb",
+    "agentId": "d9680d37-36b5-494c-bb13-e8eb6126c6ee",
+    "sessionId": "6a802fae-09c3-47ba-af47-d03e9c320501",
+    "role": "user",
+    "content": "I adopted a baby on Feb 19, 2026",
+    "timestamp": "2026-02-13T15:38:42.910Z"
+  },
+  {
+    "id": "bf4ee73b-0cee-42a7-a748-3cdccf40f32c",
+    "agentId": "d9680d37-36b5-494c-bb13-e8eb6126c6ee",
+    "sessionId": "6a802fae-09c3-47ba-af47-d03e9c320501",
+    "role": "assistant",
+    "content": "Congratulations on your adoption! Because you've experienced a birth/adoption, you are eligible to make changes to your benefits. You have 31 days from the date of the event to make these changes.\n\nWould you like to add the baby as a dependent and/or make changes to your benefit elections at this time?",
+    "timestamp": "2026-02-13T15:38:44.422Z"
+  },
+  {
+    "id": "6a2e8400-1098-45cc-acf3-e319c15d2417",
+    "agentId": "d9680d37-36b5-494c-bb13-e8eb6126c6ee",
+    "sessionId": "6a802fae-09c3-47ba-af47-d03e9c320501",
+    "role": "user",
+    "content": "Yes",
+    "timestamp": "2026-02-13T15:40:28.982Z"
+  },
+  {
+    "id": "adcffdb9-2636-4577-b70f-43cac4fba211",
+    "agentId": "d9680d37-36b5-494c-bb13-e8eb6126c6ee",
+    "sessionId": "6a802fae-09c3-47ba-af47-d03e9c320501",
+    "role": "assistant",
+    "content": "Okay, let's start with adding your adopted baby as a dependent. I'll need some information to get started:\n- What is the baby's full name?\n- What is the baby's Social Security Number (SSN)?",
+    "timestamp": "2026-02-13T15:40:29.973Z"
+  },
+  {
+    "id": "5f4e4629-6396-44e5-bedf-9d2c7348c3e4",
+    "agentId": "d9680d37-36b5-494c-bb13-e8eb6126c6ee",
+    "sessionId": "6a802fae-09c3-47ba-af47-d03e9c320501",
+    "role": "user",
+    "content": "Sohee Kang / 123-45-6778",
+    "timestamp": "2026-02-13T15:40:40.074Z"
+  },
+  {
+    "id": "be191541-dfa5-439e-b4e5-f0f3b2ef1cdc",
+    "agentId": "d9680d37-36b5-494c-bb13-e8eb6126c6ee",
+    "sessionId": "6a802fae-09c3-47ba-af47-d03e9c320501",
+    "role": "assistant",
+    "content": "Thanks! Before I add Sohee Kang as a dependent, can you confirm the relationship? Is Sohee a child or legal ward?",
+    "timestamp": "2026-02-13T15:40:41.314Z"
+  },
+  {
+    "id": "15afe0de-bc29-4b1a-b28b-4b6ebab1143a",
+    "agentId": "d9680d37-36b5-494c-bb13-e8eb6126c6ee",
+    "sessionId": "6a802fae-09c3-47ba-af47-d03e9c320501",
+    "role": "user",
+    "content": "Child",
+    "timestamp": "2026-02-13T15:40:46.762Z"
+  },
+  {
+    "id": "37af1561-8dc3-46af-b306-b56528f7d10c",
+    "agentId": "d9680d37-36b5-494c-bb13-e8eb6126c6ee",
+    "sessionId": "6a802fae-09c3-47ba-af47-d03e9c320501",
+    "role": "assistant",
+    "content": "Okay, I'm ready to add Sohee as your child dependent.\n\nI will add Sohee Kang, born on Feb 19, 2026, as a child dependent. You will be required to upload supporting documentation (adoption decree or placement letter) in the next step.\n\nDo you wish to proceed?",
+    "timestamp": "2026-02-13T15:40:48.242Z"
+  }
+]

@@ -1,0 +1,114 @@
+[
+  {
+    "id": "2faeacee-df95-4df8-a984-39f6d3df81b1",
+    "agentId": "6fb89b14-34ca-464a-a7ca-01538a550368",
+    "sessionId": "48d55cce-db0e-45cd-8394-75471174ce35",
+    "role": "user",
+    "content": "Susie is sick",
+    "timestamp": "2026-02-13T22:06:18.923Z"
+  },
+  {
+    "id": "6670b16a-f416-4195-b536-058d37bdc905",
+    "agentId": "6fb89b14-34ca-464a-a7ca-01538a550368",
+    "sessionId": "48d55cce-db0e-45cd-8394-75471174ce35",
+    "role": "assistant",
+    "content": "I found two employees with a similar name:\n*   Susan Jones (E12345, Cashier, Store 101)\n*   Susanne Jones (E67890, Cashier, Store 101)\n\nWhich employee are you referring to?",
+    "timestamp": "2026-02-13T22:06:19.781Z"
+  },
+  {
+    "id": "846b856a-b2e5-4991-a06d-b50dc1f29876",
+    "agentId": "6fb89b14-34ca-464a-a7ca-01538a550368",
+    "sessionId": "48d55cce-db0e-45cd-8394-75471174ce35",
+    "role": "user",
+    "content": "9am casier shift",
+    "timestamp": "2026-02-13T22:06:38.985Z"
+  },
+  {
+    "id": "c497590f-ebc6-4976-8178-4ba9d536f84a",
+    "agentId": "6fb89b14-34ca-464a-a7ca-01538a550368",
+    "sessionId": "48d55cce-db0e-45cd-8394-75471174ce35",
+    "role": "assistant",
+    "content": "Before we move on to your new request — Which employee are you referring to?",
+    "timestamp": "2026-02-13T22:06:39.940Z"
+  },
+  {
+    "id": "9dd9d96a-27dc-407e-8473-770ebed9d8e5",
+    "agentId": "6fb89b14-34ca-464a-a7ca-01538a550368",
+    "sessionId": "48d55cce-db0e-45cd-8394-75471174ce35",
+    "role": "user",
+    "content": "that's the shift for susie",
+    "timestamp": "2026-02-13T22:06:53.237Z"
+  },
+  {
+    "id": "dbcf38f5-7bea-47a4-b98f-d2587ded0960",
+    "agentId": "6fb89b14-34ca-464a-a7ca-01538a550368",
+    "sessionId": "48d55cce-db0e-45cd-8394-75471174ce35",
+    "role": "assistant",
+    "content": "I found two employees with a similar name:\n\n*   Susan Jones (E12345, Cashier, Store 101)\n*   Susanne Jones (E67890, Cashier, Store 101)\n\nCan you specify which employee you are referring to with the 9 am cashier shift? Is it Susan or Susanne?",
+    "timestamp": "2026-02-13T22:06:54.562Z"
+  },
+  {
+    "id": "994d621b-eb9f-46eb-af93-3a7490a88537",
+    "agentId": "6fb89b14-34ca-464a-a7ca-01538a550368",
+    "sessionId": "48d55cce-db0e-45cd-8394-75471174ce35",
+    "role": "user",
+    "content": "Susan",
+    "timestamp": "2026-02-13T22:07:06.382Z"
+  },
+  {
+    "id": "bd64f885-431e-47c8-b534-a47e1e76f775",
+    "agentId": "6fb89b14-34ca-464a-a7ca-01538a550368",
+    "sessionId": "48d55cce-db0e-45cd-8394-75471174ce35",
+    "role": "assistant",
+    "content": "It sounds like Susan Jones called in sick. To confirm, are we processing an absence for Susan Jones (E12345, Cashier) for February 3rd, 2026 for her shift that starts at 9:00 AM?\n\nAnd which earning code should we apply for her absence? Based on company policy, common options are:\n\n*   **SICK**: Sick Leave (requires accrual balance)\n*   **PTO**: Paid Time Off (requires accrual balance)\n*   **UNPAID**: Unpaid Absence (no accrual required)",
+    "timestamp": "2026-02-13T22:07:07.692Z"
+  },
+  {
+    "id": "902393b4-d59e-4acc-b8f7-4d91c0bc8f1d",
+    "agentId": "6fb89b14-34ca-464a-a7ca-01538a550368",
+    "sessionId": "48d55cce-db0e-45cd-8394-75471174ce35",
+    "role": "user",
+    "content": "sick",
+    "timestamp": "2026-02-13T22:08:28.259Z"
+  },
+  {
+    "id": "11d88abe-fd15-454b-962d-41314699f208",
+    "agentId": "6fb89b14-34ca-464a-a7ca-01538a550368",
+    "sessionId": "48d55cce-db0e-45cd-8394-75471174ce35",
+    "role": "assistant",
+    "content": "Okay, so you would like to classify Susan Jones' absence on February 3rd as Sick Leave. Just to confirm, before I report the absence:\n\n*   Employee: Susan Jones (E12345, Cashier)\n*   Date: February 3rd, 2026\n*   Shift Start Time: 9:00 AM\n*   Earning Code: SICK (Sick Leave)\n*   This will deduct from her accrual balance and convert the shift to an open shift\n\nDo you wish to proceed?",
+    "timestamp": "2026-02-13T22:08:29.523Z"
+  },
+  {
+    "id": "97f0faac-0761-4554-bc99-18543e141754",
+    "agentId": "6fb89b14-34ca-464a-a7ca-01538a550368",
+    "sessionId": "48d55cce-db0e-45cd-8394-75471174ce35",
+    "role": "user",
+    "content": "yes",
+    "timestamp": "2026-02-13T22:08:58.823Z"
+  },
+  {
+    "id": "5bc21359-9e0e-4279-b429-f28625085d9e",
+    "agentId": "6fb89b14-34ca-464a-a7ca-01538a550368",
+    "sessionId": "48d55cce-db0e-45cd-8394-75471174ce35",
+    "role": "assistant",
+    "content": "Okay, I have successfully reported Susan Jones' (E12345) absence for today, February 3rd, and updated the schedule. The shift that starts at 9:00 AM is now open for coverage, and 6 hours have been deducted from her Sick Leave balance.",
+    "timestamp": "2026-02-13T22:09:00.692Z"
+  },
+  {
+    "id": "8b9b9874-ab5c-4ecf-b69d-e7eed413550e",
+    "agentId": "6fb89b14-34ca-464a-a7ca-01538a550368",
+    "sessionId": "48d55cce-db0e-45cd-8394-75471174ce35",
+    "role": "user",
+    "content": "thank you",
+    "timestamp": "2026-02-13T22:09:17.624Z"
+  },
+  {
+    "id": "753eb7ba-edc4-40a2-af86-d29102e98840",
+    "agentId": "6fb89b14-34ca-464a-a7ca-01538a550368",
+    "sessionId": "48d55cce-db0e-45cd-8394-75471174ce35",
+    "role": "assistant",
+    "content": "You're welcome! Is there anything else I can help you with today?",
+    "timestamp": "2026-02-13T22:09:18.158Z"
+  }
+]

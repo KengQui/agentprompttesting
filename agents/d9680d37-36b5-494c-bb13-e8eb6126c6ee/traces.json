@@ -1871,22 +1871,197 @@
         }
       ],
       "success": true
+    },
+    {
+      "id": "trace-1770997115543",
+      "sessionId": "6a802fae-09c3-47ba-af47-d03e9c320501",
+      "userInput": "I have some life change event and not sure if I'm eligible to change the benefits options",
+      "agentResponse": "I can help you determine if you're eligible to change your benefits. Could you please tell me what life event occurred and the date it happened?",
+      "startTime": "2026-02-13T15:38:34.753Z",
+      "endTime": "2026-02-13T15:38:35.543Z",
+      "totalDuration": 790,
+      "entries": [
+        {
+          "id": "entry-1770997114754-1",
+          "type": "intent_classification",
+          "name": "Orchestrator Intent Classification",
+          "timestamp": "2026-02-13T15:38:34.754Z",
+          "metadata": {
+            "intent": "answer_question",
+            "classificationMethod": "orchestrator",
+            "confidence": "high"
+          }
+        },
+        {
+          "id": "entry-1770997115543-3",
+          "type": "llm_call",
+          "name": "Gemini Response Generation",
+          "timestamp": "2026-02-13T15:38:35.543Z",
+          "duration": 789,
+          "metadata": {
+            "model": "gemini",
+            "intent": "answer_question",
+            "validated": true
+          }
+        }
+      ],
+      "success": true
+    },
+    {
+      "id": "trace-1770997124420",
+      "sessionId": "6a802fae-09c3-47ba-af47-d03e9c320501",
+      "userInput": "I adopted a baby on Feb 19, 2026",
+      "agentResponse": "Congratulations on your adoption! Because you've experienced a birth/adoption, you are eligible to make changes to your benefits. You have 31 days from the date of the event to make these changes.\n\nWould you like to add the baby as a dependent and/or make changes to your benefit elections at this time?",
+      "startTime": "2026-02-13T15:38:42.910Z",
+      "endTime": "2026-02-13T15:38:44.420Z",
+      "totalDuration": 1510,
+      "entries": [
+        {
+          "id": "entry-1770997123320-1",
+          "type": "intent_classification",
+          "name": "Orchestrator Intent Classification",
+          "timestamp": "2026-02-13T15:38:43.320Z",
+          "metadata": {
+            "intent": "answer_question",
+            "classificationMethod": "orchestrator",
+            "confidence": "high"
+          }
+        },
+        {
+          "id": "entry-1770997124420-3",
+          "type": "llm_call",
+          "name": "Gemini Response Generation",
+          "timestamp": "2026-02-13T15:38:44.420Z",
+          "duration": 1100,
+          "metadata": {
+            "model": "gemini",
+            "intent": "answer_question",
+            "validated": true
+          }
+        }
+      ],
+      "success": true
+    },
+    {
+      "id": "trace-1770997229972",
+      "sessionId": "6a802fae-09c3-47ba-af47-d03e9c320501",
+      "userInput": "Yes",
+      "agentResponse": "Okay, let's start with adding your adopted baby as a dependent. I'll need some information to get started:\n- What is the baby's full name?\n- What is the baby's Social Security Number (SSN)?",
+      "startTime": "2026-02-13T15:40:28.982Z",
+      "endTime": "2026-02-13T15:40:29.972Z",
+      "totalDuration": 990,
+      "entries": [
+        {
+          "id": "entry-1770997228983-1",
+          "type": "intent_classification",
+          "name": "Orchestrator Intent Classification",
+          "timestamp": "2026-02-13T15:40:28.983Z",
+          "metadata": {
+            "intent": "answer_question",
+            "classificationMethod": "orchestrator",
+            "confidence": "high"
+          }
+        },
+        {
+          "id": "entry-1770997229972-3",
+          "type": "llm_call",
+          "name": "Gemini Response Generation",
+          "timestamp": "2026-02-13T15:40:29.972Z",
+          "duration": 989,
+          "metadata": {
+            "model": "gemini",
+            "intent": "answer_question",
+            "validated": true
+          }
+        }
+      ],
+      "success": true
+    },
+    {
+      "id": "trace-1770997241313",
+      "sessionId": "6a802fae-09c3-47ba-af47-d03e9c320501",
+      "userInput": "Sohee Kang / 123-45-6778",
+      "agentResponse": "Thanks! Before I add Sohee Kang as a dependent, can you confirm the relationship? Is Sohee a child or legal ward?",
+      "startTime": "2026-02-13T15:40:40.074Z",
+      "endTime": "2026-02-13T15:40:41.313Z",
+      "totalDuration": 1239,
+      "entries": [
+        {
+          "id": "entry-1770997240533-1",
+          "type": "intent_classification",
+          "name": "Orchestrator Intent Classification",
+          "timestamp": "2026-02-13T15:40:40.533Z",
+          "metadata": {
+            "intent": "answer_question",
+            "classificationMethod": "orchestrator",
+            "confidence": "high"
+          }
+        },
+        {
+          "id": "entry-1770997241313-3",
+          "type": "llm_call",
+          "name": "Gemini Response Generation",
+          "timestamp": "2026-02-13T15:40:41.313Z",
+          "duration": 780,
+          "metadata": {
+            "model": "gemini",
+            "intent": "answer_question",
+            "validated": true
+          }
+        }
+      ],
+      "success": true
+    },
+    {
+      "id": "trace-1770997248240",
+      "sessionId": "6a802fae-09c3-47ba-af47-d03e9c320501",
+      "userInput": "Child",
+      "agentResponse": "Okay, I'm ready to add Sohee as your child dependent.\n\nI will add Sohee Kang, born on Feb 19, 2026, as a child dependent. You will be required to upload supporting documentation (adoption decree or placement letter) in the next step.\n\nDo you wish to proceed?",
+      "startTime": "2026-02-13T15:40:46.762Z",
+      "endTime": "2026-02-13T15:40:48.240Z",
+      "totalDuration": 1478,
+      "entries": [
+        {
+          "id": "entry-1770997247117-1",
+          "type": "intent_classification",
+          "name": "Orchestrator Intent Classification",
+          "timestamp": "2026-02-13T15:40:47.117Z",
+          "metadata": {
+            "intent": "answer_question",
+            "classificationMethod": "orchestrator",
+            "confidence": "high"
+          }
+        },
+        {
+          "id": "entry-1770997248240-3",
+          "type": "llm_call",
+          "name": "Gemini Response Generation",
+          "timestamp": "2026-02-13T15:40:48.240Z",
+          "duration": 1123,
+          "metadata": {
+            "model": "gemini",
+            "intent": "answer_question",
+            "validated": true
+          }
+        }
+      ],
+      "success": true
     }
   ],
   "stats": {
     "hookCalls": {},
     "signalReads": {},
     "intentDistribution": {
-      "answer_question": 48
+      "answer_question": 53
     },
     "classificationMethods": {
-      "orchestrator": 48
+      "orchestrator": 53
     },
-    "avgResponseTime": 1508.4791666666667,
-    "totalLlmCalls": 47,
+    "avgResponseTime": 1479.5094339622642,
+    "totalLlmCalls": 52,
     "totalTokensUsed": 0,
     "errorCount": 1
   },
   "createdAt": "2026-02-03T17:39:57.040Z",
-  "updatedAt": "2026-02-13T02:00:24.732Z"
+  "updatedAt": "2026-02-13T15:40:48.240Z"
 }
