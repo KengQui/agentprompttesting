@@ -1853,7 +1853,7 @@ export async function registerRoutes(
 
       const { field, action, content } = req.body;
 
-      const allowedFields = ["businessUseCase", "domainKnowledge", "validationRules", "guardrails"];
+      const allowedFields = ["businessUseCase", "domainKnowledge", "validationRules", "guardrails", "welcomeGreeting", "welcomeSuggestedPrompts"];
       if (!allowedFields.includes(field)) {
         return res.status(400).json({ message: `Invalid field: ${field}. Allowed: ${allowedFields.join(", ")}` });
       }
@@ -1862,18 +1862,47 @@ export async function registerRoutes(
         return res.status(400).json({ message: "Content is required" });
       }
 
-      let newValue: string;
-      const currentValue = (agent as any)[field] || "";
+      let update: Record<string, any>;
 
-      if (action === "replace") {
-        newValue = content;
-      } else if (action === "append") {
-        newValue = currentValue ? `${currentValue}\n\n${content}` : content;
+      if (field === "welcomeGreeting") {
+        const currentConfig = agent.welcomeConfig || { enabled: true, greeting: "", suggestedPrompts: [] };
+        update = {
+          welcomeConfig: {
+            ...currentConfig,
+            greeting: content,
+          },
+        };
+      } else if (field === "welcomeSuggestedPrompts") {
+        try {
+          const prompts = JSON.parse(content);
+          if (!Array.isArray(prompts)) {
+            return res.status(400).json({ message: "Welcome suggested prompts content must be a JSON array" });
+          }
+          const currentConfig = agent.welcomeConfig || { enabled: true, greeting: "", suggestedPrompts: [] };
+          update = {
+            welcomeConfig: {
+              ...currentConfig,
+              suggestedPrompts: prompts,
+            },
+          };
+        } catch {
+          return res.status(400).json({ message: "Invalid JSON for welcome suggested prompts" });
+        }
       } else {
-        return res.status(400).json({ message: "Invalid action. Must be 'replace' or 'append'" });
+        let newValue: string;
+        const currentValue = (agent as any)[field] || "";
+
+        if (action === "replace") {
+          newValue = content;
+        } else if (action === "append") {
+          newValue = currentValue ? `${currentValue}\n\n${content}` : content;
+        } else {
+          return res.status(400).json({ message: "Invalid action. Must be 'replace' or 'append'" });
+        }
+
+        update = { [field]: newValue };
       }
 
-      const update: Record<string, string> = { [field]: newValue };
       await storage.updateAgent(req.params.id, update as any);
 
       // Clear agent cache so changes take effect
@@ -1902,7 +1931,7 @@ export async function registerRoutes(
         console.error("Auto-regeneration of prompt failed (non-blocking):", regenError?.message);
       }
 
-      res.json({ success: true, field, newValue, promptRegenerated });
+      res.json({ success: true, field, promptRegenerated });
     } catch (error: any) {
       console.error("Error applying prompt coach change:", error);
       res.status(500).json({ message: error?.message || "Failed to apply change" });

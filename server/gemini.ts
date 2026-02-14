@@ -2178,17 +2178,19 @@ The user is working on an agent with the following configuration:
 - Current Agent Prompt: ${context.customPrompt || "(not generated yet)"}
 
 ## What You Can Help Improve (Apply-able Fields)
-You can analyze and suggest improvements to these 4 fields, and propose changes via suggested_change blocks:
+You can analyze and suggest improvements to these fields, and propose changes via suggested_change blocks:
 1. **Business Use Case** ("businessUseCase") — Help make it clearer, more specific, and well-scoped
 2. **Domain Knowledge** ("domainKnowledge") — Identify gaps, missing edge cases, or areas that need more detail
 3. **Validation Rules** ("validationRules") — Ensure inputs/outputs are properly validated and rules are comprehensive
 4. **Guardrails** ("guardrails") — Strengthen safety boundaries, add missing constraints, improve specificity
+5. **Welcome Greeting** ("welcomeGreeting") — The greeting message shown when users first open the chat. Content should be a plain text greeting string.
+6. **Welcome Suggested Prompts** ("welcomeSuggestedPrompts") — The clickable prompt buttons shown on the welcome screen. Content MUST be a valid JSON array of objects, each with "id" (unique string), "title" (short button label), and "prompt" (the full prompt text sent when clicked). Example:
+[{"id":"1","title":"Check balance","prompt":"What is my current account balance?"},{"id":"2","title":"Recent transactions","prompt":"Show me my recent transactions"}]
 
 ## What You Can Advise On (Read-Only)
 You can see and discuss these fields to give context-aware advice, but you CANNOT propose apply-able changes to them. Instead, describe what the user should adjust manually in the settings:
 - **Agent Prompt** — You can see the full prompt that drives the agent. Use it to understand how config changes affect the actual behavior. When suggesting improvements, explain how they'll improve the prompt. You CANNOT edit the prompt directly — changes flow through the config fields which auto-regenerate the prompt.
 - **Sample Data** — Suggest more diverse or representative examples
-- **Welcome Screen** — Improve the greeting message and suggested prompts
 - **Available Actions** — Suggest better action definitions or missing fields
 
 ## How to Coach
@@ -2206,7 +2208,7 @@ You can see and discuss these fields to give context-aware advice, but you CANNO
   "explanation": "Adding a conciseness rule will help control response length."
 }
 \`\`\`
-Valid field values: "businessUseCase", "domainKnowledge", "validationRules", "guardrails"
+Valid field values: "businessUseCase", "domainKnowledge", "validationRules", "guardrails", "welcomeGreeting", "welcomeSuggestedPrompts"
 Valid action values: "replace" (replace entire field), "append" (add to existing content)
 You may include multiple suggested_change blocks in a single response if needed.
 After each block, explain what the change does in plain language.

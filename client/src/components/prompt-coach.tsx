@@ -1,6 +1,6 @@
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import ReactMarkdown from "react-markdown";
-import { GraduationCap, Send, X, Loader2, Check, ChevronDown, ChevronUp, Eraser, Clock } from "lucide-react";
+import { GraduationCap, Send, X, Loader2, Check, ChevronDown, ChevronUp, Eraser, Clock, Undo2, Eye, EyeOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Card } from "@/components/ui/card";
@@ -36,7 +36,16 @@ const FIELD_LABELS: Record<string, string> = {
   domainKnowledge: "Domain Knowledge",
   validationRules: "Validation Rules",
   guardrails: "Guardrails",
+  welcomeGreeting: "Welcome Greeting",
+  welcomeSuggestedPrompts: "Welcome Prompts",
 };
+
+const TOKEN_LIMIT = 50000;
+const TOKEN_WARNING_THRESHOLD = 0.8;
+
+function estimateTokens(text: string): number {
+  return Math.ceil(text.length / 4);
+}
 
 export function PromptCoachTrigger({ isOpen, onToggle, isLoading }: { isOpen: boolean; onToggle: () => void; isLoading: boolean }) {
   return (
@@ -59,10 +68,23 @@ export function PromptCoachPanel({ agentId, agentName, onClose, onConfigChanged 
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingHistory, setIsLoadingHistory] = useState(true);
   const [applyingIndex, setApplyingIndex] = useState<string | null>(null);
+  const [undoingField, setUndoingField] = useState<string | null>(null);
+  const [lastAppliedChange, setLastAppliedChange] = useState<{ field: string; previousValue: string } | null>(null);
+  const [expandedPreviews, setExpandedPreviews] = useState<Set<string>>(new Set());
   const scrollRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const hasInitialized = useRef(false);
   const { toast } = useToast();
+
+  const tokenUsage = useMemo(() => {
+    const totalText = messages.map((m) => m.content).join("");
+    const tokens = estimateTokens(totalText);
+    const percentage = Math.min(tokens / TOKEN_LIMIT, 1);
+    return { tokens, percentage };
+  }, [messages]);
+
+  const isAtLimit = tokenUsage.percentage >= 1;
+  const isNearLimit = tokenUsage.percentage >= TOKEN_WARNING_THRESHOLD;
 
   const serializeMessages = useCallback((msgs: CoachMessage[]) => {
     return msgs.map((m) => ({
@@ -146,7 +168,7 @@ export function PromptCoachPanel({ agentId, agentName, onClose, onConfigChanged 
   }, [messages]);
 
   const handleSend = async () => {
-    if (!input.trim() || isLoading) return;
+    if (!input.trim() || isLoading || isAtLimit) return;
 
     const userMessage = input.trim();
     setInput("");
@@ -192,12 +214,26 @@ export function PromptCoachPanel({ agentId, agentName, onClose, onConfigChanged 
     setApplyingIndex(key);
 
     try {
+      const agentResponse = await fetch(`/api/agents/${agentId}`, { credentials: "include" });
+      const agentData = await agentResponse.json();
+
+      let previousValue = "";
+      if (change.field === "welcomeGreeting") {
+        previousValue = agentData.welcomeConfig?.greeting || "";
+      } else if (change.field === "welcomeSuggestedPrompts") {
+        previousValue = JSON.stringify(agentData.welcomeConfig?.suggestedPrompts || []);
+      } else {
+        previousValue = agentData[change.field] || "";
+      }
+
       const response = await apiRequest("POST", `/api/agents/${agentId}/prompt-coach/apply`, {
         field: change.field,
         action: change.action,
         content: change.content,
       });
       const responseData = await response.json();
+
+      setLastAppliedChange({ field: change.field, previousValue });
 
       const updatedMessages = messages.map((msg, idx) => {
         if (idx === messageIndex && msg.appliedChanges) {
@@ -234,11 +270,71 @@ export function PromptCoachPanel({ agentId, agentName, onClose, onConfigChanged 
     }
   };
 
+  const handleUndo = async () => {
+    if (!lastAppliedChange) return;
+    setUndoingField(lastAppliedChange.field);
+
+    try {
+      await apiRequest("POST", `/api/agents/${agentId}/prompt-coach/apply`, {
+        field: lastAppliedChange.field,
+        action: "replace",
+        content: lastAppliedChange.previousValue,
+      });
+
+      queryClient.invalidateQueries({ queryKey: ["/api/agents", agentId] });
+
+      if (onConfigChanged) {
+        onConfigChanged(lastAppliedChange.field);
+      }
+
+      toast({
+        title: "Change reverted",
+        description: `Restored ${FIELD_LABELS[lastAppliedChange.field] || lastAppliedChange.field} to its previous value.`,
+        duration: 3000,
+      });
+
+      setLastAppliedChange(null);
+    } catch (error: any) {
+      toast({
+        title: "Failed to undo",
+        description: error?.message || "Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setUndoingField(null);
+    }
+  };
+
+  const togglePreview = (key: string) => {
+    setExpandedPreviews((prev) => {
+      const next = new Set(prev);
+      if (next.has(key)) {
+        next.delete(key);
+      } else {
+        next.add(key);
+      }
+      return next;
+    });
+  };
+
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       handleSend();
     }
+  };
+
+  const handleClearHistory = async () => {
+    await apiRequest("DELETE", `/api/agents/${agentId}/prompt-coach/history`);
+    setMessages([
+      {
+        role: "assistant",
+        content: `Hi! I'm your Prompt Coach for **${agentName}**. I can help you improve your agent's configuration — things like the business use case, domain knowledge, validation rules, and guardrails.\n\nWhat would you like to improve? Or say **"review my agent"** and I'll analyze your current setup.`,
+        timestamp: new Date().toISOString(),
+      },
+    ]);
+    setLastAppliedChange(null);
+    setExpandedPreviews(new Set());
   };
 
   return (
@@ -249,20 +345,27 @@ export function PromptCoachPanel({ agentId, agentName, onClose, onConfigChanged 
           <span className="text-sm font-medium">Prompt Coach</span>
         </div>
         <div className="flex items-center gap-1">
+          {lastAppliedChange && (
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={handleUndo}
+              disabled={!!undoingField}
+              title={`Undo: revert ${FIELD_LABELS[lastAppliedChange.field] || lastAppliedChange.field}`}
+              data-testid="button-prompt-coach-undo"
+            >
+              {undoingField ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Undo2 className="h-4 w-4" />
+              )}
+            </Button>
+          )}
           {messages.length > 1 && (
             <Button
               variant="ghost"
               size="icon"
-              onClick={async () => {
-                await apiRequest("DELETE", `/api/agents/${agentId}/prompt-coach/history`);
-                setMessages([
-                  {
-                    role: "assistant",
-                    content: `Hi! I'm your Prompt Coach for **${agentName}**. I can help you improve your agent's configuration — things like the business use case, domain knowledge, validation rules, and guardrails.\n\nWhat would you like to improve? Or say **"review my agent"** and I'll analyze your current setup.`,
-                    timestamp: new Date().toISOString(),
-                  },
-                ]);
-              }}
+              onClick={handleClearHistory}
               data-testid="button-prompt-coach-clear"
             >
               <Eraser className="h-4 w-4" />
@@ -278,6 +381,35 @@ export function PromptCoachPanel({ agentId, agentName, onClose, onConfigChanged 
           </Button>
         </div>
       </div>
+
+      {!isLoadingHistory && messages.length > 1 && (
+        <div className="px-3 pt-2 shrink-0">
+          <div className="flex items-center gap-2" data-testid="context-usage-bar">
+            <div className="flex-1 h-1.5 bg-muted rounded-full overflow-hidden">
+              <div
+                className={`h-full rounded-full transition-all duration-300 ${
+                  isAtLimit ? "bg-destructive" : isNearLimit ? "bg-yellow-500" : "bg-primary"
+                }`}
+                style={{ width: `${Math.round(tokenUsage.percentage * 100)}%` }}
+              />
+            </div>
+            <span className={`text-[10px] shrink-0 ${isAtLimit ? "text-destructive" : "text-muted-foreground"}`}>
+              {Math.round(tokenUsage.percentage * 100)}%
+            </span>
+          </div>
+          {isAtLimit && (
+            <p className="text-[11px] text-destructive mt-1">
+              Context limit reached. Clear the conversation to continue.
+            </p>
+          )}
+          {isNearLimit && !isAtLimit && (
+            <p className="text-[11px] text-yellow-600 dark:text-yellow-400 mt-1">
+              Approaching context limit. Consider clearing soon.
+            </p>
+          )}
+        </div>
+      )}
+
       <div className="flex-1 min-h-0 overflow-y-auto" ref={scrollRef}>
         <div className="space-y-4 p-4">
           {!isLoadingHistory && messages.length > 1 && (
@@ -316,31 +448,54 @@ export function PromptCoachPanel({ agentId, agentName, onClose, onConfigChanged 
                   {msg.suggestedChanges.map((change, changeIdx) => {
                     const isApplied = msg.appliedChanges?.has(changeIdx);
                     const isApplying = applyingIndex === `${msgIdx}-${changeIdx}`;
+                    const previewKey = `${msgIdx}-${changeIdx}`;
+                    const isPreviewExpanded = expandedPreviews.has(previewKey);
                     return (
                       <Card key={changeIdx} className="p-3" data-testid={`coach-change-${msgIdx}-${changeIdx}`}>
                         <div className="flex items-center justify-between gap-2 flex-wrap">
                           <Badge variant="outline" className="text-xs">
                             {FIELD_LABELS[change.field] || change.field}
                           </Badge>
-                          <Button
-                            variant={isApplied ? "outline" : "default"}
-                            size="sm"
-                            disabled={isApplied || isApplying}
-                            onClick={() => handleApplyChange(msgIdx, changeIdx, change)}
-                            data-testid={`button-apply-change-${msgIdx}-${changeIdx}`}
-                          >
-                            {isApplying ? (
-                              <Loader2 className="h-3 w-3 animate-spin" />
-                            ) : isApplied ? (
-                              <>
-                                <Check className="h-3 w-3" />
-                                Applied
-                              </>
-                            ) : (
-                              "Apply"
-                            )}
-                          </Button>
+                          <div className="flex items-center gap-1">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => togglePreview(previewKey)}
+                              className="text-xs gap-1"
+                              data-testid={`button-preview-change-${msgIdx}-${changeIdx}`}
+                            >
+                              {isPreviewExpanded ? (
+                                <EyeOff className="h-3 w-3" />
+                              ) : (
+                                <Eye className="h-3 w-3" />
+                              )}
+                              {isPreviewExpanded ? "Hide" : "Preview"}
+                            </Button>
+                            <Button
+                              variant={isApplied ? "outline" : "default"}
+                              size="sm"
+                              disabled={isApplied || isApplying}
+                              onClick={() => handleApplyChange(msgIdx, changeIdx, change)}
+                              data-testid={`button-apply-change-${msgIdx}-${changeIdx}`}
+                            >
+                              {isApplying ? (
+                                <Loader2 className="h-3 w-3 animate-spin" />
+                              ) : isApplied ? (
+                                <>
+                                  <Check className="h-3 w-3" />
+                                  Applied
+                                </>
+                              ) : (
+                                "Apply"
+                              )}
+                            </Button>
+                          </div>
                         </div>
+                        {isPreviewExpanded && (
+                          <div className="mt-2 p-2 bg-muted/50 rounded text-xs font-mono whitespace-pre-wrap break-words max-h-[200px] overflow-y-auto" data-testid={`preview-content-${msgIdx}-${changeIdx}`}>
+                            {change.content}
+                          </div>
+                        )}
                         <p className="text-[11px] text-muted-foreground/70 mt-1 text-right">
                           {change.action === "append"
                             ? `Will add to existing ${(FIELD_LABELS[change.field] || change.field).toLowerCase()}`
@@ -366,17 +521,18 @@ export function PromptCoachPanel({ agentId, agentName, onClose, onConfigChanged 
         <div className="flex gap-2">
           <Textarea
             ref={textareaRef}
-            placeholder="Ask for help improving your agent..."
+            placeholder={isAtLimit ? "Context limit reached. Clear conversation to continue." : "Ask for help improving your agent..."}
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
             className="min-h-[40px] max-h-[80px] resize-none border-0 focus-visible:ring-0 text-sm"
             rows={1}
+            disabled={isAtLimit}
             data-testid="textarea-coach-input"
           />
           <Button
             onClick={handleSend}
-            disabled={!input.trim() || isLoading}
+            disabled={!input.trim() || isLoading || isAtLimit}
             size="icon"
             className="shrink-0"
             data-testid="button-coach-send"
