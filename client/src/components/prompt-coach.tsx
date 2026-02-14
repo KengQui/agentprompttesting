@@ -150,7 +150,7 @@ export function PromptCoachPanel({ agentId, agentName, onClose, onConfigChanged 
       setMessages([
         {
           role: "assistant",
-          content: `Hi! I'm your Prompt Coach for **${agentName}**. I can help you improve your agent's configuration — things like the business use case, domain knowledge, validation rules, and guardrails.\n\nWhat would you like to improve? Or say **"review my agent"** and I'll analyze your current setup.`,
+          content: `Hi! I'm your Prompt Coach for **${agentName}**. I can help you improve your agent's prompt and configuration — I'll analyze what's working and what needs fixing, then suggest specific changes.\n\nSay **"review my agent"** for a full analysis, or tell me about a specific issue you're seeing.`,
           timestamp: new Date().toISOString(),
         },
       ]);
@@ -329,7 +329,7 @@ export function PromptCoachPanel({ agentId, agentName, onClose, onConfigChanged 
     setMessages([
       {
         role: "assistant",
-        content: `Hi! I'm your Prompt Coach for **${agentName}**. I can help you improve your agent's configuration — things like the business use case, domain knowledge, validation rules, and guardrails.\n\nWhat would you like to improve? Or say **"review my agent"** and I'll analyze your current setup.`,
+        content: `Hi! I'm your Prompt Coach for **${agentName}**. I can help you improve your agent's prompt and configuration — I'll analyze what's working and what needs fixing, then suggest specific changes.\n\nSay **"review my agent"** for a full analysis, or tell me about a specific issue you're seeing.`,
         timestamp: new Date().toISOString(),
       },
     ]);
