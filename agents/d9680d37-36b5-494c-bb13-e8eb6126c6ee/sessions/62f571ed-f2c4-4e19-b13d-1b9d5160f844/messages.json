@@ -1,0 +1,66 @@
+[
+  {
+    "id": "4fd45133-840d-46fc-a177-9db86b03b2d6",
+    "agentId": "d9680d37-36b5-494c-bb13-e8eb6126c6ee",
+    "sessionId": "62f571ed-f2c4-4e19-b13d-1b9d5160f844",
+    "role": "user",
+    "content": "hello",
+    "timestamp": "2026-02-14T02:33:54.231Z"
+  },
+  {
+    "id": "c3f8215a-fc98-4560-85ef-0023795c8fd2",
+    "agentId": "d9680d37-36b5-494c-bb13-e8eb6126c6ee",
+    "sessionId": "62f571ed-f2c4-4e19-b13d-1b9d5160f844",
+    "role": "assistant",
+    "content": "Hi Sarah, how can I help you today with life events and related HR/benefits updates?",
+    "timestamp": "2026-02-14T02:33:54.854Z"
+  },
+  {
+    "id": "edcef42c-902a-49b5-b2d5-fc946159da80",
+    "agentId": "d9680d37-36b5-494c-bb13-e8eb6126c6ee",
+    "sessionId": "62f571ed-f2c4-4e19-b13d-1b9d5160f844",
+    "role": "user",
+    "content": "What is my current medical plan?",
+    "timestamp": "2026-02-14T02:34:40.856Z"
+  },
+  {
+    "id": "6c60119f-80eb-4369-9a28-96acbf152024",
+    "agentId": "d9680d37-36b5-494c-bb13-e8eb6126c6ee",
+    "sessionId": "62f571ed-f2c4-4e19-b13d-1b9d5160f844",
+    "role": "assistant",
+    "content": "You are currently enrolled in the BlueCross PPO Plus medical plan, with \"Employee + Spouse\" coverage. Your bi-weekly premium is $156.00. Is there anything else I can help you with regarding your medical plan or other benefits?",
+    "timestamp": "2026-02-14T02:34:41.698Z"
+  },
+  {
+    "id": "13d8c727-c14f-486f-9092-6ed0351432ab",
+    "agentId": "d9680d37-36b5-494c-bb13-e8eb6126c6ee",
+    "sessionId": "62f571ed-f2c4-4e19-b13d-1b9d5160f844",
+    "role": "user",
+    "content": "What is a qualifying life event?",
+    "timestamp": "2026-02-14T02:34:41.733Z"
+  },
+  {
+    "id": "17e0f09b-dad5-4085-8bb8-59921d358d10",
+    "agentId": "d9680d37-36b5-494c-bb13-e8eb6126c6ee",
+    "sessionId": "62f571ed-f2c4-4e19-b13d-1b9d5160f844",
+    "role": "assistant",
+    "content": "Before we move on, is there anything else I can help you with regarding your medical plan or other benefits?",
+    "timestamp": "2026-02-14T02:34:42.699Z"
+  },
+  {
+    "id": "50f00ffd-ff54-4dd2-9d54-212edb064045",
+    "agentId": "d9680d37-36b5-494c-bb13-e8eb6126c6ee",
+    "sessionId": "62f571ed-f2c4-4e19-b13d-1b9d5160f844",
+    "role": "user",
+    "content": "Can you submit my benefits enrollment form?",
+    "timestamp": "2026-02-14T02:34:42.735Z"
+  },
+  {
+    "id": "207d0f7d-7d0b-47af-a49d-bbf7a89b7ed7",
+    "agentId": "d9680d37-36b5-494c-bb13-e8eb6126c6ee",
+    "sessionId": "62f571ed-f2c4-4e19-b13d-1b9d5160f844",
+    "role": "assistant",
+    "content": "I am sorry, I cannot help with that. I can only process qualifying life events and related updates, not general benefit questions, open enrollment, new hire enrollment, or general employee data updates unrelated to QLEs.",
+    "timestamp": "2026-02-14T02:34:43.870Z"
+  }
+]

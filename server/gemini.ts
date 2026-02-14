@@ -597,6 +597,116 @@ Reply with ONLY one word: "ANSWERING" or "SWITCHING"`;
   }
 }
 
+export interface ContextSections {
+  needsData: boolean;
+  needsActions: boolean;
+  needsMockState: boolean;
+  needsDomainKnowledge: boolean;
+}
+
+export function classifyMessageContext(
+  userMessage: string,
+  _chatHistory: ChatHistory[] = [],
+  agent: AgentContext
+): ContextSections {
+  let cleanMessage = userMessage;
+  const systemContextIdx = cleanMessage.indexOf('[SYSTEM CONTEXT:');
+  if (systemContextIdx !== -1) {
+    const endIdx = cleanMessage.indexOf(']', systemContextIdx);
+    if (endIdx !== -1) {
+      cleanMessage = cleanMessage.substring(endIdx + 1);
+    }
+  }
+  const msgLower = cleanMessage.toLowerCase().trim();
+
+  const dataKeywords = [
+    'my salary', 'my pay', 'my data', 'my record', 'my info', 'my information',
+    'my email', 'my address', 'my phone', 'my name', 'my department',
+    'my benefits', 'my insurance', 'my deduction', 'my earning',
+    'my balance', 'my accrual', 'my pto', 'my time off', 'my leave',
+    'my schedule', 'my shift', 'my hours', 'my overtime',
+    'how much do i', 'what is my', 'what are my', 'show me my', 'show my',
+    'look up employee', 'find employee', 'find the employee',
+    'employee data', 'employee record', 'employee info',
+    'how many employee', 'how many record', 'how many people',
+    'list all employee', 'show all employee',
+    'paycheck', 'payroll', 'compensation', 'wage',
+    'who has', 'who is on', 'who are', 'which employee',
+    'total for', 'sum of', 'average of',
+    'current plan', 'current coverage', 'current enrollment',
+    'enrolled in', 'coverage tier',
+  ];
+
+  const actionKeywords = [
+    'submit my', 'submit the', 'submit a',
+    'enroll me', 'enroll in', 'sign me up',
+    'please process', 'go ahead and', 'proceed with', 'confirm the',
+    'i want to submit', 'i want to enroll', 'i want to cancel',
+    'i need to submit', 'i need to enroll', 'i need to cancel',
+    'i\'d like to submit', 'i\'d like to enroll',
+    'opt in to', 'opt out of',
+    'approve my', 'approve the',
+    'cancel my', 'terminate my', 'drop my',
+    'update my benefits', 'change my plan', 'switch my plan',
+    'transfer my', 'modify my',
+  ];
+
+  const domainKeywords = [
+    'how does', 'how do i', 'how to', 'what is a', 'what is the', 'what are the', 'what does',
+    'explain', 'describe', 'tell me about', 'help me understand',
+    'policy', 'procedure', 'rule', 'regulation',
+    'eligibility', 'eligible', 'qualify', 'requirement',
+    'deadline', 'when can i', 'when do i', 'when is the',
+    'definition', 'define', 'meaning of',
+    'difference between', 'versus', 'vs',
+    'qualifying life event', 'open enrollment',
+    'syntax', 'expression', 'formula', 'format',
+  ];
+
+  const casualPatterns = [
+    /^(hi|hello|hey|thanks|thank you|bye|goodbye|ok|okay|sure|yes|no|y|n)[\s!.?]*$/i,
+    /^(good morning|good afternoon|good evening|how are you)[\s!.?]*$/i,
+    /^(that'?s? (great|good|helpful|perfect|awesome))[\s!.?]*$/i,
+  ];
+
+  const isCasual = casualPatterns.some(p => p.test(msgLower));
+
+  if (isCasual) {
+    return {
+      needsData: false,
+      needsActions: false,
+      needsMockState: false,
+      needsDomainKnowledge: false,
+    };
+  }
+
+  const hasDataSignal = dataKeywords.some(kw => msgLower.includes(kw));
+  const hasActionSignal = actionKeywords.some(kw => msgLower.includes(kw));
+  const hasDomainSignal = domainKeywords.some(kw => msgLower.includes(kw));
+
+  const hasData = !!(agent.sampleDatasets && agent.sampleDatasets.length > 0);
+  const hasActions = !!(agent.availableActions && agent.availableActions.length > 0);
+  const hasMockState = !!(agent.mockUserState && agent.mockUserState.length > 0);
+  const hasDomain = !!(agent.domainKnowledge || (agent.domainDocuments && agent.domainDocuments.length > 0));
+
+  const noSignals = !hasDataSignal && !hasActionSignal && !hasDomainSignal;
+  if (noSignals) {
+    return {
+      needsData: false,
+      needsActions: false,
+      needsMockState: false,
+      needsDomainKnowledge: false,
+    };
+  }
+
+  return {
+    needsData: hasDataSignal && hasData,
+    needsActions: hasActionSignal && hasActions,
+    needsMockState: hasActionSignal && hasMockState,
+    needsDomainKnowledge: hasDomainSignal && hasDomain,
+  };
+}
+
 export async function generateAgentResponse(
   agent: AgentContext,
   userMessage: string,
@@ -606,7 +716,10 @@ export async function generateAgentResponse(
     throw new Error("GEMINI_API_KEY is not configured");
   }
 
-  const systemPrompt = getSystemPrompt(agent);
+  const contextNeeds = classifyMessageContext(userMessage, chatHistory, agent);
+  const systemPrompt = getSystemPrompt(agent, contextNeeds);
+
+  console.log('[ContextManager] Message:', userMessage.substring(0, 80), '| Sections:', JSON.stringify(contextNeeds));
 
   const contents = [
     ...chatHistory.map((msg) => ({
@@ -804,18 +917,26 @@ function buildMockUserStateText(agent: AgentContext): string {
   return section;
 }
 
-function getSystemPrompt(agent: AgentContext): string {
+function getSystemPrompt(agent: AgentContext, contextNeeds?: ContextSections): string {
   const currentDate = new Date().toLocaleDateString('en-US', { 
     weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' 
   });
   const currentDateSection = `\n\n## Current Date\nToday is: ${currentDate}`;
   
+  const includeAll = !contextNeeds;
+  const needs = contextNeeds || {
+    needsData: true,
+    needsActions: true,
+    needsMockState: true,
+    needsDomainKnowledge: true,
+  };
+
   if (agent.customPrompt && agent.customPrompt.trim()) {
     let fullPrompt = agent.customPrompt.trim();
     
-    const sampleDatasetsText = buildSampleDatasetsText(agent);
-    const actionsText = buildActionsText(agent);
-    const mockStateText = buildMockUserStateText(agent);
+    const sampleDatasetsText = needs.needsData ? buildSampleDatasetsText(agent) : '';
+    const actionsText = needs.needsActions ? buildActionsText(agent) : '';
+    const mockStateText = needs.needsMockState ? buildMockUserStateText(agent) : '';
     
     fullPrompt = fullPrompt.replace(/\{\{SAMPLE_DATA\}\}/g, sampleDatasetsText || '(No sample data provided)');
     fullPrompt = fullPrompt.replace(/\{\{VALIDATION_RULES\}\}/g, agent.validationRules || '(No validation rules provided)');
@@ -831,21 +952,26 @@ function getSystemPrompt(agent: AgentContext): string {
       fullPrompt += `\n\n${mockStateText}`;
     }
     
-    if (sampleDatasetsText || mockStateText) {
+    const hasDataOrState = sampleDatasetsText || mockStateText;
+    if (hasDataOrState) {
       fullPrompt += `\n\n## Smart Name Resolution
 - When a user refers to a person by name, search the available data for matches
 - If there is exactly ONE person matching that name, proceed immediately without asking for further clarification — do NOT ask for Employee ID, record ID, or any other identifier
 - Only ask for disambiguation when there are MULTIPLE people with the same or similar name, and in that case ask about recognizable attributes (department, role, location) rather than requesting an ID number
 - Never expect users to know internal system identifiers like Employee IDs, record numbers, or account IDs. Look up records using human-friendly attributes such as name, department, role, or other contextual details the user would naturally know`;
     }
+
+    if (!needs.needsData && !needs.needsActions && !needs.needsMockState && !needs.needsDomainKnowledge) {
+      fullPrompt += `\n\n[NOTE: Additional data, actions, and reference materials are available but not loaded for this turn. If the user asks about their data, available actions, or domain-specific questions, those materials will be loaded automatically.]`;
+    }
     
     return fullPrompt;
   }
   
-  const domainKnowledgeText = buildDomainKnowledgeText(agent);
-  const sampleDatasetsText = buildSampleDatasetsText(agent);
-  const actionsText = buildActionsText(agent);
-  const mockStateText = buildMockUserStateText(agent);
+  const domainKnowledgeText = needs.needsDomainKnowledge ? buildDomainKnowledgeText(agent) : '';
+  const sampleDatasetsText = needs.needsData ? buildSampleDatasetsText(agent) : '';
+  const actionsText = needs.needsActions ? buildActionsText(agent) : '';
+  const mockStateText = needs.needsMockState ? buildMockUserStateText(agent) : '';
   
   let fullPrompt = `You are ${agent.name}, a helpful AI assistant.`;
   
@@ -879,12 +1005,17 @@ function getSystemPrompt(agent: AgentContext): string {
     fullPrompt += `\n\n${mockStateText}`;
   }
   
-  if (sampleDatasetsText || mockStateText) {
+  const hasDataOrState = sampleDatasetsText || mockStateText;
+  if (hasDataOrState) {
     fullPrompt += `\n\n## Smart Name Resolution
 - When a user refers to a person by name, search the available data for matches
 - If there is exactly ONE person matching that name, proceed immediately without asking for further clarification — do NOT ask for Employee ID, record ID, or any other identifier
 - Only ask for disambiguation when there are MULTIPLE people with the same or similar name, and in that case ask about recognizable attributes (department, role, location) rather than requesting an ID number
 - Never expect users to know internal system identifiers like Employee IDs, record numbers, or account IDs. Look up records using human-friendly attributes such as name, department, role, or other contextual details the user would naturally know`;
+  }
+
+  if (!needs.needsData && !needs.needsActions && !needs.needsMockState && !needs.needsDomainKnowledge) {
+    fullPrompt += `\n\n[NOTE: Additional data, actions, and reference materials are available but not loaded for this turn. If the user asks about their data, available actions, or domain-specific questions, those materials will be loaded automatically.]`;
   }
   
   return fullPrompt;

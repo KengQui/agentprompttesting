@@ -2046,22 +2046,477 @@
         }
       ],
       "success": true
+    },
+    {
+      "id": "trace-1771036434851",
+      "sessionId": "62f571ed-f2c4-4e19-b13d-1b9d5160f844",
+      "userInput": "hello",
+      "agentResponse": "Hi Sarah, how can I help you today with life events and related HR/benefits updates?",
+      "startTime": "2026-02-14T02:33:54.231Z",
+      "endTime": "2026-02-14T02:33:54.851Z",
+      "totalDuration": 620,
+      "entries": [
+        {
+          "id": "entry-1771036434233-1",
+          "type": "intent_classification",
+          "name": "Orchestrator Intent Classification",
+          "timestamp": "2026-02-14T02:33:54.233Z",
+          "metadata": {
+            "intent": "answer_question",
+            "classificationMethod": "orchestrator",
+            "confidence": "high"
+          }
+        },
+        {
+          "id": "entry-1771036434851-3",
+          "type": "llm_call",
+          "name": "Gemini Response Generation",
+          "timestamp": "2026-02-14T02:33:54.851Z",
+          "duration": 618,
+          "metadata": {
+            "model": "gemini",
+            "intent": "answer_question",
+            "validated": true
+          }
+        }
+      ],
+      "success": true
+    },
+    {
+      "id": "trace-1771036481696",
+      "sessionId": "62f571ed-f2c4-4e19-b13d-1b9d5160f844",
+      "userInput": "What is my current medical plan?",
+      "agentResponse": "You are currently enrolled in the BlueCross PPO Plus medical plan, with \"Employee + Spouse\" coverage. Your bi-weekly premium is $156.00. Is there anything else I can help you with regarding your medical plan or other benefits?",
+      "startTime": "2026-02-14T02:34:40.856Z",
+      "endTime": "2026-02-14T02:34:41.696Z",
+      "totalDuration": 840,
+      "entries": [
+        {
+          "id": "entry-1771036480857-1",
+          "type": "intent_classification",
+          "name": "Orchestrator Intent Classification",
+          "timestamp": "2026-02-14T02:34:40.857Z",
+          "metadata": {
+            "intent": "answer_question",
+            "classificationMethod": "orchestrator",
+            "confidence": "high"
+          }
+        },
+        {
+          "id": "entry-1771036481696-3",
+          "type": "llm_call",
+          "name": "Gemini Response Generation",
+          "timestamp": "2026-02-14T02:34:41.696Z",
+          "duration": 839,
+          "metadata": {
+            "model": "gemini",
+            "intent": "answer_question",
+            "validated": true
+          }
+        }
+      ],
+      "success": true
+    },
+    {
+      "id": "trace-1771036482698",
+      "sessionId": "62f571ed-f2c4-4e19-b13d-1b9d5160f844",
+      "userInput": "What is a qualifying life event?",
+      "agentResponse": "Before we move on, is there anything else I can help you with regarding your medical plan or other benefits?",
+      "startTime": "2026-02-14T02:34:41.733Z",
+      "endTime": "2026-02-14T02:34:42.698Z",
+      "totalDuration": 965,
+      "entries": [
+        {
+          "id": "entry-1771036482056-1",
+          "type": "intent_classification",
+          "name": "Orchestrator Intent Classification",
+          "timestamp": "2026-02-14T02:34:42.056Z",
+          "metadata": {
+            "intent": "answer_question",
+            "classificationMethod": "orchestrator",
+            "confidence": "high"
+          }
+        },
+        {
+          "id": "entry-1771036482698-3",
+          "type": "llm_call",
+          "name": "Gemini Response Generation",
+          "timestamp": "2026-02-14T02:34:42.698Z",
+          "duration": 642,
+          "metadata": {
+            "model": "gemini",
+            "intent": "answer_question",
+            "validated": true
+          }
+        }
+      ],
+      "success": true
+    },
+    {
+      "id": "trace-1771036483869",
+      "sessionId": "62f571ed-f2c4-4e19-b13d-1b9d5160f844",
+      "userInput": "Can you submit my benefits enrollment form?",
+      "agentResponse": "I am sorry, I cannot help with that. I can only process qualifying life events and related updates, not general benefit questions, open enrollment, new hire enrollment, or general employee data updates unrelated to QLEs.",
+      "startTime": "2026-02-14T02:34:42.735Z",
+      "endTime": "2026-02-14T02:34:43.869Z",
+      "totalDuration": 1134,
+      "entries": [
+        {
+          "id": "entry-1771036483129-1",
+          "type": "intent_classification",
+          "name": "Orchestrator Intent Classification",
+          "timestamp": "2026-02-14T02:34:43.129Z",
+          "metadata": {
+            "intent": "answer_question",
+            "classificationMethod": "orchestrator",
+            "confidence": "high"
+          }
+        },
+        {
+          "id": "entry-1771036483869-3",
+          "type": "llm_call",
+          "name": "Gemini Response Generation",
+          "timestamp": "2026-02-14T02:34:43.869Z",
+          "duration": 740,
+          "metadata": {
+            "model": "gemini",
+            "intent": "answer_question",
+            "validated": true
+          }
+        }
+      ],
+      "success": true
+    },
+    {
+      "id": "trace-1771036585473",
+      "sessionId": "3cf15271-4236-4f8c-bf13-adf205329348",
+      "userInput": "hello",
+      "agentResponse": "Hi Sarah, how can I help you today with your benefits or HR-related questions?",
+      "startTime": "2026-02-14T02:36:24.802Z",
+      "endTime": "2026-02-14T02:36:25.473Z",
+      "totalDuration": 671,
+      "entries": [
+        {
+          "id": "entry-1771036584803-1",
+          "type": "intent_classification",
+          "name": "Orchestrator Intent Classification",
+          "timestamp": "2026-02-14T02:36:24.803Z",
+          "metadata": {
+            "intent": "answer_question",
+            "classificationMethod": "orchestrator",
+            "confidence": "high"
+          }
+        },
+        {
+          "id": "entry-1771036585473-3",
+          "type": "llm_call",
+          "name": "Gemini Response Generation",
+          "timestamp": "2026-02-14T02:36:25.473Z",
+          "duration": 670,
+          "metadata": {
+            "model": "gemini",
+            "intent": "answer_question",
+            "validated": true
+          }
+        }
+      ],
+      "success": true
+    },
+    {
+      "id": "trace-1771036586454",
+      "sessionId": "3cf15271-4236-4f8c-bf13-adf205329348",
+      "userInput": "What is a qualifying life event?",
+      "agentResponse": "A qualifying life event (QLE) allows you to make changes to your benefit elections outside of the annual open enrollment period. These events include changes in your family status (marriage, divorce, birth, adoption, or death), loss of other coverage, or changes in employment status or residence that affect benefit eligibility.",
+      "startTime": "2026-02-14T02:36:25.510Z",
+      "endTime": "2026-02-14T02:36:26.454Z",
+      "totalDuration": 944,
+      "entries": [
+        {
+          "id": "entry-1771036585511-1",
+          "type": "intent_classification",
+          "name": "Orchestrator Intent Classification",
+          "timestamp": "2026-02-14T02:36:25.511Z",
+          "metadata": {
+            "intent": "answer_question",
+            "classificationMethod": "orchestrator",
+            "confidence": "high"
+          }
+        },
+        {
+          "id": "entry-1771036586454-3",
+          "type": "llm_call",
+          "name": "Gemini Response Generation",
+          "timestamp": "2026-02-14T02:36:26.454Z",
+          "duration": 943,
+          "metadata": {
+            "model": "gemini",
+            "intent": "answer_question",
+            "validated": true
+          }
+        }
+      ],
+      "success": true
+    },
+    {
+      "id": "trace-1771036587359",
+      "sessionId": "3cf15271-4236-4f8c-bf13-adf205329348",
+      "userInput": "What is my current medical plan?",
+      "agentResponse": "You are currently enrolled in the BlueCross PPO Plus medical plan with Employee + Spouse coverage. Your bi-weekly premium is $156.00, and the employer contributes $412.00 bi-weekly.",
+      "startTime": "2026-02-14T02:36:26.491Z",
+      "endTime": "2026-02-14T02:36:27.359Z",
+      "totalDuration": 868,
+      "entries": [
+        {
+          "id": "entry-1771036586492-1",
+          "type": "intent_classification",
+          "name": "Orchestrator Intent Classification",
+          "timestamp": "2026-02-14T02:36:26.492Z",
+          "metadata": {
+            "intent": "answer_question",
+            "classificationMethod": "orchestrator",
+            "confidence": "high"
+          }
+        },
+        {
+          "id": "entry-1771036587359-3",
+          "type": "llm_call",
+          "name": "Gemini Response Generation",
+          "timestamp": "2026-02-14T02:36:27.359Z",
+          "duration": 867,
+          "metadata": {
+            "model": "gemini",
+            "intent": "answer_question",
+            "validated": true
+          }
+        }
+      ],
+      "success": true
+    },
+    {
+      "id": "trace-1771036588219",
+      "sessionId": "3cf15271-4236-4f8c-bf13-adf205329348",
+      "userInput": "Can you submit my benefits enrollment form?",
+      "agentResponse": "I can't submit a benefits enrollment form without knowing what changes you'd like to make. Do you have a qualifying life event that requires you to submit a new form? If so, can you provide me with the details?",
+      "startTime": "2026-02-14T02:36:27.397Z",
+      "endTime": "2026-02-14T02:36:28.219Z",
+      "totalDuration": 822,
+      "entries": [
+        {
+          "id": "entry-1771036587398-1",
+          "type": "intent_classification",
+          "name": "Orchestrator Intent Classification",
+          "timestamp": "2026-02-14T02:36:27.398Z",
+          "metadata": {
+            "intent": "answer_question",
+            "classificationMethod": "orchestrator",
+            "confidence": "high"
+          }
+        },
+        {
+          "id": "entry-1771036588219-3",
+          "type": "llm_call",
+          "name": "Gemini Response Generation",
+          "timestamp": "2026-02-14T02:36:28.219Z",
+          "duration": 821,
+          "metadata": {
+            "model": "gemini",
+            "intent": "answer_question",
+            "validated": true
+          }
+        }
+      ],
+      "success": true
+    },
+    {
+      "id": "trace-1771036589402",
+      "sessionId": "3cf15271-4236-4f8c-bf13-adf205329348",
+      "userInput": "Can you help me with something?",
+      "agentResponse": "Before we move on, do you have a qualifying life event that requires you to submit a new enrollment form? If so, can you provide me with the details? This will help me understand what changes you'd like to make.",
+      "startTime": "2026-02-14T02:36:28.255Z",
+      "endTime": "2026-02-14T02:36:29.402Z",
+      "totalDuration": 1147,
+      "entries": [
+        {
+          "id": "entry-1771036588611-1",
+          "type": "intent_classification",
+          "name": "Orchestrator Intent Classification",
+          "timestamp": "2026-02-14T02:36:28.611Z",
+          "metadata": {
+            "intent": "answer_question",
+            "classificationMethod": "orchestrator",
+            "confidence": "high"
+          }
+        },
+        {
+          "id": "entry-1771036589402-3",
+          "type": "llm_call",
+          "name": "Gemini Response Generation",
+          "timestamp": "2026-02-14T02:36:29.402Z",
+          "duration": 791,
+          "metadata": {
+            "model": "gemini",
+            "intent": "answer_question",
+            "validated": true
+          }
+        }
+      ],
+      "success": true
+    },
+    {
+      "id": "trace-1771036622582",
+      "sessionId": "9c0d7143-4968-438d-946e-20e38414a57c",
+      "userInput": "What is my current medical plan?",
+      "agentResponse": "You are currently enrolled in the BlueCross PPO Plus medical plan.",
+      "startTime": "2026-02-14T02:37:02.025Z",
+      "endTime": "2026-02-14T02:37:02.582Z",
+      "totalDuration": 557,
+      "entries": [
+        {
+          "id": "entry-1771036622026-1",
+          "type": "intent_classification",
+          "name": "Orchestrator Intent Classification",
+          "timestamp": "2026-02-14T02:37:02.026Z",
+          "metadata": {
+            "intent": "answer_question",
+            "classificationMethod": "orchestrator",
+            "confidence": "high"
+          }
+        },
+        {
+          "id": "entry-1771036622581-3",
+          "type": "llm_call",
+          "name": "Gemini Response Generation",
+          "timestamp": "2026-02-14T02:37:02.582Z",
+          "duration": 556,
+          "metadata": {
+            "model": "gemini",
+            "intent": "answer_question",
+            "validated": true
+          }
+        }
+      ],
+      "success": true
+    },
+    {
+      "id": "trace-1771036623462",
+      "sessionId": "9c0d7143-4968-438d-946e-20e38414a57c",
+      "userInput": "Can you help me with something?",
+      "agentResponse": "I can help you with qualifying life events and any related updates to your HR, benefits, and payroll information. What would you like assistance with today?",
+      "startTime": "2026-02-14T02:37:02.617Z",
+      "endTime": "2026-02-14T02:37:03.462Z",
+      "totalDuration": 845,
+      "entries": [
+        {
+          "id": "entry-1771036622618-1",
+          "type": "intent_classification",
+          "name": "Orchestrator Intent Classification",
+          "timestamp": "2026-02-14T02:37:02.618Z",
+          "metadata": {
+            "intent": "answer_question",
+            "classificationMethod": "orchestrator",
+            "confidence": "high"
+          }
+        },
+        {
+          "id": "entry-1771036623462-3",
+          "type": "llm_call",
+          "name": "Gemini Response Generation",
+          "timestamp": "2026-02-14T02:37:03.462Z",
+          "duration": 844,
+          "metadata": {
+            "model": "gemini",
+            "intent": "answer_question",
+            "validated": true
+          }
+        }
+      ],
+      "success": true
+    },
+    {
+      "id": "trace-1771036654443",
+      "sessionId": "18904ff9-b91d-4545-b742-425559cc5d34",
+      "userInput": "What is my current medical plan?",
+      "agentResponse": "You are currently enrolled in the BlueCross PPO Plus medical plan.",
+      "startTime": "2026-02-14T02:37:33.912Z",
+      "endTime": "2026-02-14T02:37:34.443Z",
+      "totalDuration": 531,
+      "entries": [
+        {
+          "id": "entry-1771036653913-1",
+          "type": "intent_classification",
+          "name": "Orchestrator Intent Classification",
+          "timestamp": "2026-02-14T02:37:33.913Z",
+          "metadata": {
+            "intent": "answer_question",
+            "classificationMethod": "orchestrator",
+            "confidence": "high"
+          }
+        },
+        {
+          "id": "entry-1771036654443-3",
+          "type": "llm_call",
+          "name": "Gemini Response Generation",
+          "timestamp": "2026-02-14T02:37:34.443Z",
+          "duration": 529,
+          "metadata": {
+            "model": "gemini",
+            "intent": "answer_question",
+            "validated": true
+          }
+        }
+      ],
+      "success": true
+    },
+    {
+      "id": "trace-1771036655257",
+      "sessionId": "18904ff9-b91d-4545-b742-425559cc5d34",
+      "userInput": "Can you help me with something?",
+      "agentResponse": "I can help you with updates related to qualifying life events, such as adding a dependent, updating beneficiaries, or modifying your FSA contributions. What kind of life event are you experiencing?",
+      "startTime": "2026-02-14T02:37:34.481Z",
+      "endTime": "2026-02-14T02:37:35.257Z",
+      "totalDuration": 776,
+      "entries": [
+        {
+          "id": "entry-1771036654482-1",
+          "type": "intent_classification",
+          "name": "Orchestrator Intent Classification",
+          "timestamp": "2026-02-14T02:37:34.482Z",
+          "metadata": {
+            "intent": "answer_question",
+            "classificationMethod": "orchestrator",
+            "confidence": "high"
+          }
+        },
+        {
+          "id": "entry-1771036655257-3",
+          "type": "llm_call",
+          "name": "Gemini Response Generation",
+          "timestamp": "2026-02-14T02:37:35.257Z",
+          "duration": 775,
+          "metadata": {
+            "model": "gemini",
+            "intent": "answer_question",
+            "validated": true
+          }
+        }
+      ],
+      "success": true
     }
   ],
   "stats": {
     "hookCalls": {},
     "signalReads": {},
     "intentDistribution": {
-      "answer_question": 53
+      "answer_question": 66
     },
     "classificationMethods": {
-      "orchestrator": 53
+      "orchestrator": 66
     },
-    "avgResponseTime": 1479.5094339622642,
-    "totalLlmCalls": 52,
+    "avgResponseTime": 1350.5151515151515,
+    "totalLlmCalls": 65,
     "totalTokensUsed": 0,
     "errorCount": 1
   },
   "createdAt": "2026-02-03T17:39:57.040Z",
-  "updatedAt": "2026-02-13T15:40:48.240Z"
+  "updatedAt": "2026-02-14T02:37:35.257Z"
 }

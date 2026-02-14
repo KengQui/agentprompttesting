@@ -1,0 +1,82 @@
+[
+  {
+    "id": "487452f6-71fc-4c50-88db-5f9c258075e7",
+    "agentId": "d9680d37-36b5-494c-bb13-e8eb6126c6ee",
+    "sessionId": "3cf15271-4236-4f8c-bf13-adf205329348",
+    "role": "user",
+    "content": "hello",
+    "timestamp": "2026-02-14T02:36:24.802Z"
+  },
+  {
+    "id": "af8cd80e-d08f-404e-a867-b4e42e5235dd",
+    "agentId": "d9680d37-36b5-494c-bb13-e8eb6126c6ee",
+    "sessionId": "3cf15271-4236-4f8c-bf13-adf205329348",
+    "role": "assistant",
+    "content": "Hi Sarah, how can I help you today with your benefits or HR-related questions?",
+    "timestamp": "2026-02-14T02:36:25.474Z"
+  },
+  {
+    "id": "eda7c535-f82c-43a0-a9fe-52e0970725fd",
+    "agentId": "d9680d37-36b5-494c-bb13-e8eb6126c6ee",
+    "sessionId": "3cf15271-4236-4f8c-bf13-adf205329348",
+    "role": "user",
+    "content": "What is a qualifying life event?",
+    "timestamp": "2026-02-14T02:36:25.510Z"
+  },
+  {
+    "id": "cfb82f80-0e3a-4524-945f-0de5dd3fa301",
+    "agentId": "d9680d37-36b5-494c-bb13-e8eb6126c6ee",
+    "sessionId": "3cf15271-4236-4f8c-bf13-adf205329348",
+    "role": "assistant",
+    "content": "A qualifying life event (QLE) allows you to make changes to your benefit elections outside of the annual open enrollment period. These events include changes in your family status (marriage, divorce, birth, adoption, or death), loss of other coverage, or changes in employment status or residence that affect benefit eligibility.",
+    "timestamp": "2026-02-14T02:36:26.455Z"
+  },
+  {
+    "id": "b0b44815-3482-4f9c-b635-a887fd3b6c63",
+    "agentId": "d9680d37-36b5-494c-bb13-e8eb6126c6ee",
+    "sessionId": "3cf15271-4236-4f8c-bf13-adf205329348",
+    "role": "user",
+    "content": "What is my current medical plan?",
+    "timestamp": "2026-02-14T02:36:26.491Z"
+  },
+  {
+    "id": "55bf9c88-5f19-423f-b444-d1ab0f466a64",
+    "agentId": "d9680d37-36b5-494c-bb13-e8eb6126c6ee",
+    "sessionId": "3cf15271-4236-4f8c-bf13-adf205329348",
+    "role": "assistant",
+    "content": "You are currently enrolled in the BlueCross PPO Plus medical plan with Employee + Spouse coverage. Your bi-weekly premium is $156.00, and the employer contributes $412.00 bi-weekly.",
+    "timestamp": "2026-02-14T02:36:27.360Z"
+  },
+  {
+    "id": "56707ca1-21b4-418a-9ac2-c078bca03e9f",
+    "agentId": "d9680d37-36b5-494c-bb13-e8eb6126c6ee",
+    "sessionId": "3cf15271-4236-4f8c-bf13-adf205329348",
+    "role": "user",
+    "content": "Can you submit my benefits enrollment form?",
+    "timestamp": "2026-02-14T02:36:27.397Z"
+  },
+  {
+    "id": "47ca76cc-2e6d-48cd-92d0-1f56ec323a52",
+    "agentId": "d9680d37-36b5-494c-bb13-e8eb6126c6ee",
+    "sessionId": "3cf15271-4236-4f8c-bf13-adf205329348",
+    "role": "assistant",
+    "content": "I can't submit a benefits enrollment form without knowing what changes you'd like to make. Do you have a qualifying life event that requires you to submit a new form? If so, can you provide me with the details?",
+    "timestamp": "2026-02-14T02:36:28.220Z"
+  },
+  {
+    "id": "91172061-32aa-4af8-a717-53660cdcb377",
+    "agentId": "d9680d37-36b5-494c-bb13-e8eb6126c6ee",
+    "sessionId": "3cf15271-4236-4f8c-bf13-adf205329348",
+    "role": "user",
+    "content": "Can you help me with something?",
+    "timestamp": "2026-02-14T02:36:28.255Z"
+  },
+  {
+    "id": "55de0127-b6d6-4f9a-abec-59f46b7089e0",
+    "agentId": "d9680d37-36b5-494c-bb13-e8eb6126c6ee",
+    "sessionId": "3cf15271-4236-4f8c-bf13-adf205329348",
+    "role": "assistant",
+    "content": "Before we move on, do you have a qualifying life event that requires you to submit a new enrollment form? If so, can you provide me with the details? This will help me understand what changes you'd like to make.",
+    "timestamp": "2026-02-14T02:36:29.404Z"
+  }
+]
