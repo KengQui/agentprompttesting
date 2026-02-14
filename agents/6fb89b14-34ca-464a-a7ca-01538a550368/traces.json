@@ -2580,6 +2580,41 @@
         }
       ],
       "success": true
+    },
+    {
+      "id": "trace-1771037517290",
+      "sessionId": "a87a3a34-59ec-4f78-ac98-d15d1e7d0dcc",
+      "userInput": "Show me all open shifts for my team for the upcoming week.",
+      "agentResponse": "I am specialized in processing employee call-ins. I can help you report an employee absence, classify it with an earning code, and convert the shift to an open shift. I do not have the functionality to show all open shifts for your team for the upcoming week.",
+      "startTime": "2026-02-14T02:51:56.474Z",
+      "endTime": "2026-02-14T02:51:57.290Z",
+      "totalDuration": 816,
+      "entries": [
+        {
+          "id": "entry-1771037516475-1",
+          "type": "intent_classification",
+          "name": "Orchestrator Intent Classification",
+          "timestamp": "2026-02-14T02:51:56.475Z",
+          "metadata": {
+            "intent": "answer_question",
+            "classificationMethod": "orchestrator",
+            "confidence": "high"
+          }
+        },
+        {
+          "id": "entry-1771037517290-3",
+          "type": "llm_call",
+          "name": "Gemini Response Generation",
+          "timestamp": "2026-02-14T02:51:57.290Z",
+          "duration": 815,
+          "metadata": {
+            "model": "gemini",
+            "intent": "answer_question",
+            "validated": true
+          }
+        }
+      ],
+      "success": true
     }
   ],
   "stats": {
@@ -2588,16 +2623,16 @@
     },
     "signalReads": {},
     "intentDistribution": {
-      "answer_question": 71
+      "answer_question": 72
     },
     "classificationMethods": {
-      "orchestrator": 71
+      "orchestrator": 72
     },
-    "avgResponseTime": 1138.1549295774648,
-    "totalLlmCalls": 64,
+    "avgResponseTime": 1133.6805555555557,
+    "totalLlmCalls": 65,
     "totalTokensUsed": 0,
     "errorCount": 4
   },
   "createdAt": "2026-02-06T01:22:58.868Z",
-  "updatedAt": "2026-02-13T22:09:18.157Z"
+  "updatedAt": "2026-02-14T02:51:57.290Z"
 }

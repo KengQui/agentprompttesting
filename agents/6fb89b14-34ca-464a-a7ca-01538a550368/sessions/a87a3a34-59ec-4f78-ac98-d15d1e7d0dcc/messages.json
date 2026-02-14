@@ -1,0 +1,18 @@
+[
+  {
+    "id": "cc03996a-ab15-49f1-8f2c-470bfa06e690",
+    "agentId": "6fb89b14-34ca-464a-a7ca-01538a550368",
+    "sessionId": "a87a3a34-59ec-4f78-ac98-d15d1e7d0dcc",
+    "role": "user",
+    "content": "Show me all open shifts for my team for the upcoming week.",
+    "timestamp": "2026-02-14T02:51:56.474Z"
+  },
+  {
+    "id": "1a795c1c-5103-44f4-b731-215730861ca1",
+    "agentId": "6fb89b14-34ca-464a-a7ca-01538a550368",
+    "sessionId": "a87a3a34-59ec-4f78-ac98-d15d1e7d0dcc",
+    "role": "assistant",
+    "content": "I am specialized in processing employee call-ins. I can help you report an employee absence, classify it with an earning code, and convert the shift to an open shift. I do not have the functionality to show all open shifts for your team for the upcoming week.",
+    "timestamp": "2026-02-14T02:51:57.293Z"
+  }
+]
