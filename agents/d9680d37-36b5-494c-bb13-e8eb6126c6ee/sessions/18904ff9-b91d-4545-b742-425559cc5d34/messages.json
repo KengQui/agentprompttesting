@@ -30,5 +30,37 @@
     "role": "assistant",
     "content": "I can help you with updates related to qualifying life events, such as adding a dependent, updating beneficiaries, or modifying your FSA contributions. What kind of life event are you experiencing?",
     "timestamp": "2026-02-14T02:37:35.259Z"
+  },
+  {
+    "id": "85208f62-0628-4551-a657-5dc5059e70fa",
+    "agentId": "d9680d37-36b5-494c-bb13-e8eb6126c6ee",
+    "sessionId": "18904ff9-b91d-4545-b742-425559cc5d34",
+    "role": "user",
+    "content": "update fsa contribution by 7 dolaar a month",
+    "timestamp": "2026-02-14T03:38:04.199Z"
+  },
+  {
+    "id": "1ec92d8e-930d-468d-9e7a-38c008f47bb8",
+    "agentId": "d9680d37-36b5-494c-bb13-e8eb6126c6ee",
+    "sessionId": "18904ff9-b91d-4545-b742-425559cc5d34",
+    "role": "assistant",
+    "content": "Okay, I can help with that. Which FSA account do you want to update, your Healthcare FSA or your Dependent Care FSA?",
+    "timestamp": "2026-02-14T03:38:04.926Z"
+  },
+  {
+    "id": "2d5bd920-0959-498a-851a-e39d1ed9321b",
+    "agentId": "d9680d37-36b5-494c-bb13-e8eb6126c6ee",
+    "sessionId": "18904ff9-b91d-4545-b742-425559cc5d34",
+    "role": "user",
+    "content": "healthc are",
+    "timestamp": "2026-02-14T03:38:13.898Z"
+  },
+  {
+    "id": "29c52f69-8b58-4249-9cb9-50fcc23be0de",
+    "agentId": "d9680d37-36b5-494c-bb13-e8eb6126c6ee",
+    "sessionId": "18904ff9-b91d-4545-b742-425559cc5d34",
+    "role": "assistant",
+    "content": "What new annual contribution amount would you like for your Healthcare FSA?",
+    "timestamp": "2026-02-14T03:38:14.864Z"
   }
 ]

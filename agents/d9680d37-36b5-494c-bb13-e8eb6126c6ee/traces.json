@@ -2501,22 +2501,92 @@
         }
       ],
       "success": true
+    },
+    {
+      "id": "trace-1771040284924",
+      "sessionId": "18904ff9-b91d-4545-b742-425559cc5d34",
+      "userInput": "update fsa contribution by 7 dolaar a month",
+      "agentResponse": "Okay, I can help with that. Which FSA account do you want to update, your Healthcare FSA or your Dependent Care FSA?",
+      "startTime": "2026-02-14T03:38:04.198Z",
+      "endTime": "2026-02-14T03:38:04.924Z",
+      "totalDuration": 726,
+      "entries": [
+        {
+          "id": "entry-1771040284200-1",
+          "type": "intent_classification",
+          "name": "Orchestrator Intent Classification",
+          "timestamp": "2026-02-14T03:38:04.200Z",
+          "metadata": {
+            "intent": "answer_question",
+            "classificationMethod": "orchestrator",
+            "confidence": "high"
+          }
+        },
+        {
+          "id": "entry-1771040284923-3",
+          "type": "llm_call",
+          "name": "Gemini Response Generation",
+          "timestamp": "2026-02-14T03:38:04.923Z",
+          "duration": 723,
+          "metadata": {
+            "model": "gemini",
+            "intent": "answer_question",
+            "validated": true
+          }
+        }
+      ],
+      "success": true
+    },
+    {
+      "id": "trace-1771040294863",
+      "sessionId": "18904ff9-b91d-4545-b742-425559cc5d34",
+      "userInput": "healthc are",
+      "agentResponse": "What new annual contribution amount would you like for your Healthcare FSA?",
+      "startTime": "2026-02-14T03:38:13.898Z",
+      "endTime": "2026-02-14T03:38:14.863Z",
+      "totalDuration": 965,
+      "entries": [
+        {
+          "id": "entry-1771040294207-1",
+          "type": "intent_classification",
+          "name": "Orchestrator Intent Classification",
+          "timestamp": "2026-02-14T03:38:14.207Z",
+          "metadata": {
+            "intent": "answer_question",
+            "classificationMethod": "orchestrator",
+            "confidence": "high"
+          }
+        },
+        {
+          "id": "entry-1771040294863-3",
+          "type": "llm_call",
+          "name": "Gemini Response Generation",
+          "timestamp": "2026-02-14T03:38:14.863Z",
+          "duration": 656,
+          "metadata": {
+            "model": "gemini",
+            "intent": "answer_question",
+            "validated": true
+          }
+        }
+      ],
+      "success": true
     }
   ],
   "stats": {
     "hookCalls": {},
     "signalReads": {},
     "intentDistribution": {
-      "answer_question": 66
+      "answer_question": 68
     },
     "classificationMethods": {
-      "orchestrator": 66
+      "orchestrator": 68
     },
-    "avgResponseTime": 1350.5151515151515,
-    "totalLlmCalls": 65,
+    "avgResponseTime": 1335.6617647058824,
+    "totalLlmCalls": 67,
     "totalTokensUsed": 0,
     "errorCount": 1
   },
   "createdAt": "2026-02-03T17:39:57.040Z",
-  "updatedAt": "2026-02-14T02:37:35.257Z"
+  "updatedAt": "2026-02-14T03:38:14.863Z"
 }
