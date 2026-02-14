@@ -1828,6 +1828,7 @@ export async function registerRoutes(
         sampleDataSummary,
         welcomeConfig: welcomeConfigStr,
         availableActions: actionsStr,
+        customPrompt: agent.customPrompt || "",
       };
 
       const history: PromptCoachMessage[] = Array.isArray(chatHistory) ? chatHistory : [];

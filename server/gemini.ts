@@ -2141,6 +2141,7 @@ export interface PromptCoachContext {
   sampleDataSummary: string;
   welcomeConfig: string;
   availableActions: string;
+  customPrompt: string;
 }
 
 export interface PromptCoachMessage {
@@ -2174,6 +2175,7 @@ The user is working on an agent with the following configuration:
 - Sample Data: ${context.sampleDataSummary || "(none)"}
 - Welcome Screen: ${context.welcomeConfig || "(not configured)"}
 - Available Actions: ${context.availableActions || "(none)"}
+- Current Agent Prompt: ${context.customPrompt || "(not generated yet)"}
 
 ## What You Can Help Improve (Apply-able Fields)
 You can analyze and suggest improvements to these 4 fields, and propose changes via suggested_change blocks:
@@ -2184,6 +2186,7 @@ You can analyze and suggest improvements to these 4 fields, and propose changes 
 
 ## What You Can Advise On (Read-Only)
 You can see and discuss these fields to give context-aware advice, but you CANNOT propose apply-able changes to them. Instead, describe what the user should adjust manually in the settings:
+- **Agent Prompt** — You can see the full prompt that drives the agent. Use it to understand how config changes affect the actual behavior. When suggesting improvements, explain how they'll improve the prompt. You CANNOT edit the prompt directly — changes flow through the config fields which auto-regenerate the prompt.
 - **Sample Data** — Suggest more diverse or representative examples
 - **Welcome Screen** — Improve the greeting message and suggested prompts
 - **Available Actions** — Suggest better action definitions or missing fields
@@ -2252,23 +2255,15 @@ When the user approves a suggested change:
 ## Tone & Style
 - Friendly and encouraging, like a helpful colleague
 - Non-technical — avoid jargon, explain concepts simply
-- Concise — keep responses focused and actionable
 - Patient — if the user is confused, rephrase and give examples
-- Never condescending — treat every question as valid${
-  context.agentName.toLowerCase() === "life agent 8"
-    ? `
-
-## IMPORTANT: Concise Mode
-For this agent, keep your responses short and direct:
-- Skip preamble and pleasantries. Get straight to the point.
+- Never condescending — treat every question as valid
+- Keep responses short and direct. Skip preamble and pleasantries. Get straight to the point.
 - Use short sentences. No filler words.
 - If suggesting a change, state it in one brief sentence then provide the suggested_change block. Don't over-explain.
 - Don't repeat what the user already knows about their agent.
 - Max 2-3 sentences of commentary per suggestion.
 - Let the suggested_change blocks speak for themselves — the user can read the content there.
-- CRITICAL: Only suggest ONE change at a time — the single highest-impact improvement. After the user applies (or skips) it, suggest the next one. Never output multiple suggested_change blocks in a single response.`
-    : ""
-}`;
+- CRITICAL: Only suggest ONE change at a time — the single highest-impact improvement. After the user applies (or skips) it, suggest the next one. Never output multiple suggested_change blocks in a single response.`;
 }
 
 function parseSuggestedChanges(text: string): PromptCoachResponse["suggestedChanges"] {

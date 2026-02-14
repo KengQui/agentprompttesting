@@ -77,13 +77,12 @@ The Prompt Coach is an AI-powered chatbot that helps users improve their agent c
 - `parseSuggestedChanges()` — Extracts ```suggested_change JSON blocks from AI response
 - `cleanCoachResponse()` — Strips suggested_change blocks from the display message
 - Coach can suggest changes to 4 apply-able fields: businessUseCase, domainKnowledge, validationRules, guardrails
-- Coach can advise on (but not apply changes to) read-only fields: sampleData, welcomeConfig, availableActions
-- Has a hardcoded "Concise Mode" for agent "life agent 8" — should be generalized
+- Coach can advise on (but not apply changes to) read-only fields: customPrompt (agent prompt), sampleData, welcomeConfig, availableActions
+- Concise coaching mode is the default for all agents (short responses, one suggestion at a time, no filler)
+- Coach has read-only visibility into the agent's custom prompt (Step 9) for context-aware advice
 
 **Current Limitations / Improvement Areas**:
-- Hardcoded concise mode for one specific agent instead of being a general setting
 - Coach sees full agent config every message (no context optimization like the chat system has)
-- No awareness of the generated system prompt — can only see raw config fields
 - "Apply" only works for 4 text fields — can't suggest changes to sample data, actions, or welcome config
 - No undo for applied changes
 - No tracking of what changes were previously applied across sessions
