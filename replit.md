@@ -53,6 +53,46 @@ Agent Studio utilizes a modern web application architecture with a clear separat
 - **Per-Session Message Storage**: Chat messages stored in individual session files (`/agents/{agent-id}/sessions/{session-id}/messages.json`) for independent experiment threads and session isolation.
 - **In-memory storage**: Utilizes nested Maps for transient data, persisted to YAML/JSON files.
 
+### Prompt Coach (Detailed)
+The Prompt Coach is an AI-powered chatbot that helps users improve their agent configurations through conversational interaction.
+
+**Frontend**: `client/src/components/prompt-coach.tsx` (431 lines)
+- Renders as a collapsible panel in the agent wizard sidebar
+- Components: `PromptCoachTrigger` (toggle button) and `PromptCoach` (main chat panel)
+- Shows AI messages with embedded "Apply" buttons for suggested changes
+- Tracks which suggestions have been applied via `appliedChanges` Set per message
+- Chat history is persisted per agent and survives page refreshes
+- Uses `SuggestedChange` interface: `{ field, action ("replace"|"append"), content, explanation }`
+
+**Backend Endpoints** (in `server/routes.ts`):
+- `POST /api/agents/:id/prompt-coach` — Sends user message + chat history, returns AI response with optional `suggestedChanges[]`
+- `POST /api/agents/:id/prompt-coach/apply` — Applies a suggested change to one of 4 fields: businessUseCase, domainKnowledge, validationRules, guardrails. Auto-regenerates the system prompt after applying.
+- `GET /api/agents/:id/prompt-coach/history` — Retrieves persisted chat history
+- `PUT /api/agents/:id/prompt-coach/history` — Saves chat history
+- `DELETE /api/agents/:id/prompt-coach/history` — Clears chat history
+
+**AI Logic** (in `server/gemini.ts`):
+- `buildPromptCoachSystemPrompt()` — Builds the coach's system prompt, injecting all agent config fields as context
+- `generatePromptCoachResponse()` — Sends to Gemini AI with chat history, returns `{ message, suggestedChanges? }`
+- `parseSuggestedChanges()` — Extracts ```suggested_change JSON blocks from AI response
+- `cleanCoachResponse()` — Strips suggested_change blocks from the display message
+- Coach can suggest changes to 4 apply-able fields: businessUseCase, domainKnowledge, validationRules, guardrails
+- Coach can advise on (but not apply changes to) read-only fields: sampleData, welcomeConfig, availableActions
+- Has a hardcoded "Concise Mode" for agent "life agent 8" — should be generalized
+
+**Current Limitations / Improvement Areas**:
+- Hardcoded concise mode for one specific agent instead of being a general setting
+- Coach sees full agent config every message (no context optimization like the chat system has)
+- No awareness of the generated system prompt — can only see raw config fields
+- "Apply" only works for 4 text fields — can't suggest changes to sample data, actions, or welcome config
+- No undo for applied changes
+- No tracking of what changes were previously applied across sessions
+
+### Smart Context Management
+- **Context Classification** (`classifyMessageContext()` in `server/gemini.ts`): Keyword-based classifier that analyzes each user message to determine which prompt sections (data, actions, domain knowledge, mock state) should be included. Reduces prompt size for simple messages.
+- **System Context Stripping**: Classifier strips `[SYSTEM CONTEXT: ...]` prefixes injected by the orchestrator before classifying, preventing false keyword matches from prior conversation turns.
+- Runs at the app level in `generateAgentResponse()` — benefits all agents automatically.
+
 ## External Dependencies
 - **Google Gemini AI**: Used for generating agent responses, system prompts, validation rules, guardrails, and sample data.
 - **Chroma Research**: The concept of context rot and token usage monitoring is based on research from Chroma.
