@@ -76,6 +76,13 @@ export function PromptCoachPanel({ agentId, agentName, onClose, onConfigChanged 
   const hasInitialized = useRef(false);
   const { toast } = useToast();
 
+  const adjustTextareaHeight = useCallback(() => {
+    const el = textareaRef.current;
+    if (!el) return;
+    el.style.height = "auto";
+    el.style.height = Math.min(el.scrollHeight, 120) + "px";
+  }, []);
+
   const tokenUsage = useMemo(() => {
     const totalText = messages.map((m) => m.content).join("");
     const tokens = estimateTokens(totalText);
@@ -172,6 +179,7 @@ export function PromptCoachPanel({ agentId, agentName, onClose, onConfigChanged 
 
     const userMessage = input.trim();
     setInput("");
+    if (textareaRef.current) textareaRef.current.style.height = "auto";
     const now = new Date().toISOString();
     const updatedWithUser = [...messages, { role: "user" as const, content: userMessage, timestamp: now }];
     setMessages(updatedWithUser);
@@ -548,9 +556,12 @@ export function PromptCoachPanel({ agentId, agentName, onClose, onConfigChanged 
             ref={textareaRef}
             placeholder={isAtLimit ? "Context limit reached. Clear conversation to continue." : "Ask for help improving your agent..."}
             value={input}
-            onChange={(e) => setInput(e.target.value)}
+            onChange={(e) => {
+              setInput(e.target.value);
+              adjustTextareaHeight();
+            }}
             onKeyDown={handleKeyDown}
-            className="min-h-[40px] max-h-[80px] resize-none border-0 focus-visible:ring-0 text-sm"
+            className="min-h-[40px] max-h-[120px] resize-none border-0 focus-visible:ring-0 text-sm overflow-y-auto"
             rows={1}
             disabled={isAtLimit}
             data-testid="textarea-coach-input"
