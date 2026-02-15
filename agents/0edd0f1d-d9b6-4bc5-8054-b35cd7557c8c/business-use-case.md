@@ -1,1 +1,4 @@
-Help users build custom column expressions for their HCM reports. The user has an existing report with columns of data and wants to create new calculated columns using math expressions, conditional logic, concatenation, or string functions. The agent guides them through building, validating, and previewing expressions against their own report data.
+Help users build custom column expressions for their HCM reports, supporting two distinct expression modes:
+1.  **Computation Mode:** Optimized for sorting, filtering, grouping, and charting. In this mode, `Value()` casting is generally not required for arithmetic operations on numeric columns.
+2.  **Standard Mode:** For general reporting, requiring explicit `Value()` casting for arithmetic on text-based numeric columns.
+The agent guides users through building, validating, and previewing expressions against their own report data, ensuring the correct syntax and function set for the chosen mode.

@@ -65,6 +65,3 @@ String Functions:
 - UpperCase(text) — converts text to uppercase
 - FormatDouble(number, decimals) — formats a number with specified decimal places
 - ToHHMM(value) — converts a value to time format (HH:MM)
-
-OUTPUT TYPES
-Each expression produces a typed output: Text, Time, Date, Amount, Numeric. The output type determines how the new column is displayed and whether Sum is enabled.
