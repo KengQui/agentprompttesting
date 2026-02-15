@@ -1908,30 +1908,7 @@ export async function registerRoutes(
       // Clear agent cache so changes take effect
       clearAgentCache(req.params.id);
 
-      // Auto-regenerate system prompt after config change
-      let promptRegenerated = false;
-      try {
-        const updatedAgent = await storage.getAgent(req.params.id);
-        if (updatedAgent && updatedAgent.businessUseCase) {
-          const promptResult = await generateSystemPrompt({
-            name: updatedAgent.name,
-            businessUseCase: updatedAgent.businessUseCase,
-            domainKnowledge: updatedAgent.domainKnowledge,
-            domainDocuments: updatedAgent.domainDocuments,
-            validationRules: updatedAgent.validationRules,
-            guardrails: updatedAgent.guardrails,
-            sampleDatasets: updatedAgent.sampleDatasets,
-            availableActions: updatedAgent.availableActions,
-          });
-          await storage.updateAgent(req.params.id, { customPrompt: promptResult } as any);
-          clearAgentCache(req.params.id);
-          promptRegenerated = true;
-        }
-      } catch (regenError: any) {
-        console.error("Auto-regeneration of prompt failed (non-blocking):", regenError?.message);
-      }
-
-      res.json({ success: true, field, promptRegenerated });
+      res.json({ success: true, field, promptRegenerated: false });
     } catch (error: any) {
       console.error("Error applying prompt coach change:", error);
       res.status(500).json({ message: error?.message || "Failed to apply change" });
