@@ -1,0 +1,18 @@
+[
+  {
+    "id": "f8d60566-aea0-47bb-8923-f152f89155a3",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "sessionId": "f7743f08-dd57-493b-a569-aa358c007052",
+    "role": "user",
+    "content": "Divide Annual Salary by 12 to get monthly pay.",
+    "timestamp": "2026-02-15T22:11:07.212Z"
+  },
+  {
+    "id": "729824ea-4bc8-44f5-9e7f-e39823950423",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "sessionId": "f7743f08-dd57-493b-a569-aa358c007052",
+    "role": "assistant",
+    "content": "```\nDivide(Value(AnnualSalary), 12)\n```\n\nThis expression will produce a **Numeric** output.\n\nSuggested column name: **Monthly Pay**\n\n{{SUGGESTED_ACTIONS:Revise this expression|Create new column|Test with my data|Explain this expression}}",
+    "timestamp": "2026-02-15T22:11:08.011Z"
+  }
+]

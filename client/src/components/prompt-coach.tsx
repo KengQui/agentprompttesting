@@ -68,8 +68,8 @@ export function PromptCoachPanel({ agentId, agentName, onClose, onConfigChanged 
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingHistory, setIsLoadingHistory] = useState(true);
   const [applyingIndex, setApplyingIndex] = useState<string | null>(null);
-  const [undoingField, setUndoingField] = useState<string | null>(null);
-  const [lastAppliedChange, setLastAppliedChange] = useState<{ field: string; previousValue: string } | null>(null);
+  const [revertingIndex, setRevertingIndex] = useState<string | null>(null);
+  const [revertHistory, setRevertHistory] = useState<Map<string, { field: string; previousValue: string }>>(new Map());
   const [expandedPreviews, setExpandedPreviews] = useState<Set<string>>(new Set());
   const scrollRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -233,7 +233,12 @@ export function PromptCoachPanel({ agentId, agentName, onClose, onConfigChanged 
       });
       const responseData = await response.json();
 
-      setLastAppliedChange({ field: change.field, previousValue });
+      const key = `${messageIndex}-${changeIndex}`;
+      setRevertHistory((prev) => {
+        const next = new Map(prev);
+        next.set(key, { field: change.field, previousValue });
+        return next;
+      });
 
       const updatedMessages = messages.map((msg, idx) => {
         if (idx === messageIndex && msg.appliedChanges) {
@@ -270,38 +275,55 @@ export function PromptCoachPanel({ agentId, agentName, onClose, onConfigChanged 
     }
   };
 
-  const handleUndo = async () => {
-    if (!lastAppliedChange) return;
-    setUndoingField(lastAppliedChange.field);
+  const handleRevert = async (messageIndex: number, changeIndex: number) => {
+    const key = `${messageIndex}-${changeIndex}`;
+    const revertData = revertHistory.get(key);
+    if (!revertData) return;
+    setRevertingIndex(key);
 
     try {
       await apiRequest("POST", `/api/agents/${agentId}/prompt-coach/apply`, {
-        field: lastAppliedChange.field,
+        field: revertData.field,
         action: "replace",
-        content: lastAppliedChange.previousValue,
+        content: revertData.previousValue,
       });
 
       queryClient.invalidateQueries({ queryKey: ["/api/agents", agentId] });
 
+      const updatedMessages = messages.map((msg, idx) => {
+        if (idx === messageIndex && msg.appliedChanges) {
+          const newApplied = new Set(msg.appliedChanges);
+          newApplied.delete(changeIndex);
+          return { ...msg, appliedChanges: newApplied };
+        }
+        return msg;
+      });
+      setMessages(updatedMessages);
+      saveHistory(updatedMessages);
+
+      setRevertHistory((prev) => {
+        const next = new Map(prev);
+        next.delete(key);
+        return next;
+      });
+
       if (onConfigChanged) {
-        onConfigChanged(lastAppliedChange.field);
+        onConfigChanged(revertData.field);
       }
 
       toast({
         title: "Change reverted",
-        description: `Restored ${FIELD_LABELS[lastAppliedChange.field] || lastAppliedChange.field} to its previous value.`,
+        description: `Restored ${FIELD_LABELS[revertData.field] || revertData.field} to its previous value.`,
         duration: 3000,
       });
-
-      setLastAppliedChange(null);
     } catch (error: any) {
       toast({
-        title: "Failed to undo",
+        title: "Failed to revert",
         description: error?.message || "Please try again.",
         variant: "destructive",
       });
     } finally {
-      setUndoingField(null);
+      setRevertingIndex(null);
     }
   };
 
@@ -333,7 +355,7 @@ export function PromptCoachPanel({ agentId, agentName, onClose, onConfigChanged 
         timestamp: new Date().toISOString(),
       },
     ]);
-    setLastAppliedChange(null);
+    setRevertHistory(new Map());
     setExpandedPreviews(new Set());
   };
 
@@ -345,22 +367,6 @@ export function PromptCoachPanel({ agentId, agentName, onClose, onConfigChanged 
           <span className="text-sm font-medium">Prompt Coach</span>
         </div>
         <div className="flex items-center gap-1">
-          {lastAppliedChange && (
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={handleUndo}
-              disabled={!!undoingField}
-              title={`Undo: revert ${FIELD_LABELS[lastAppliedChange.field] || lastAppliedChange.field}`}
-              data-testid="button-prompt-coach-undo"
-            >
-              {undoingField ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                <Undo2 className="h-4 w-4" />
-              )}
-            </Button>
-          )}
           {messages.length > 1 && (
             <Button
               variant="ghost"
@@ -448,8 +454,10 @@ export function PromptCoachPanel({ agentId, agentName, onClose, onConfigChanged 
                   {msg.suggestedChanges.map((change, changeIdx) => {
                     const isApplied = msg.appliedChanges?.has(changeIdx);
                     const isApplying = applyingIndex === `${msgIdx}-${changeIdx}`;
-                    const previewKey = `${msgIdx}-${changeIdx}`;
-                    const isPreviewExpanded = expandedPreviews.has(previewKey);
+                    const changeKey = `${msgIdx}-${changeIdx}`;
+                    const isPreviewExpanded = expandedPreviews.has(changeKey);
+                    const canRevert = isApplied && revertHistory.has(changeKey);
+                    const isReverting = revertingIndex === changeKey;
                     return (
                       <Card key={changeIdx} className="p-3" data-testid={`coach-change-${msgIdx}-${changeIdx}`}>
                         <div className="flex items-center justify-between gap-2 flex-wrap">
@@ -460,7 +468,7 @@ export function PromptCoachPanel({ agentId, agentName, onClose, onConfigChanged 
                             <Button
                               variant="ghost"
                               size="sm"
-                              onClick={() => togglePreview(previewKey)}
+                              onClick={() => togglePreview(changeKey)}
                               className="text-xs gap-1"
                               data-testid={`button-preview-change-${msgIdx}-${changeIdx}`}
                             >
@@ -471,6 +479,23 @@ export function PromptCoachPanel({ agentId, agentName, onClose, onConfigChanged 
                               )}
                               {isPreviewExpanded ? "Hide" : "Preview"}
                             </Button>
+                            {canRevert && (
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleRevert(msgIdx, changeIdx)}
+                                disabled={isReverting}
+                                className="text-xs gap-1"
+                                data-testid={`button-revert-change-${msgIdx}-${changeIdx}`}
+                              >
+                                {isReverting ? (
+                                  <Loader2 className="h-3 w-3 animate-spin" />
+                                ) : (
+                                  <Undo2 className="h-3 w-3" />
+                                )}
+                                Revert
+                              </Button>
+                            )}
                             <Button
                               variant={isApplied ? "outline" : "default"}
                               size="sm"
