@@ -689,10 +689,12 @@ export function classifyMessageContext(
   const hasMockState = !!(agent.mockUserState && agent.mockUserState.length > 0);
   const hasDomain = !!(agent.domainKnowledge || (agent.domainDocuments && agent.domainDocuments.length > 0));
 
+  const promptRequiresData = !!(agent.customPrompt && agent.customPrompt.includes('{{SAMPLE_DATA}}') && hasData);
+
   const noSignals = !hasDataSignal && !hasActionSignal && !hasDomainSignal;
   if (noSignals) {
     return {
-      needsData: false,
+      needsData: promptRequiresData,
       needsActions: false,
       needsMockState: false,
       needsDomainKnowledge: false,
@@ -700,7 +702,7 @@ export function classifyMessageContext(
   }
 
   return {
-    needsData: hasDataSignal && hasData,
+    needsData: (hasDataSignal && hasData) || promptRequiresData,
     needsActions: hasActionSignal && hasActions,
     needsMockState: hasActionSignal && hasMockState,
     needsDomainKnowledge: hasDomainSignal && hasDomain,
