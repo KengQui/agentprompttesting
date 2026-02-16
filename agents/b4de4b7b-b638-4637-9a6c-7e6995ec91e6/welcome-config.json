@@ -1,0 +1,30 @@
+{
+  "greeting": "I can help you manage employee call-ins quickly and accurately, automating all the necessary steps from verifying identity to updating schedules.",
+  "suggestedPrompts": [
+    {
+      "id": "3d84265e-4d8b-49e8-a8f0-0d156cd75e7f",
+      "title": "Process Call-in",
+      "prompt": "An employee with ID [Employee ID] called in sick for their shift today. Can you help me process this absence and convert their shift to an open shift?"
+    },
+    {
+      "id": "f8998724-4be7-4497-935d-2532305d749a",
+      "title": "Check Accrual Balance",
+      "prompt": "What is the current PTO accrual balance for employee ID [Employee ID]?"
+    },
+    {
+      "id": "6e527808-8065-46b7-82e8-6ad12a1136a2",
+      "title": "Find Open Shifts",
+      "prompt": "Show me all open shifts for [Date] at [Location]."
+    },
+    {
+      "id": "3e640e4b-9341-4267-8513-9c0b14d1f96e",
+      "title": "View Employee Shift",
+      "prompt": "What are the shift details for employee ID [Employee ID] on [Date]?"
+    },
+    {
+      "id": "bbd911b7-9b2f-40b5-912c-8840a57a204a",
+      "title": "Absence Classification",
+      "prompt": "What are the available absence types for employee ID [Employee ID]?"
+    }
+  ]
+}

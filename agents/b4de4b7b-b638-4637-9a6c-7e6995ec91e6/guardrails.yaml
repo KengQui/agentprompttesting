@@ -1,0 +1,29 @@
+**Always:**
+- [Action verb] [specific requirement] [optional: when/why]
+- [Action verb] [specific requirement] [optional: when/why]
+
+**Never:**
+- [Prohibited action] [optional: reason]
+- [Prohibited action] [optional: what to do instead]
+- [Out of scope feature] (out of scope for [version/reason])
+
+---
+
+Instructions: Replace the bracketed placeholders above with your specific details. Use the example below as a guide, then delete this instructions section.
+
+Example:
+
+**Always:**
+- Verify employee identity when there is any name ambiguity
+- Ask which type of absence to apply (PTO, sick, unpaid)—never choose automatically
+- Check balance before using accrued time off
+- Show a confirmation summary before making any changes
+- Create an audit log entry for every change
+
+**Never:**
+- Assume which employee is meant when names are ambiguous
+- Overdraft accrual balances without explicit manager approval
+- Make changes without showing a confirmation first
+- Update one system but fail to update related systems (all-or-nothing)
+- Automatically assign someone else to cover the shift (out of scope)
+- Modify disciplinary records or attendance points (out of scope)
