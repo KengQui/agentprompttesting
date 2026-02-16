@@ -1113,9 +1113,11 @@ export default function Chat() {
 
   const handleSessionSelect = (sessionId: string) => {
     setActiveSessionId(sessionId);
+    setMessage("");
   };
 
   const handleNewSession = () => {
+    setMessage("");
     createSessionMutation.mutate();
   };
 
