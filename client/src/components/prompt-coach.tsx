@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import ReactMarkdown from "react-markdown";
-import { GraduationCap, Send, X, Loader2, Check, ChevronDown, ChevronUp, Eraser, Clock, Undo2, Eye, EyeOff } from "lucide-react";
+import { GraduationCap, Send, X, Loader2, Check, ChevronDown, ChevronUp, Eraser, Clock, Undo2, Eye, EyeOff, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Card } from "@/components/ui/card";
@@ -13,6 +13,10 @@ interface SuggestedChange {
   action: "replace" | "append";
   content: string;
   explanation: string;
+  promptUpdate?: {
+    findText: string;
+    replaceText: string;
+  };
 }
 
 interface CoachMessage {
@@ -234,11 +238,15 @@ export function PromptCoachPanel({ agentId, agentName, onClose, onConfigChanged 
         previousValue = agentData[change.field] || "";
       }
 
-      const response = await apiRequest("POST", `/api/agents/${agentId}/prompt-coach/apply`, {
+      const applyPayload: any = {
         field: change.field,
         action: change.action,
         content: change.content,
-      });
+      };
+      if (change.promptUpdate) {
+        applyPayload.promptUpdate = change.promptUpdate;
+      }
+      const response = await apiRequest("POST", `/api/agents/${agentId}/prompt-coach/apply`, applyPayload);
       const responseData = await response.json();
 
       const key = `${messageIndex}-${changeIndex}`;
@@ -265,11 +273,16 @@ export function PromptCoachPanel({ agentId, agentName, onClose, onConfigChanged 
         onConfigChanged(change.field);
       }
 
+      const fieldLabel = FIELD_LABELS[change.field] || change.field;
+      let description = `Updated ${fieldLabel} successfully.`;
+      if (responseData.promptUpdated) {
+        description = `Updated ${fieldLabel} and agent prompt.`;
+      } else if (responseData.promptRegenerated) {
+        description = `Updated ${fieldLabel} and regenerated the system prompt.`;
+      }
       toast({
         title: "Change applied",
-        description: responseData.promptRegenerated 
-          ? `Updated ${FIELD_LABELS[change.field] || change.field} and regenerated the system prompt.`
-          : `Updated ${FIELD_LABELS[change.field] || change.field} successfully.`,
+        description,
         duration: 3000,
       });
     } catch (error: any) {
@@ -529,11 +542,19 @@ export function PromptCoachPanel({ agentId, agentName, onClose, onConfigChanged 
                             {change.content}
                           </div>
                         )}
-                        <p className="text-[11px] text-muted-foreground/70 mt-1 text-right">
-                          {change.action === "append"
-                            ? `Will add to existing ${(FIELD_LABELS[change.field] || change.field).toLowerCase()}`
-                            : `Will replace existing ${(FIELD_LABELS[change.field] || change.field).toLowerCase()}`}
-                        </p>
+                        <div className="flex items-center justify-between mt-1 flex-wrap gap-1">
+                          {change.promptUpdate && (
+                            <span className="text-[11px] text-primary/70 flex items-center gap-1">
+                              <FileText className="h-3 w-3" />
+                              Also updates agent prompt
+                            </span>
+                          )}
+                          <p className="text-[11px] text-muted-foreground/70 text-right flex-1">
+                            {change.action === "append"
+                              ? `Will add to existing ${(FIELD_LABELS[change.field] || change.field).toLowerCase()}`
+                              : `Will replace existing ${(FIELD_LABELS[change.field] || change.field).toLowerCase()}`}
+                          </p>
+                        </div>
                       </Card>
                     );
                   })}

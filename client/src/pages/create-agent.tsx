@@ -2836,34 +2836,94 @@ function Step8ValidationChecklist({
 function Step8Review({
   data,
   onUpdate,
+  agentId,
 }: {
   data: WizardStepData;
   onUpdate: (data: Partial<WizardStepData>) => void;
+  agentId?: string;
 }) {
-  // Mode: null = show selection cards, 'manual' = show template, 'ai' = show AI generated
-  // If there's already a custom prompt, default to showing it in manual edit mode
-  const [promptMode, setPromptMode] = useState<'manual' | 'ai' | null>(null);
-  const [isEditing, setIsEditing] = useState(false);
   const [editedPrompt, setEditedPrompt] = useState(data.customPrompt || "");
-  const [generatedPrompt, setGeneratedPrompt] = useState(data.customPrompt || "");
+  const [isEditing, setIsEditing] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const [generationError, setGenerationError] = useState<string | null>(null);
   const [selectedModel, setSelectedModel] = useState<GeminiModel>(defaultGenerationModel);
+  const [pendingGeneratedPrompt, setPendingGeneratedPrompt] = useState<string | null>(null);
+  const [promptLastRevisedBy, setPromptLastRevisedBy] = useState<string | null>(null);
+  const [promptLastRevisedAt, setPromptLastRevisedAt] = useState<string | null>(null);
+  const [isOutOfSync, setIsOutOfSync] = useState(false);
   const { toast } = useToast();
 
   const hasBusinessUseCase = !!(data.businessUseCase && data.businessUseCase.trim());
+  const hasExistingPrompt = !!(data.customPrompt && data.customPrompt.trim());
+
+  useEffect(() => {
+    setEditedPrompt(data.customPrompt || "");
+  }, [data.customPrompt]);
+
+  useEffect(() => {
+    if (!agentId) return;
+    const checkSync = async () => {
+      try {
+        const response = await fetch(`/api/agents/${agentId}/prompt-sync-status`, { credentials: "include" });
+        if (response.ok) {
+          const status = await response.json();
+          setIsOutOfSync(!status.isInSync);
+          setPromptLastRevisedBy(status.promptLastRevisedBy);
+          setPromptLastRevisedAt(status.promptLastRevisedAt);
+        }
+      } catch {}
+    };
+    checkSync();
+  }, [agentId, data.customPrompt]);
+
+  const savePrompt = async (prompt: string, revisedBy: "user" | "ai-generate") => {
+    if (!agentId) {
+      onUpdate({ customPrompt: prompt });
+      toast({ title: "Prompt saved", description: "Your changes have been saved." });
+      return;
+    }
+
+    setIsSaving(true);
+    try {
+      const response = await apiRequest("POST", `/api/agents/${agentId}/save-prompt`, {
+        customPrompt: prompt,
+        revisedBy,
+      });
+      const result = await response.json();
+      onUpdate({ customPrompt: prompt });
+      setPromptLastRevisedBy(result.promptLastRevisedBy);
+      setPromptLastRevisedAt(result.promptLastRevisedAt);
+      setIsOutOfSync(false);
+      queryClient.invalidateQueries({ queryKey: ["/api/agents", agentId] });
+      toast({
+        title: "Prompt saved",
+        description: revisedBy === "ai-generate"
+          ? "AI-generated prompt has been saved."
+          : "Your changes have been saved.",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Failed to save prompt",
+        description: error?.message || "Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
   const generatePromptFromAPI = async (model?: GeminiModel) => {
     const modelToUse = model || selectedModel;
     if (!data.name || !data.businessUseCase) {
       const fallback = generatePromptPreview("gemini", data);
-      setGeneratedPrompt(fallback);
-      setEditedPrompt(fallback);
+      setPendingGeneratedPrompt(fallback);
       return;
     }
     
     setIsGenerating(true);
     setGenerationError(null);
+    setPendingGeneratedPrompt(null);
     try {
       const response = await apiRequest("POST", "/api/generate/system-prompt", {
         name: data.name,
@@ -2876,72 +2936,58 @@ function Step8Review({
         model: modelToUse,
       });
       const result = await response.json();
-      setGeneratedPrompt(result.systemPrompt);
-      setEditedPrompt(result.systemPrompt);
-      onUpdate({ customPrompt: result.systemPrompt });
+      if (hasExistingPrompt) {
+        setPendingGeneratedPrompt(result.systemPrompt);
+      } else {
+        await savePrompt(result.systemPrompt, "ai-generate");
+      }
     } catch (error: any) {
       console.error("Failed to generate system prompt:", error);
       setGenerationError(error.message || "Failed to generate prompt");
       const fallback = generatePromptPreview("gemini", data);
-      setGeneratedPrompt(fallback);
-      setEditedPrompt(fallback);
+      setPendingGeneratedPrompt(fallback);
     } finally {
       setIsGenerating(false);
     }
   };
 
-  const handleSelectManual = () => {
-    const template = generateManualTemplate(data);
-    setEditedPrompt(template);
-    setGeneratedPrompt(template);
-    onUpdate({ customPrompt: template });
-    setPromptMode('manual');
-    setIsEditing(true);
-  };
-
-  const handleSelectAI = () => {
-    setPromptMode('ai');
-    generatePromptFromAPI();
-  };
-
-  const handleBackToSelection = () => {
-    setPromptMode(null);
-    setIsEditing(false);
-    onUpdate({ customPrompt: "" });
-  };
-
   const handleSaveEdit = () => {
-    onUpdate({ customPrompt: editedPrompt });
-    setIsEditing(false);
-    toast({
-      title: "Prompt saved",
-      description: "Your changes have been saved.",
-    });
-  };
-
-  const handleEditToggle = () => {
-    if (!isEditing) {
-      setEditedPrompt(data.customPrompt || generatedPrompt);
-    }
-    setIsEditing(!isEditing);
-  };
-
-  const handleResetPrompt = () => {
-    onUpdate({ customPrompt: "" });
-    if (promptMode === 'ai') {
-      generatePromptFromAPI();
-    } else {
-      const template = generateManualTemplate(data);
-      setEditedPrompt(template);
-      setGeneratedPrompt(template);
-      onUpdate({ customPrompt: template });
-    }
+    savePrompt(editedPrompt, "user");
     setIsEditing(false);
   };
 
-  const displayPrompt = data.customPrompt || generatedPrompt;
+  const handleAcceptGenerated = () => {
+    if (pendingGeneratedPrompt) {
+      savePrompt(pendingGeneratedPrompt, "ai-generate");
+      setPendingGeneratedPrompt(null);
+    }
+  };
 
-  // Configuration summary data for the review section
+  const handleDiscardGenerated = () => {
+    setPendingGeneratedPrompt(null);
+  };
+
+  const formatRevisedBy = (source: string | null) => {
+    if (!source) return null;
+    const labels: Record<string, string> = {
+      "user": "User (manual edit)",
+      "prompt-coach": "Prompt Coach",
+      "ai-generate": "AI Generate",
+    };
+    return labels[source] || source;
+  };
+
+  const formatTimestamp = (ts: string | null) => {
+    if (!ts) return "";
+    try {
+      const date = new Date(ts);
+      return date.toLocaleDateString(undefined, {
+        month: "short", day: "numeric", year: "numeric",
+        hour: "numeric", minute: "2-digit",
+      });
+    } catch { return ts; }
+  };
+
   const domainDocsCount = data.domainDocuments?.length || 0;
   const domainKnowledgeValue = data.domainKnowledge 
     ? data.domainKnowledge 
@@ -2965,7 +3011,6 @@ function Step8Review({
     { label: "Available Actions", value: actionsValue, icon: Zap, optional: true },
   ];
 
-  // Configuration review summary component
   const ConfigReviewSummary = () => (
     <Card>
       <CardHeader>
@@ -3010,246 +3055,236 @@ function Step8Review({
     </Card>
   );
 
-  // Selection cards view
-  if (promptMode === null) {
-    return (
-      <div className="space-y-6">
-        <ConfigReviewSummary />
-        
-        <Card>
+  return (
+    <div className="space-y-6">
+      <ConfigReviewSummary />
+
+      {isOutOfSync && hasExistingPrompt && (
+        <div className="flex items-start gap-3 p-3 rounded-md bg-yellow-500/10 border border-yellow-500/30" data-testid="prompt-out-of-sync-warning">
+          <AlertCircle className="h-4 w-4 text-yellow-600 dark:text-yellow-400 mt-0.5 shrink-0" />
+          <div className="flex-1">
+            <p className="text-sm font-medium text-yellow-700 dark:text-yellow-300">Configuration has changed</p>
+            <p className="text-xs text-yellow-600 dark:text-yellow-400 mt-0.5">
+              Your agent's configuration fields have been updated since this prompt was last saved. You may want to regenerate the prompt or manually update it to reflect the latest changes.
+            </p>
+          </div>
+        </div>
+      )}
+
+      {pendingGeneratedPrompt && (
+        <Card data-testid="card-pending-generated-prompt">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Code className="h-5 w-5 text-primary" />
-              Create Agent Prompt
+            <CardTitle className="flex items-center gap-2 text-base">
+              <Sparkles className="h-4 w-4 text-primary" />
+              New AI-Generated Prompt
             </CardTitle>
             <CardDescription>
-              Choose how you want to create your agent's system prompt.
+              Review the generated prompt below. You can replace your current prompt or discard this version.
             </CardDescription>
           </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {/* Manual Creation Card */}
-              <Card 
-                className="cursor-pointer hover-elevate transition-all border-2 hover:border-primary/50"
-                onClick={handleSelectManual}
-                data-testid="card-manual-prompt"
+          <CardContent className="space-y-3">
+            <div className="rounded-md bg-muted/50 p-4 text-xs font-mono whitespace-pre-wrap max-h-[300px] overflow-y-auto" data-testid="preview-generated-prompt">
+              {pendingGeneratedPrompt}
+            </div>
+            <div className="flex items-center justify-end gap-2">
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={handleDiscardGenerated}
+                data-testid="button-discard-generated"
               >
-                <CardHeader className="pb-3">
-                  <CardTitle className="flex items-center gap-2 text-base">
-                    <Pencil className="h-4 w-4 text-primary" />
-                    Create Manually
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="pt-0">
-                  <p className="text-sm text-muted-foreground mb-3">
-                    Start with a structured template based on prompt engineering best practices. Your sample data and available actions will be pre-populated.
-                  </p>
-                  <div className="flex flex-wrap gap-1">
-                    <Badge variant="secondary" className="text-xs">Template-based</Badge>
-                    <Badge variant="secondary" className="text-xs">Full control</Badge>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* AI Generation Card */}
-              <Card 
-                className={`transition-all border-2 ${
-                  hasBusinessUseCase 
-                    ? "cursor-pointer hover-elevate hover:border-primary/50" 
-                    : "opacity-50 cursor-not-allowed"
-                }`}
-                onClick={hasBusinessUseCase ? handleSelectAI : undefined}
-                data-testid="card-ai-prompt"
+                <X className="h-3 w-3 mr-1" />
+                Discard
+              </Button>
+              <Button
+                type="button"
+                variant="default"
+                size="sm"
+                onClick={handleAcceptGenerated}
+                disabled={isSaving}
+                data-testid="button-replace-prompt"
               >
-                <CardHeader className="pb-3">
-                  <CardTitle className="flex items-center gap-2 text-base">
-                    <Sparkles className="h-4 w-4 text-primary" />
-                    AI Generate
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="pt-0">
-                  <p className="text-sm text-muted-foreground mb-3">
-                    Let AI create an optimized prompt by intelligently analyzing your business use case and configuration.
-                  </p>
-                  <div className="flex flex-wrap gap-1">
-                    <Badge variant="secondary" className="text-xs">AI-powered</Badge>
-                    <Badge variant="secondary" className="text-xs">Context-aware</Badge>
-                  </div>
-                  {!hasBusinessUseCase && (
-                    <div className="mt-3 flex items-center gap-2 text-xs text-muted-foreground">
-                      <AlertTriangle className="h-3 w-3" />
-                      Requires business use case to be filled in
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
+                {isSaving ? (
+                  <Loader2 className="h-3 w-3 animate-spin mr-1" />
+                ) : (
+                  <Check className="h-3 w-3 mr-1" />
+                )}
+                Replace Current Prompt
+              </Button>
             </div>
           </CardContent>
         </Card>
-      </div>
-    );
-  }
+      )}
 
-  // Prompt editor view (for both manual and AI modes)
-  return (
-    <div className="space-y-6">
       <Card>
         <CardHeader>
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between flex-wrap gap-2">
             <div>
               <CardTitle className="flex items-center gap-2">
                 <Code className="h-5 w-5 text-primary" />
-                {promptMode === 'manual' ? 'Manual Prompt Template' : 'AI Generated Prompt'}
+                Agent Prompt
               </CardTitle>
               <CardDescription>
-                {promptMode === 'manual' 
-                  ? 'Edit the template below. Your data has been pre-populated into the appropriate sections.'
-                  : 'AI has generated a prompt based on your configuration. You can edit it if needed.'
+                {hasExistingPrompt
+                  ? "View and edit your agent's system prompt. Click Edit to make changes, then Save."
+                  : "Create your agent's system prompt using AI generation or write it manually."
                 }
               </CardDescription>
             </div>
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              onClick={handleBackToSelection}
-              className="gap-1"
-              data-testid="button-back-to-selection"
-            >
-              <ArrowLeft className="h-3 w-3" />
-              Change Method
-            </Button>
           </div>
+          {promptLastRevisedBy && promptLastRevisedAt && (
+            <div className="flex items-center gap-2 text-xs text-muted-foreground mt-1" data-testid="text-last-revised">
+              <User className="h-3 w-3 shrink-0" />
+              <span>Last revised by <span className="font-medium">{formatRevisedBy(promptLastRevisedBy)}</span> &mdash; {formatTimestamp(promptLastRevisedAt)}</span>
+            </div>
+          )}
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <div className="flex items-center justify-between flex-wrap gap-2">
-              <Label>
-                {promptMode === 'manual' ? 'Prompt Template' : 'Prompt Preview'}
-              </Label>
-              <div className="flex items-center gap-2">
-                {promptMode === 'ai' && !isGenerating && !isEditing && (
-                  <>
-                    <span className="text-sm text-muted-foreground">AI model</span>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="sm"
-                          className="gap-1 h-7"
-                          data-testid="button-regenerate-prompt"
-                        >
-                          {geminiModelDisplayNames[selectedModel]}
-                          <ChevronDown className="h-3 w-3" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        {(Object.keys(geminiModelDisplayNames) as GeminiModel[]).map((model) => (
-                          <DropdownMenuItem
-                            key={model}
-                            onClick={() => {
-                              setSelectedModel(model);
-                              onUpdate({ customPrompt: "" });
-                              generatePromptFromAPI(model);
-                            }}
-                            data-testid={`menu-item-prompt-model-${model}`}
-                          >
-                            {geminiModelDisplayNames[model]}
-                          </DropdownMenuItem>
-                        ))}
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </>
-                )}
-                {isGenerating && (
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    className="gap-1 h-7"
-                    disabled
-                  >
-                    <Loader2 className="h-3 w-3 animate-spin" />
-                    Generating...
-                  </Button>
-                )}
-              </div>
-            </div>
-            <div className="flex items-center justify-end gap-2">
-              {data.customPrompt && !isGenerating && (
+          <div className="flex items-center justify-between flex-wrap gap-2">
+            <div className="flex items-center gap-2">
+              {hasBusinessUseCase && (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      disabled={isGenerating}
+                      data-testid="button-ai-generate-prompt"
+                    >
+                      {isGenerating ? (
+                        <Loader2 className="h-3 w-3 animate-spin mr-1" />
+                      ) : (
+                        <Sparkles className="h-3 w-3 mr-1" />
+                      )}
+                      {isGenerating ? "Generating..." : "AI Generate"}
+                      {!isGenerating && <ChevronDown className="h-3 w-3 ml-1" />}
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="start">
+                    {(Object.keys(geminiModelDisplayNames) as GeminiModel[]).map((model) => (
+                      <DropdownMenuItem
+                        key={model}
+                        onClick={() => {
+                          setSelectedModel(model);
+                          generatePromptFromAPI(model);
+                        }}
+                        data-testid={`menu-item-prompt-model-${model}`}
+                      >
+                        {geminiModelDisplayNames[model]}
+                      </DropdownMenuItem>
+                    ))}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              )}
+              {!hasExistingPrompt && !isEditing && (
                 <Button
                   type="button"
-                  variant="ghost"
+                  variant="outline"
                   size="sm"
-                  onClick={handleResetPrompt}
-                  className="gap-1 h-7"
-                  data-testid="button-reset-prompt"
+                  onClick={() => {
+                    const template = generateManualTemplate(data);
+                    setEditedPrompt(template);
+                    setIsEditing(true);
+                  }}
+                  data-testid="button-create-manual-prompt"
                 >
-                  <RotateCcw className="h-3 w-3" />
-                  {promptMode === 'ai' ? 'Regenerate' : 'Reset Template'}
+                  <Pencil className="h-3 w-3 mr-1" />
+                  Create Manually
                 </Button>
               )}
-              {promptMode === 'ai' && (
+            </div>
+            <div className="flex items-center gap-2">
+              {hasExistingPrompt && !isEditing && (
                 <Button
                   type="button"
                   variant="ghost"
                   size="sm"
-                  onClick={isEditing ? handleSaveEdit : handleEditToggle}
-                  className="gap-1 h-7"
-                  disabled={isGenerating}
+                  onClick={() => {
+                    setEditedPrompt(data.customPrompt || "");
+                    setIsEditing(true);
+                  }}
                   data-testid="button-edit-prompt"
                 >
-                  <Pencil className="h-3 w-3" />
-                  {isEditing ? "Save" : "Edit"}
+                  <Pencil className="h-3 w-3 mr-1" />
+                  Edit
                 </Button>
               )}
-              {promptMode === 'manual' && isEditing && (
-                <Button
-                  type="button"
-                  variant="default"
-                  size="sm"
-                  onClick={handleSaveEdit}
-                  className="gap-1 h-7"
-                  data-testid="button-save-prompt"
-                >
-                  <Check className="h-3 w-3" />
-                  Save Changes
-                </Button>
+              {isEditing && (
+                <>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                      setEditedPrompt(data.customPrompt || "");
+                      setIsEditing(false);
+                    }}
+                    data-testid="button-cancel-edit-prompt"
+                  >
+                    <X className="h-3 w-3 mr-1" />
+                    Cancel
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="default"
+                    size="sm"
+                    onClick={handleSaveEdit}
+                    disabled={isSaving || editedPrompt === data.customPrompt}
+                    data-testid="button-save-prompt"
+                  >
+                    {isSaving ? (
+                      <Loader2 className="h-3 w-3 animate-spin mr-1" />
+                    ) : (
+                      <Save className="h-3 w-3 mr-1" />
+                    )}
+                    Save
+                  </Button>
+                </>
               )}
             </div>
-
-            {generationError && (
-              <div className="flex items-center gap-2 p-2 rounded-md bg-destructive/10 text-destructive text-xs">
-                <AlertTriangle className="h-3 w-3" />
-                {generationError} - Using fallback template.
-              </div>
-            )}
-            
-            {isGenerating ? (
-              <div 
-                className="rounded-md bg-muted/50 p-4 min-h-[400px] flex flex-col items-center justify-center gap-3"
-                data-testid="prompt-loading"
-              >
-                <Loader2 className="h-6 w-6 animate-spin text-primary" />
-                <p className="text-sm text-muted-foreground">Generating prompt with AI...</p>
-              </div>
-            ) : (promptMode === 'manual' || isEditing) ? (
-              <Textarea
-                value={editedPrompt}
-                onChange={(e) => setEditedPrompt(e.target.value)}
-                className="min-h-[400px] resize-y font-mono text-xs"
-                data-testid="textarea-edit-prompt"
-              />
-            ) : (
-              <div 
-                className="rounded-md bg-muted/50 p-4 text-xs font-mono whitespace-pre-wrap max-h-[400px] overflow-y-auto"
-                data-testid="prompt-preview"
-              >
-                {displayPrompt || "No prompt generated yet."}
-              </div>
-            )}
           </div>
+
+          {generationError && (
+            <div className="flex items-center gap-2 p-2 rounded-md bg-destructive/10 text-destructive text-xs">
+              <AlertTriangle className="h-3 w-3" />
+              {generationError} - Using fallback template.
+            </div>
+          )}
+
+          {isGenerating ? (
+            <div 
+              className="rounded-md bg-muted/50 p-4 min-h-[400px] flex flex-col items-center justify-center gap-3"
+              data-testid="prompt-loading"
+            >
+              <Loader2 className="h-6 w-6 animate-spin text-primary" />
+              <p className="text-sm text-muted-foreground">Generating prompt with AI...</p>
+            </div>
+          ) : isEditing ? (
+            <Textarea
+              value={editedPrompt}
+              onChange={(e) => setEditedPrompt(e.target.value)}
+              className="min-h-[400px] resize-y font-mono text-xs"
+              data-testid="textarea-edit-prompt"
+            />
+          ) : hasExistingPrompt ? (
+            <div 
+              className="rounded-md bg-muted/50 p-4 text-xs font-mono whitespace-pre-wrap max-h-[500px] overflow-y-auto"
+              data-testid="prompt-preview"
+            >
+              {data.customPrompt}
+            </div>
+          ) : (
+            <div 
+              className="rounded-md bg-muted/50 p-8 flex flex-col items-center justify-center gap-3 text-center"
+              data-testid="prompt-empty-state"
+            >
+              <Code className="h-8 w-8 text-muted-foreground/50" />
+              <p className="text-sm text-muted-foreground">No prompt created yet.</p>
+              <p className="text-xs text-muted-foreground">Use AI Generate or Create Manually to get started.</p>
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>
@@ -3746,7 +3781,7 @@ export default function CreateAgent() {
       case 8:
         return <Step8ValidationChecklist data={formData} onUpdate={updateFormData} />;
       case 9:
-        return <Step8Review data={formData} onUpdate={updateFormData} />;
+        return <Step8Review data={formData} onUpdate={updateFormData} agentId={draftId || undefined} />;
       case 10:
         return <Step10WelcomeScreen data={formData} onUpdate={updateFormData} />;
       default:

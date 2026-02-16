@@ -2156,6 +2156,10 @@ export interface PromptCoachResponse {
     action: "replace" | "append";
     content: string;
     explanation: string;
+    promptUpdate?: {
+      findText: string;
+      replaceText: string;
+    };
   }[];
 }
 
@@ -2238,13 +2242,31 @@ You can see, analyze, and discuss these fields to give context-aware advice, but
   "field": "guardrails",
   "action": "append",
   "content": "Keep responses concise — under 3 sentences unless the user asks for detail.",
-  "explanation": "Adding a conciseness rule will help control response length."
+  "explanation": "Adding a conciseness rule will help control response length.",
+  "promptUpdate": {
+    "findText": "exact text from the current agent prompt to find and replace",
+    "replaceText": "the updated text that should replace the found text"
+  }
 }
 \`\`\`
 Valid field values: "businessUseCase", "domainKnowledge", "validationRules", "guardrails", "welcomeGreeting", "welcomeSuggestedPrompts"
 Valid action values: "replace" (replace entire field), "append" (add to existing content)
 You may include multiple suggested_change blocks in a single response if needed.
 After each block, explain what the change does in plain language.
+
+## IMPORTANT: Prompt Update Behavior
+When you click "Apply", it ONLY updates the specific configuration field. The Agent Prompt is NOT automatically regenerated. To keep the prompt in sync, you MUST include a "promptUpdate" field in your suggested_change block whenever the change should also be reflected in the agent prompt.
+
+The "promptUpdate" object has two required fields:
+- "findText": An exact substring from the current agent prompt that corresponds to the section being changed. Copy it exactly — it must match character-for-character.
+- "replaceText": The replacement text that should replace "findText" in the prompt.
+
+If the current agent prompt doesn't contain a relevant section for the change (e.g., you're adding a brand new guardrail and the prompt has no guardrails section), you may omit "promptUpdate" — the user will see an out-of-sync warning and can choose to regenerate the prompt manually.
+
+When including "promptUpdate", be careful to:
+- Copy the findText exactly from the "Current Agent Prompt" visible to you above
+- Keep the replaceText consistent with the surrounding prompt structure and formatting
+- Only update the specific section relevant to the change — don't rewrite unrelated parts
 
 ## Proactive Analysis
 When the user asks for a general review ("review my agent", etc.), give an honest, actionable analysis:
@@ -2312,12 +2334,19 @@ function parseSuggestedChanges(text: string): PromptCoachResponse["suggestedChan
     try {
       const parsed = JSON.parse(match[1].trim());
       if (parsed.field && parsed.action && parsed.content) {
-        changes.push({
+        const change: any = {
           field: parsed.field,
           action: parsed.action,
           content: parsed.content,
           explanation: parsed.explanation || "",
-        });
+        };
+        if (parsed.promptUpdate && parsed.promptUpdate.findText && parsed.promptUpdate.replaceText) {
+          change.promptUpdate = {
+            findText: parsed.promptUpdate.findText,
+            replaceText: parsed.promptUpdate.replaceText,
+          };
+        }
+        changes.push(change);
       }
     } catch {
       // Skip malformed JSON blocks

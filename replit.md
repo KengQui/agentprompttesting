@@ -56,35 +56,50 @@ Agent Studio utilizes a modern web application architecture with a clear separat
 ### Prompt Coach (Detailed)
 The Prompt Coach is an AI-powered chatbot that helps users improve their agent configurations through conversational interaction.
 
-**Frontend**: `client/src/components/prompt-coach.tsx` (431 lines)
+**Frontend**: `client/src/components/prompt-coach.tsx`
 - Renders as a collapsible panel in the agent wizard sidebar
 - Components: `PromptCoachTrigger` (toggle button) and `PromptCoach` (main chat panel)
 - Shows AI messages with embedded "Apply" buttons for suggested changes
 - Tracks which suggestions have been applied via `appliedChanges` Set per message
 - Chat history is persisted per agent and survives page refreshes
-- Uses `SuggestedChange` interface: `{ field, action ("replace"|"append"), content, explanation }`
+- Uses `SuggestedChange` interface: `{ field, action ("replace"|"append"), content, explanation, promptUpdate? }`
+- Shows "Also updates agent prompt" indicator when a suggestion includes a `promptUpdate` field
 
 **Backend Endpoints** (in `server/routes.ts`):
 - `POST /api/agents/:id/prompt-coach` — Sends user message + chat history, returns AI response with optional `suggestedChanges[]`
-- `POST /api/agents/:id/prompt-coach/apply` — Applies a suggested change to one of 4 fields: businessUseCase, domainKnowledge, validationRules, guardrails. Auto-regenerates the system prompt after applying.
+- `POST /api/agents/:id/prompt-coach/apply` — Applies a suggested change to config fields AND optionally applies a surgical `promptUpdate` (find/replace in custom-prompt.md). Returns `{ success, field, promptUpdated }`. Sets `promptLastRevisedBy: "prompt-coach"` when prompt is updated.
 - `GET /api/agents/:id/prompt-coach/history` — Retrieves persisted chat history
 - `PUT /api/agents/:id/prompt-coach/history` — Saves chat history
 - `DELETE /api/agents/:id/prompt-coach/history` — Clears chat history
 
+**Prompt Management Endpoints** (in `server/routes.ts`):
+- `POST /api/agents/:id/save-prompt` — Saves the agent's custom prompt with revision tracking. Body: `{ customPrompt, revisedBy: "user"|"ai-generate"|"prompt-coach" }`. Returns `{ promptLastRevisedBy, promptLastRevisedAt }`.
+- `GET /api/agents/:id/prompt-sync-status` — Checks whether the agent's prompt is in sync with the current config fields (businessUseCase, domainKnowledge, validationRules, guardrails). Uses MD5 hash comparison. Returns `{ isInSync, promptLastRevisedBy, promptLastRevisedAt, configFieldsHash, promptConfigFieldsHash }`.
+
 **AI Logic** (in `server/gemini.ts`):
 - `buildPromptCoachSystemPrompt()` — Builds the coach's system prompt, injecting all agent config fields as context
 - `generatePromptCoachResponse()` — Sends to Gemini AI with chat history, returns `{ message, suggestedChanges? }`
-- `parseSuggestedChanges()` — Extracts ```suggested_change JSON blocks from AI response
+- `parseSuggestedChanges()` — Extracts ```suggested_change JSON blocks from AI response, including optional `promptUpdate` field
 - `cleanCoachResponse()` — Strips suggested_change blocks from the display message
-- Coach can suggest changes to 4 apply-able fields: businessUseCase, domainKnowledge, validationRules, guardrails
-- Coach can advise on (but not apply changes to) read-only fields: customPrompt (agent prompt), sampleData, welcomeConfig, availableActions
+- Coach can suggest changes to 6 apply-able fields: businessUseCase, domainKnowledge, validationRules, guardrails, welcomeGreeting, welcomeSuggestedPrompts
+- Coach is instructed to include `promptUpdate: { findText, replaceText }` in suggestions to surgically update the agent prompt in sync with config field changes
 - Concise coaching mode is the default for all agents (short responses, one suggestion at a time, no filler)
 - Coach has read-only visibility into the agent's custom prompt (Step 9) for context-aware advice
 
+### Prompt Revision Tracking
+- Agent schema includes: `promptLastRevisedBy` (string), `promptLastRevisedAt` (ISO timestamp), `configFieldsHash` (MD5 hash)
+- `computeConfigFieldsHash()` in `server/routes.ts` — Computes MD5 hash of businessUseCase + domainKnowledge + validationRules + guardrails
+- Step 9 (Agent Prompt) UI shows:
+  - "Last revised by" indicator with source (User, Prompt Coach, AI Generate) and timestamp
+  - Out-of-sync warning when config fields have changed since prompt was last saved
+  - Explicit Save button (no auto-save) for manual prompt edits
+  - AI Generate dropdown with model selection; shows confirmation dialog if existing prompt would be replaced
+  - "Create Manually" button for starting from a template
+
 **Current Limitations / Improvement Areas**:
 - Coach sees full agent config every message (no context optimization like the chat system has)
-- "Apply" only works for 4 text fields — can't suggest changes to sample data, actions, or welcome config
-- No undo for applied changes
+- "Apply" works for 6 fields — can't suggest changes to sample data or actions
+- Undo supported for applied changes within the same session
 - No tracking of what changes were previously applied across sessions
 
 ### Smart Context Management

@@ -1,6 +1,6 @@
 import type { Express, Request, Response, NextFunction } from "express";
 import { createServer, type Server } from "http";
-import { storage } from "./storage";
+import { storage, computeConfigFieldsHash } from "./storage";
 import { insertAgentSchema, updateAgentSchema, insertChatSessionSchema, updateChatSessionSchema, simulationRequestSchema, insertUserSchema, loginSchema, passwordResetRequestSchema, passwordResetSchema, type PublicUser } from "@shared/schema";
 import { z } from "zod";
 import type { TurnTrace, TraceEntry, ConfigSnapshot } from "@shared/schema";
@@ -1842,6 +1842,68 @@ export async function registerRoutes(
   });
 
   // Apply a suggested change from the prompt coach
+  app.post("/api/agents/:id/save-prompt", requireAuth, async (req: AuthenticatedRequest, res) => {
+    try {
+      const agent = await storage.getAgent(req.params.id);
+      if (!agent) return res.status(404).json({ message: "Agent not found" });
+
+      if (agent.userId !== req.user!.id) {
+        return res.status(403).json({ message: "Forbidden" });
+      }
+
+      const { customPrompt, revisedBy } = req.body;
+      if (typeof customPrompt !== "string") {
+        return res.status(400).json({ message: "customPrompt is required" });
+      }
+
+      const validSources = ["user", "prompt-coach", "ai-generate"];
+      const source = validSources.includes(revisedBy) ? revisedBy : "user";
+
+      const now = new Date().toISOString();
+      const update: Record<string, any> = {
+        customPrompt,
+        promptLastRevisedBy: source,
+        promptLastRevisedAt: now,
+      };
+
+      const mergedAgent = { ...agent, ...update };
+      update.configFieldsHash = computeConfigFieldsHash(mergedAgent);
+
+      await storage.updateAgent(req.params.id, update as any);
+      clearAgentCache(req.params.id);
+
+      res.json({ success: true, promptLastRevisedBy: source, promptLastRevisedAt: now, configFieldsHash: update.configFieldsHash });
+    } catch (error: any) {
+      console.error("Error saving prompt:", error);
+      res.status(500).json({ message: error?.message || "Failed to save prompt" });
+    }
+  });
+
+  app.get("/api/agents/:id/prompt-sync-status", requireAuth, async (req: AuthenticatedRequest, res) => {
+    try {
+      const agent = await storage.getAgent(req.params.id);
+      if (!agent) return res.status(404).json({ message: "Agent not found" });
+
+      if (agent.userId !== req.user!.id) {
+        return res.status(403).json({ message: "Forbidden" });
+      }
+
+      const currentHash = computeConfigFieldsHash(agent);
+      const isInSync = !agent.configFieldsHash || agent.configFieldsHash === currentHash;
+
+      res.json({
+        isInSync,
+        promptLastRevisedBy: agent.promptLastRevisedBy || null,
+        promptLastRevisedAt: agent.promptLastRevisedAt || null,
+        configFieldsHash: agent.configFieldsHash || null,
+        currentConfigHash: currentHash,
+      });
+    } catch (error: any) {
+      console.error("Error checking prompt sync status:", error);
+      res.status(500).json({ message: error?.message || "Failed to check sync status" });
+    }
+  });
+
   app.post("/api/agents/:id/prompt-coach/apply", requireAuth, async (req: AuthenticatedRequest, res) => {
     try {
       const agent = await storage.getAgent(req.params.id);
@@ -1851,7 +1913,7 @@ export async function registerRoutes(
         return res.status(403).json({ message: "Forbidden" });
       }
 
-      const { field, action, content } = req.body;
+      const { field, action, content, promptUpdate } = req.body;
 
       const allowedFields = ["businessUseCase", "domainKnowledge", "validationRules", "guardrails", "welcomeGreeting", "welcomeSuggestedPrompts"];
       if (!allowedFields.includes(field)) {
@@ -1903,12 +1965,27 @@ export async function registerRoutes(
         update = { [field]: newValue };
       }
 
+      let promptUpdated = false;
+      if (promptUpdate && typeof promptUpdate === "object" && agent.customPrompt) {
+        const { findText, replaceText } = promptUpdate;
+        if (findText && typeof findText === "string" && typeof replaceText === "string") {
+          const currentPrompt = agent.customPrompt;
+          if (currentPrompt.includes(findText)) {
+            update.customPrompt = currentPrompt.replace(findText, replaceText);
+            update.promptLastRevisedBy = "prompt-coach";
+            update.promptLastRevisedAt = new Date().toISOString();
+            const mergedAgent = { ...agent, ...update };
+            update.configFieldsHash = computeConfigFieldsHash(mergedAgent);
+            promptUpdated = true;
+          }
+        }
+      }
+
       await storage.updateAgent(req.params.id, update as any);
 
-      // Clear agent cache so changes take effect
       clearAgentCache(req.params.id);
 
-      res.json({ success: true, field, promptRegenerated: false });
+      res.json({ success: true, field, promptUpdated });
     } catch (error: any) {
       console.error("Error applying prompt coach change:", error);
       res.status(500).json({ message: error?.message || "Failed to apply change" });

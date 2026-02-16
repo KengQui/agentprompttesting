@@ -153,6 +153,9 @@ export const agentSchema = z.object({
   configurationStep: z.number().default(1),
   promptGeneratedAt: z.string().optional(),
   lastConfigUpdate: z.string().optional(),
+  promptLastRevisedBy: z.enum(["user", "prompt-coach", "ai-generate"]).optional(),
+  promptLastRevisedAt: z.string().optional(),
+  configFieldsHash: z.string().optional(),
   createdAt: z.string(),
   updatedAt: z.string(),
 });

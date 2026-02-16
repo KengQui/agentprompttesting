@@ -1,4 +1,4 @@
-import { randomUUID } from "crypto";
+import { randomUUID, createHash } from "crypto";
 import * as fs from "fs";
 import * as path from "path";
 import bcrypt from "bcryptjs";
@@ -29,6 +29,16 @@ function ensureDir(dir: string) {
   if (!fs.existsSync(dir)) {
     fs.mkdirSync(dir, { recursive: true });
   }
+}
+
+export function computeConfigFieldsHash(agent: Pick<Agent, 'businessUseCase' | 'domainKnowledge' | 'validationRules' | 'guardrails'>): string {
+  const content = [
+    agent.businessUseCase || "",
+    agent.domainKnowledge || "",
+    agent.validationRules || "",
+    agent.guardrails || "",
+  ].join("|||");
+  return createHash("md5").update(content).digest("hex");
 }
 
 function getAgentDir(agentId: string) {
@@ -458,6 +468,9 @@ export class MemStorage implements IStorage {
       description: meta.description || "",
       promptGeneratedAt: meta.promptGeneratedAt || undefined,
       lastConfigUpdate: meta.lastConfigUpdate || undefined,
+      promptLastRevisedBy: (meta.promptLastRevisedBy as "user" | "prompt-coach" | "ai-generate") || undefined,
+      promptLastRevisedAt: meta.promptLastRevisedAt || undefined,
+      configFieldsHash: meta.configFieldsHash || undefined,
       businessUseCase,
       domainKnowledge,
       validationRules,
@@ -535,6 +548,9 @@ export class MemStorage implements IStorage {
       description: agent.description || "",
       ...(agent.promptGeneratedAt ? { promptGeneratedAt: agent.promptGeneratedAt } : {}),
       ...(agent.lastConfigUpdate ? { lastConfigUpdate: agent.lastConfigUpdate } : {}),
+      ...(agent.promptLastRevisedBy ? { promptLastRevisedBy: agent.promptLastRevisedBy } : {}),
+      ...(agent.promptLastRevisedAt ? { promptLastRevisedAt: agent.promptLastRevisedAt } : {}),
+      ...(agent.configFieldsHash ? { configFieldsHash: agent.configFieldsHash } : {}),
     });
     writeTextFile(getAgentFilePath(agent.id, AGENT_FILES.META), metaYaml);
 
@@ -690,6 +706,12 @@ export class MemStorage implements IStorage {
       ...(hasConfigChange ? { lastConfigUpdate: new Date().toISOString() } : {}),
       ...(isPromptUpdate ? { promptGeneratedAt: new Date().toISOString() } : {}),
     };
+
+    if (isPromptUpdate && !updates.promptLastRevisedBy) {
+      updatedAgent.promptLastRevisedBy = "user";
+      updatedAgent.promptLastRevisedAt = new Date().toISOString();
+      updatedAgent.configFieldsHash = computeConfigFieldsHash(updatedAgent);
+    }
 
     this.agents.set(id, updatedAgent);
     this.saveAgentToDisk(updatedAgent);
