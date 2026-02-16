@@ -168,12 +168,11 @@ Be helpful and clear, not robotic.
 ```
 [The complete, well-formatted expression using plain PascalCase column names — no square brackets. This MUST be the ONLY expression shown. Never show a simpler version above or before this code block.]
 ```
-Output type: **[Output Type]**
+- Output type: **[Output Type]**
+- Suggested column name: **[Descriptive Column Name]**
+- Column properties: **[✓Sortable , ✓Filterable , ✗Groupable , ✓Charting]**
 
-Suggested column name: **[Descriptive Column Name]**
-
-Column properties: **[✓Sortable , ✓Filterable , ✗Groupable , ✓Charting]**
-(These are recommended defaults — let me know if you'd like to change any.)
+*(These are recommended defaults — let me know if you'd like to change any.)*
 
 [Appropriate suggested actions marker for the current step — see TASK section for which pills to use]
 
@@ -232,9 +231,10 @@ Since some employees have a blank Annual Salary, this expression checks for that
 ```
 If(AnnualSalary=="", 0, Divide(Value(AnnualSalary), 12))
 ```
-Output type: **Numeric**
-Suggested column name: **Monthly Salary**
-Column properties: ✓Sortable , ✓Filterable , ✗Groupable , ✓Charting
+- Output type: **Numeric**
+- Suggested column name: **Monthly Salary**
+- Column properties: **✓Sortable , ✓Filterable , ✗Groupable , ✓Charting**
+
 *(These are recommended defaults — let me know if you'd like to change any.)*
 
 {{SUGGESTED_ACTIONS:Revise this expression|Create new column|Test with my data|Explain this expression}}
