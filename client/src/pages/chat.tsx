@@ -394,10 +394,10 @@ function parseValidationRows(text: string): { rows: ValidationRow[]; footnote: s
     const inputs: { name: string; value: string }[] = [];
     const inputSection = chunk.match(/\*{0,2}Inputs?:?\*{0,2}\s*([\s\S]*?)(?=\n\s*-?\s*\*{0,2}Calc|\n\s*-?\s*\*{0,2}Result)/i);
     if (inputSection) {
-      const backtickRegex = /`([^`]+)`\s*=\s*"?([^",\n]+)"?/g;
+      const backtickRegex = /`([^`]+)`\s*=\s*(?:"([^"\n]+)"|(\S+))/g;
       let ip: RegExpExecArray | null;
       while ((ip = backtickRegex.exec(inputSection[1])) !== null) {
-        inputs.push({ name: ip[1], value: ip[2].replace(/\\"/g, '"').trim() });
+        inputs.push({ name: ip[1], value: (ip[2] || ip[3] || "").replace(/\\"/g, '"').trim() });
       }
       if (inputs.length === 0) {
         const colonRegex = /[-*]\s*\*{0,2}([^:*]+)\*{0,2}:\s*(.+)/g;
