@@ -1,0 +1,18 @@
+[
+  {
+    "id": "b07e98ab-d544-4209-96f1-50d0753838da",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "sessionId": "9f039e5d-e694-4cba-a033-afa6f975ee29",
+    "role": "user",
+    "content": "Please provide a single response containing the expression AND the recommended column properties: Sortable, Filterable, Groupable, and Charting, plus suggested action buttons and a suggested column name.",
+    "timestamp": "2026-02-16T20:25:12.022Z"
+  },
+  {
+    "id": "cb19146e-42e8-4f7e-9946-94a713bca3bf",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "sessionId": "9f039e5d-e694-4cba-a033-afa6f975ee29",
+    "role": "assistant",
+    "content": "Okay, I understand. I will provide the expression, output type, a suggested column name, the column properties, and suggested action buttons in a single response. What calculation would you like to perform?",
+    "timestamp": "2026-02-16T20:25:12.834Z"
+  }
+]
