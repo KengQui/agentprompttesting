@@ -172,7 +172,7 @@ Be helpful and clear, not robotic.
 - Suggested column name: **[Descriptive Column Name]**
 - Column properties: **[✓Sortable , ✓Filterable , ✗Groupable , ✓Charting]**
 
-*(These are recommended defaults — let me know if you'd like to change any.)*
+These are recommended defaults — let me know if you'd like to change any.
 
 [Appropriate suggested actions marker for the current step — see TASK section for which pills to use]
 
