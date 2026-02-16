@@ -76,6 +76,49 @@ function validateAIResponse(response: string): ResponseValidationResult {
     recoveryResponse: isInvalid ? recoveryMessage : trimmed,
   };
 }
+function enforceColumnPropertiesGate(response: string, chatHistory: Array<{role: string; content: string}>): string {
+  const isFirstUserTurn = chatHistory.filter(m => m.role === 'user').length === 0;
+  if (!isFirstUserTurn) {
+    const lastUserMsg = chatHistory.filter(m => m.role === 'user').pop();
+    if (lastUserMsg) {
+      const lower = lastUserMsg.content.toLowerCase();
+      const isPropertyAnswer = /\b(yes|no|sure|sortable|filterable|groupable|don't need|not needed|skip|nah|yeah)\b/i.test(lower);
+      if (isPropertyAnswer) return response;
+    }
+  }
+
+  const propertiesQuestionPattern = /would you like (?:this column|it) to be\s+\*{0,2}(sortable|filterable|groupable)/i;
+  const hasPropertiesQuestion = propertiesQuestionPattern.test(response);
+  if (!hasPropertiesQuestion) return response;
+
+  const hasCodeBlock = /```[\s\S]*?```/.test(response);
+  const hasExpressionInline = /\b(If|Divide|Multiply|Add|Subtract|Round|Value|Concatenate|DateDiff)\s*\(/i.test(response);
+  const hasSuggestedActions = /\{\{SUGGESTED_ACTIONS:/.test(response);
+
+  if (!hasCodeBlock && !hasSuggestedActions) return response;
+
+  const questionMatch = response.match(propertiesQuestionPattern);
+  if (!questionMatch) return response;
+
+  const questionEnd = response.indexOf(questionMatch[0]) + questionMatch[0].length;
+  let truncateAt = questionEnd;
+  const afterQuestion = response.substring(questionEnd);
+  const nextSentenceEnd = afterQuestion.match(/^[^.?!]*[.?!]/);
+  if (nextSentenceEnd) {
+    truncateAt = questionEnd + nextSentenceEnd[0].length;
+  }
+
+  let truncated = response.substring(0, truncateAt).trim();
+  truncated = truncated.replace(/```[\s\S]*?```/g, '').trim();
+  truncated = truncated.replace(/\{\{SUGGESTED_ACTIONS:[^}]*\}\}/g, '').trim();
+  truncated = truncated.replace(/Suggested column name:.*$/gim, '').trim();
+  truncated = truncated.replace(/This expression will produce.*$/gim, '').trim();
+
+  if (truncated.length < 20) return response;
+
+  return truncated;
+}
+
 import { v4 as uuidv4 } from "uuid";
 import type { Agent, SampleDataset, MockUserState, AgentAction } from "@shared/schema";
 import type { ActionExecutionResult } from "./gemini";
@@ -799,6 +842,8 @@ export async function registerRoutes(
             // Validate AI response using shared helper
             const validation = validateAIResponse(rawResponse);
             responseContent = validation.recoveryResponse;
+            
+            responseContent = enforceColumnPropertiesGate(responseContent, chatHistory);
             
             if (!validation.isValid) {
               traceEntries.push({

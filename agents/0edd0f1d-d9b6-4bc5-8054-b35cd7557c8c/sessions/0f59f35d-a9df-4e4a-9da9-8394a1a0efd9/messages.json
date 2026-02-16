@@ -1,0 +1,18 @@
+[
+  {
+    "id": "99ef1a1b-b329-4976-9073-08d13076e233",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "sessionId": "0f59f35d-a9df-4e4a-9da9-8394a1a0efd9",
+    "role": "user",
+    "content": "Divide Annual Salary by 12 to get monthly pay",
+    "timestamp": "2026-02-16T20:02:52.373Z"
+  },
+  {
+    "id": "764c41e9-9c28-469e-b185-bf5194e9edac",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "sessionId": "0f59f35d-a9df-4e4a-9da9-8394a1a0efd9",
+    "role": "assistant",
+    "content": "I'll create a numeric column for monthly pay. Would you like this column to be **sortable** so you can rank employees by their monthly salary?",
+    "timestamp": "2026-02-16T20:02:53.122Z"
+  }
+]
