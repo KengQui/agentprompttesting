@@ -2571,22 +2571,57 @@
         }
       ],
       "success": true
+    },
+    {
+      "id": "trace-1771257963257",
+      "sessionId": "77bc84c3-7b4a-4602-ac13-aa87512ddf61",
+      "userInput": "update fsa contribution by 7 dolaar a month",
+      "agentResponse": "Okay, I can help you with that. Which FSA account would you like to update, your Healthcare FSA or your Dependent Care FSA?",
+      "startTime": "2026-02-16T16:06:02.466Z",
+      "endTime": "2026-02-16T16:06:03.257Z",
+      "totalDuration": 791,
+      "entries": [
+        {
+          "id": "entry-1771257962468-1",
+          "type": "intent_classification",
+          "name": "Orchestrator Intent Classification",
+          "timestamp": "2026-02-16T16:06:02.468Z",
+          "metadata": {
+            "intent": "answer_question",
+            "classificationMethod": "orchestrator",
+            "confidence": "high"
+          }
+        },
+        {
+          "id": "entry-1771257963257-3",
+          "type": "llm_call",
+          "name": "Gemini Response Generation",
+          "timestamp": "2026-02-16T16:06:03.257Z",
+          "duration": 789,
+          "metadata": {
+            "model": "gemini",
+            "intent": "answer_question",
+            "validated": true
+          }
+        }
+      ],
+      "success": true
     }
   ],
   "stats": {
     "hookCalls": {},
     "signalReads": {},
     "intentDistribution": {
-      "answer_question": 68
+      "answer_question": 69
     },
     "classificationMethods": {
-      "orchestrator": 68
+      "orchestrator": 69
     },
-    "avgResponseTime": 1335.6617647058824,
-    "totalLlmCalls": 67,
+    "avgResponseTime": 1327.768115942029,
+    "totalLlmCalls": 68,
     "totalTokensUsed": 0,
     "errorCount": 1
   },
   "createdAt": "2026-02-03T17:39:57.040Z",
-  "updatedAt": "2026-02-14T03:38:14.863Z"
+  "updatedAt": "2026-02-16T16:06:03.258Z"
 }
