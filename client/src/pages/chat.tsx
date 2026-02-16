@@ -394,7 +394,7 @@ function parseValidationRows(text: string): { rows: ValidationRow[]; footnote: s
     const inputs: { name: string; value: string }[] = [];
     const inputSection = chunk.match(/\*{0,2}Inputs?:?\*{0,2}\s*([\s\S]*?)(?=\n\s*-?\s*\*{0,2}Calc|\n\s*-?\s*\*{0,2}Result)/i);
     if (inputSection) {
-      const backtickRegex = /`([^`]+)`\s*=\s*(?:"([^"\n]+)"|(\S+))/g;
+      const backtickRegex = /`([^`]+)`\s*=\s*(?:"([^"\n]*)"|(\S+))/g;
       let ip: RegExpExecArray | null;
       while ((ip = backtickRegex.exec(inputSection[1])) !== null) {
         inputs.push({ name: ip[1], value: (ip[2] || ip[3] || "").replace(/\\"/g, '"').trim() });
@@ -462,7 +462,7 @@ function ValidationRowCard({ row, index, note }: { row: ValidationRow; index: nu
               <div key={j} className="rounded-md bg-muted px-2.5 py-1.5 text-xs">
                 <span className="text-muted-foreground">{input.name}</span>
                 <span className="mx-1">=</span>
-                <span className="font-mono font-medium">{input.value}</span>
+                <span className="font-mono font-medium">{input.value || <span className="italic text-muted-foreground">(blank)</span>}</span>
               </div>
             ))}
           </div>
