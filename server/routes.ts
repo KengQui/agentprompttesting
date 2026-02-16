@@ -77,33 +77,48 @@ function validateAIResponse(response: string): ResponseValidationResult {
   };
 }
 function enforceColumnPropertiesGate(response: string, chatHistory: Array<{role: string; content: string}>): string {
-  const isFirstUserTurn = chatHistory.filter(m => m.role === 'user').length === 0;
-  if (!isFirstUserTurn) {
-    const lastUserMsg = chatHistory.filter(m => m.role === 'user').pop();
-    if (lastUserMsg) {
-      const lower = lastUserMsg.content.toLowerCase();
-      const isPropertyAnswer = /\b(yes|no|sure|sortable|filterable|groupable|don't need|not needed|skip|nah|yeah)\b/i.test(lower);
-      if (isPropertyAnswer) return response;
-    }
+  const previousAssistantMessages = chatHistory.filter(m => m.role === 'assistant');
+  if (previousAssistantMessages.length > 0) {
+    const lastAssistant = previousAssistantMessages[previousAssistantMessages.length - 1].content.toLowerCase();
+    const askedPropertyQuestion = /\b(sortable|filterable|groupable)\b/.test(lastAssistant) &&
+      /(would you like|should|do you want|would it be helpful)/i.test(lastAssistant);
+    if (askedPropertyQuestion) return response;
   }
 
-  const propertiesQuestionPattern = /would you like (?:this column|it) to be\s+\*{0,2}(sortable|filterable|groupable)/i;
-  const hasPropertiesQuestion = propertiesQuestionPattern.test(response);
-  if (!hasPropertiesQuestion) return response;
+  const propertiesQuestionPatterns = [
+    /would you like (?:this column|it|the column) to be\s+\*{0,2}(sortable|filterable|groupable)/i,
+    /should (?:this column|it|the column) be\s+\*{0,2}(sortable|filterable|groupable)/i,
+    /do you want (?:this column|it|the column) to be\s+\*{0,2}(sortable|filterable|groupable)/i,
+    /would it be helpful .*(sortable|filterable|groupable)/i,
+    /\b(sortable|filterable|groupable)\b.*\?/i,
+  ];
+
+  let matchedPattern: RegExp | null = null;
+  let questionMatch: RegExpMatchArray | null = null;
+  for (const pattern of propertiesQuestionPatterns) {
+    const match = response.match(pattern);
+    if (match) {
+      matchedPattern = pattern;
+      questionMatch = match;
+      break;
+    }
+  }
+  if (!questionMatch) return response;
 
   const hasCodeBlock = /```[\s\S]*?```/.test(response);
-  const hasExpressionInline = /\b(If|Divide|Multiply|Add|Subtract|Round|Value|Concatenate|DateDiff)\s*\(/i.test(response);
+  const hasExpressionFunction = /\b(If|Divide|Multiply|Add|Subtract|Round|Value|Concatenate|DateDiff|FormatDouble)\s*\(/i.test(response);
   const hasSuggestedActions = /\{\{SUGGESTED_ACTIONS:/.test(response);
+  const hasSuggestedColumnName = /Suggested column name:/i.test(response);
 
-  if (!hasCodeBlock && !hasSuggestedActions) return response;
+  const hasExpressionContent = hasCodeBlock || hasSuggestedActions || hasSuggestedColumnName ||
+    (hasExpressionFunction && (hasSuggestedActions || hasSuggestedColumnName || /output/i.test(response)));
 
-  const questionMatch = response.match(propertiesQuestionPattern);
-  if (!questionMatch) return response;
+  if (!hasExpressionContent) return response;
 
   const questionEnd = response.indexOf(questionMatch[0]) + questionMatch[0].length;
   let truncateAt = questionEnd;
   const afterQuestion = response.substring(questionEnd);
-  const nextSentenceEnd = afterQuestion.match(/^[^.?!]*[.?!]/);
+  const nextSentenceEnd = afterQuestion.match(/^[^.?!\n]*[.?!]/);
   if (nextSentenceEnd) {
     truncateAt = questionEnd + nextSentenceEnd[0].length;
   }
@@ -113,6 +128,7 @@ function enforceColumnPropertiesGate(response: string, chatHistory: Array<{role:
   truncated = truncated.replace(/\{\{SUGGESTED_ACTIONS:[^}]*\}\}/g, '').trim();
   truncated = truncated.replace(/Suggested column name:.*$/gim, '').trim();
   truncated = truncated.replace(/This expression will produce.*$/gim, '').trim();
+  truncated = truncated.replace(/\bExpression:\s*`[^`]+`/gi, '').trim();
 
   if (truncated.length < 20) return response;
 
