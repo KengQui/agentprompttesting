@@ -1,0 +1,18 @@
+[
+  {
+    "id": "70d3344a-7647-48e7-b655-6bca440a88a0",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "sessionId": "9f6051d8-af97-4283-96d0-2d028ebd23dc",
+    "role": "user",
+    "content": "Divide Annual Salary by 12 to get monthly pay",
+    "timestamp": "2026-02-16T20:55:27.850Z"
+  },
+  {
+    "id": "5a3e746c-fa48-4348-a615-d126f60843f7",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "sessionId": "9f6051d8-af97-4283-96d0-2d028ebd23dc",
+    "role": "assistant",
+    "content": "Since some employees have a blank Annual Salary, this expression checks for that first and returns 0 for those rows to avoid errors.\n\n```\nIf(AnnualSalary==\"\", 0, Divide(Value(AnnualSalary), 12))\n```\nOutput type: **Numeric**\n\nSuggested column name: **Monthly Salary**\n\nColumn properties: ✓Sortable , ✓Filterable , ✗Groupable , ✓Charting\n(These are recommended defaults — let me know if you'd like to change any.)\n\n{{SUGGESTED_ACTIONS:Revise this expression|Create new column|Test with my data|Explain this expression}}",
+    "timestamp": "2026-02-16T20:55:29.152Z"
+  }
+]
