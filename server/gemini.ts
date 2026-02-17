@@ -803,6 +803,21 @@ function buildSampleDatasetsText(agent: AgentContext): string {
     const recordCount = countRecordsInDataset(dataset.content, dataset.format);
     const countLabel = recordCount > 0 ? `Total records: ${recordCount}` : "";
     
+    // DEBUG: Log injected CSV to verify row numbers
+    const displayLines = displayContent.split('\n');
+    console.log(`[ROW-DEBUG] Dataset: ${dataset.name}, format: ${dataset.format}`);
+    console.log(`[ROW-DEBUG] Header: ${displayLines[0]?.substring(0, 100)}`);
+    // Find Oliver Houser in output
+    for (let i = 0; i < displayLines.length; i++) {
+      if (displayLines[i].includes('Oliver') || displayLines[i].includes('Houser')) {
+        console.log(`[ROW-DEBUG] Oliver Houser line: "${displayLines[i].substring(0, 120)}"`);
+      }
+    }
+    console.log(`[ROW-DEBUG] First 3 data lines:`);
+    for (let i = 1; i <= 3 && i < displayLines.length; i++) {
+      console.log(`[ROW-DEBUG]   ${displayLines[i]?.substring(0, 100)}`);
+    }
+    
     section += `\n--- ${dataset.name} (${dataset.format.toUpperCase()}) ---\n`;
     if (countLabel) {
       section += `${countLabel}\n`;

@@ -1,0 +1,34 @@
+[
+  {
+    "id": "7dac3978-4a46-4f25-97b4-98c827adf13e",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "sessionId": "d4b1a880-402f-43ca-ad37-4c5014070033",
+    "role": "user",
+    "content": "Create a filter that display anyone that report to Susan",
+    "timestamp": "2026-02-17T20:45:37.581Z"
+  },
+  {
+    "id": "7b4d15b7-92a0-4137-aa5a-70498b8359e9",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "sessionId": "d4b1a880-402f-43ca-ad37-4c5014070033",
+    "role": "assistant",
+    "content": "I can create an expression to filter for employees who report to Susan.\n\n```\nIf(SupervisorName==\"Susan Clark (Chicago) (CKMT0018)\", \"Yes\", \"No\")\n```\n- Output type: **Text**\n- Suggested column name: **Reports to Susan**\n- Column properties: **✗Sortable , ✓Filterable , ✓Groupable , ✓Charting**\n\nThese are recommended defaults — let me know if you'd like to change any.\n\n{{SUGGESTED_ACTIONS:Revise this expression|Create new column|Test with my data|Explain this expression}}",
+    "timestamp": "2026-02-17T20:45:39.006Z"
+  },
+  {
+    "id": "bd2ec613-7abe-410d-b660-abeb706ba2eb",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "sessionId": "d4b1a880-402f-43ca-ad37-4c5014070033",
+    "role": "user",
+    "content": "Test with my data",
+    "timestamp": "2026-02-17T20:45:41.072Z"
+  },
+  {
+    "id": "ea7fb0f4-f99e-4957-b169-8006ca592143",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "sessionId": "d4b1a880-402f-43ca-ad37-4c5014070033",
+    "role": "assistant",
+    "content": "Here's a preview of how the expression will appear with your data.\n\n**Row 28: Employee: Oliver Houser**\n- **Inputs:** `SupervisorName` = \"Susan Clark (Chicago) (CKMT0018)\"\n- **Calculation:**\n  `If(SupervisorName==\"Susan Clark (Chicago) (CKMT0018)\", \"Yes\", \"No\")`\n  = `If(\"Susan Clark (Chicago) (CKMT0018)\"==\"Susan Clark (Chicago) (CKMT0018)\", \"Yes\", \"No\")`\n  = `If(True, \"Yes\", \"No\")`\n  = \"Yes\"\n- **Result:** Yes\n\n**Row 2: Employee: Harold Smith**\n- **Inputs:** `SupervisorName` = \"\"\n- **Calculation:**\n  `If(SupervisorName==\"Susan Clark (Chicago) (CKMT0018)\", \"Yes\", \"No\")`\n  = `If(\"\"==\"Susan Clark (Chicago) (CKMT0018)\", \"Yes\", \"No\")`\n  = `If(False, \"Yes\", \"No\")`\n  = \"No\"\n- **Result:** No\n\n{{SUGGESTED_ACTIONS:Create new column|Revise this expression|Explain this expression}}",
+    "timestamp": "2026-02-17T20:45:43.436Z"
+  }
+]
