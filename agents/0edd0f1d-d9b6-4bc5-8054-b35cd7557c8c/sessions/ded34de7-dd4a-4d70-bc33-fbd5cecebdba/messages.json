@@ -1,0 +1,34 @@
+[
+  {
+    "id": "b17e0c0d-7b38-4671-a514-51443dc5f3c3",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "sessionId": "ded34de7-dd4a-4d70-bc33-fbd5cecebdba",
+    "role": "user",
+    "content": "Create an expression that filter all employees that has Susan Clark as supervisor",
+    "timestamp": "2026-02-17T20:19:34.019Z"
+  },
+  {
+    "id": "a53061b2-5271-436e-b26d-75b624713b35",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "sessionId": "ded34de7-dd4a-4d70-bc33-fbd5cecebdba",
+    "role": "assistant",
+    "content": "This expression checks if the Supervisor Name contains \"Susan Clark\". It returns 1 if the supervisor name contains \"Susan Clark\", and 0 otherwise.\n\n```\nIf(Search(\"Susan Clark\", SupervisorName) > 0, 1, 0)\n```\n- Output type: **Numeric**\n- Suggested column name: **Supervisor is Susan Clark**\n- Column properties: **✓Sortable , ✓Filterable , ✗Groupable , ✓Charting**\n\nThese are recommended defaults — let me know if you'd like to change any.\n\n{{SUGGESTED_ACTIONS:Revise this expression|Create new column|Test with my data|Explain this expression}}",
+    "timestamp": "2026-02-17T20:19:35.534Z"
+  },
+  {
+    "id": "e1ef2d73-0a85-463c-b502-7b2459c9ac27",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "sessionId": "ded34de7-dd4a-4d70-bc33-fbd5cecebdba",
+    "role": "user",
+    "content": "Test with my data",
+    "timestamp": "2026-02-17T20:19:37.367Z"
+  },
+  {
+    "id": "3bef29f7-b0b5-4340-a241-4e000095a37e",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "sessionId": "ded34de7-dd4a-4d70-bc33-fbd5cecebdba",
+    "role": "assistant",
+    "content": "Okay, here's a preview of how the expression will work with your data. I'll use rows from the CalculatedTimeSummary.csv data.\n\n**Row 1: Employee: Harold Smith**\n- **Inputs:** `SupervisorName` = \"Bill h (Chicago) (1)\"\n- **Calculation:**\n  If(Search(\"Susan Clark\", SupervisorName) > 0, 1, 0)\n  = If(Search(\"Susan Clark\", \"Bill h (Chicago) (1)\") > 0, 1, 0)\n  = If(0 > 0, 1, 0)\n  = If(false, 1, 0)\n- **Result:** 0\n\n**Row 26: Employee: Oliver Houser**\n- **Inputs:** `SupervisorName` = \"Susan Clark (Chicago) (CKMT0018)\"\n- **Calculation:**\n  If(Search(\"Susan Clark\", SupervisorName) > 0, 1, 0)\n  = If(Search(\"Susan Clark\", \"Susan Clark (Chicago) (CKMT0018)\") > 0, 1, 0)\n  = If(1 > 0, 1, 0)\n  = If(true, 1, 0)\n- **Result:** 1\n\n{{SUGGESTED_ACTIONS:Create new column|Revise this expression|Explain this expression}}",
+    "timestamp": "2026-02-17T20:19:39.932Z"
+  }
+]

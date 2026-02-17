@@ -91,7 +91,7 @@ export function countRecordsInDataset(content: string, format: string): number {
 }
 
 function buildRowIndex(csvContent: string): string {
-  const lines = csvContent.split(/\r?\n/).filter(l => l.trim());
+  const lines = csvContent.split(/\r?\n/);
   if (lines.length <= 1) return "";
   
   const header = lines[0];
@@ -103,6 +103,7 @@ function buildRowIndex(csvContent: string): string {
   
   let index = "\nRow Index (row numbers match the user's spreadsheet where row 1 is the header):\n";
   for (let i = 1; i < lines.length; i++) {
+    if (!lines[i].trim()) continue;
     const spreadsheetRow = i + 1;
     const parts = lines[i].split(',');
     const id = parts[0] ? parts[0].trim() : "";
