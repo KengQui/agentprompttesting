@@ -90,6 +90,20 @@ export function countRecordsInDataset(content: string, format: string): number {
   return 0;
 }
 
+function addRowNumbersToCSV(csvContent: string): string {
+  const lines = csvContent.split(/\r?\n/);
+  if (lines.length === 0) return csvContent;
+  
+  const numberedLines: string[] = [];
+  numberedLines.push(`Row,${lines[0]}`);
+  for (let i = 1; i < lines.length; i++) {
+    if (lines[i].trim()) {
+      numberedLines.push(`${i},${lines[i]}`);
+    }
+  }
+  return numberedLines.join('\n');
+}
+
 function buildSampleDataSection(context: PromptContext): string {
   if (!context.sampleDatasets || context.sampleDatasets.length === 0) {
     return "";
@@ -107,9 +121,10 @@ function buildSampleDataSection(context: PromptContext): string {
     }
     
     const cleanedContent = stripCodeBlocks(dataset.content);
+    const contentWithRows = dataset.format === 'csv' ? addRowNumbersToCSV(cleanedContent) : cleanedContent;
     const maxDataChars = Math.min(MAX_DOC_PREVIEW_CHARS, remainingBudget);
-    const truncatedContent = cleanedContent.slice(0, maxDataChars);
-    const datasetTruncated = cleanedContent.length > maxDataChars;
+    const truncatedContent = contentWithRows.slice(0, maxDataChars);
+    const datasetTruncated = contentWithRows.length > maxDataChars;
     if (datasetTruncated) wasTruncated = true;
     const suffix = datasetTruncated ? "\n[Data truncated...]" : "";
     
@@ -171,11 +186,13 @@ ${sampleData}
 - Respond naturally with specific numbers, dates, and insights from the data
 - If the user asks about changes over time (like pay increases), compare the relevant records and explain what changed
 
-**CRITICAL: DATA COUNT ACCURACY:**
+**CRITICAL: DATA COUNT AND ROW NUMBER ACCURACY:**
 - Each dataset above includes a "Total records" count. Use that exact number when stating how many records exist.
 - If you display a table or list of records, the number of rows you display MUST match the count you state. Do NOT say "there are 3 employees" and then list 5.
 - If data was truncated, clearly state "showing N of M total records" so the user knows not all data is visible.
-- NEVER guess or estimate record counts — always count the actual records you can see in the data above before stating a number.`;
+- NEVER guess or estimate record counts — always count the actual records you can see in the data above before stating a number.
+- CSV datasets include a "Row" column as the first column. When referring to a specific row, ALWAYS use the row number from this "Row" column — do NOT count rows yourself or assign your own row numbers.
+- For example, if the Row column says "10" for an employee named Randy, then that employee is at Row 10, not Row 2 or any other number.`;
   }
 
   if (context.validationRules) {
