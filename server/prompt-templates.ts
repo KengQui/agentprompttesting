@@ -101,13 +101,14 @@ function buildRowIndex(csvContent: string): string {
     ? header.substring(firstComma + 1, header.indexOf(',', firstComma + 1)).trim()
     : "";
   
-  let index = "\nRow Index (row number = line position after header, starting at 1):\n";
+  let index = "\nRow Index (row numbers match the user's spreadsheet where row 1 is the header):\n";
   for (let i = 1; i < lines.length; i++) {
+    const spreadsheetRow = i + 1;
     const parts = lines[i].split(',');
     const id = parts[0] ? parts[0].trim() : "";
     const name = parts[1] ? parts[1].trim() : "";
     const label = secondCol ? `${firstCol}: ${id}, ${secondCol}: ${name}` : `${firstCol}: ${id}`;
-    index += `  Row ${i}: ${label}\n`;
+    index += `  Row ${spreadsheetRow}: ${label}\n`;
   }
   return index;
 }
@@ -203,7 +204,7 @@ ${sampleData}
 - If you display a table or list of records, the number of rows you display MUST match the count you state. Do NOT say "there are 3 employees" and then list 5.
 - If data was truncated, clearly state "showing N of M total records" so the user knows not all data is visible.
 - NEVER guess or estimate record counts — always count the actual records you can see in the data above before stating a number.
-- CSV datasets include a "Row Index" section after the data. When referring to a specific data row, ALWAYS look up the row number from the Row Index — do NOT count rows yourself or assign your own row numbers.
+- CSV datasets include a "Row Index" section after the data. When referring to a specific data row, ALWAYS look up the row number from the Row Index — do NOT count rows yourself or assign your own row numbers. These row numbers match the user's spreadsheet (where row 1 is the header row).
 - ONLY use data values that actually appear in the dataset. NEVER fabricate, invent, or guess data values. If a field value is not visible in the data, say so rather than making one up.`;
   }
 
