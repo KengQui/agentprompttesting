@@ -2,76 +2,6 @@
   "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
   "traces": [
     {
-      "id": "trace-1770926106452",
-      "sessionId": "2f5580a1-f308-42a0-8136-2d6e5929f6b4",
-      "userInput": "Give me the options",
-      "agentResponse": "You have these options:\n\n*   **Create new column:** This will create a new calculated column named 'Total Scheduled Amount' using the expression: Add(Value(ScheduledEEAmount), Value(ScheduledERAmount)).\n*   **Revise this expression:** If you want to modify the expression.\n*   **Explain this expression:** If you want a detailed explanation of the expression.\n\nWhich action would you like to take?",
-      "startTime": "2026-02-12T19:55:05.339Z",
-      "endTime": "2026-02-12T19:55:06.452Z",
-      "totalDuration": 1113,
-      "entries": [
-        {
-          "id": "entry-1770926105340-1",
-          "type": "intent_classification",
-          "name": "Orchestrator Intent Classification",
-          "timestamp": "2026-02-12T19:55:05.340Z",
-          "metadata": {
-            "intent": "answer_question",
-            "classificationMethod": "orchestrator",
-            "confidence": "high"
-          }
-        },
-        {
-          "id": "entry-1770926106452-3",
-          "type": "llm_call",
-          "name": "Gemini Response Generation",
-          "timestamp": "2026-02-12T19:55:06.452Z",
-          "duration": 1112,
-          "metadata": {
-            "model": "gemini",
-            "intent": "answer_question",
-            "validated": true
-          }
-        }
-      ],
-      "success": true
-    },
-    {
-      "id": "trace-1770931602632",
-      "sessionId": "2f5580a1-f308-42a0-8136-2d6e5929f6b4",
-      "userInput": "revise this expression",
-      "agentResponse": "What would you like to change about the expression?",
-      "startTime": "2026-02-12T21:26:42.054Z",
-      "endTime": "2026-02-12T21:26:42.632Z",
-      "totalDuration": 578,
-      "entries": [
-        {
-          "id": "entry-1770931602055-1",
-          "type": "intent_classification",
-          "name": "Orchestrator Intent Classification",
-          "timestamp": "2026-02-12T21:26:42.055Z",
-          "metadata": {
-            "intent": "answer_question",
-            "classificationMethod": "orchestrator",
-            "confidence": "high"
-          }
-        },
-        {
-          "id": "entry-1770931602632-3",
-          "type": "llm_call",
-          "name": "Gemini Response Generation",
-          "timestamp": "2026-02-12T21:26:42.632Z",
-          "duration": 577,
-          "metadata": {
-            "model": "gemini",
-            "intent": "answer_question",
-            "validated": true
-          }
-        }
-      ],
-      "success": true
-    },
-    {
       "id": "trace-1770931623703",
       "sessionId": "2f5580a1-f308-42a0-8136-2d6e5929f6b4",
       "userInput": "remove \"value\", i don't think is neccessary",
@@ -3561,6 +3491,76 @@
         }
       ],
       "success": true
+    },
+    {
+      "id": "trace-1771360778755",
+      "sessionId": "04248473-0e62-49fc-860d-0e899a32981d",
+      "userInput": "Create a filter that display anyone that report to Susan",
+      "agentResponse": "This expression will check if the employee reports to Susan Clark.\n\n```\nSearch(\"Susan Clark\", SupervisorName) > 0\n```\n- Output type: **Numeric**\n- Suggested column name: **Reports to Susan Clark**\n- Column properties: **✓Sortable , ✓Filterable , ✗Groupable , ✓Charting**\n\nThese are recommended defaults — let me know if you'd like to change any.\n\n{{SUGGESTED_ACTIONS:Revise this expression|Create new column|Test with my data|Explain this expression}}",
+      "startTime": "2026-02-17T20:39:37.380Z",
+      "endTime": "2026-02-17T20:39:38.755Z",
+      "totalDuration": 1375,
+      "entries": [
+        {
+          "id": "entry-1771360777381-1",
+          "type": "intent_classification",
+          "name": "Orchestrator Intent Classification",
+          "timestamp": "2026-02-17T20:39:37.381Z",
+          "metadata": {
+            "intent": "answer_question",
+            "classificationMethod": "orchestrator",
+            "confidence": "high"
+          }
+        },
+        {
+          "id": "entry-1771360778755-3",
+          "type": "llm_call",
+          "name": "Gemini Response Generation",
+          "timestamp": "2026-02-17T20:39:38.755Z",
+          "duration": 1373,
+          "metadata": {
+            "model": "gemini",
+            "intent": "answer_question",
+            "validated": true
+          }
+        }
+      ],
+      "success": true
+    },
+    {
+      "id": "trace-1771360783904",
+      "sessionId": "04248473-0e62-49fc-860d-0e899a32981d",
+      "userInput": "Test with my data",
+      "agentResponse": "Here's how the expression works with some sample data:\n\n**Row 2: Employee: Harold Smith**\n- **Inputs:** `SupervisorName` = \"Bill h (Chicago) (1)\"\n- **Calculation:**\n  Search(\"Susan Clark\", SupervisorName) > 0\n  = Search(\"Susan Clark\", \"Bill h (Chicago) (1)\") > 0\n  = 0 > 0\n  = False\n- **Result:** 0\n\n**Row 28: Employee: Oliver Houser**\n- **Inputs:** `SupervisorName` = \"Susan Clark (Chicago) (CKMT0018)\"\n- **Calculation:**\n  Search(\"Susan Clark\", SupervisorName) > 0\n  = Search(\"Susan Clark\", \"Susan Clark (Chicago) (CKMT0018)\") > 0\n  = 1 > 0\n  = True\n- **Result:** 1\n\n{{SUGGESTED_ACTIONS:Create new column|Revise this expression|Explain this expression}}",
+      "startTime": "2026-02-17T20:39:41.940Z",
+      "endTime": "2026-02-17T20:39:43.904Z",
+      "totalDuration": 1964,
+      "entries": [
+        {
+          "id": "entry-1771360781941-1",
+          "type": "intent_classification",
+          "name": "Orchestrator Intent Classification",
+          "timestamp": "2026-02-17T20:39:41.941Z",
+          "metadata": {
+            "intent": "answer_question",
+            "classificationMethod": "orchestrator",
+            "confidence": "high"
+          }
+        },
+        {
+          "id": "entry-1771360783904-3",
+          "type": "llm_call",
+          "name": "Gemini Response Generation",
+          "timestamp": "2026-02-17T20:39:43.904Z",
+          "duration": 1963,
+          "metadata": {
+            "model": "gemini",
+            "intent": "answer_question",
+            "validated": true
+          }
+        }
+      ],
+      "success": true
     }
   ],
   "stats": {
@@ -3572,11 +3572,11 @@
     "classificationMethods": {
       "orchestrator": 101
     },
-    "avgResponseTime": 1667.5049504950496,
+    "avgResponseTime": 1666.970297029703,
     "totalLlmCalls": 100,
     "totalTokensUsed": 0,
     "errorCount": 1
   },
   "createdAt": "2026-02-05T16:40:15.025Z",
-  "updatedAt": "2026-02-17T20:33:51.811Z"
+  "updatedAt": "2026-02-17T20:39:43.904Z"
 }

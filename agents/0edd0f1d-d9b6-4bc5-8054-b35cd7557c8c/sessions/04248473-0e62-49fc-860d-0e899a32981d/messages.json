@@ -1,0 +1,34 @@
+[
+  {
+    "id": "195c5aa7-fe1e-4753-a827-be0f06c99aa5",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "sessionId": "04248473-0e62-49fc-860d-0e899a32981d",
+    "role": "user",
+    "content": "Create a filter that display anyone that report to Susan",
+    "timestamp": "2026-02-17T20:39:37.380Z"
+  },
+  {
+    "id": "88bccf9b-dd0b-4395-b644-ff9642bd35c0",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "sessionId": "04248473-0e62-49fc-860d-0e899a32981d",
+    "role": "assistant",
+    "content": "This expression will check if the employee reports to Susan Clark.\n\n```\nSearch(\"Susan Clark\", SupervisorName) > 0\n```\n- Output type: **Numeric**\n- Suggested column name: **Reports to Susan Clark**\n- Column properties: **✓Sortable , ✓Filterable , ✗Groupable , ✓Charting**\n\nThese are recommended defaults — let me know if you'd like to change any.\n\n{{SUGGESTED_ACTIONS:Revise this expression|Create new column|Test with my data|Explain this expression}}",
+    "timestamp": "2026-02-17T20:39:38.759Z"
+  },
+  {
+    "id": "0282bcd0-d7f8-45db-b897-977bb38d6942",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "sessionId": "04248473-0e62-49fc-860d-0e899a32981d",
+    "role": "user",
+    "content": "Test with my data",
+    "timestamp": "2026-02-17T20:39:41.940Z"
+  },
+  {
+    "id": "fb1236b5-744a-4de9-94ac-fc8ce2cc0ba5",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "sessionId": "04248473-0e62-49fc-860d-0e899a32981d",
+    "role": "assistant",
+    "content": "Here's how the expression works with some sample data:\n\n**Row 2: Employee: Harold Smith**\n- **Inputs:** `SupervisorName` = \"Bill h (Chicago) (1)\"\n- **Calculation:**\n  Search(\"Susan Clark\", SupervisorName) > 0\n  = Search(\"Susan Clark\", \"Bill h (Chicago) (1)\") > 0\n  = 0 > 0\n  = False\n- **Result:** 0\n\n**Row 28: Employee: Oliver Houser**\n- **Inputs:** `SupervisorName` = \"Susan Clark (Chicago) (CKMT0018)\"\n- **Calculation:**\n  Search(\"Susan Clark\", SupervisorName) > 0\n  = Search(\"Susan Clark\", \"Susan Clark (Chicago) (CKMT0018)\") > 0\n  = 1 > 0\n  = True\n- **Result:** 1\n\n{{SUGGESTED_ACTIONS:Create new column|Revise this expression|Explain this expression}}",
+    "timestamp": "2026-02-17T20:39:43.907Z"
+  }
+]
