@@ -783,9 +783,95 @@ export async function registerRoutes(
               : '';
             
             // Add system context for suggested action pill clicks to reinforce correct behavior
+            const buildTestWithDataPrefix = (): string => {
+              const datasets = filteredDatasets || agent.sampleDatasets || [];
+              if (datasets.length === 0) {
+                return '[SYSTEM CONTEXT: The user clicked "Test with my data". Show a row-by-row validation preview, but note that no sample data is currently loaded.]\n\n';
+              }
+              const sanitize = (s: string) => s.replace(/[\[\]]/g, '').trim();
+              const parseCSV = (line: string): string[] => {
+                const result: string[] = [];
+                let current = '';
+                let inQuotes = false;
+                for (let i = 0; i < line.length; i++) {
+                  const ch = line[i];
+                  if (ch === '"') {
+                    if (inQuotes && line[i + 1] === '"') { current += '"'; i++; }
+                    else { inQuotes = !inQuotes; }
+                  } else if (ch === ',' && !inQuotes) {
+                    result.push(current); current = '';
+                  } else { current += ch; }
+                }
+                result.push(current);
+                return result;
+              };
+              const extractJsonIdentifiers = (obj: any): string[] => {
+                const ids: string[] = [];
+                if (Array.isArray(obj)) {
+                  for (let r = 0; r < obj.length && r < 10; r++) {
+                    const row = obj[r];
+                    if (typeof row !== 'object' || row === null) continue;
+                    const nameKey = Object.keys(row).find((k: string) => /name/i.test(k));
+                    const idKey = Object.keys(row).find((k: string) => /id/i.test(k));
+                    const label = sanitize(nameKey ? String(row[nameKey]) : idKey ? String(row[idKey]) : '');
+                    if (label) ids.push(`Row ${r + 1}: ${label}`);
+                  }
+                } else if (typeof obj === 'object' && obj !== null) {
+                  for (const key of Object.keys(obj)) {
+                    if (Array.isArray(obj[key]) && obj[key].length > 0 && typeof obj[key][0] === 'object') {
+                      return extractJsonIdentifiers(obj[key]);
+                    }
+                  }
+                  const nameKey = Object.keys(obj).find((k: string) => /name|display/i.test(k));
+                  const idKey = Object.keys(obj).find((k: string) => /id/i.test(k));
+                  const label = sanitize(nameKey ? String(obj[nameKey]) : idKey ? String(obj[idKey]) : '');
+                  if (label) ids.push(`Record: ${label}`);
+                }
+                return ids;
+              };
+              const datasetSummaries: string[] = [];
+              for (const ds of datasets) {
+                const content = ds.content || '';
+                const rowIdentifiers: string[] = [];
+                let rowCount = 0;
+                const safeDsName = sanitize(ds.name || 'Unknown');
+
+                if (ds.format === 'json') {
+                  try {
+                    const parsed = JSON.parse(content);
+                    if (Array.isArray(parsed)) rowCount = parsed.length;
+                    const extracted = extractJsonIdentifiers(parsed);
+                    rowIdentifiers.push(...extracted);
+                  } catch {}
+                } else {
+                  const lines = content.split(/\r?\n/).filter((l: string) => l.trim());
+                  if (lines.length < 2) continue;
+                  rowCount = lines.length - 1;
+                  const headerCols = parseCSV(lines[0]);
+                  const nameColIdx = headerCols.findIndex((h: string) => /name/i.test(h.trim()));
+                  for (let r = 1; r < lines.length && r <= 10; r++) {
+                    const cols = parseCSV(lines[r]);
+                    const id = sanitize(cols[0] || '');
+                    const name = nameColIdx >= 0 ? sanitize(cols[nameColIdx] || '') : '';
+                    if (name) {
+                      rowIdentifiers.push(`Row ${r}: ${name}`);
+                    } else if (id) {
+                      rowIdentifiers.push(`Row ${r}: ${id}`);
+                    }
+                  }
+                }
+                if (rowIdentifiers.length > 0) {
+                  datasetSummaries.push(`Dataset "${safeDsName}" (${rowCount} rows): ${rowIdentifiers.join(', ')}`);
+                }
+              }
+              const dataSummary = datasetSummaries.length > 0
+                ? ` The data section contains: ${datasetSummaries.join('; ')}. You MUST use ONLY these actual rows. Do NOT invent or fabricate any names, IDs, or values.`
+                : '';
+              return `[SYSTEM CONTEXT: The user clicked "Test with my data". Show a row-by-row validation preview using ONLY real rows from the data section.${dataSummary}]\n\n`;
+            };
             const suggestedActionPrefixes: Record<string, string> = {
               'Create new column': '[SYSTEM CONTEXT: The user clicked "Create new column". You MUST create the column immediately via the create_calculated_column action. Do NOT show any validation examples, row-by-row calculations, or sample data. Confirm the column was created and offer follow-up options.]\n\n',
-              'Test with my data': '[SYSTEM CONTEXT: The user clicked "Test with my data". Show a row-by-row validation preview using real rows from the report data.]\n\n',
+              'Test with my data': buildTestWithDataPrefix(),
               'Explain this expression': '[SYSTEM CONTEXT: The user clicked "Explain this expression". Provide a plain-language explanation of how the expression works without showing sample data rows.]\n\n',
               'Revise this expression': '[SYSTEM CONTEXT: The user clicked "Revise this expression". Do NOT review, analyze, or suggest improvements to the expression on your own — the user has not asked for that. Simply ask the user whether they would like to (1) manually edit the expression themselves, or (2) describe the changes they want and let you make the revisions. Keep your response brief — just present these two options and wait for the user to choose.]\n\n',
               'See related expressions': '[SYSTEM CONTEXT: The user clicked "See related expressions". Suggest 3 related expressions they might find useful.]\n\n',

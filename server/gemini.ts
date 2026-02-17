@@ -610,12 +610,9 @@ export function classifyMessageContext(
   agent: AgentContext
 ): ContextSections {
   let cleanMessage = userMessage;
-  const systemContextIdx = cleanMessage.indexOf('[SYSTEM CONTEXT:');
-  if (systemContextIdx !== -1) {
-    const endIdx = cleanMessage.indexOf(']', systemContextIdx);
-    if (endIdx !== -1) {
-      cleanMessage = cleanMessage.substring(endIdx + 1);
-    }
+  const scMatch = cleanMessage.match(/\[SYSTEM CONTEXT:[^\]]*\]\s*/);
+  if (scMatch) {
+    cleanMessage = cleanMessage.substring((scMatch.index || 0) + scMatch[0].length);
   }
   const msgLower = cleanMessage.toLowerCase().trim();
 
