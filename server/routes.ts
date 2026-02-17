@@ -664,7 +664,8 @@ export async function registerRoutes(
       }
 
       const contentSchema = z.object({ 
-        content: z.string().min(1).max(2000, "Message exceeds 2000 character limit") 
+        content: z.string().min(1).max(2000, "Message exceeds 2000 character limit"),
+        selectedDatasetIds: z.array(z.string()).optional(),
       });
       const parsed = contentSchema.safeParse(req.body);
       if (!parsed.success) {
@@ -672,6 +673,7 @@ export async function registerRoutes(
       }
 
       const userInput = parsed.data.content;
+      const selectedDatasetIds = parsed.data.selectedDatasetIds;
       const traceStartTime = Date.now();
       const traceEntries: TraceEntry[] = [];
 
@@ -691,13 +693,17 @@ export async function registerRoutes(
       }));
 
       // Load agent components (orchestrator with turn manager)
+      const filteredDatasets = selectedDatasetIds
+        ? (agent.sampleDatasets || []).filter(d => selectedDatasetIds.includes(d.id))
+        : agent.sampleDatasets;
+        
       const agentConfig = {
         name: agent.name,
         businessUseCase: agent.businessUseCase,
         description: agent.description,
         domainKnowledge: agent.domainKnowledge,
         domainDocuments: agent.domainDocuments,
-        sampleDatasets: agent.sampleDatasets,
+        sampleDatasets: filteredDatasets,
         validationRules: agent.validationRules,
         guardrails: agent.guardrails,
         promptStyle: agent.promptStyle,
