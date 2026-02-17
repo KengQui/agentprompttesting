@@ -90,28 +90,18 @@ export function countRecordsInDataset(content: string, format: string): number {
   return 0;
 }
 
-function buildRowIndex(csvContent: string): string {
+function injectRowNumbers(csvContent: string): string {
   const lines = csvContent.split(/\r?\n/);
-  if (lines.length <= 1) return "";
+  if (lines.length <= 1) return csvContent;
   
-  const header = lines[0];
-  const firstComma = header.indexOf(',');
-  const firstCol = firstComma > 0 ? header.substring(0, firstComma).trim() : "ID";
-  const secondCol = firstComma > 0 && header.indexOf(',', firstComma + 1) > 0
-    ? header.substring(firstComma + 1, header.indexOf(',', firstComma + 1)).trim()
-    : "";
-  
-  let index = "\nRow Index (row numbers match the user's spreadsheet where row 1 is the header):\n";
+  const result: string[] = [];
+  result.push("Row," + lines[0]);
   for (let i = 1; i < lines.length; i++) {
     if (!lines[i].trim()) continue;
     const spreadsheetRow = i + 1;
-    const parts = lines[i].split(',');
-    const id = parts[0] ? parts[0].trim() : "";
-    const name = parts[1] ? parts[1].trim() : "";
-    const label = secondCol ? `${firstCol}: ${id}, ${secondCol}: ${name}` : `${firstCol}: ${id}`;
-    index += `  Row ${spreadsheetRow}: ${label}\n`;
+    result.push(spreadsheetRow + "," + lines[i]);
   }
-  return index;
+  return result.join("\n");
 }
 
 function buildSampleDataSection(context: PromptContext): string {
@@ -131,26 +121,22 @@ function buildSampleDataSection(context: PromptContext): string {
     }
     
     const cleanedContent = stripCodeBlocks(dataset.content);
+    const numberedContent = dataset.format === 'csv' ? injectRowNumbers(cleanedContent) : cleanedContent;
     const maxDataChars = Math.min(MAX_DOC_PREVIEW_CHARS, remainingBudget);
-    const truncatedContent = cleanedContent.slice(0, maxDataChars);
-    const datasetTruncated = cleanedContent.length > maxDataChars;
+    const truncatedContent = numberedContent.slice(0, maxDataChars);
+    const datasetTruncated = numberedContent.length > maxDataChars;
     if (datasetTruncated) wasTruncated = true;
     const suffix = datasetTruncated ? "\n[Data truncated...]" : "";
     
     const recordCount = countRecordsInDataset(dataset.content, dataset.format);
     const countLabel = recordCount > 0 ? `Total records: ${recordCount}` : "";
     
-    const rowIndex = dataset.format === 'csv' ? buildRowIndex(cleanedContent) : "";
-    
     section += `\n--- ${dataset.name} (${dataset.format.toUpperCase()}) ---\n`;
     if (countLabel) {
       section += `${countLabel}\n`;
     }
     section += `${truncatedContent}${suffix}\n`;
-    if (rowIndex) {
-      section += rowIndex;
-    }
-    totalChars += truncatedContent.length + dataset.name.length + rowIndex.length + 30;
+    totalChars += truncatedContent.length + dataset.name.length + 30;
   }
   
   if (wasTruncated) {
@@ -205,7 +191,7 @@ ${sampleData}
 - If you display a table or list of records, the number of rows you display MUST match the count you state. Do NOT say "there are 3 employees" and then list 5.
 - If data was truncated, clearly state "showing N of M total records" so the user knows not all data is visible.
 - NEVER guess or estimate record counts — always count the actual records you can see in the data above before stating a number.
-- CSV datasets include a "Row Index" section after the data. When referring to a specific data row, ALWAYS look up the row number from the Row Index — do NOT count rows yourself or assign your own row numbers. These row numbers match the user's spreadsheet (where row 1 is the header row).
+- CSV datasets have a "Row" column prepended as the first column. These row numbers match the user's spreadsheet (where row 1 is the header row). When referring to a specific data row, ALWAYS use the value in the "Row" column — do NOT count rows yourself or assign your own row numbers.
 - ONLY use data values that actually appear in the dataset. NEVER fabricate, invent, or guess data values. If a field value is not visible in the data, say so rather than making one up.`;
   }
 

@@ -1,0 +1,82 @@
+[
+  {
+    "id": "3c32a810-d7f4-49bc-a538-686c58865d2d",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "sessionId": "a3ba0916-3612-4b58-a09d-b1fa950dc02b",
+    "role": "user",
+    "content": "Create a filter that display anyone that report to Susan",
+    "timestamp": "2026-02-17T20:25:46.790Z"
+  },
+  {
+    "id": "df26be91-6258-4da5-8eaf-6f5b356f6e88",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "sessionId": "a3ba0916-3612-4b58-a09d-b1fa950dc02b",
+    "role": "assistant",
+    "content": "To create a filter that displays anyone who reports to Susan, I need to know which column contains the supervisor or manager's name. Could you clarify which column contains the name of the person's manager or supervisor?",
+    "timestamp": "2026-02-17T20:25:47.779Z"
+  },
+  {
+    "id": "b437d32e-23c7-4b71-8ed8-4c9a48dc4bf3",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "sessionId": "a3ba0916-3612-4b58-a09d-b1fa950dc02b",
+    "role": "user",
+    "content": "as a supervisor",
+    "timestamp": "2026-02-17T20:25:58.973Z"
+  },
+  {
+    "id": "63260623-f5d3-4883-bf1c-cca25c868ead",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "sessionId": "a3ba0916-3612-4b58-a09d-b1fa950dc02b",
+    "role": "assistant",
+    "content": "Before we move on, to create a filter that displays anyone who reports to Susan, I need to know which column contains the supervisor or manager's name. Could you clarify which column contains the name of the person's manager or supervisor?",
+    "timestamp": "2026-02-17T20:26:00.240Z"
+  },
+  {
+    "id": "4b3d1f97-9d5c-48ce-b197-e029984ab8ed",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "sessionId": "a3ba0916-3612-4b58-a09d-b1fa950dc02b",
+    "role": "user",
+    "content": "Susan Clark",
+    "timestamp": "2026-02-17T20:26:18.951Z"
+  },
+  {
+    "id": "34b71a4e-0d67-4dcf-9ff0-302a9b7f15cf",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "sessionId": "a3ba0916-3612-4b58-a09d-b1fa950dc02b",
+    "role": "assistant",
+    "content": "To create a column showing who reports to Susan Clark, I need to know which column lists the names of supervisors. Is that column called \"Supervisor Name\", \"Manager Name\", or something else?",
+    "timestamp": "2026-02-17T20:26:20.263Z"
+  },
+  {
+    "id": "b1078d74-9812-4959-9c7c-64b2b4d785bf",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "sessionId": "a3ba0916-3612-4b58-a09d-b1fa950dc02b",
+    "role": "user",
+    "content": "Supervisor Name",
+    "timestamp": "2026-02-17T20:26:34.765Z"
+  },
+  {
+    "id": "cf86cfc2-2006-47b3-9ac9-ee867ca921b4",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "sessionId": "a3ba0916-3612-4b58-a09d-b1fa950dc02b",
+    "role": "assistant",
+    "content": "This expression will check if the \"Supervisor Name\" column contains \"Susan Clark\". If it does, the expression will return \"Reports to Susan\", otherwise it will return \"Does not report to Susan.\"\n\n```\nIf(Eq(SupervisorName, \"Susan Clark (Chicago) (CKMT0018)\"), \"Reports to Susan\", \"Does not report to Susan\")\n```\n\n- Output type: **Text**\n- Suggested column name: **Reports to Susan Clark**\n- Column properties: **✗Sortable , ✓Filterable , ✓Groupable , ✓Charting**\n\nThese are recommended defaults — let me know if you'd like to change any.\n\n{{SUGGESTED_ACTIONS:Revise this expression|Create new column|Test with my data|Explain this expression}}",
+    "timestamp": "2026-02-17T20:26:36.685Z"
+  },
+  {
+    "id": "58a9a798-3ef5-4ec9-8194-ebb7a02cc680",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "sessionId": "a3ba0916-3612-4b58-a09d-b1fa950dc02b",
+    "role": "user",
+    "content": "Test with my data",
+    "timestamp": "2026-02-17T20:26:45.273Z"
+  },
+  {
+    "id": "f174d601-df8a-40b6-bc00-f01502466375",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "sessionId": "a3ba0916-3612-4b58-a09d-b1fa950dc02b",
+    "role": "assistant",
+    "content": "Here's how the expression works on a couple of rows from your data:\n\n**Row 4: Employee: Kyle Erdu**\n- **Inputs:** `SupervisorName` = \"Friedrich Hayek (Chicago) (8432)\"\n- **Calculation:**\n  `If(Eq(SupervisorName, \"Susan Clark (Chicago) (CKMT0018)\"), \"Reports to Susan\", \"Does not report to Susan\")`\n  = `If(Eq(\"Friedrich Hayek (Chicago) (8432)\", \"Susan Clark (Chicago) (CKMT0018)\"), \"Reports to Susan\", \"Does not report to Susan\")`\n  = `If(false, \"Reports to Susan\", \"Does not report to Susan\")`\n  = \"Does not report to Susan\"\n- **Result:** Does not report to Susan\n\n**Row 28: Employee: Ozzy Anderson**\n- **Inputs:** `SupervisorName` = \"Friedrich Hayek (Chicago) (8432)\"\n- **Calculation:**\n  `If(Eq(SupervisorName, \"Susan Clark (Chicago) (CKMT0018)\"), \"Reports to Susan\", \"Does not report to Susan\")`\n  = `If(Eq(\"Friedrich Hayek (Chicago) (8432)\", \"Susan Clark (Chicago) (CKMT0018)\"), \"Reports to Susan\", \"Does not report to Susan\")`\n  = `If(false, \"Reports to Susan\", \"Does not report to Susan\")`\n  = \"Does not report to Susan\"\n- **Result:** Does not report to Susan\n\n**Row 10: Employee: Randy Mateo**\n- **Inputs:** `SupervisorName` = \"Jacqueline Montgomery (Chicago) (0016)\"\n- **Calculation:**\n  `If(Eq(SupervisorName, \"Susan Clark (Chicago) (CKMT0018)\"), \"Reports to Susan\", \"Does not report to Susan\")`\n  = `If(Eq(\"Jacqueline Montgomery (Chicago) (0016)\", \"Susan Clark (Chicago) (CKMT0018)\"), \"Reports to Susan\", \"Does not report to Susan\")`\n  = `If(false, \"Reports to Susan\", \"Does not report to Susan\")`\n  = \"Does not report to Susan\"\n- **Result:** Does not report to Susan\n\n**Row 27: Employee: Oliver Houser**\n- **Inputs:** `SupervisorName` = \"Susan Clark (Chicago) (CKMT0018)\"\n- **Calculation:**\n  `If(Eq(SupervisorName, \"Susan Clark (Chicago) (CKMT0018)\"), \"Reports to Susan\", \"Does not report to Susan\")`\n  = `If(Eq(\"Susan Clark (Chicago) (CKMT0018)\", \"Susan Clark (Chicago) (CKMT0018)\"), \"Reports to Susan\", \"Does not report to Susan\")`\n  = `If(true, \"Reports to Susan\", \"Does not report to Susan\")`\n  = \"Reports to Susan\"\n- **Result:** Reports to Susan\n\n{{SUGGESTED_ACTIONS:Create new column|Revise this expression|Explain this expression}}",
+    "timestamp": "2026-02-17T20:26:50.631Z"
+  }
+]
