@@ -2,76 +2,6 @@
   "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
   "traces": [
     {
-      "id": "trace-1770850951877",
-      "sessionId": "51c5f3a4-3c30-44b3-a0cf-85297d0288ef",
-      "userInput": "Test with my data",
-      "agentResponse": "Here's how the expression works with the data in your report:\n\n**Row 1: Employee: Sarah Johnson**\n- **Inputs:** `ScheduledERAmount` = \"$142.75\", `AnnualSalary` = \"$95,000.00\"\n- **Calculation:**\n  Multiply(Divide(Value(ScheduledERAmount), Value(AnnualSalary)), 100)\n  = Multiply(Divide(Value(\"$142.75\"), Value(\"$95,000.00\")), 100)\n  = Multiply(Divide(142.75, 95000.00), 100)\n  = Multiply(0.00150263157, 100)\n  = 0.150263157\n- **Result:** 0.150263157\n\n**Row 2: Employee: Michael Chen**\n- **Inputs:** `ScheduledERAmount` = \"$97.50\", `AnnualSalary` = \"\"\n- **Calculation:**\n  Multiply(Divide(Value(ScheduledERAmount), Value(AnnualSalary)), 100)\n  = Multiply(Divide(Value(\"$97.50\"), Value(\"\")), 100)\n  = Multiply(Divide(97.50, 0), 100)\n  = Multiply(Error, 100)\n  = Error\n- **Result:** Error\n\nThe result for Michael Chen is \"Error\" because the Annual Salary is blank. Dividing by zero results in an error. Is this the behavior you want?\n{{SUGGESTED_ACTIONS:Create new column|Revise this expression|Explain this expression}}",
-      "startTime": "2026-02-11T23:02:28.814Z",
-      "endTime": "2026-02-11T23:02:31.877Z",
-      "totalDuration": 3063,
-      "entries": [
-        {
-          "id": "entry-1770850948815-1",
-          "type": "intent_classification",
-          "name": "Orchestrator Intent Classification",
-          "timestamp": "2026-02-11T23:02:28.815Z",
-          "metadata": {
-            "intent": "answer_question",
-            "classificationMethod": "orchestrator",
-            "confidence": "high"
-          }
-        },
-        {
-          "id": "entry-1770850951877-3",
-          "type": "llm_call",
-          "name": "Gemini Response Generation",
-          "timestamp": "2026-02-11T23:02:31.877Z",
-          "duration": 3062,
-          "metadata": {
-            "model": "gemini",
-            "intent": "answer_question",
-            "validated": true
-          }
-        }
-      ],
-      "success": true
-    },
-    {
-      "id": "trace-1770851816843",
-      "sessionId": "581bc0f5-50bb-4a23-bfc0-e62f161bf073",
-      "userInput": "Calculate the daily hourly rate by dividing Hourly Pay by 8\"",
-      "agentResponse": "To calculate the daily hourly rate, I will divide the `Hourly Pay` by 8.\n\n```\nDivide(Value(HourlyPay), 8)\n```\n\nThis expression will produce a **Numeric** output.\n\nSuggested column name: **Daily Hourly Rate**\n\n{{SUGGESTED_ACTIONS:Create new column|Test with my data|Explain this expression}}",
-      "startTime": "2026-02-11T23:16:55.818Z",
-      "endTime": "2026-02-11T23:16:56.843Z",
-      "totalDuration": 1025,
-      "entries": [
-        {
-          "id": "entry-1770851815820-1",
-          "type": "intent_classification",
-          "name": "Orchestrator Intent Classification",
-          "timestamp": "2026-02-11T23:16:55.820Z",
-          "metadata": {
-            "intent": "answer_question",
-            "classificationMethod": "orchestrator",
-            "confidence": "high"
-          }
-        },
-        {
-          "id": "entry-1770851816843-3",
-          "type": "llm_call",
-          "name": "Gemini Response Generation",
-          "timestamp": "2026-02-11T23:16:56.843Z",
-          "duration": 1023,
-          "metadata": {
-            "model": "gemini",
-            "intent": "answer_question",
-            "validated": true
-          }
-        }
-      ],
-      "success": true
-    },
-    {
       "id": "trace-1770851821580",
       "sessionId": "581bc0f5-50bb-4a23-bfc0-e62f161bf073",
       "userInput": "Test with my data",
@@ -3577,6 +3507,76 @@
         }
       ],
       "success": true
+    },
+    {
+      "id": "trace-1771358662593",
+      "sessionId": "d957c12a-6838-4c7d-b06b-d58ac59ecc06",
+      "userInput": "Create an expression that filter all employees that has Susan Clark as supervisor",
+      "agentResponse": "This expression will check if the Supervisor Name is Susan Clark (Chicago) (CKMT0018) and return \"Yes\" if true, and \"No\" if false.\n\n```\nIf(Eq(SupervisorName, \"Susan Clark (Chicago) (CKMT0018)\"), \"Yes\", \"No\")\n```\n- Output type: **Text**\n- Suggested column name: **Supervisor Is Susan Clark**\n- Column properties: **✗Sortable , ✓Filterable , ✓Groupable , ✓Charting**\n\nThese are recommended defaults — let me know if you'd like to change any.\n\n{{SUGGESTED_ACTIONS:Revise this expression|Create new column|Test with my data|Explain this expression}}",
+      "startTime": "2026-02-17T20:04:21.000Z",
+      "endTime": "2026-02-17T20:04:22.593Z",
+      "totalDuration": 1593,
+      "entries": [
+        {
+          "id": "entry-1771358661002-1",
+          "type": "intent_classification",
+          "name": "Orchestrator Intent Classification",
+          "timestamp": "2026-02-17T20:04:21.002Z",
+          "metadata": {
+            "intent": "answer_question",
+            "classificationMethod": "orchestrator",
+            "confidence": "high"
+          }
+        },
+        {
+          "id": "entry-1771358662593-3",
+          "type": "llm_call",
+          "name": "Gemini Response Generation",
+          "timestamp": "2026-02-17T20:04:22.593Z",
+          "duration": 1590,
+          "metadata": {
+            "model": "gemini",
+            "intent": "answer_question",
+            "validated": true
+          }
+        }
+      ],
+      "success": true
+    },
+    {
+      "id": "trace-1771358673070",
+      "sessionId": "d957c12a-6838-4c7d-b06b-d58ac59ecc06",
+      "userInput": "Test with my data",
+      "agentResponse": "Here's how the expression works on a few rows of your data:\n\n**Row 1: Employee: Harold Smith**\n- **Inputs:** `SupervisorName` = \"Bill h (Chicago) (1)\"\n- **Calculation:**\n  `If(Eq(SupervisorName, \"Susan Clark (Chicago) (CKMT0018)\"), \"Yes\", \"No\")`\n  = `If(Eq(\"Bill h (Chicago) (1)\", \"Susan Clark (Chicago) (CKMT0018)\"), \"Yes\", \"No\")`\n  = `If(false, \"Yes\", \"No\")`\n  = `No`\n- **Result:** No\n\n**Row 10: Employee: Randy Mateo**\n- **Inputs:** `SupervisorName` = \"Jacqueline Montgomery (Chicago) (0016)\"\n- **Calculation:**\n  `If(Eq(SupervisorName, \"Susan Clark (Chicago) (CKMT0018)\"), \"Yes\", \"No\")`\n  = `If(Eq(\"Jacqueline Montgomery (Chicago) (0016)\", \"Susan Clark (Chicago) (CKMT0018)\"), \"Yes\", \"No\")`\n  = `If(false, \"Yes\", \"No\")`\n  = `No`\n- **Result:** No\n\n**Row 27: Employee: Oliver Houser**\n- **Inputs:** `SupervisorName` = \"Susan Clark (Chicago) (CKMT0018)\"\n- **Calculation:**\n  `If(Eq(SupervisorName, \"Susan Clark (Chicago) (CKMT0018)\"), \"Yes\", \"No\")`\n  = `If(Eq(\"Susan Clark (Chicago) (CKMT0018)\", \"Susan Clark (Chicago) (CKMT0018)\"), \"Yes\", \"No\")`\n  = `If(true, \"Yes\", \"No\")`\n  = `Yes`\n- **Result:** Yes\n\n{{SUGGESTED_ACTIONS:Create new column|Revise this expression|Explain this expression}}",
+      "startTime": "2026-02-17T20:04:29.388Z",
+      "endTime": "2026-02-17T20:04:33.070Z",
+      "totalDuration": 3682,
+      "entries": [
+        {
+          "id": "entry-1771358669389-1",
+          "type": "intent_classification",
+          "name": "Orchestrator Intent Classification",
+          "timestamp": "2026-02-17T20:04:29.389Z",
+          "metadata": {
+            "intent": "answer_question",
+            "classificationMethod": "orchestrator",
+            "confidence": "high"
+          }
+        },
+        {
+          "id": "entry-1771358673070-3",
+          "type": "llm_call",
+          "name": "Gemini Response Generation",
+          "timestamp": "2026-02-17T20:04:33.070Z",
+          "duration": 3680,
+          "metadata": {
+            "model": "gemini",
+            "intent": "answer_question",
+            "validated": true
+          }
+        }
+      ],
+      "success": true
     }
   ],
   "stats": {
@@ -3588,11 +3588,11 @@
     "classificationMethods": {
       "orchestrator": 101
     },
-    "avgResponseTime": 1722.2772277227723,
+    "avgResponseTime": 1730.118811881188,
     "totalLlmCalls": 100,
     "totalTokensUsed": 0,
     "errorCount": 1
   },
   "createdAt": "2026-02-05T16:40:15.025Z",
-  "updatedAt": "2026-02-17T17:58:03.345Z"
+  "updatedAt": "2026-02-17T20:04:33.070Z"
 }

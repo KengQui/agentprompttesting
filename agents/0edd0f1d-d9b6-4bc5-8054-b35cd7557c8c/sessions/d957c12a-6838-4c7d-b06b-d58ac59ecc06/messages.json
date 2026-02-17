@@ -1,0 +1,34 @@
+[
+  {
+    "id": "977db8b7-a4be-4346-a7e8-b7529b9fa17c",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "sessionId": "d957c12a-6838-4c7d-b06b-d58ac59ecc06",
+    "role": "user",
+    "content": "Create an expression that filter all employees that has Susan Clark as supervisor",
+    "timestamp": "2026-02-17T20:04:21.000Z"
+  },
+  {
+    "id": "692a18fa-863b-4097-aaf9-b02adf053b9d",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "sessionId": "d957c12a-6838-4c7d-b06b-d58ac59ecc06",
+    "role": "assistant",
+    "content": "This expression will check if the Supervisor Name is Susan Clark (Chicago) (CKMT0018) and return \"Yes\" if true, and \"No\" if false.\n\n```\nIf(Eq(SupervisorName, \"Susan Clark (Chicago) (CKMT0018)\"), \"Yes\", \"No\")\n```\n- Output type: **Text**\n- Suggested column name: **Supervisor Is Susan Clark**\n- Column properties: **✗Sortable , ✓Filterable , ✓Groupable , ✓Charting**\n\nThese are recommended defaults — let me know if you'd like to change any.\n\n{{SUGGESTED_ACTIONS:Revise this expression|Create new column|Test with my data|Explain this expression}}",
+    "timestamp": "2026-02-17T20:04:22.600Z"
+  },
+  {
+    "id": "4a274e81-a9a9-4f96-a887-7f420e26c1e5",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "sessionId": "d957c12a-6838-4c7d-b06b-d58ac59ecc06",
+    "role": "user",
+    "content": "Test with my data",
+    "timestamp": "2026-02-17T20:04:29.388Z"
+  },
+  {
+    "id": "1a07b9d8-d4ed-442e-aa6b-30d7f4ab98bf",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "sessionId": "d957c12a-6838-4c7d-b06b-d58ac59ecc06",
+    "role": "assistant",
+    "content": "Here's how the expression works on a few rows of your data:\n\n**Row 1: Employee: Harold Smith**\n- **Inputs:** `SupervisorName` = \"Bill h (Chicago) (1)\"\n- **Calculation:**\n  `If(Eq(SupervisorName, \"Susan Clark (Chicago) (CKMT0018)\"), \"Yes\", \"No\")`\n  = `If(Eq(\"Bill h (Chicago) (1)\", \"Susan Clark (Chicago) (CKMT0018)\"), \"Yes\", \"No\")`\n  = `If(false, \"Yes\", \"No\")`\n  = `No`\n- **Result:** No\n\n**Row 10: Employee: Randy Mateo**\n- **Inputs:** `SupervisorName` = \"Jacqueline Montgomery (Chicago) (0016)\"\n- **Calculation:**\n  `If(Eq(SupervisorName, \"Susan Clark (Chicago) (CKMT0018)\"), \"Yes\", \"No\")`\n  = `If(Eq(\"Jacqueline Montgomery (Chicago) (0016)\", \"Susan Clark (Chicago) (CKMT0018)\"), \"Yes\", \"No\")`\n  = `If(false, \"Yes\", \"No\")`\n  = `No`\n- **Result:** No\n\n**Row 27: Employee: Oliver Houser**\n- **Inputs:** `SupervisorName` = \"Susan Clark (Chicago) (CKMT0018)\"\n- **Calculation:**\n  `If(Eq(SupervisorName, \"Susan Clark (Chicago) (CKMT0018)\"), \"Yes\", \"No\")`\n  = `If(Eq(\"Susan Clark (Chicago) (CKMT0018)\", \"Susan Clark (Chicago) (CKMT0018)\"), \"Yes\", \"No\")`\n  = `If(true, \"Yes\", \"No\")`\n  = `Yes`\n- **Result:** Yes\n\n{{SUGGESTED_ACTIONS:Create new column|Revise this expression|Explain this expression}}",
+    "timestamp": "2026-02-17T20:04:33.072Z"
+  }
+]
