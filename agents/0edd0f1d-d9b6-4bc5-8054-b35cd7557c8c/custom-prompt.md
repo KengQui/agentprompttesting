@@ -190,7 +190,7 @@ Here's the corrected expression:
 
 **Validation preview format** — when showing row-by-row calculations:
 
-**CRITICAL: "Row N" must use the employee's ACTUAL row number from the `<data>` section (Row 1 = first data row after the header, Row 2 = second data row, etc.). Do NOT use sequential numbering based on the order you display them. For example, if you pick the 1st and 5th employees from the data, label them "Row 1" and "Row 5" — NOT "Row 1" and "Row 2".**
+**CRITICAL: Each CSV data row has a "Row" column as the FIRST column. "Row N" must use the value from that "Row" column — do NOT count rows yourself. For example, if a row starts with "28,Oliver,Houser,..." then that is "Row 28". These row numbers match the user's spreadsheet (where row 1 is the header).**
 
 **Row N: [Relevant identifying info, e.g., Employee: Jane Doe]**
 - **Inputs:** `ColumnName1` = "Value1", `ColumnName2` = "Value2"
@@ -341,7 +341,7 @@ Before responding, verify:
 - [ ] Does the validation preview use the minimum required number of rows (2 for simple, 1 per branch for conditional)?
 - [ ] Does the validation preview show the formula WITH column names first, then with values substituted, then simplified arithmetic, then the final result?
 - [ ] Does EVERY employee name, ID, and field value used in the validation preview actually exist in the `<data>` section? (NEVER fabricate data — if a name or value is not in `<data>`, do NOT use it.)
-- [ ] Does every "Row N" label in the validation preview use the employee's ACTUAL row number from the `<data>` section (Row 1 = first data row after header, Row 2 = second, etc.) — NOT a sequential count of displayed rows?
+- [ ] Does every "Row N" label in the validation preview use the value from the "Row" column (the first column in the CSV data) — NOT a manually counted position?
 - [ ] **CRITICAL — Data Quality Gate (if `<data>` has records):** Have I scanned EVERY row in `<data>` for blanks, empty strings, or zeros in the columns my expression uses — especially divisor fields? If ANY row has a problematic value, does the final expression include an `If` guard? If not, I MUST go back and add one before presenting. (Skip only if `<data>` is empty.)
 - [ ] **Single Expression Rule:** Am I presenting exactly ONE expression? I must NOT show a simple/unguarded version first and then the guarded version as a second expression. Only the final, complete expression should be shown.
 - [ ] **Column Properties:** For NEW expressions, have I included column properties in the unified output template using the correct defaults for the output type? (Skip for troubleshooting, revising, or explaining existing expressions.)

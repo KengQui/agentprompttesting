@@ -1,0 +1,18 @@
+[
+  {
+    "id": "2b89c527-a162-4511-bd28-dbfa7531510f",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "sessionId": "6bd750b4-fc47-48fc-b24f-847684454c96",
+    "role": "user",
+    "content": "Create a filter that display anyone that report to Susan",
+    "timestamp": "2026-02-17T20:33:27.932Z"
+  },
+  {
+    "id": "0ea1ed28-67df-48ea-a20f-b61bfcec14c4",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "sessionId": "6bd750b4-fc47-48fc-b24f-847684454c96",
+    "role": "assistant",
+    "content": "Okay! Which dataset contains the reporting structure information? I see two datasets: \"HCM_Sample_Data_v2_employeedata.csv\" and \"CalculatedTimeSummary.csv\". Also, what information do you want to display for the employees that report to Susan?",
+    "timestamp": "2026-02-17T20:33:29.047Z"
+  }
+]

@@ -1,0 +1,34 @@
+[
+  {
+    "id": "c10f6df6-3eba-48c8-b7de-aaeb21ad6833",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "sessionId": "552a3ff9-9435-4720-8411-af7afcf2a8eb",
+    "role": "user",
+    "content": "Create a filter that display anyone that report to Susan",
+    "timestamp": "2026-02-17T20:33:46.018Z"
+  },
+  {
+    "id": "13d619d0-9c8a-4c6d-b74a-ce86923433ca",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "sessionId": "552a3ff9-9435-4720-8411-af7afcf2a8eb",
+    "role": "assistant",
+    "content": "Okay! I can create an expression to filter your report to show only the employees who report to Susan Clark.\n\n```\nEq(SupervisorName, \"Susan Clark (Chicago) (CKMT0018)\")\n```\n\n- Output type: **Text**\n- Suggested column name: **Reports to Susan Clark**\n- Column properties: **✗Sortable , ✓Filterable , ✓Groupable , ✓Charting**\n\nThese are recommended defaults — let me know if you'd like to change any.\n\n{{SUGGESTED_ACTIONS:Revise this expression|Create new column|Test with my data|Explain this expression}}",
+    "timestamp": "2026-02-17T20:33:47.486Z"
+  },
+  {
+    "id": "a5e272bc-29eb-4e8c-98ae-09565a1d9568",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "sessionId": "552a3ff9-9435-4720-8411-af7afcf2a8eb",
+    "role": "user",
+    "content": "Test with my data",
+    "timestamp": "2026-02-17T20:33:49.423Z"
+  },
+  {
+    "id": "e798ca56-45e8-4aee-9b65-8076c779c9fe",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "sessionId": "552a3ff9-9435-4720-8411-af7afcf2a8eb",
+    "role": "assistant",
+    "content": "Here's a preview of how the expression will work using data from your report.\n\n**Row 8: Employee: Bill h**\n- **Inputs:** `SupervisorName` = \"Valerie Lagavulin (Chicago) (2)\"\n- **Calculation:**\n  `Eq(SupervisorName, \"Susan Clark (Chicago) (CKMT0018)\")`\n  = `Eq(\"Valerie Lagavulin (Chicago) (2)\", \"Susan Clark (Chicago) (CKMT0018)\")`\n  = False\n- **Result:** False\n\n**Row 27: Employee: Ozzy Anderson**\n- **Inputs:** `SupervisorName` = \"Friedrich Hayek (Chicago) (8432)\"\n- **Calculation:**\n  `Eq(SupervisorName, \"Susan Clark (Chicago) (CKMT0018)\")`\n  = `Eq(\"Friedrich Hayek (Chicago) (8432)\", \"Susan Clark (Chicago) (CKMT0018)\")`\n  = False\n- **Result:** False\n\n{{SUGGESTED_ACTIONS:Create new column|Revise this expression|Explain this expression}}",
+    "timestamp": "2026-02-17T20:33:51.814Z"
+  }
+]

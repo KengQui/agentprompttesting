@@ -777,6 +777,20 @@ function stripCodeBlocks(content: string): string {
   return cleaned.trim();
 }
 
+function injectRowNumbersIntoCSV(csvContent: string): string {
+  const lines = csvContent.split(/\r?\n/);
+  if (lines.length <= 1) return csvContent;
+
+  const result: string[] = [];
+  result.push("Row," + lines[0]);
+  for (let i = 1; i < lines.length; i++) {
+    if (!lines[i].trim()) continue;
+    const spreadsheetRow = i + 1;
+    result.push(spreadsheetRow + "," + lines[i]);
+  }
+  return result.join("\n");
+}
+
 function buildSampleDatasetsText(agent: AgentContext): string {
   if (!agent.sampleDatasets || agent.sampleDatasets.length === 0) {
     return "";
@@ -785,6 +799,7 @@ function buildSampleDatasetsText(agent: AgentContext): string {
   let section = "User Data Records:\n";
   for (const dataset of agent.sampleDatasets) {
     const cleanedContent = stripCodeBlocks(dataset.content);
+    const displayContent = dataset.format === 'csv' ? injectRowNumbersIntoCSV(cleanedContent) : cleanedContent;
     const recordCount = countRecordsInDataset(dataset.content, dataset.format);
     const countLabel = recordCount > 0 ? `Total records: ${recordCount}` : "";
     
@@ -792,7 +807,7 @@ function buildSampleDatasetsText(agent: AgentContext): string {
     if (countLabel) {
       section += `${countLabel}\n`;
     }
-    section += `${cleanedContent}\n`;
+    section += `${displayContent}\n`;
   }
   return section;
 }
