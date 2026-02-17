@@ -90,18 +90,26 @@ export function countRecordsInDataset(content: string, format: string): number {
   return 0;
 }
 
-function addRowNumbersToCSV(csvContent: string): string {
-  const lines = csvContent.split(/\r?\n/);
-  if (lines.length === 0) return csvContent;
+function buildRowIndex(csvContent: string): string {
+  const lines = csvContent.split(/\r?\n/).filter(l => l.trim());
+  if (lines.length <= 1) return "";
   
-  const numberedLines: string[] = [];
-  numberedLines.push(`Row,${lines[0]}`);
+  const header = lines[0];
+  const firstComma = header.indexOf(',');
+  const firstCol = firstComma > 0 ? header.substring(0, firstComma).trim() : "ID";
+  const secondCol = firstComma > 0 && header.indexOf(',', firstComma + 1) > 0
+    ? header.substring(firstComma + 1, header.indexOf(',', firstComma + 1)).trim()
+    : "";
+  
+  let index = "\nRow Index (row number = line position after header, starting at 1):\n";
   for (let i = 1; i < lines.length; i++) {
-    if (lines[i].trim()) {
-      numberedLines.push(`${i},${lines[i]}`);
-    }
+    const parts = lines[i].split(',');
+    const id = parts[0] ? parts[0].trim() : "";
+    const name = parts[1] ? parts[1].trim() : "";
+    const label = secondCol ? `${firstCol}: ${id}, ${secondCol}: ${name}` : `${firstCol}: ${id}`;
+    index += `  Row ${i}: ${label}\n`;
   }
-  return numberedLines.join('\n');
+  return index;
 }
 
 function buildSampleDataSection(context: PromptContext): string {
@@ -121,22 +129,26 @@ function buildSampleDataSection(context: PromptContext): string {
     }
     
     const cleanedContent = stripCodeBlocks(dataset.content);
-    const contentWithRows = dataset.format === 'csv' ? addRowNumbersToCSV(cleanedContent) : cleanedContent;
     const maxDataChars = Math.min(MAX_DOC_PREVIEW_CHARS, remainingBudget);
-    const truncatedContent = contentWithRows.slice(0, maxDataChars);
-    const datasetTruncated = contentWithRows.length > maxDataChars;
+    const truncatedContent = cleanedContent.slice(0, maxDataChars);
+    const datasetTruncated = cleanedContent.length > maxDataChars;
     if (datasetTruncated) wasTruncated = true;
     const suffix = datasetTruncated ? "\n[Data truncated...]" : "";
     
     const recordCount = countRecordsInDataset(dataset.content, dataset.format);
     const countLabel = recordCount > 0 ? `Total records: ${recordCount}` : "";
     
+    const rowIndex = dataset.format === 'csv' ? buildRowIndex(cleanedContent) : "";
+    
     section += `\n--- ${dataset.name} (${dataset.format.toUpperCase()}) ---\n`;
     if (countLabel) {
       section += `${countLabel}\n`;
     }
     section += `${truncatedContent}${suffix}\n`;
-    totalChars += truncatedContent.length + dataset.name.length + 30;
+    if (rowIndex) {
+      section += rowIndex;
+    }
+    totalChars += truncatedContent.length + dataset.name.length + rowIndex.length + 30;
   }
   
   if (wasTruncated) {
@@ -191,8 +203,8 @@ ${sampleData}
 - If you display a table or list of records, the number of rows you display MUST match the count you state. Do NOT say "there are 3 employees" and then list 5.
 - If data was truncated, clearly state "showing N of M total records" so the user knows not all data is visible.
 - NEVER guess or estimate record counts — always count the actual records you can see in the data above before stating a number.
-- CSV datasets include a "Row" column as the first column. When referring to a specific row, ALWAYS use the row number from this "Row" column — do NOT count rows yourself or assign your own row numbers.
-- For example, if the Row column says "10" for an employee named Randy, then that employee is at Row 10, not Row 2 or any other number.`;
+- CSV datasets include a "Row Index" section after the data. When referring to a specific data row, ALWAYS look up the row number from the Row Index — do NOT count rows yourself or assign your own row numbers.
+- ONLY use data values that actually appear in the dataset. NEVER fabricate, invent, or guess data values. If a field value is not visible in the data, say so rather than making one up.`;
   }
 
   if (context.validationRules) {
