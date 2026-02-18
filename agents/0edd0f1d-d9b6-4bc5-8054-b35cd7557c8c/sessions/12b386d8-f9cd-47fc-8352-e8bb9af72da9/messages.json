@@ -62,5 +62,21 @@
     "role": "assistant",
     "content": "**1. Understanding the Goal**\nThe goal is to calculate the total scheduled amount by adding the scheduled employee (EE) amount and the scheduled employer (ER) amount.\n\n**2. Identifying Necessary Columns**\n- `ScheduledEEAmount`: The amount scheduled to be paid by the employee.\n- `ScheduledERAmount`: The amount scheduled to be paid by the employer.\n\n**3. Using the Add Function**\nThe `Add` function is used to sum two or more numbers. In this case, we're adding the scheduled employee amount and the scheduled employer amount. The simplified expression before data conversion is:\n   `Add(ScheduledEEAmount, ScheduledERAmount)`\n\n**4. Combining Everything**\nThe complete expression converts the two text columns to numbers and then adds them together to get the total scheduled amount.\n\n```\nAdd(Value(ScheduledEEAmount), Value(ScheduledERAmount))\n```\n\nThis produces a **Numeric** result — you'll see values like 1,500 or 750 in your report column.\n\n{{SUGGESTED_ACTIONS:Use this expression|Revise this expression|Validate with sample data}}",
     "timestamp": "2026-02-11T01:07:39.447Z"
+  },
+  {
+    "id": "567544c1-4fea-4aa4-bcc8-d01fe2a8aeed",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "sessionId": "12b386d8-f9cd-47fc-8352-e8bb9af72da9",
+    "role": "user",
+    "content": "Use this expression",
+    "timestamp": "2026-02-18T03:08:18.487Z"
+  },
+  {
+    "id": "7e193b26-e042-46e7-b1f1-e0181ad7e023",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "sessionId": "12b386d8-f9cd-47fc-8352-e8bb9af72da9",
+    "role": "assistant",
+    "content": "```tool_code\ncreate_calculated_column(\n    expression='Add(Value(ScheduledEEAmount), Value(ScheduledERAmount))',\n    output_type='Numeric',\n    name='Total Scheduled Amount',\n    sortable=True,\n    filterable=True,\n    groupable=False,\n    charting=True\n)\n```",
+    "timestamp": "2026-02-18T03:08:19.577Z"
   }
 ]

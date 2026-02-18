@@ -1,0 +1,98 @@
+[
+  {
+    "id": "65b2535c-2545-4ea4-8269-292738607e33",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "sessionId": "8e9ef6f1-c80c-426c-9369-1969cc3ad655",
+    "role": "user",
+    "content": "Create a filter that display anyone that report to Susan Clark",
+    "timestamp": "2026-02-18T02:58:51.118Z"
+  },
+  {
+    "id": "7bb8630c-264c-4c6a-a089-643a1533faca",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "sessionId": "8e9ef6f1-c80c-426c-9369-1969cc3ad655",
+    "role": "assistant",
+    "content": "I can't create a filter, but I can create a calculated column that flags employees who report to Susan Clark.\n\n```\nIf(SupervisorName==\"Susan Clark (Chicago) (CKMT0018)\", \"Reports to Susan Clark\", \"Does Not Report to Susan Clark\")\n```\n- Output type: **Text**\n- Suggested column name: **Reports to Susan Clark**\n- Column properties: **✗Sortable , ✓Filterable , ✓Groupable , ✓Charting**\n\nThese are recommended defaults — let me know if you'd like to change any.\n\n{{SUGGESTED_ACTIONS:Revise this expression|Create new column|Test with my data|Explain this expression}}",
+    "timestamp": "2026-02-18T02:58:52.614Z"
+  },
+  {
+    "id": "a7f96ea0-5587-41bb-9ae7-df57ec3a2686",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "sessionId": "8e9ef6f1-c80c-426c-9369-1969cc3ad655",
+    "role": "user",
+    "content": "Test with my data",
+    "timestamp": "2026-02-18T02:59:01.735Z"
+  },
+  {
+    "id": "b81b44ad-b6f3-4c66-ad8e-f29bf4cbd87d",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "sessionId": "8e9ef6f1-c80c-426c-9369-1969cc3ad655",
+    "role": "assistant",
+    "content": "Okay, here's how the expression works using data from your report:\n\n**Row 28: Oliver Houser**\n- **Inputs:** `SupervisorName` = \"Susan Clark (Chicago) (CKMT0018)\"\n- **Calculation:**\n  `If(SupervisorName==\"Susan Clark (Chicago) (CKMT0018)\", \"Reports to Susan Clark\", \"Does Not Report to Susan Clark\")`\n  = `If(\"Susan Clark (Chicago) (CKMT0018)\"==\"Susan Clark (Chicago) (CKMT0018)\", \"Reports to Susan Clark\", \"Does Not Report to Susan Clark\")`\n  = `If(true, \"Reports to Susan Clark\", \"Does Not Report to Susan Clark\")`\n  = `\"Reports to Susan Clark\"`\n- **Result:** Reports to Susan Clark\n\n**Row 2: Paul Jones**\n- **Inputs:** `SupervisorName` = \"Kathy Mae Watts (Chicago) (4)\"\n- **Calculation:**\n  `If(SupervisorName==\"Susan Clark (Chicago) (CKMT0018)\", \"Reports to Susan Clark\", \"Does Not Report to Susan Clark\")`\n  = `If(\"Kathy Mae Watts (Chicago) (4)\"==\"Susan Clark (Chicago) (CKMT0018)\", \"Reports to Susan Clark\", \"Does Not Report to Susan Clark\")`\n  = `If(false, \"Reports to Susan Clark\", \"Does Not Report to Susan Clark\")`\n  = `\"Does Not Report to Susan Clark\"`\n- **Result:** Does Not Report to Susan Clark\n\n{{SUGGESTED_ACTIONS:Create new column|Revise this expression|Explain this expression}}",
+    "timestamp": "2026-02-18T02:59:04.181Z"
+  },
+  {
+    "id": "4fdaf2d0-07e7-4e76-bedf-d4cbe63b4ab2",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "sessionId": "8e9ef6f1-c80c-426c-9369-1969cc3ad655",
+    "role": "user",
+    "content": "Change output type to Yes or No",
+    "timestamp": "2026-02-18T02:59:40.769Z"
+  },
+  {
+    "id": "a78ec86d-0e1a-4aa9-be57-a16f8baa5c6b",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "sessionId": "8e9ef6f1-c80c-426c-9369-1969cc3ad655",
+    "role": "assistant",
+    "content": "```\nIf(SupervisorName==\"Susan Clark (Chicago) (CKMT0018)\", \"Yes\", \"No\")\n```\n- Output type: **Text**\n- Suggested column name: **Reports to Susan Clark**\n- Column properties: **✗Sortable , ✓Filterable , ✓Groupable , ✓Charting**\n\nThese are recommended defaults — let me know if you'd like to change any.\n\n{{SUGGESTED_ACTIONS:Revise this expression|Create new column|Test with my data|Explain this expression}}",
+    "timestamp": "2026-02-18T02:59:42.064Z"
+  },
+  {
+    "id": "ae968946-7c7b-42c6-8950-c50e55232c51",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "sessionId": "8e9ef6f1-c80c-426c-9369-1969cc3ad655",
+    "role": "user",
+    "content": "Test with my data",
+    "timestamp": "2026-02-18T02:59:48.117Z"
+  },
+  {
+    "id": "fc8c08db-f008-4ab9-ac07-7afa569416a4",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "sessionId": "8e9ef6f1-c80c-426c-9369-1969cc3ad655",
+    "role": "assistant",
+    "content": "Okay, here's how the expression works using data from your report:\n\n**Row 28: Oliver Houser**\n- **Inputs:** `SupervisorName` = \"Susan Clark (Chicago) (CKMT0018)\"\n- **Calculation:**\n  `If(SupervisorName==\"Susan Clark (Chicago) (CKMT0018)\", \"Yes\", \"No\")`\n  = `If(\"Susan Clark (Chicago) (CKMT0018)\"==\"Susan Clark (Chicago) (CKMT0018)\", \"Yes\", \"No\")`\n  = `If(true, \"Yes\", \"No\")`\n  = `\"Yes\"`\n- **Result:** Yes\n\n**Row 2: Paul Jones**\n- **Inputs:** `SupervisorName` = \"Kathy Mae Watts (Chicago) (4)\"\n- **Calculation:**\n  `If(SupervisorName==\"Susan Clark (Chicago) (CKMT0018)\", \"Yes\", \"No\")`\n  = `If(\"Kathy Mae Watts (Chicago) (4)\"==\"Susan Clark (Chicago) (CKMT0018)\", \"Yes\", \"No\")`\n  = `If(false, \"Yes\", \"No\")`\n  = `\"No\"`\n- **Result:** No\n\n{{SUGGESTED_ACTIONS:Create new column|Revise this expression|Explain this expression}}",
+    "timestamp": "2026-02-18T02:59:50.632Z"
+  },
+  {
+    "id": "60da15cb-147e-495a-b334-e88b14d05242",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "sessionId": "8e9ef6f1-c80c-426c-9369-1969cc3ad655",
+    "role": "user",
+    "content": "Create new column",
+    "timestamp": "2026-02-18T03:00:08.229Z"
+  },
+  {
+    "id": "742c22fa-980e-43ce-bcc6-4c03a8faa58f",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "sessionId": "8e9ef6f1-c80c-426c-9369-1969cc3ad655",
+    "role": "assistant",
+    "content": "```tool_code\ncreate_calculated_column(expression='If(SupervisorName==\"Susan Clark (Chicago) (CKMT0018)\", \"Yes\", \"No\")', output_type='Text', column_name='Reports to Susan Clark', sortable=False, filterable=True, groupable=True, charting=True)\n```\n{{SUGGESTED_ACTIONS:See related expressions|Create new expression|I'm done}}",
+    "timestamp": "2026-02-18T03:00:09.452Z"
+  },
+  {
+    "id": "31fda660-b1c4-41da-9c14-8311bc540ae6",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "sessionId": "8e9ef6f1-c80c-426c-9369-1969cc3ad655",
+    "role": "user",
+    "content": "See related expressions",
+    "timestamp": "2026-02-18T03:00:21.378Z"
+  },
+  {
+    "id": "286f763b-c178-4f63-b813-336f3f8f673c",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "sessionId": "8e9ef6f1-c80c-426c-9369-1969cc3ad655",
+    "role": "assistant",
+    "content": "Here are 3 related expressions you might find useful:\n\n1.  **Manager Name** — Display the name of the employee's manager.\n2.  **Department Code** — Show a shortened code for each employee's department.\n3.  **Reports to Kathy Mae Watts** — Flag employees who report to Kathy Mae Watts.\n\nWhich one would you like me to build?",
+    "timestamp": "2026-02-18T03:00:22.603Z"
+  }
+]
