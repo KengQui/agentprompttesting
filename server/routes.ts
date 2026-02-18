@@ -945,7 +945,11 @@ export async function registerRoutes(
                   responseContent = parsedAction.cleanedResponse;
                   if (!responseContent.trim() && actionResult.success) {
                     try {
-                      const actionFollowUp = `[SYSTEM: You just executed the action "${actionResult.actionName}" with these parameters: ${JSON.stringify(actionResult.fields)}. The action was successful: "${actionResult.message}". Now, based on the user data you have access to, provide a helpful response that: 1) Summarizes what you found or did (include specific data values), 2) Explains what this means in context of the user's request, 3) Suggests a logical next step. Do NOT just repeat the success message. Be specific and actionable.]`;
+                      const isColumnCreation = actionResult.actionName === 'create_calculated_column';
+                      const columnCreationSuffix = isColumnCreation
+                        ? ' MANDATORY: Your response MUST end with exactly this marker on its own line:\n{{SUGGESTED_ACTIONS:See related expressions|Create new expression|I\'m done}}\nDo NOT omit this marker. Do NOT rephrase it. Do NOT replace it with free-form text.'
+                        : '';
+                      const actionFollowUp = `[SYSTEM: You just executed the action "${actionResult.actionName}" with these parameters: ${JSON.stringify(actionResult.fields)}. The action was successful: "${actionResult.message}". Now, based on the user data you have access to, provide a helpful response that: 1) Summarizes what you found or did (include specific data values), 2) Explains what this means in context of the user's request, 3) Suggests a logical next step. Do NOT just repeat the success message. Be specific and actionable.${columnCreationSuffix}]`;
                       const followUpHistory = [
                         ...chatHistory,
                         { role: "user" as const, content: userInput },
