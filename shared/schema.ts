@@ -1,4 +1,6 @@
 import { z } from "zod";
+import { pgTable, text, timestamp, jsonb, integer, boolean as pgBoolean } from "drizzle-orm/pg-core";
+import { createInsertSchema } from "drizzle-zod";
 
 // Agent status enum
 export const agentStatusEnum = z.enum(["draft", "configured", "active"]);
@@ -551,3 +553,102 @@ export const simulationResultSchema = z.object({
 });
 
 export type SimulationResult = z.infer<typeof simulationResultSchema>;
+
+// =====================================================
+// Drizzle ORM Table Definitions (PostgreSQL)
+// =====================================================
+
+export const usersTable = pgTable("users", {
+  id: text("id").primaryKey(),
+  username: text("username").notNull().unique(),
+  password: text("password").notNull(),
+  role: text("role").notNull().default("user"),
+  createdAt: text("created_at").notNull(),
+});
+
+export const agentsTable = pgTable("agents", {
+  id: text("id").primaryKey(),
+  userId: text("user_id").notNull(),
+  name: text("name").notNull(),
+  description: text("description").notNull().default(""),
+  status: text("status").notNull().default("draft"),
+  promptStyle: text("prompt_style").notNull().default("gemini"),
+  mockMode: text("mock_mode").notNull().default("full"),
+  configurationStep: integer("configuration_step").notNull().default(1),
+  businessUseCase: text("business_use_case").notNull().default(""),
+  domainKnowledge: text("domain_knowledge").notNull().default(""),
+  validationRules: text("validation_rules").notNull().default(""),
+  guardrails: text("guardrails").notNull().default(""),
+  customPrompt: text("custom_prompt").notNull().default(""),
+  domainDocuments: jsonb("domain_documents").notNull().default([]),
+  sampleDatasets: jsonb("sample_datasets").notNull().default([]),
+  clarifyingInsights: jsonb("clarifying_insights").notNull().default([]),
+  availableActions: jsonb("available_actions").notNull().default([]),
+  mockUserState: jsonb("mock_user_state").notNull().default([]),
+  welcomeConfig: jsonb("welcome_config"),
+  promptGeneratedAt: text("prompt_generated_at"),
+  lastConfigUpdate: text("last_config_update"),
+  promptLastRevisedBy: text("prompt_last_revised_by"),
+  promptLastRevisedAt: text("prompt_last_revised_at"),
+  configFieldsHash: text("config_fields_hash"),
+  createdAt: text("created_at").notNull(),
+  updatedAt: text("updated_at").notNull(),
+});
+
+export const agentComponentsTable = pgTable("agent_components", {
+  id: text("id").primaryKey(),
+  agentId: text("agent_id").notNull(),
+  fileName: text("file_name").notNull(),
+  code: text("code").notNull(),
+  createdAt: text("created_at").notNull(),
+});
+
+export const chatSessionsTable = pgTable("chat_sessions", {
+  id: text("id").primaryKey(),
+  agentId: text("agent_id").notNull(),
+  title: text("title").notNull().default("New Session"),
+  createdAt: text("created_at").notNull(),
+  updatedAt: text("updated_at").notNull(),
+});
+
+export const chatMessagesTable = pgTable("chat_messages", {
+  id: text("id").primaryKey(),
+  agentId: text("agent_id").notNull(),
+  sessionId: text("session_id").notNull(),
+  role: text("role").notNull(),
+  content: text("content").notNull(),
+  timestamp: text("timestamp").notNull(),
+});
+
+export const agentTracesTable = pgTable("agent_traces", {
+  id: text("id").primaryKey(),
+  agentId: text("agent_id").notNull(),
+  sessionId: text("session_id"),
+  traces: jsonb("traces").notNull().default([]),
+  stats: jsonb("stats").notNull().default({}),
+  createdAt: text("created_at").notNull(),
+  updatedAt: text("updated_at").notNull(),
+});
+
+export const configSnapshotsTable = pgTable("config_snapshots", {
+  id: text("id").primaryKey(),
+  agentId: text("agent_id").notNull(),
+  description: text("description"),
+  changes: jsonb("changes").notNull().default([]),
+  config: jsonb("config").notNull().default({}),
+  isRevertPoint: pgBoolean("is_revert_point").notNull().default(false),
+  timestamp: text("timestamp").notNull(),
+});
+
+export const authSessionsTable = pgTable("auth_sessions", {
+  id: text("id").primaryKey(),
+  userId: text("user_id").notNull(),
+  expiresAt: text("expires_at").notNull(),
+});
+
+export const promptCoachHistoryTable = pgTable("prompt_coach_history", {
+  id: text("id").primaryKey(),
+  agentId: text("agent_id").notNull().unique(),
+  messages: jsonb("messages").notNull().default([]),
+  savedAt: text("saved_at").notNull(),
+});

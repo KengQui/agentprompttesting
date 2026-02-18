@@ -1,20 +1,11 @@
-/**
- * Agent Loader
- * 
- * Dynamically loads per-agent components if they exist.
- * Falls back to base components if no custom components are defined.
- * 
- * Note: This uses tsx runtime for dynamic TS imports. For production builds,
- * agent components should be pre-compiled or bundled.
- */
-
 import * as fs from 'fs';
 import * as path from 'path';
-import { fileURLToPath } from 'url';
+import * as os from 'os';
+import { eq, and } from 'drizzle-orm';
+import { db } from './db';
+import { agentComponentsTable } from '@shared/schema';
 import { Orchestrator, createOrchestrator } from './components/orchestrator';
 import type { AgentConfig } from './components/types';
-
-const agentsDir = path.join(process.cwd(), 'agents');
 
 interface AgentComponents {
   orchestrator: Orchestrator;
@@ -28,34 +19,63 @@ export async function loadAgentComponents(agentId: string, agentConfig: AgentCon
     return loadedOrchestrators.get(agentId)!;
   }
 
-  const agentComponentsPath = path.join(agentsDir, agentId, 'components');
-  const orchestratorPath = path.join(agentComponentsPath, 'orchestrator.ts');
-
   let orchestrator: Orchestrator;
   let hasCustomComponents = false;
 
-  if (fs.existsSync(orchestratorPath)) {
-    try {
-      // Use file:// URL for dynamic imports (works with tsx runtime)
-      const indexPath = path.join(agentComponentsPath, 'index.ts');
-      const moduleUrl = `file://${indexPath}`;
-      
-      const agentModule = await import(moduleUrl);
-      if (agentModule.createOrchestrator) {
-        orchestrator = agentModule.createOrchestrator(agentConfig);
-        hasCustomComponents = true;
-        console.log(`[agent-loader] Loaded custom orchestrator for agent ${agentId}`);
+  try {
+    const componentRows = await db.select().from(agentComponentsTable)
+      .where(eq(agentComponentsTable.agentId, agentId));
+
+    if (componentRows.length > 0) {
+      const orchestratorRow = componentRows.find(r => r.fileName === 'orchestrator.ts');
+      const indexRow = componentRows.find(r => r.fileName === 'index.ts');
+
+      if (indexRow) {
+        const tmpDir = path.join(os.tmpdir(), 'agent-components', agentId);
+        fs.mkdirSync(tmpDir, { recursive: true });
+
+        const serverDir = path.resolve(process.cwd(), 'server');
+        for (const row of componentRows) {
+          let code = row.code;
+          code = code.replace(
+            /from\s+['"]\.\.\/\.\.\/\.\.\/server\/components\/(.*?)['"]/g,
+            `from '${serverDir}/components/$1'`
+          );
+          code = code.replace(
+            /require\s*\(\s*['"]\.\.\/\.\.\/\.\.\/server\/components\/(.*?)['"]\s*\)/g,
+            `require('${serverDir}/components/$1')`
+          );
+          fs.writeFileSync(path.join(tmpDir, row.fileName), code, 'utf-8');
+        }
+
+        const indexPath = path.join(tmpDir, 'index.ts');
+        const moduleUrl = `file://${indexPath}`;
+
+        try {
+          const agentModule = await import(moduleUrl);
+          if (agentModule.createOrchestrator) {
+            orchestrator = agentModule.createOrchestrator(agentConfig);
+            hasCustomComponents = true;
+            console.log(`[agent-loader] Loaded custom orchestrator for agent ${agentId} from DB`);
+          } else {
+            orchestrator = createOrchestrator({ agentConfig });
+            console.log(`[agent-loader] Using base orchestrator for agent ${agentId} (no createOrchestrator in DB components)`);
+          }
+        } catch (importError) {
+          console.error(`[agent-loader] Error importing components for agent ${agentId}:`, importError);
+          orchestrator = createOrchestrator({ agentConfig });
+        }
       } else {
         orchestrator = createOrchestrator({ agentConfig });
-        console.log(`[agent-loader] Using base orchestrator for agent ${agentId} (no createOrchestrator found)`);
+        console.log(`[agent-loader] Using base orchestrator for agent ${agentId} (no index.ts in DB)`);
       }
-    } catch (error) {
-      console.error(`[agent-loader] Error loading custom components for agent ${agentId}:`, error);
+    } else {
       orchestrator = createOrchestrator({ agentConfig });
+      console.log(`[agent-loader] Using base orchestrator for agent ${agentId} (no components in DB)`);
     }
-  } else {
+  } catch (error) {
+    console.error(`[agent-loader] Error loading components for agent ${agentId}:`, error);
     orchestrator = createOrchestrator({ agentConfig });
-    console.log(`[agent-loader] Using base orchestrator for agent ${agentId} (no components folder)`);
   }
 
   await orchestrator.initFlowMode();
@@ -73,7 +93,12 @@ export function clearAgentCache(agentId?: string): void {
   }
 }
 
-export function hasCustomComponents(agentId: string): boolean {
-  const agentComponentsPath = path.join(agentsDir, agentId, 'components', 'orchestrator.ts');
-  return fs.existsSync(agentComponentsPath);
+export async function hasCustomComponents(agentId: string): Promise<boolean> {
+  const rows = await db.select().from(agentComponentsTable)
+    .where(and(
+      eq(agentComponentsTable.agentId, agentId),
+      eq(agentComponentsTable.fileName, 'orchestrator.ts')
+    ))
+    .limit(1);
+  return rows.length > 0;
 }

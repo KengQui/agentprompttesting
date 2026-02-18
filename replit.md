@@ -43,15 +43,35 @@ Agent Studio utilizes a modern web application architecture with a clear separat
 - **Password Reset**: Username-only verification for password reset.
 - **Agent Isolation**: Each user can only manage their own agents.
 - **Protected Routes**: All agent-related routes enforce ownership verification.
-- **Data Persistence**: Users stored in `/users/users.json`.
+- **Data Persistence**: Users stored in PostgreSQL `users` table.
 
 ### Agent Component Templates
-- **Template System**: Agent components (TurnManager, FlowController, Orchestrator) are generated from templates in `/server/templates/agent-components/`. When a new agent is created, these templates are copied to `/agents/{agent-id}/components/` with placeholders replaced. New features for agent components **MUST** be added to the corresponding template files.
+- **Template System**: Agent components (TurnManager, FlowController, Orchestrator) are generated from templates in `/server/templates/agent-components/`. When a new agent is created, templates are rendered and stored in the `agent_components` DB table (one row per file per agent). New features for agent components **MUST** be added to the corresponding template files.
 
-### Data Persistence
-- **Agent Configuration**: Stored in dedicated folders (`/agents/{agent-id}/`) with a multi-file structure (e.g., `meta.yaml`, `business-use-case.md`, `validation-rules.yaml`, `custom-prompt.md`, `available-actions.json`).
-- **Per-Session Message Storage**: Chat messages stored in individual session files (`/agents/{agent-id}/sessions/{session-id}/messages.json`) for independent experiment threads and session isolation.
-- **In-memory storage**: Utilizes nested Maps for transient data, persisted to YAML/JSON files.
+### Data Persistence (PostgreSQL)
+- **Database**: All data is stored in PostgreSQL via Drizzle ORM. The schema is defined in `shared/schema.ts`.
+- **Agent Configuration**: Stored in the `agents` table with all config fields as columns and JSON columns for arrays (domainDocuments, sampleDatasets, clarifyingInsights, availableActions, mockUserState).
+- **Agent Components**: Stored in `agent_components` table (one row per file per agent, columns: agentId, fileName, code).
+- **Chat Sessions/Messages**: Stored in `chat_sessions` and `chat_messages` tables.
+- **Traces**: Stored in `agent_traces` table with JSON columns for traces array and stats.
+- **Config History**: Stored in `config_snapshots` table.
+- **Users & Auth**: Stored in `users` and `auth_sessions` tables.
+- **Prompt Coach**: History stored in `prompt_coach_history` table.
+- **Auto-Migration**: On first startup with an empty DB, `server/migrate-files-to-db.ts` imports all existing file-based agents, users, sessions, messages, and components into the DB. After migration, the system exclusively uses the database.
+- **Storage Interface**: `server/storage.ts` exports `DatabaseStorage` class implementing `IStorage` interface using Drizzle ORM queries.
+- **DB Connection**: `server/db.ts` creates the Drizzle client using `DATABASE_URL` environment variable.
+
+<!-- PROTECTED: DO NOT MODIFY THIS SECTION WHEN ADDING NEW KNOWLEDGE -->
+### Migration Instructions (PROTECTED)
+**CRITICAL: These instructions must NEVER be modified when updating replit.md with new knowledge.**
+
+1. **Schema Changes**: All schema changes go in `shared/schema.ts`. After modifying, run `npm run db:push` (or `npm run db:push --force` if needed).
+2. **Storage Changes**: Update `DatabaseStorage` class in `server/storage.ts` and the `IStorage` interface.
+3. **Never change ID column types**: Existing IDs use `varchar` with UUIDs. Never switch to serial or vice versa.
+4. **File-to-DB Migration**: `server/migrate-files-to-db.ts` runs once on startup if DB is empty. It reads from `/agents/` and `/users/` directories. Do not modify the migration logic after initial deployment.
+5. **Agent Components in DB**: Components are stored in `agent_components` table, not on disk. The `agent-loader.ts` reads from DB and writes to temp directories for dynamic imports.
+6. **Design Choice**: Simple migration approach — all agents get updated logic when templates change. No version splitting between agents.
+<!-- END PROTECTED SECTION -->
 
 ### Prompt Coach (Detailed)
 The Prompt Coach is an AI-powered chatbot that helps users improve their agent configurations through conversational interaction.

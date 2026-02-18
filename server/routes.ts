@@ -1076,7 +1076,7 @@ export async function registerRoutes(
       const agent = await verifyAgentOwnership(req, res, req.params.id);
       if (!agent) return;
       
-      res.json({ hasCustomComponents: hasCustomComponents(req.params.id) });
+      res.json({ hasCustomComponents: await hasCustomComponents(req.params.id) });
     } catch (error) {
       console.error("Error checking components:", error);
       res.status(500).json({ message: "Failed to check components" });
