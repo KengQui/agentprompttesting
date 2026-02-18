@@ -1,0 +1,66 @@
+[
+  {
+    "id": "e3343ec2-31d7-4abb-a686-8902fda9eb79",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "sessionId": "9b9dc106-6567-4330-8735-b3ca4a61f7ea",
+    "role": "user",
+    "content": "show a shortened code for each employee's department.",
+    "timestamp": "2026-02-18T03:19:59.174Z"
+  },
+  {
+    "id": "1b9cdd17-5ec4-4d68-bb21-53369ac30585",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "sessionId": "9b9dc106-6567-4330-8735-b3ca4a61f7ea",
+    "role": "assistant",
+    "content": "I can create an expression to shorten each employee's department. How many characters do you want to include in the shortened department code?",
+    "timestamp": "2026-02-18T03:20:00.069Z"
+  },
+  {
+    "id": "e5800c5f-99eb-4529-a8fa-dadfaef4ecb5",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "sessionId": "9b9dc106-6567-4330-8735-b3ca4a61f7ea",
+    "role": "user",
+    "content": "3",
+    "timestamp": "2026-02-18T03:20:05.353Z"
+  },
+  {
+    "id": "f7931b35-d9f5-44ae-9b39-84e888dce07f",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "sessionId": "9b9dc106-6567-4330-8735-b3ca4a61f7ea",
+    "role": "assistant",
+    "content": "Okay, this expression will take the first 3 characters of the Department.\n\n```\nLeft(Department, 3)\n```\n- Output type: **Text**\n- Suggested column name: **Department Code**\n- Column properties: **✗Sortable , ✓Filterable , ✓Groupable , ✓Charting**\n\nThese are recommended defaults — let me know if you'd like to change any.\n\n{{SUGGESTED_ACTIONS:Revise this expression|Create new column|Test with my data|Explain this expression}}",
+    "timestamp": "2026-02-18T03:20:07.118Z"
+  },
+  {
+    "id": "490a8375-6082-444c-990a-dbc4873e4e95",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "sessionId": "9b9dc106-6567-4330-8735-b3ca4a61f7ea",
+    "role": "user",
+    "content": "Test with my data",
+    "timestamp": "2026-02-18T03:20:40.913Z"
+  },
+  {
+    "id": "369e9230-57bc-4002-a7d4-c9d0b027cd61",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "sessionId": "9b9dc106-6567-4330-8735-b3ca4a61f7ea",
+    "role": "assistant",
+    "content": "Okay, here's a preview of how the expression will work using some data from your report:\n\n**Row 2: Employee: Sarah Johnson**\n- **Inputs:** `Department` = \"Engineering\"\n- **Calculation:**\n  Left(Department, 3)\n  = Left(\"Engineering\", 3)\n  = \"Eng\"\n- **Result:** Eng\n\n**Row 3: Employee: Michael Chen**\n- **Inputs:** `Department` = \"Sales\"\n- **Calculation:**\n  Left(Department, 3)\n  = Left(\"Sales\", 3)\n  = \"Sal\"\n- **Result:** Sal\n\n{{SUGGESTED_ACTIONS:Create new column|Revise this expression|Explain this expression}}",
+    "timestamp": "2026-02-18T03:20:42.504Z"
+  },
+  {
+    "id": "e7b68e32-e318-4279-9c51-5e75b3378aa8",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "sessionId": "9b9dc106-6567-4330-8735-b3ca4a61f7ea",
+    "role": "user",
+    "content": "Create new column",
+    "timestamp": "2026-02-18T03:20:54.519Z"
+  },
+  {
+    "id": "b498bf05-2870-4c65-87d3-69764ea5fa90",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "sessionId": "9b9dc106-6567-4330-8735-b3ca4a61f7ea",
+    "role": "assistant",
+    "content": "I've created the new calculated column. It is now available in your report.\n\n{{SUGGESTED_ACTIONS:See related expressions|Create new expression|I'm done}}",
+    "timestamp": "2026-02-18T03:20:55.611Z"
+  }
+]

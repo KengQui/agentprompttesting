@@ -1,0 +1,34 @@
+[
+  {
+    "id": "77274e8f-1223-45f7-8427-5ce503311d72",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "sessionId": "c18b9f94-afde-49d2-832f-b74e29f3dce8",
+    "role": "user",
+    "content": "Create a filter that display anyone that report to Susan Clark",
+    "timestamp": "2026-02-18T03:17:10.682Z"
+  },
+  {
+    "id": "e283e6ba-d813-4132-acca-5960243c45da",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "sessionId": "c18b9f94-afde-49d2-832f-b74e29f3dce8",
+    "role": "assistant",
+    "content": "I can create an expression to filter employees who report to Susan Clark.\n\n```\nIf(SupervisorName==\"Susan Clark (Chicago) (CKMT0018)\", \"Reports to Susan Clark\", \"Does Not Report to Susan Clark\")\n```\n- Output type: **Text**\n- Suggested column name: **Reports To Susan Clark**\n- Column properties: **✗Sortable , ✓Filterable , ✓Groupable , ✓Charting**\n\nThese are recommended defaults — let me know if you'd like to change any.\n\n{{SUGGESTED_ACTIONS:Revise this expression|Create new column|Test with my data|Explain this expression}}",
+    "timestamp": "2026-02-18T03:17:12.156Z"
+  },
+  {
+    "id": "0a2fd417-aee4-4f31-ac8e-a5420dd41783",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "sessionId": "c18b9f94-afde-49d2-832f-b74e29f3dce8",
+    "role": "user",
+    "content": "Create new column",
+    "timestamp": "2026-02-18T03:17:19.279Z"
+  },
+  {
+    "id": "50b95784-344d-430a-a5cc-1300aa17bea0",
+    "agentId": "0edd0f1d-d9b6-4bc5-8054-b35cd7557c8c",
+    "sessionId": "c18b9f94-afde-49d2-832f-b74e29f3dce8",
+    "role": "assistant",
+    "content": "OK, I've created the new column.\n\n{{SUGGESTED_ACTIONS:See related expressions|Create new expression|I'm done}}",
+    "timestamp": "2026-02-18T03:17:20.229Z"
+  }
+]
