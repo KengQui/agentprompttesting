@@ -1,0 +1,36 @@
+{
+  "enabled": true,
+  "greeting": "I can help you efficiently manage employee call-ins. Just tell me who called in and why, and I'll handle all the necessary steps, from checking accruals to updating schedules.",
+  "suggestedPrompts": [
+    {
+      "id": "75f8be25-a9c7-4f9c-bab7-60bf55079e8e",
+      "title": "Report Sick Call-in",
+      "prompt": "Process a sick call-in for [Employee Name] for their shift on [Date]. They won't be in today."
+    },
+    {
+      "id": "98f59293-97a0-4139-ae18-3a452e4fadf2",
+      "title": "Process PTO Absence",
+      "prompt": "An employee, [Employee Name], needs to use PTO for their scheduled shift on [Date] at [Time]. Please process this."
+    },
+    {
+      "id": "2f094019-7635-4597-8032-6a91e439c027",
+      "title": "Report Bereavement Leave",
+      "prompt": "Process a bereavement leave for [Employee Name] for [Number] days, starting [Start Date]."
+    },
+    {
+      "id": "36ccdd73-e8ee-4955-9fbb-563c43c3660b",
+      "title": "Unpaid Absence Request",
+      "prompt": "An employee, [Employee Name], requests an unpaid absence for their shift on [Date]. Please apply the 'Unpaid' earning code."
+    },
+    {
+      "id": "05a37b90-1f93-4a0b-ae42-0937284bfcc9",
+      "title": "Check Accrual Balance",
+      "prompt": "What is the current PTO accrual balance for [Employee Name]?"
+    },
+    {
+      "id": "0672af07-eb7a-45c0-9477-e34fb2e79a7e",
+      "title": "Find Open Shifts",
+      "prompt": "Show me any open shifts for [Department/Location] for the next 48 hours."
+    }
+  ]
+}

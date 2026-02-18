@@ -1,0 +1,41 @@
+### Employee Call-In Management Validation Criteria
+
+**1. Required Information:**
+
+*   **Employee Identity:** The specific employee who is calling in (e.g., employee name, ID).
+*   **Absence Date & Time:** The specific date and duration (e.g., full shift, partial shift) for which the employee will be absent.
+*   **Absence Type/Reason:** The reason for the absence, which will map to a valid company-configured earning code (e.g., "sick," "PTO," "bereavement," "unpaid leave").
+*   **Manager Confirmation:** Explicit manager approval of the proposed changes before execution.
+
+**2. Validation Criteria:**
+
+*   **Employee Verification:**
+    *   The specified employee must exist in the system and have an "active" employment status.
+    *   The manager initiating the call-in must be authorized to manage schedules and time for the specified employee.
+*   **Scheduled Shift Existence:**
+    *   An assigned shift for the specified employee must exist for the requested absence date and time.
+    *   The identified shift must currently be in an "assigned" status, not already "open" or "canceled."
+*   **Earning Code Validity:**
+    *   The selected absence type must correspond to a valid, active earning code configured for the company and applicable to the employee's employment type/location.
+    *   If multiple earning codes could apply (e.g., "Sick-Paid," "Sick-Unpaid"), the agent must clarify which one the manager intends to use.
+*   **Accrual Balance Sufficiency (if applicable):**
+    *   If the selected earning code requires drawing from an accrual balance (e.g., PTO, Sick Leave), the employee must have a sufficient balance of that specific accrual type to cover the duration of the absence.
+    *   Accrual balances cannot go negative unless there is an explicit manager override *and* company policy permits such overrides.
+*   **Shift Conversion Eligibility:**
+    *   The identified assigned shift must be eligible for conversion to an open shift (e.g., not already covered by another employee, not part of a critical unfillable role unless explicitly permitted).
+*   **Temporal Consistency:**
+    *   The absence date/time should ideally be in the future relative to the current time, or for a shift that has just started but needs immediate processing. Past-dated call-ins may require additional justification or policy checks.
+
+**3. What to do when validation fails:**
+
+*   **Inform and Explain:** Clearly articulate *which* validation criterion failed and *why*.
+    *   Example: "I couldn't find a scheduled shift for [Employee Name] on [Date]. Would you like to check a different date or employee?"
+    *   Example: "[Employee Name] only has [X] hours of [Accrual Type] balance, but the shift is [Y] hours. Would you like to use [Accrual Type] for [X] hours and classify the remaining [Z] hours as [Unpaid/another available accrual]?"
+*   **Offer Solutions/Alternatives:** Provide actionable options to resolve the issue.
+    *   If no shift found: Prompt for correction of employee or date/time, or confirm if the employee was not scheduled.
+    *   If insufficient accrual balance: Suggest using a different earning code (e.g., unpaid leave, another accrual type if available), or inquire about potential manager override if company policy allows.
+    *   If earning code is invalid: List valid earning codes relevant to the situation for the manager to choose from.
+*   **Request Clarification:** If the input is ambiguous, ask for more specific details.
+    *   Example: "Which specific sick leave earning code should I use? We have options for 'Paid Sick Leave' and 'Unpaid Sick Leave'."
+*   **Maintain Transparency:** Before any changes are committed, present a summary of all proposed actions (employee, date, shift, earning code, balance deduction, shift status change) and require explicit manager confirmation.
+*   **Prevent Negative Balances:** If an earning code requiring accrual usage would result in a negative balance, the agent must *not* proceed without explicit manager confirmation and acknowledgment of the policy implications (or an authorized override).

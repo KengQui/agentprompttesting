@@ -1,0 +1,36 @@
+{
+  "enabled": true,
+  "greeting": "I can help you build custom column expressions for your HCM reports. Describe the new column you want to create, and I'll guide you through writing the expression using your report's data.",
+  "suggestedPrompts": [
+    {
+      "id": "cd30d9b5-21e5-4376-98f0-36c85b55a15b",
+      "title": "Calculate Weekly Pay",
+      "prompt": "Create an expression to calculate weekly pay. For 'Hourly' Pay Type, multiply 'Hourly Pay' by 40. For 'Salaried' Pay Type, divide 'Annual Salary' by 52. Ensure numeric conversion for calculations."
+    },
+    {
+      "id": "99ac05f3-b20c-4fff-8c5e-1963ab775269",
+      "title": "Employee Tenure Status",
+      "prompt": "Write an expression that labels employees as 'New Hire' if 'Days Employed' is less than 365, 'Mid-Career' if between 365 and 1825 days, and 'Veteran' if 'Days Employed' is 1825 days or more."
+    },
+    {
+      "id": "6579678f-10b1-43dd-b559-7675395caed1",
+      "title": "Days to Credential Expiry",
+      "prompt": "Create an expression to calculate the number of days remaining until 'Credential Expires'. If 'Credential Expires' is blank or already passed, display 'N/A' or 'Expired'. Use 'Today()' for the current date."
+    },
+    {
+      "id": "97706792-1844-4851-8d96-fd95563e2752",
+      "title": "Full Contact Info",
+      "prompt": "Build an expression to combine 'Employee Name' and 'Primary Email' into a single text string like 'Sarah Johnson (sarah.johnson@company.com)'. If 'Primary Email' is blank, just show the 'Employee Name'."
+    },
+    {
+      "id": "9801447b-0d39-4130-8775-d154283c6635",
+      "title": "Total Monthly Benefit Cost",
+      "prompt": "Create an expression that adds 'Scheduled EE Amount' and 'Scheduled ER Amount' to show the total monthly benefit cost. Ensure the output is formatted as a number with two decimal places."
+    },
+    {
+      "id": "09a59c74-c86c-422f-be20-50f4fbca22fd",
+      "title": "Special Coverage/Training",
+      "prompt": "Identify employees who have 'EE + Spouse' or 'EE + Family' benefit coverage, OR whose 'Training Profile' indicates 'LOTO Authorized'. Display 'Special' if true, otherwise 'Standard'."
+    }
+  ]
+}

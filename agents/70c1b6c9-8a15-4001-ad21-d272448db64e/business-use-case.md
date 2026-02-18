@@ -1,1 +1,0 @@
-Assist managers with handling employee call-ins and shift replacements.

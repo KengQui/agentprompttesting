@@ -1,1 +1,0 @@
-Help HR analysts build custom report column expressions to calculate employer contribution percentages and other payroll-derived metrics.

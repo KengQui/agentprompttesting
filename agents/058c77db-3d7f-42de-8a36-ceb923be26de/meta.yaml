@@ -1,8 +1,0 @@
-name: "HCM Expression Builder Test"
-userId: "f9f74543-4918-408c-8b88-b9fef44f170f"
-status: "configured"
-createdAt: "2026-02-08T21:22:52.475Z"
-updatedAt: "2026-02-08T21:22:59.302Z"
-promptStyle: "gemini"
-mockMode: "full"
-description: ""

@@ -1,1 +1,0 @@
-Customer support assistant for a coffee shop

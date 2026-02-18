@@ -1,1 +1,0 @@
-Agent to handle qualifying life event requests: collect event type, date, requested benefit changes, affected individuals, and documentation acknowledgment; provide confirmations and simulate actions.

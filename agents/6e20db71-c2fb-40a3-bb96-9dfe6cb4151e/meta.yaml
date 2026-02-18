@@ -1,8 +1,0 @@
-name: "Test Agent"
-userId: "ede40124-a694-4e26-ac25-9ce6b46e645c"
-status: "draft"
-createdAt: "2026-02-08T21:07:17.769Z"
-updatedAt: "2026-02-08T21:14:36.023Z"
-promptStyle: "gemini"
-mockMode: "full"
-description: "Helps customers with orders and questions"

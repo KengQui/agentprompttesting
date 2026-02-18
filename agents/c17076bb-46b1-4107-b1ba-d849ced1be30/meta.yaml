@@ -1,8 +1,0 @@
-name: "Call-In Test Agent"
-userId: "7e10d44d-27c6-4cbc-8608-e191c15b8105"
-status: "draft"
-createdAt: "2026-02-06T01:35:00.305Z"
-updatedAt: "2026-02-06T01:35:00.305Z"
-promptStyle: "gemini"
-mockMode: "full"
-description: "Handles employee call-in requests for shift management"

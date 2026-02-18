@@ -1,8 +1,0 @@
-name: "Life Event Agent"
-userId: "2325e7ee-bfc6-470c-b4c3-09055ea0d961"
-status: "configured"
-createdAt: "2026-02-02T21:56:49.684Z"
-updatedAt: "2026-02-02T21:56:49.684Z"
-promptStyle: "gemini"
-mockMode: "full"
-description: ""

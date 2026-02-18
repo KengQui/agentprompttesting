@@ -1,1 +1,0 @@
-A health benefits assistant that helps employees manage their health insurance, add dependents, and update coverage options.

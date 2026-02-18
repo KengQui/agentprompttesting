@@ -1,0 +1,13 @@
+name: test1
+description: 
+status: configured
+promptStyle: gemini
+mockMode: full
+userId: 22e95869-718c-428a-a9ae-a4694723ac19
+createdAt: 2026-02-18T15:45:37.163Z
+updatedAt: 2026-02-18T15:53:47.010Z
+promptGeneratedAt: 2026-02-18T15:53:35.730Z
+lastConfigUpdate: 2026-02-18T15:53:47.010Z
+promptLastRevisedBy: ai-generate
+promptLastRevisedAt: 2026-02-18T15:53:35.730Z
+configFieldsHash: 556a10b29dd55248889f20c90b3cae8e

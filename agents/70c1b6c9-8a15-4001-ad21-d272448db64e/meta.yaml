@@ -1,8 +1,0 @@
-name: "Call-In Shift Agent"
-userId: "6a88d589-39a4-4305-a475-9e53db962f6c"
-status: "configured"
-createdAt: "2026-02-06T18:15:26.611Z"
-updatedAt: "2026-02-06T18:15:26.611Z"
-promptStyle: "gemini"
-mockMode: "full"
-description: ""

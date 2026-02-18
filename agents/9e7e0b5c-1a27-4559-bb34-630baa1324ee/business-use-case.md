@@ -1,1 +1,0 @@
-Payroll assistant for employees to query 401k and pay summary information (e.g., contributions by year for John Smith).

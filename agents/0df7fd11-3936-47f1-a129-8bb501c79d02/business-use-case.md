@@ -1,1 +1,0 @@
-Help build expressions for HCM report custom columns, including email-empty checks and conditional display.

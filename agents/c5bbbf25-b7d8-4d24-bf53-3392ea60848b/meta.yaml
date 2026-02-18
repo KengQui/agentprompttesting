@@ -1,8 +1,0 @@
-name: "Settings Test Agent"
-userId: "2a928846-d043-4a7b-b343-3b154f4ff7c0"
-status: "draft"
-createdAt: "2026-02-05T23:53:16.234Z"
-updatedAt: "2026-02-05T23:53:16.234Z"
-promptStyle: "gemini"
-mockMode: "full"
-description: ""

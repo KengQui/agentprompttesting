@@ -1,0 +1,31 @@
+{
+  "enabled": true,
+  "greeting": "I'm here to help you manage employee absences, adjust schedules, and quickly find coverage, ensuring your operations run smoothly.",
+  "suggestedPrompts": [
+    {
+      "id": "905684fa-77f7-496a-90ec-46fdd4eefc23",
+      "title": "Log Absence",
+      "prompt": "Log a 'Sick Leave' absence for 'Employee Name' John Doe for their scheduled 'Shift Start Time' today."
+    },
+    {
+      "id": "a3fc6484-dc2c-4d6f-8c00-4daf21f04f46",
+      "title": "Check Accruals",
+      "prompt": "What is the 'Accrual Balance' for 'Employee ID' 54321 for 'PTO' and 'Sick Leave'?"
+    },
+    {
+      "id": "18dcf941-c3a1-4f1a-b582-a5eef642bfea",
+      "title": "Open Shift for Coverage",
+      "prompt": "Convert 'Employee Name' Jane Smith's 'Shift Start Time' of 9 AM to 5 PM today into an 'open shift' for coverage."
+    },
+    {
+      "id": "f453180f-9d3f-4e73-b73a-b4f673fbb64c",
+      "title": "Today's Schedule",
+      "prompt": "Show me today's 'Shift Start Time' and 'Shift End Time' for all employees at 'Location' Downtown."
+    },
+    {
+      "id": "1e36f8a8-815c-4b35-93a6-df25a8c1f2fb",
+      "title": "Update Employee Position",
+      "prompt": "Update 'Employee Name' Michael Brown's 'Position' to 'Senior Associate'."
+    }
+  ]
+}

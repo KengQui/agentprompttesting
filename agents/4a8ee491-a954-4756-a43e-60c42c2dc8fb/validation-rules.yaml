@@ -1,0 +1,23 @@
+**[Validation Category Name]**
+[When to check]: [What to verify]
+[What to do if validation fails]: [Specific action]
+
+
+
+Example: "[Show exact message the user would see]"
+
+---
+
+Instructions: Replace the bracketed placeholders above with your specific details. Use the examples below as a guide, then delete this instructions section.
+
+Example:
+
+**Employee Identity Verification**
+If the name provided doesn't exactly match one employee record, ask for clarification listing possible matches with their employee IDs.
+
+Example: "Which person did you mean: Susan Jones (E12345) or Susanne Jones (E67890)?"
+
+**Balance Check**
+Before using accrued time off, check if the employee has enough hours. If not, warn them and present options.
+
+Example: "Susan's PTO balance is 2.0 hours; the shift is 6.0 hours. Would you like to: (A) apply 2.0 hours PTO and 4.0 hours unpaid, (B) apply 6.0 hours unpaid, or (C) cancel?"
