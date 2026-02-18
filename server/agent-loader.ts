@@ -14,6 +14,90 @@ interface AgentComponents {
 
 const loadedOrchestrators = new Map<string, AgentComponents>();
 
+function resolvePackageEsmPath(pkg: string): string | null {
+  try {
+    const nodeModulesDir = path.resolve(process.cwd(), 'node_modules');
+    const pkgDir = path.join(nodeModulesDir, ...pkg.split('/'));
+    const pkgJsonPath = path.join(pkgDir, 'package.json');
+
+    if (!fs.existsSync(pkgJsonPath)) return null;
+
+    const pkgJson = JSON.parse(fs.readFileSync(pkgJsonPath, 'utf-8'));
+    const exports = pkgJson?.exports?.['.'];
+
+    let esmPath: string | undefined;
+    if (exports) {
+      if (typeof exports === 'string') {
+        esmPath = exports;
+      } else if (typeof exports?.node?.import === 'string') {
+        esmPath = exports.node.import;
+      } else if (typeof exports?.import === 'string') {
+        esmPath = exports.import;
+      } else if (typeof exports?.default === 'string') {
+        esmPath = exports.default;
+      }
+    }
+    if (!esmPath && typeof pkgJson?.module === 'string') {
+      esmPath = pkgJson.module;
+    }
+    if (!esmPath && typeof pkgJson?.main === 'string') {
+      esmPath = pkgJson.main;
+    }
+
+    if (esmPath) {
+      return 'file://' + path.resolve(pkgDir, esmPath);
+    }
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+async function bundleAgentComponents(tmpDir: string, agentId: string): Promise<string> {
+  const entryPoint = path.join(tmpDir, 'index.ts');
+  const outFile = path.join(tmpDir, `bundle_${Date.now()}.mjs`);
+  const nodeModulesDir = path.resolve(process.cwd(), 'node_modules');
+
+  const externalPackages = [
+    '@google/genai',
+    'drizzle-orm',
+    'openai',
+  ];
+
+  const { build } = await import('esbuild');
+
+  await build({
+    entryPoints: [entryPoint],
+    bundle: true,
+    outfile: outFile,
+    format: 'esm',
+    platform: 'node',
+    target: 'node18',
+    nodePaths: [nodeModulesDir],
+    external: externalPackages,
+    logLevel: 'silent',
+  });
+
+  let bundleCode = fs.readFileSync(outFile, 'utf-8');
+  for (const pkg of externalPackages) {
+    const absPath = resolvePackageEsmPath(pkg);
+    if (absPath) {
+      const escaped = pkg.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      bundleCode = bundleCode.replace(
+        new RegExp(`from\\s+"${escaped}"`, 'g'),
+        `from "${absPath}"`
+      );
+      bundleCode = bundleCode.replace(
+        new RegExp(`from\\s+'${escaped}'`, 'g'),
+        `from '${absPath}'`
+      );
+    }
+  }
+  fs.writeFileSync(outFile, bundleCode, 'utf-8');
+
+  return outFile;
+}
+
 export async function loadAgentComponents(agentId: string, agentConfig: AgentConfig): Promise<AgentComponents> {
   if (loadedOrchestrators.has(agentId)) {
     return loadedOrchestrators.get(agentId)!;
@@ -27,7 +111,6 @@ export async function loadAgentComponents(agentId: string, agentConfig: AgentCon
       .where(eq(agentComponentsTable.agentId, agentId));
 
     if (componentRows.length > 0) {
-      const orchestratorRow = componentRows.find(r => r.fileName === 'orchestrator.ts');
       const indexRow = componentRows.find(r => r.fileName === 'index.ts');
 
       if (indexRow) {
@@ -48,10 +131,9 @@ export async function loadAgentComponents(agentId: string, agentConfig: AgentCon
           fs.writeFileSync(path.join(tmpDir, row.fileName), code, 'utf-8');
         }
 
-        const indexPath = path.join(tmpDir, 'index.ts');
-        const moduleUrl = `file://${indexPath}`;
-
         try {
+          const bundlePath = await bundleAgentComponents(tmpDir, agentId);
+          const moduleUrl = `file://${bundlePath}`;
           const agentModule = await import(moduleUrl);
           if (agentModule.createOrchestrator) {
             orchestrator = agentModule.createOrchestrator(agentConfig);
