@@ -343,6 +343,7 @@ function ExpressionExplanationCard({ content, timestamp }: { content: string; ti
 
 interface ValidationRow {
   employeeName: string;
+  rowNumber: number;
   inputs: { name: string; value: string }[];
   calculationSteps: string[];
   result: string;
@@ -390,8 +391,11 @@ function parseValidationRows(text: string): { rows: ValidationRow[]; footnote: s
     const end = i + 1 < rowMatches.length ? rowMatches[i + 1] : lastRowEnd;
     const chunk = text.slice(start, end).trim();
 
+    const rowNumMatch = chunk.match(/Row\s+(\d+)/i);
+    const rowNumber = rowNumMatch ? parseInt(rowNumMatch[1], 10) : i + 1;
+
     const nameMatch = chunk.match(/Row\s+\d+[:\s]*(?:Employee[:\s]*)?\*{0,2}\s*(.+?)\s*\*{0,2}\s*\n/i);
-    const employeeName = nameMatch ? nameMatch[1].replace(/\*+/g, "").trim() : `Row ${i + 1}`;
+    const employeeName = nameMatch ? nameMatch[1].replace(/\*+/g, "").trim() : `Row ${rowNumber}`;
 
     const inputs: { name: string; value: string }[] = [];
     const inputSection = chunk.match(/\*{0,2}Inputs?:?\*{0,2}\s*([\s\S]*?)(?=\n\s*-?\s*\*{0,2}Calc|\n\s*-?\s*\*{0,2}Result)/i);
@@ -422,7 +426,7 @@ function parseValidationRows(text: string): { rows: ValidationRow[]; footnote: s
     const resultMatch = chunk.match(/\*{0,2}Result:?\*{0,2}\s*(.+)/i);
     const result = resultMatch ? resultMatch[1].replace(/\*+/g, "").trim() : "";
 
-    rows.push({ employeeName, inputs, calculationSteps: calcSteps, result });
+    rows.push({ employeeName, rowNumber, inputs, calculationSteps: calcSteps, result });
   }
 
   if (footnoteStart >= 0) {
@@ -452,7 +456,7 @@ function ValidationRowCard({ row, index, note }: { row: ValidationRow; index: nu
   return (
     <div className="px-4 py-3 space-y-3" data-testid={`validation-row-${index}`}>
       <div className="flex items-center gap-2 text-sm">
-        <span className="font-medium">Row {index + 1}</span>
+        <span className="font-medium">Row {row.rowNumber}</span>
         <span className="text-muted-foreground">|</span>
         <span className="font-medium">{row.employeeName}</span>
       </div>
