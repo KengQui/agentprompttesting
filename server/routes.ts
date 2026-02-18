@@ -2126,6 +2126,60 @@ export async function registerRoutes(
     }
   });
 
+  // Cleanup test users endpoint - removes auto-generated test accounts and their data
+  app.post("/api/admin/cleanup-test-users", async (req: Request, res: Response) => {
+    try {
+      if (process.env.ENABLE_SYNC !== 'true') {
+        return res.status(404).json({ message: "Not found" });
+      }
+      const syncKey = req.headers['x-sync-key'];
+      if (syncKey !== 'temp-sync-2026') {
+        return res.status(403).json({ message: "Forbidden" });
+      }
+
+      const { db } = await import('./db');
+      const { sql } = await import('drizzle-orm');
+
+      const keepUsernames = ['kengqui.chia@ukg.com', 'svstoyanov', 'svstoyanovvvv', 'test@abv.bg'];
+
+      // Get test user IDs
+      const testUsersRes = await db.execute(sql`SELECT id, username FROM users WHERE username NOT IN ('kengqui.chia@ukg.com', 'svstoyanov', 'svstoyanovvvv', 'test@abv.bg')`);
+      const testUsers = testUsersRes.rows ?? testUsersRes;
+      const testUserIds = testUsers.map((u: any) => u.id);
+
+      if (testUserIds.length === 0) {
+        return res.json({ message: "No test users to clean up", deleted: 0 });
+      }
+
+      // Get agent IDs for test users
+      const testAgentsRes = await db.execute(sql`SELECT id FROM agents WHERE user_id = ANY(${testUserIds})`);
+      const testAgents = testAgentsRes.rows ?? testAgentsRes;
+      const testAgentIds = testAgents.map((a: any) => a.id);
+
+      // Delete in order: messages -> sessions -> components -> traces -> coach history -> config snapshots -> agents -> auth sessions -> users
+      if (testAgentIds.length > 0) {
+        await db.execute(sql`DELETE FROM chat_messages WHERE agent_id = ANY(${testAgentIds})`);
+        await db.execute(sql`DELETE FROM chat_sessions WHERE agent_id = ANY(${testAgentIds})`);
+        await db.execute(sql`DELETE FROM agent_components WHERE agent_id = ANY(${testAgentIds})`);
+        await db.execute(sql`DELETE FROM agent_traces WHERE agent_id = ANY(${testAgentIds})`);
+        await db.execute(sql`DELETE FROM prompt_coach_history WHERE agent_id = ANY(${testAgentIds})`);
+        await db.execute(sql`DELETE FROM config_snapshots WHERE agent_id = ANY(${testAgentIds})`);
+        await db.execute(sql`DELETE FROM agents WHERE id = ANY(${testAgentIds})`);
+      }
+      await db.execute(sql`DELETE FROM auth_sessions WHERE user_id = ANY(${testUserIds})`);
+      await db.execute(sql`DELETE FROM users WHERE id = ANY(${testUserIds})`);
+
+      res.json({
+        message: "Cleanup complete",
+        deletedUsers: testUserIds.length,
+        deletedAgents: testAgentIds.length,
+        keptUsers: keepUsernames,
+      });
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
   // Data sync endpoint - only active when ENABLE_SYNC=true env var is set
   const expressModule = await import('express');
   app.post("/api/admin/sync-data", expressModule.json({ limit: '50mb' }), async (req: Request, res: Response) => {
