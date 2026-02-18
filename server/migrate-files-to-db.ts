@@ -63,7 +63,8 @@ export async function migrateFilesToDb(): Promise<void> {
   const userCount = await db.select({ count: sql<number>`count(*)` }).from(usersTable);
 
   if (Number(agentCount[0]?.count) > 0 || Number(userCount[0]?.count) > 0) {
-    console.log("[migrate] DB already has data, skipping file migration.");
+    console.log("[migrate] DB already has data. Checking for missing agents...");
+    await syncMissingAgentsAndUsers();
     return;
   }
 
@@ -282,4 +283,142 @@ async function migrateAgents(): Promise<void> {
   }
 
   console.log(`[migrate] Migrated ${agentsMigrated} agents.`);
+}
+
+async function syncMissingAgentsAndUsers(): Promise<void> {
+  // First ensure all users from files exist in DB
+  const usersFile = path.join(USERS_DIR, "users.json");
+  if (fs.existsSync(usersFile)) {
+    try {
+      const content = fs.readFileSync(usersFile, "utf-8");
+      const fileUsers = JSON.parse(content) as User[];
+      const dbUsers = await db.select({ id: usersTable.id }).from(usersTable);
+      const dbUserIds = new Set(dbUsers.map(u => u.id));
+      
+      let usersAdded = 0;
+      for (const user of fileUsers) {
+        if (!dbUserIds.has(user.id)) {
+          await db.insert(usersTable).values({
+            id: user.id,
+            username: user.username,
+            password: user.password,
+            createdAt: user.createdAt,
+          });
+          usersAdded++;
+          console.log(`[migrate] Added missing user: ${user.username}`);
+        }
+      }
+      if (usersAdded > 0) {
+        console.log(`[migrate] Added ${usersAdded} missing users.`);
+      }
+    } catch (e) {
+      console.error("[migrate] Error syncing users:", e);
+    }
+  }
+
+  // Then check for missing agents
+  if (!fs.existsSync(AGENTS_DIR)) return;
+
+  const dbAgents = await db.select({ id: agentsTable.id }).from(agentsTable);
+  const dbAgentIds = new Set(dbAgents.map(a => a.id));
+
+  const dirs = fs.readdirSync(AGENTS_DIR, { withFileTypes: true });
+  let agentsAdded = 0;
+
+  for (const dir of dirs) {
+    if (!dir.isDirectory()) continue;
+
+    const agentId = dir.name;
+    if (dbAgentIds.has(agentId)) continue; // Already in DB
+
+    const agentDir = path.join(AGENTS_DIR, agentId);
+
+    try {
+      const metaPath = path.join(agentDir, "meta.yaml");
+      if (!fs.existsSync(metaPath)) continue;
+
+      const metaContent = readTextFile(metaPath);
+      const meta = parseSimpleYaml(metaContent);
+
+      if (!meta.name || !meta.createdAt) continue;
+
+      // Ensure userId exists in DB before inserting agent
+      if (meta.userId) {
+        const existingUser = await db.select({ id: usersTable.id }).from(usersTable).where(eq(usersTable.id, meta.userId));
+        if (existingUser.length === 0) {
+          console.log(`[migrate] Skipping agent ${agentId}: userId ${meta.userId} not in DB`);
+          continue;
+        }
+      }
+
+      const businessUseCase = readTextFile(path.join(agentDir, "business-use-case.md"));
+      const domainKnowledge = readTextFile(path.join(agentDir, "domain-knowledge.md"));
+      const validationRules = readTextFile(path.join(agentDir, "validation-rules.yaml"));
+      const guardrails = readTextFile(path.join(agentDir, "guardrails.yaml"));
+      const customPrompt = readTextFile(path.join(agentDir, "custom-prompt.md"));
+      const domainDocuments = readJsonFile<DomainDocument[]>(path.join(agentDir, "domain-documents.json"), []);
+      const sampleDatasets = readJsonFile<SampleDataset[]>(path.join(agentDir, "sample-data.json"), []);
+      const clarifyingInsights = readJsonFile<ClarifyingInsight[]>(path.join(agentDir, "clarifying-insights.json"), []);
+      const availableActions = readJsonFile<AgentAction[]>(path.join(agentDir, "available-actions.json"), []);
+      const mockUserState = readJsonFile<MockUserState[]>(path.join(agentDir, "mock-user-state.json"), []);
+      const welcomeConfig = readJsonFile<any>(path.join(agentDir, "welcome-config.json"), null);
+
+      await db.insert(agentsTable).values({
+        id: agentId,
+        userId: meta.userId || "",
+        name: meta.name,
+        description: meta.description || "",
+        status: meta.status || "configured",
+        promptStyle: meta.promptStyle || "gemini",
+        mockMode: meta.mockMode || "full",
+        configurationStep: 1,
+        businessUseCase,
+        domainKnowledge,
+        validationRules,
+        guardrails,
+        customPrompt,
+        domainDocuments,
+        sampleDatasets,
+        clarifyingInsights,
+        availableActions,
+        mockUserState,
+        welcomeConfig: welcomeConfig || null,
+        promptGeneratedAt: meta.promptGeneratedAt || null,
+        lastConfigUpdate: meta.lastConfigUpdate || null,
+        promptLastRevisedBy: meta.promptLastRevisedBy || null,
+        promptLastRevisedAt: meta.promptLastRevisedAt || null,
+        configFieldsHash: meta.configFieldsHash || null,
+        createdAt: meta.createdAt,
+        updatedAt: meta.updatedAt || meta.createdAt,
+      });
+
+      // Also import components
+      const componentsDir = path.join(agentDir, "components");
+      if (fs.existsSync(componentsDir)) {
+        const compFiles = fs.readdirSync(componentsDir);
+        for (const compFile of compFiles) {
+          if (compFile.endsWith('.ts')) {
+            const code = fs.readFileSync(path.join(componentsDir, compFile), 'utf-8');
+            await db.insert(agentComponentsTable).values({
+              id: randomUUID(),
+              agentId,
+              fileName: compFile,
+              code,
+            });
+          }
+        }
+      }
+
+      agentsAdded++;
+      console.log(`[migrate] Added missing agent ${agentId} (${meta.name})`);
+    } catch (e) {
+      console.error(`[migrate] Error adding agent ${agentId}:`, e);
+    }
+  }
+
+  if (agentsAdded > 0) {
+    console.log(`[migrate] Added ${agentsAdded} missing agents.`);
+  } else {
+    console.log("[migrate] All agents already in DB.");
+  }
 }
