@@ -63,6 +63,10 @@ app.use((req, res, next) => {
 });
 
 (async () => {
+  const crypto = await import("crypto");
+  const dbUrlHash = crypto.createHash("md5").update(process.env.DATABASE_URL || "").digest("hex").substring(0, 8);
+  console.log(`[startup] DB URL hash: ${dbUrlHash}, NODE_ENV: ${process.env.NODE_ENV}`);
+
   const { migrateFilesToDb } = await import("./migrate-files-to-db");
   await migrateFilesToDb();
 

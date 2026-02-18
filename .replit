@@ -48,3 +48,4 @@ integrations = ["javascript_openai:1.0.0"]
 ENABLE_SYNC = "true"
 
 [userenv.production]
+ENABLE_SYNC = "true"

@@ -2088,6 +2088,44 @@ export async function registerRoutes(
     }
   });
 
+  // Diagnostic endpoint - returns DB info and agent counts (no auth required)
+  app.get("/api/admin/db-info", async (_req: Request, res: Response) => {
+    try {
+      const { db } = await import('./db');
+      const { sql } = await import('drizzle-orm');
+      const crypto = await import('crypto');
+      const fs = await import('fs');
+      const path = await import('path');
+      
+      const dbUrlHash = crypto.createHash("md5").update(process.env.DATABASE_URL || "").digest("hex").substring(0, 8);
+      const agentCountRes = await db.execute(sql`SELECT count(*)::int as count FROM agents`);
+      const userCountRes = await db.execute(sql`SELECT count(*)::int as count FROM users`);
+      const componentCountRes = await db.execute(sql`SELECT count(*)::int as count FROM agent_components`);
+      
+      const agentsByUser = await db.execute(sql`SELECT user_id, count(*)::int as count FROM agents GROUP BY user_id`);
+      const agentCount = agentCountRes.rows?.[0]?.count ?? agentCountRes[0]?.count;
+      const userCount = userCountRes.rows?.[0]?.count ?? userCountRes[0]?.count;
+      const componentCount = componentCountRes.rows?.[0]?.count ?? componentCountRes[0]?.count;
+      
+      const agentsDirExists = fs.existsSync('./agents');
+      const agentDirCount = agentsDirExists ? fs.readdirSync('./agents').filter((d: string) => fs.statSync(path.join('./agents', d)).isDirectory()).length : 0;
+      
+      res.json({
+        dbUrlHash,
+        nodeEnv: process.env.NODE_ENV,
+        enableSync: process.env.ENABLE_SYNC,
+        agentCount: agentCount,
+        userCount: userCount, 
+        componentCount: componentCount,
+        agentsByUser: agentsByUser.rows ?? agentsByUser,
+        agentsDirExists,
+        agentDirCount,
+      });
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
   // Data sync endpoint - only active when ENABLE_SYNC=true env var is set
   const expressModule = await import('express');
   app.post("/api/admin/sync-data", expressModule.json({ limit: '50mb' }), async (req: Request, res: Response) => {
