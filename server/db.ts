@@ -6,8 +6,22 @@ if (!process.env.DATABASE_URL) {
   throw new Error("DATABASE_URL must be set. Did you forget to provision a database?");
 }
 
+try {
+  const url = new URL(process.env.DATABASE_URL);
+  console.log(`[db] Connecting to host: ${url.hostname}, port: ${url.port || '5432'}, db: ${url.pathname?.slice(1)}`);
+} catch (e) {
+  console.log(`[db] DATABASE_URL format could not be parsed for logging`);
+}
+
 const pool = new pg.Pool({
   connectionString: process.env.DATABASE_URL,
+  connectionTimeoutMillis: 10000,
+  idleTimeoutMillis: 30000,
+  max: 10,
+});
+
+pool.on('error', (err) => {
+  console.error('[db] Pool error:', err.message);
 });
 
 export const db = drizzle(pool, { schema });
