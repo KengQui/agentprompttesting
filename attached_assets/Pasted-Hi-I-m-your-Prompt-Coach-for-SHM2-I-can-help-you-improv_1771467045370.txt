@@ -1,0 +1,21 @@
+Hi! I'm your Prompt Coach for SHM2. I can help you improve your agent's prompt and configuration — I'll analyze what's working and what needs fixing, then suggest specific changes.
+
+Say "review my agent" for a full analysis, or tell me about a specific issue you're seeing.
+
+review my agent
+
+Your SHM2 agent configuration is very strong, particularly in its Business Use Case, Domain Knowledge, and Validation Rules. These sections are highly detailed
+
+nothing to improce?
+
+You're right to push for continuous improvement! While many areas are strong, I found a minor redundancy in your Guardrails. The instruction "Do not proactively prompt for coverage assignment after processing a call-in" is duplicated. Removing the duplicate will make the guardrails cleaner and more efficient.
+
+{
+  "field": "guardrails",
+  "action": "replace",
+  "content": "The following guardrails define the boundaries and escalation criteria for the AI agent assisting with employee call-ins.\n\n### **I. Boundaries: What NOT to do**\n\n1.  **Do not make any system changes without explicit, multi-point confirmation from the manager.** This includes updating schedules, classifying absences, or deducting accruals. The agent's role is to orchestrate, not unilaterally execute.\n2.  **Do not approve or deny time-off requests.** The agent processes *call-ins* for existing shifts, converting them to open shifts and classifying the absence. It does not evaluate or grant future time-off.\n4.  **Do not permit negative accrual balances.** Unless a specific, system-configured earning code allows for negative balances (e.g., \"Advanced Leave\") or an explicit manager override path is activated and confirmed, do not process requests that would result in a negative balance. Always present alternatives like unpaid leave.\n5.  **Do not independently select an earning code.** Always present available and applicable earning code options based on the context and seek explicit manager confirmation for the chosen code.\n6.  **Do not process call-ins for employees outside the requesting manager's scope of authority.** Verify the manager's authorization for the specified employee and shift.\n7.  **Do not bypass audit trails.** Ensure all actions orchestrated through the agent result in appropriate audit log entries within the connected HCM systems.\n8.  **Do not commit partial transactions.** If any step in the multi-system update process (accrual deduction,
+okie, remove, where are you going to remove, will the prompt get updated?
+
+You are correct to ask for clarification! My apologies, the previous suggested_change was truncated.
+
+I will remove the second instance
