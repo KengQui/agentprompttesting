@@ -2222,6 +2222,97 @@ export async function registerRoutes(
     }
   });
 
+  // Shared list of fields that sync copies from production to dev
+  const syncFieldsToCompare = [
+    { key: 'name', label: 'Agent Name' },
+    { key: 'description', label: 'Description' },
+    { key: 'status', label: 'Status' },
+    { key: 'promptStyle', label: 'Prompt Style' },
+    { key: 'mockMode', label: 'Mock Mode' },
+    { key: 'configurationStep', label: 'Configuration Step' },
+    { key: 'businessUseCase', label: 'Business Use Case' },
+    { key: 'domainKnowledge', label: 'Domain Knowledge' },
+    { key: 'validationRules', label: 'Validation Rules' },
+    { key: 'guardrails', label: 'Guardrails' },
+    { key: 'customPrompt', label: 'System Prompt' },
+    { key: 'domainDocuments', label: 'Domain Documents' },
+    { key: 'sampleDatasets', label: 'Sample Data' },
+    { key: 'clarifyingInsights', label: 'Clarifying Insights' },
+    { key: 'availableActions', label: 'Available Actions' },
+    { key: 'mockUserState', label: 'Mock User State' },
+    { key: 'welcomeConfig', label: 'Welcome Config' },
+  ];
+
+  // Preview differences between dev and production agent configs
+  app.post("/api/admin/sync-preview", async (req: Request, res: Response) => {
+    try {
+      if (process.env.ENABLE_SYNC !== 'true') {
+        return res.status(404).json({ message: "Not found" });
+      }
+
+      const { agentId } = req.body;
+      if (!agentId) {
+        return res.status(400).json({ message: "agentId is required" });
+      }
+
+      const prodUrl = process.env.PROD_APP_URL;
+      if (!prodUrl) {
+        return res.status(400).json({ message: "PROD_APP_URL environment variable is not set." });
+      }
+
+      const exportUrl = `${prodUrl.replace(/\/$/, '')}/api/admin/export-agent/${agentId}`;
+      const response = await fetch(exportUrl);
+
+      if (!response.ok) {
+        const err = await response.json().catch(() => ({ message: "Failed to fetch from production" }));
+        return res.status(response.status).json({ message: err.message || "Failed to fetch from production" });
+      }
+
+      const { agent: prodAgent } = await response.json();
+      if (!prodAgent) {
+        return res.status(404).json({ message: "Agent not found in production" });
+      }
+
+      const devAgent = await storage.getAgent(agentId);
+      if (!devAgent) {
+        return res.status(404).json({ message: "Agent does not exist in dev." });
+      }
+
+      const differences: Array<{ field: string; label: string; devValue: string; prodValue: string }> = [];
+
+      for (const { key, label } of syncFieldsToCompare) {
+        const devVal = JSON.stringify((devAgent as any)[key] ?? null);
+        const prodVal = JSON.stringify((prodAgent as any)[key] ?? null);
+        if (devVal !== prodVal) {
+          const summarize = (val: any) => {
+            if (val === null || val === undefined || val === '') return '(empty)';
+            if (typeof val === 'string') {
+              return val.length > 120 ? val.substring(0, 120) + '...' : val;
+            }
+            const s = JSON.stringify(val);
+            return s.length > 120 ? s.substring(0, 120) + '...' : s;
+          };
+          differences.push({
+            field: key,
+            label,
+            devValue: summarize((devAgent as any)[key]),
+            prodValue: summarize((prodAgent as any)[key]),
+          });
+        }
+      }
+
+      res.json({
+        success: true,
+        hasDifferences: differences.length > 0,
+        differences,
+        agentName: prodAgent.name,
+      });
+    } catch (error: any) {
+      console.error("Sync preview error:", error);
+      res.status(500).json({ message: error?.message || "Preview failed" });
+    }
+  });
+
   // Import agent config from production into dev (prod-to-dev sync)
   app.post("/api/admin/sync-from-prod", async (req: Request, res: Response) => {
     try {
@@ -2250,25 +2341,10 @@ export async function registerRoutes(
 
       const existingAgent = await storage.getAgent(agentId);
       if (existingAgent) {
-        const updateData: UpdateAgent = {
-          name: prodAgent.name,
-          description: prodAgent.description,
-          status: prodAgent.status,
-          promptStyle: prodAgent.promptStyle,
-          mockMode: prodAgent.mockMode,
-          configurationStep: prodAgent.configurationStep,
-          businessUseCase: prodAgent.businessUseCase,
-          domainKnowledge: prodAgent.domainKnowledge,
-          validationRules: prodAgent.validationRules,
-          guardrails: prodAgent.guardrails,
-          customPrompt: prodAgent.customPrompt,
-          domainDocuments: prodAgent.domainDocuments,
-          sampleDatasets: prodAgent.sampleDatasets,
-          clarifyingInsights: prodAgent.clarifyingInsights,
-          availableActions: prodAgent.availableActions,
-          mockUserState: prodAgent.mockUserState,
-          welcomeConfig: prodAgent.welcomeConfig,
-        };
+        const updateData: UpdateAgent = {};
+        for (const { key } of syncFieldsToCompare) {
+          (updateData as any)[key] = (prodAgent as any)[key];
+        }
         await storage.updateAgent(agentId, updateData);
       } else {
         return res.status(404).json({ message: "Agent does not exist in dev. Only existing agents can be synced." });

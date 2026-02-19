@@ -467,6 +467,8 @@ export default function SettingsPage() {
   // Sync from production state
   const [showSyncFromProdDialog, setShowSyncFromProdDialog] = useState(false);
   const [isSyncingFromProd, setIsSyncingFromProd] = useState(false);
+  const [isLoadingSyncPreview, setIsLoadingSyncPreview] = useState(false);
+  const [syncDifferences, setSyncDifferences] = useState<Array<{ field: string; label: string; devValue: string; prodValue: string }> | null>(null);
 
   // Regeneration safeguard state
   const [showRegenerationWarning, setShowRegenerationWarning] = useState(false);
@@ -1357,6 +1359,31 @@ export default function SettingsPage() {
     }
   };
 
+  const handleSyncPreview = async () => {
+    if (!params.id) return;
+    setIsLoadingSyncPreview(true);
+    setSyncDifferences(null);
+    try {
+      const response = await apiRequest("POST", "/api/admin/sync-preview", {
+        agentId: params.id,
+      });
+      const result = await response.json();
+
+      if (result.success) {
+        setSyncDifferences(result.differences);
+        setShowSyncFromProdDialog(true);
+      }
+    } catch (error: any) {
+      toast({
+        title: "Preview failed",
+        description: error.message || "Could not compare with production. Make sure the production app is reachable.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoadingSyncPreview(false);
+    }
+  };
+
   const handleSyncFromProd = async () => {
     if (!params.id) return;
     setIsSyncingFromProd(true);
@@ -1382,6 +1409,7 @@ export default function SettingsPage() {
     } finally {
       setIsSyncingFromProd(false);
       setShowSyncFromProdDialog(false);
+      setSyncDifferences(null);
     }
   };
 
@@ -1549,16 +1577,16 @@ export default function SettingsPage() {
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => setShowSyncFromProdDialog(true)}
-                  disabled={isSyncingFromProd}
+                  onClick={handleSyncPreview}
+                  disabled={isSyncingFromProd || isLoadingSyncPreview}
                   data-testid="button-sync-from-prod"
                 >
-                  {isSyncingFromProd ? (
+                  {isLoadingSyncPreview ? (
                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                   ) : (
                     <CloudDownload className="h-4 w-4 mr-2" />
                   )}
-                  {isSyncingFromProd ? "Syncing..." : "Sync from Production"}
+                  {isLoadingSyncPreview ? "Comparing..." : "Sync from Production"}
                 </Button>
               </div>
             </CardContent>
@@ -3833,18 +3861,45 @@ export default function SettingsPage() {
         </AlertDialogContent>
       </AlertDialog>
 
-      <AlertDialog open={showSyncFromProdDialog} onOpenChange={(open) => { if (!open && isSyncingFromProd) return; setShowSyncFromProdDialog(open); }}>
-        <AlertDialogContent>
+      <AlertDialog open={showSyncFromProdDialog} onOpenChange={(open) => { if (!open && isSyncingFromProd) return; setShowSyncFromProdDialog(open); if (!open) setSyncDifferences(null); }}>
+        <AlertDialogContent className="max-w-lg max-h-[80vh] flex flex-col">
           <AlertDialogHeader>
             <AlertDialogTitle className="flex items-center gap-2">
               <AlertTriangle className="h-5 w-5 text-yellow-500" />
               Sync from Production
             </AlertDialogTitle>
-            <AlertDialogDescription>
-              This will overwrite all settings for this agent in your development environment with the latest version from production. This includes the business use case, domain knowledge, guardrails, validation rules, prompt, sample data, and actions.
-              <span className="block mt-2 font-medium text-foreground">
-                Any unsaved changes in development will be lost. This cannot be undone.
-              </span>
+            <AlertDialogDescription asChild>
+              <div>
+                {syncDifferences && syncDifferences.length === 0 ? (
+                  <span className="text-green-600 dark:text-green-400 font-medium">
+                    Dev and production are already in sync. No changes needed.
+                  </span>
+                ) : (
+                  <>
+                    <span>The following fields differ between dev and production:</span>
+                    <div className="mt-3 space-y-2 overflow-y-auto max-h-[40vh] pr-1">
+                      {syncDifferences?.map((diff) => (
+                        <div key={diff.field} className="rounded-md border p-3 text-sm">
+                          <div className="font-medium text-foreground mb-1">{diff.label}</div>
+                          <div className="grid grid-cols-2 gap-2">
+                            <div>
+                              <span className="text-xs text-muted-foreground block mb-0.5">Dev (current)</span>
+                              <span className="text-xs break-words block bg-red-50 dark:bg-red-950/30 rounded px-1.5 py-1">{diff.devValue}</span>
+                            </div>
+                            <div>
+                              <span className="text-xs text-muted-foreground block mb-0.5">Production (incoming)</span>
+                              <span className="text-xs break-words block bg-green-50 dark:bg-green-950/30 rounded px-1.5 py-1">{diff.prodValue}</span>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                    <span className="block mt-3 font-medium text-foreground">
+                      Syncing will overwrite your dev values with the production versions above. This cannot be undone.
+                    </span>
+                  </>
+                )}
+              </div>
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -3852,25 +3907,27 @@ export default function SettingsPage() {
               disabled={isSyncingFromProd}
               data-testid="button-sync-cancel"
             >
-              Cancel
+              {syncDifferences?.length === 0 ? "Close" : "Cancel"}
             </AlertDialogCancel>
-            <Button
-              onClick={handleSyncFromProd}
-              disabled={isSyncingFromProd}
-              data-testid="button-sync-confirm"
-            >
-              {isSyncingFromProd ? (
-                <>
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  Syncing...
-                </>
-              ) : (
-                <>
-                  <CloudDownload className="h-4 w-4 mr-2" />
-                  Yes, Sync from Production
-                </>
-              )}
-            </Button>
+            {syncDifferences && syncDifferences.length > 0 && (
+              <Button
+                onClick={handleSyncFromProd}
+                disabled={isSyncingFromProd}
+                data-testid="button-sync-confirm"
+              >
+                {isSyncingFromProd ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Syncing...
+                  </>
+                ) : (
+                  <>
+                    <CloudDownload className="h-4 w-4 mr-2" />
+                    Yes, Sync {syncDifferences.length} {syncDifferences.length === 1 ? 'Field' : 'Fields'}
+                  </>
+                )}
+              </Button>
+            )}
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
