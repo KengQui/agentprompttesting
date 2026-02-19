@@ -3,7 +3,7 @@ import { useParams, useLocation } from "wouter";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-import { ArrowLeft, Send, Bot, User, Settings, Loader2, X, AlertCircle, MessageSquare, Eraser, Plus, PanelLeftClose, PanelLeft, Target, Columns, FunctionSquare, Layers, Copy, Check, Database, ChevronDown } from "lucide-react";
+import { ArrowLeft, Send, Bot, User, Settings, Loader2, X, AlertCircle, MessageSquare, Eraser, Plus, PanelLeftClose, PanelLeft, Target, Columns, FunctionSquare, Layers, Copy, Check, Database, ChevronDown, ListOrdered } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Card } from "@/components/ui/card";
@@ -34,7 +34,8 @@ function stripActionBlocks(text: string): string {
 const COLUMN_ADDED_FALLBACK_PILLS = ["See related expressions", "Create new expression", "I'm done"];
 const EXPRESSION_PRESENTED_FALLBACK_PILLS = ["Revise this expression", "Create new column", "Test with my data", "Explain this expression"];
 const VALIDATION_DONE_FALLBACK_PILLS = ["Create new column", "Revise this expression", "Explain this expression"];
-const EXPLANATION_DONE_FALLBACK_PILLS = ["Create new column", "Revise this expression", "Test with my data"];
+const EXPLANATION_DONE_FALLBACK_PILLS = ["Breakdown in details", "Create new column", "Revise this expression", "Test with my data"];
+const BREAKDOWN_DONE_FALLBACK_PILLS = ["Create new column", "Revise this expression", "Test with my data"];
 const REVISE_CHOICE_PILLS = ["Edit it yourself", "Describe your changes"];
 
 function parseSuggestedActions(text: string, isHcmAgent?: boolean): { cleanedText: string; actions: string[] } {
@@ -61,6 +62,9 @@ function parseSuggestedActions(text: string, isHcmAgent?: boolean): { cleanedTex
       }
       if (hasHcmExpression && /\b1\.\s*(your )?objective\b/i.test(text) && /\bcombining everything\b/i.test(text)) {
         return { cleanedText: text, actions: EXPLANATION_DONE_FALLBACK_PILLS };
+      }
+      if (isBreakdownMessage(text)) {
+        return { cleanedText: text, actions: BREAKDOWN_DONE_FALLBACK_PILLS };
       }
     }
     if (isHcmAgent && /edit it yourself|modify it directly|describe the changes|describe.*changes.*you'd like/i.test(text) && /revise/i.test(text)) {
@@ -328,6 +332,139 @@ function ExpressionExplanationCard({ content, timestamp }: { content: string; ti
                 </div>
               );
             })}
+          </div>
+        </Card>
+        <p className="text-xs text-muted-foreground px-1 pt-1">
+          {new Date(timestamp).toLocaleTimeString([], {
+            hour: "2-digit",
+            minute: "2-digit",
+          })}
+        </p>
+      </div>
+    </div>
+  );
+}
+
+interface BreakdownData {
+  expression: string;
+  steps: string[];
+  finalStep: string;
+}
+
+function isBreakdownMessage(text: string): boolean {
+  const hasExpression = /\*{0,2}Expression:?\*{0,2}/i.test(text);
+  const hasStepByStep = /\*{0,2}Step[\s-]*by[\s-]*Step:?\*{0,2}/i.test(text);
+  const hasNumberedSteps = /\n\s*\d+\.\s+/.test(text);
+  const hasFinal = /\*{0,2}Final:?\*{0,2}/i.test(text);
+  return hasExpression && (hasStepByStep || hasNumberedSteps) && hasFinal;
+}
+
+function parseBreakdown(text: string): BreakdownData | null {
+  const exprMatch = text.match(/\*{0,2}Expression:?\*{0,2}\s*\n([\s\S]*?)(?=\n\s*\*{0,2}Step[\s-]*by[\s-]*Step)/i);
+  let expression = '';
+  if (exprMatch) {
+    expression = exprMatch[1].replace(/```[a-z]*\n?/g, '').replace(/```/g, '').replace(/`/g, '').trim();
+  }
+
+  const stepsMatch = text.match(/\*{0,2}Step[\s-]*by[\s-]*Step:?\*{0,2}\s*\n([\s\S]*)/i);
+  if (!stepsMatch) {
+    const fallbackMatch = text.match(/\n(\s*1\.\s+[\s\S]*)/);
+    if (!fallbackMatch) return null;
+    return parseStepsBlock(fallbackMatch[1], expression);
+  }
+
+  return parseStepsBlock(stepsMatch[1], expression);
+}
+
+function parseStepsBlock(stepsBlock: string, expression: string): BreakdownData | null {
+  const stepLines: string[] = [];
+  let finalStep = '';
+  const lines = stepsBlock.split('\n');
+  for (const line of lines) {
+    const trimmed = line.trim();
+    if (!trimmed) continue;
+    const finalMatch = trimmed.match(/^\d+\.\s*\*{0,2}\s*Final:?\s*\*{0,2}\s*(.*)/i);
+    if (finalMatch) {
+      let finalText = finalMatch[1].replace(/`/g, '').trim();
+      const nextLineIdx = lines.indexOf(line) + 1;
+      if (nextLineIdx < lines.length) {
+        const continuation = lines[nextLineIdx].trim();
+        if (continuation && !/^\d+\./.test(continuation)) {
+          finalText = (finalText + ' ' + continuation.replace(/`/g, '')).trim();
+        }
+      }
+      finalStep = finalText;
+      continue;
+    }
+    const stepMatch = trimmed.match(/^\d+\.\s*(.*)/);
+    if (stepMatch) {
+      stepLines.push(stepMatch[1].replace(/`/g, '').trim());
+    }
+  }
+
+  if (stepLines.length === 0) return null;
+
+  return { expression, steps: stepLines, finalStep };
+}
+
+function DetailedBreakdownCard({ content, timestamp }: { content: string; timestamp: string }) {
+  const breakdown = parseBreakdown(content);
+  const [copiedExpr, setCopiedExpr] = useState(false);
+
+  if (!breakdown) return null;
+
+  const handleCopyExpression = () => {
+    navigator.clipboard.writeText(breakdown.expression);
+    setCopiedExpr(true);
+    setTimeout(() => setCopiedExpr(false), 2000);
+  };
+
+  return (
+    <div className="flex gap-3" data-testid="breakdown-card">
+      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-muted">
+        <Bot className="h-4 w-4" />
+      </div>
+      <div className="max-w-[80%] space-y-0.5">
+        <Card className="overflow-visible p-0">
+          <div className="flex items-center gap-2 px-4 py-3 border-b border-card-border">
+            <ListOrdered className="h-4 w-4 text-muted-foreground" />
+            <span className="text-sm font-semibold">Detailed Breakdown</span>
+          </div>
+          <div className="divide-y divide-card-border">
+            <div className="px-4 py-3" data-testid="breakdown-expression">
+              <div className="flex items-center gap-2 mb-1.5">
+                <FunctionSquare className="h-3.5 w-3.5 text-muted-foreground" />
+                <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Expression</span>
+                <button
+                  className="ml-auto p-1 rounded-md text-muted-foreground hover-elevate active-elevate-2"
+                  onClick={handleCopyExpression}
+                  data-testid="button-copy-breakdown-expression"
+                >
+                  {copiedExpr ? <Check className="h-3.5 w-3.5 text-green-500" /> : <Copy className="h-3.5 w-3.5" />}
+                </button>
+              </div>
+              <p className="text-sm font-mono pl-5.5 break-all">{breakdown.expression}</p>
+            </div>
+            <div className="px-4 py-3" data-testid="breakdown-steps">
+              <div className="flex items-center gap-2 mb-2">
+                <ListOrdered className="h-3.5 w-3.5 text-muted-foreground" />
+                <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Step-by-Step</span>
+              </div>
+              <ol className="space-y-1.5 pl-5.5">
+                {breakdown.steps.map((step, idx) => (
+                  <li key={idx} className="text-sm font-mono flex gap-2" data-testid={`breakdown-step-${idx}`}>
+                    <span className="text-muted-foreground shrink-0">{idx + 1}.</span>
+                    <span className="break-all">{step}</span>
+                  </li>
+                ))}
+                {breakdown.finalStep && (
+                  <li className="text-sm font-mono flex gap-2 pt-1 border-t border-card-border" data-testid="breakdown-step-final">
+                    <span className="text-muted-foreground shrink-0">{breakdown.steps.length + 1}.</span>
+                    <span className="break-all"><em>Final:</em> {breakdown.finalStep}</span>
+                  </li>
+                )}
+              </ol>
+            </div>
           </div>
         </Card>
         <p className="text-xs text-muted-foreground px-1 pt-1">
@@ -628,6 +765,19 @@ function MessageBubble({ message, agentId, isLastAssistant, onSendMessage, onRev
     return (
       <>
         <ExpressionExplanationCard content={displayContent} timestamp={message.timestamp} />
+        {showPills && <SuggestedActionPills actions={actions} onSelect={onSendMessage} onReviseExpression={onReviseExpression} onEditExpression={onEditExpression} />}
+      </>
+    );
+  }
+
+  const breakdownData = !isUser && isHcmAgent && isBreakdownMessage(displayContent)
+    ? parseBreakdown(displayContent)
+    : null;
+
+  if (breakdownData) {
+    return (
+      <>
+        <DetailedBreakdownCard content={displayContent} timestamp={message.timestamp} />
         {showPills && <SuggestedActionPills actions={actions} onSelect={onSendMessage} onReviseExpression={onReviseExpression} onEditExpression={onEditExpression} />}
       </>
     );
