@@ -2429,6 +2429,165 @@ export async function registerRoutes(
     }
   });
 
+  // Import agent config from dev into production (dev-to-prod sync - receiver endpoint)
+  app.post("/api/admin/import-agent", async (req: Request, res: Response) => {
+    try {
+      if (process.env.ENABLE_SYNC !== 'true') {
+        return res.status(404).json({ message: "Not found" });
+      }
+
+      const syncKey = req.headers['x-sync-key'];
+      if (syncKey !== 'temp-sync-2026') {
+        return res.status(403).json({ message: "Forbidden" });
+      }
+
+      const { agentId, updates } = req.body;
+      if (!agentId || !updates) {
+        return res.status(400).json({ message: "agentId and updates are required" });
+      }
+
+      const existingAgent = await storage.getAgent(agentId);
+      if (!existingAgent) {
+        return res.status(404).json({ message: "Agent not found in this environment" });
+      }
+
+      await storage.updateAgent(agentId, updates);
+      res.json({ success: true, message: "Agent updated successfully" });
+    } catch (error: any) {
+      console.error("Import agent error:", error);
+      res.status(500).json({ message: error?.message || "Import failed" });
+    }
+  });
+
+  // Push agent config from dev to production (dev-to-prod sync)
+  app.post("/api/admin/sync-to-prod", async (req: Request, res: Response) => {
+    try {
+      if (process.env.ENABLE_SYNC !== 'true') {
+        return res.status(404).json({ message: "Not found" });
+      }
+
+      const user = await getUserFromSession(req);
+      if (!user) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+
+      const { agentId } = req.body;
+      if (!agentId) {
+        return res.status(400).json({ message: "agentId is required" });
+      }
+
+      const devAgent = await storage.getAgent(agentId);
+      if (!devAgent || devAgent.userId !== user.id) {
+        return res.status(404).json({ message: "Agent not found" });
+      }
+
+      const prodUrl = process.env.PROD_APP_URL;
+      if (!prodUrl) {
+        return res.status(400).json({ message: "PROD_APP_URL environment variable is not set." });
+      }
+
+      const updateData: Record<string, any> = {};
+      for (const { key } of syncFieldsToCompare) {
+        updateData[key] = (devAgent as any)[key];
+      }
+
+      const importUrl = `${prodUrl.replace(/\/$/, '')}/api/admin/import-agent`;
+      const response = await fetch(importUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-sync-key': 'temp-sync-2026',
+        },
+        body: JSON.stringify({ agentId, updates: updateData }),
+      });
+
+      if (!response.ok) {
+        const err = await response.json().catch(() => ({ message: "Failed to push to production" }));
+        return res.status(response.status).json({ message: err.message || "Failed to push to production" });
+      }
+
+      res.json({ success: true, message: "Agent pushed to production", agentName: devAgent.name });
+    } catch (error: any) {
+      console.error("Sync to prod error:", error);
+      res.status(500).json({ message: error?.message || "Push to production failed" });
+    }
+  });
+
+  // Preview differences for dev-to-prod push
+  app.post("/api/admin/sync-to-prod-preview", async (req: Request, res: Response) => {
+    try {
+      if (process.env.ENABLE_SYNC !== 'true') {
+        return res.status(404).json({ message: "Not found" });
+      }
+
+      const user = await getUserFromSession(req);
+      if (!user) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+
+      const { agentId } = req.body;
+      if (!agentId) {
+        return res.status(400).json({ message: "agentId is required" });
+      }
+
+      const devAgent = await storage.getAgent(agentId);
+      if (!devAgent || devAgent.userId !== user.id) {
+        return res.status(404).json({ message: "Agent not found" });
+      }
+
+      const prodUrl = process.env.PROD_APP_URL;
+      if (!prodUrl) {
+        return res.status(400).json({ message: "PROD_APP_URL environment variable is not set." });
+      }
+
+      const exportUrl = `${prodUrl.replace(/\/$/, '')}/api/admin/export-agent/${agentId}`;
+      const response = await fetch(exportUrl);
+
+      if (!response.ok) {
+        const err = await response.json().catch(() => ({ message: "Failed to fetch from production" }));
+        return res.status(response.status).json({ message: err.message || "Failed to fetch from production" });
+      }
+
+      const { agent: prodAgent } = await response.json();
+      if (!prodAgent) {
+        return res.status(404).json({ message: "Agent not found in production" });
+      }
+
+      const differences: Array<{ field: string; label: string; devValue: string; prodValue: string }> = [];
+
+      for (const { key, label } of syncFieldsToCompare) {
+        const devVal = JSON.stringify((devAgent as any)[key] ?? null);
+        const prodVal = JSON.stringify((prodAgent as any)[key] ?? null);
+        if (devVal !== prodVal) {
+          const summarize = (val: any) => {
+            if (val === null || val === undefined || val === '') return '(empty)';
+            if (typeof val === 'string') {
+              return val.length > 120 ? val.substring(0, 120) + '...' : val;
+            }
+            const s = JSON.stringify(val);
+            return s.length > 120 ? s.substring(0, 120) + '...' : s;
+          };
+          differences.push({
+            field: key,
+            label,
+            devValue: summarize((devAgent as any)[key]),
+            prodValue: summarize((prodAgent as any)[key]),
+          });
+        }
+      }
+
+      res.json({
+        success: true,
+        hasDifferences: differences.length > 0,
+        differences,
+        agentName: devAgent.name,
+      });
+    } catch (error: any) {
+      console.error("Sync to prod preview error:", error);
+      res.status(500).json({ message: error?.message || "Preview failed" });
+    }
+  });
+
   // Data sync endpoint - only active when ENABLE_SYNC=true env var is set
   const expressModule = await import('express');
   app.post("/api/admin/sync-data", expressModule.json({ limit: '50mb' }), async (req: Request, res: Response) => {
