@@ -1,6 +1,6 @@
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { Link } from "wouter";
-import { Plus, MessageSquare, Settings, Bot, Sparkles, LogOut, PlayCircle, Copy, Zap, HelpCircle } from "lucide-react";
+import { Link, useLocation } from "wouter";
+import { Plus, MessageSquare, Settings, Bot, Sparkles, LogOut, PlayCircle, Copy, Zap, HelpCircle, CloudDownload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -64,7 +64,13 @@ function getFlowModeDescription(flowMode: string) {
   }
 }
 
-function AgentCard({ agent, flowMode }: { agent: Agent; flowMode?: string }) {
+interface SyncStatus {
+  hasDifferences: boolean;
+  changedFields: string[];
+}
+
+function AgentCard({ agent, flowMode, syncStatus }: { agent: Agent; flowMode?: string; syncStatus?: SyncStatus }) {
+  const [, navigate] = useLocation();
   const { toast } = useToast();
   const cloneMutation = useMutation({
     mutationFn: async () => {
@@ -119,6 +125,29 @@ function AgentCard({ agent, flowMode }: { agent: Agent; flowMode?: string }) {
                 </TooltipTrigger>
                 <TooltipContent side="left">
                   <p className="text-xs">{getFlowModeDescription(flowMode)}</p>
+                </TooltipContent>
+              </Tooltip>
+            )}
+            {syncStatus?.hasDifferences && (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <span
+                    className="cursor-pointer"
+                    onClick={() => navigate(`/settings/${agent.id}`)}
+                    data-testid={`badge-prod-updated-${agent.id}`}
+                  >
+                    <Badge
+                      variant="secondary"
+                      className="text-[10px] bg-orange-500/10 text-orange-600 dark:text-orange-400"
+                    >
+                      <CloudDownload className="h-3 w-3 mr-1" />
+                      Prod Updated
+                    </Badge>
+                  </span>
+                </TooltipTrigger>
+                <TooltipContent side="left" className="max-w-[200px]">
+                  <p className="text-xs font-medium mb-1">Production has changes in:</p>
+                  <p className="text-xs text-muted-foreground">{syncStatus.changedFields.join(", ")}</p>
                 </TooltipContent>
               </Tooltip>
             )}
@@ -225,6 +254,11 @@ interface FlowModeResult {
   flowMode: string;
 }
 
+interface SyncStatusResponse {
+  success: boolean;
+  statuses: Record<string, SyncStatus>;
+}
+
 export default function Home() {
   const { data: agents, isLoading } = useQuery<Agent[]>({
     queryKey: ["/api/agents"],
@@ -232,6 +266,12 @@ export default function Home() {
   const { data: flowModes } = useQuery<FlowModeResult[]>({
     queryKey: ["/api/agents/flow-modes"],
     enabled: !!agents && agents.length > 0,
+  });
+  const { data: syncStatusData } = useQuery<SyncStatusResponse>({
+    queryKey: ["/api/admin/sync-status"],
+    enabled: !!agents && agents.length > 0,
+    staleTime: 60000,
+    retry: false,
   });
   const { user, logout } = useAuth();
 
@@ -285,7 +325,7 @@ export default function Home() {
         ) : agents && agents.length > 0 ? (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {agents.map((agent) => (
-              <AgentCard key={agent.id} agent={agent} flowMode={flowModeMap.get(agent.id)} />
+              <AgentCard key={agent.id} agent={agent} flowMode={flowModeMap.get(agent.id)} syncStatus={syncStatusData?.statuses?.[agent.id]} />
             ))}
           </div>
         ) : (

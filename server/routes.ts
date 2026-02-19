@@ -2243,6 +2243,61 @@ export async function registerRoutes(
     { key: 'welcomeConfig', label: 'Welcome Config' },
   ];
 
+  // Batch check which agents have differences between dev and production
+  app.get("/api/admin/sync-status", async (req: Request, res: Response) => {
+    try {
+      if (process.env.ENABLE_SYNC !== 'true') {
+        return res.json({ success: true, statuses: {} });
+      }
+
+      const user = await getUserFromSession(req);
+      if (!user) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+
+      const prodUrl = process.env.PROD_APP_URL;
+      if (!prodUrl) {
+        return res.json({ success: true, statuses: {} });
+      }
+
+      const devAgents = await storage.getAgentsByUserId(user.id);
+      const statuses: Record<string, { hasDifferences: boolean; changedFields: string[] }> = {};
+
+      for (const devAgent of devAgents) {
+        try {
+          const exportUrl = `${prodUrl.replace(/\/$/, '')}/api/admin/export-agent/${devAgent.id}`;
+          const response = await fetch(exportUrl);
+          if (!response.ok) {
+            continue;
+          }
+          const { agent: prodAgent } = await response.json();
+          if (!prodAgent) continue;
+
+          const changedFields: string[] = [];
+          for (const { key, label } of syncFieldsToCompare) {
+            const devVal = JSON.stringify((devAgent as any)[key] ?? null);
+            const prodVal = JSON.stringify((prodAgent as any)[key] ?? null);
+            if (devVal !== prodVal) {
+              changedFields.push(label);
+            }
+          }
+
+          statuses[devAgent.id] = {
+            hasDifferences: changedFields.length > 0,
+            changedFields,
+          };
+        } catch {
+          // Skip agents that fail to fetch from prod
+        }
+      }
+
+      res.json({ success: true, statuses });
+    } catch (error: any) {
+      console.error("Sync status error:", error);
+      res.status(500).json({ message: error?.message || "Sync status check failed" });
+    }
+  });
+
   // Preview differences between dev and production agent configs
   app.post("/api/admin/sync-preview", async (req: Request, res: Response) => {
     try {
