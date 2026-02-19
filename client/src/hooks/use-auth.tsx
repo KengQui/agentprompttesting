@@ -28,8 +28,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const res = await apiRequest("POST", "/api/auth/login", { username, password });
       return res.json();
     },
-    onSuccess: (userData: PublicUser) => {
-      queryClient.setQueryData(["/api/auth/me"], userData);
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
       setLocation("/");
     },
   });
@@ -39,8 +39,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const res = await apiRequest("POST", "/api/auth/register", { username, password });
       return res.json();
     },
-    onSuccess: (userData: PublicUser) => {
-      queryClient.setQueryData(["/api/auth/me"], userData);
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
       setLocation("/");
     },
   });

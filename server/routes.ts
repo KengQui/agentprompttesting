@@ -1,7 +1,7 @@
 import type { Express, Request, Response, NextFunction } from "express";
 import { createServer, type Server } from "http";
 import { storage, computeConfigFieldsHash } from "./storage";
-import { insertAgentSchema, updateAgentSchema, insertChatSessionSchema, updateChatSessionSchema, simulationRequestSchema, insertUserSchema, loginSchema, passwordResetRequestSchema, passwordResetSchema, changePasswordSchema, type PublicUser } from "@shared/schema";
+import { insertAgentSchema, updateAgentSchema, insertChatSessionSchema, updateChatSessionSchema, simulationRequestSchema, insertUserSchema, loginSchema, passwordResetRequestSchema, passwordResetSchema, type PublicUser } from "@shared/schema";
 import { z } from "zod";
 import type { TurnTrace, TraceEntry, ConfigSnapshot } from "@shared/schema";
 
@@ -304,36 +304,6 @@ export async function registerRoutes(
     } catch (error) {
       console.error("Error resetting password:", error);
       res.status(500).json({ message: "Failed to reset password" });
-    }
-  });
-
-  // Change password (for logged-in users)
-  app.post("/api/auth/change-password", async (req: AuthenticatedRequest, res) => {
-    try {
-      const user = await getUserFromSession(req);
-      if (!user) {
-        return res.status(401).json({ message: "Unauthorized" });
-      }
-
-      const parsed = changePasswordSchema.safeParse(req.body);
-      if (!parsed.success) {
-        return res.status(400).json({ message: parsed.error.errors[0]?.message || "Invalid input" });
-      }
-
-      const validUser = await storage.validatePassword(user.username, parsed.data.currentPassword);
-      if (!validUser) {
-        return res.status(400).json({ message: "Current password is incorrect" });
-      }
-
-      const success = await storage.updateUserPassword(user.id, parsed.data.newPassword);
-      if (!success) {
-        return res.status(500).json({ message: "Failed to update password" });
-      }
-
-      res.json({ message: "Password changed successfully" });
-    } catch (error) {
-      console.error("Error changing password:", error);
-      res.status(500).json({ message: "Failed to change password" });
     }
   });
 
