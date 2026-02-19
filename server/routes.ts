@@ -2305,9 +2305,19 @@ export async function registerRoutes(
         return res.status(404).json({ message: "Not found" });
       }
 
+      const user = await getUserFromSession(req);
+      if (!user) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+
       const { agentId } = req.body;
       if (!agentId) {
         return res.status(400).json({ message: "agentId is required" });
+      }
+
+      const devAgent = await storage.getAgent(agentId);
+      if (!devAgent || devAgent.userId !== user.id) {
+        return res.status(404).json({ message: "Agent not found" });
       }
 
       const prodUrl = process.env.PROD_APP_URL;
@@ -2327,12 +2337,6 @@ export async function registerRoutes(
       if (!prodAgent) {
         return res.status(404).json({ message: "Agent not found in production" });
       }
-
-      const devAgent = await storage.getAgent(agentId);
-      if (!devAgent) {
-        return res.status(404).json({ message: "Agent does not exist in dev." });
-      }
-
       const differences: Array<{ field: string; label: string; devValue: string; prodValue: string }> = [];
 
       for (const { key, label } of syncFieldsToCompare) {
@@ -2371,9 +2375,23 @@ export async function registerRoutes(
   // Import agent config from production into dev (prod-to-dev sync)
   app.post("/api/admin/sync-from-prod", async (req: Request, res: Response) => {
     try {
+      if (process.env.ENABLE_SYNC !== 'true') {
+        return res.status(404).json({ message: "Not found" });
+      }
+
+      const user = await getUserFromSession(req);
+      if (!user) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+
       const { agentId } = req.body;
       if (!agentId) {
         return res.status(400).json({ message: "agentId is required" });
+      }
+
+      const existingAgent = await storage.getAgent(agentId);
+      if (!existingAgent || existingAgent.userId !== user.id) {
+        return res.status(404).json({ message: "Agent not found" });
       }
 
       const prodUrl = process.env.PROD_APP_URL;
@@ -2394,7 +2412,6 @@ export async function registerRoutes(
         return res.status(404).json({ message: "Agent not found in production" });
       }
 
-      const existingAgent = await storage.getAgent(agentId);
       if (existingAgent) {
         const updateData: UpdateAgent = {};
         for (const { key } of syncFieldsToCompare) {
