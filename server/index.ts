@@ -83,6 +83,13 @@ app.use((req, res, next) => {
     console.error(`[startup] Pending sync failed: ${e.message}`);
   }
 
+  try {
+    const { seedUsers } = await import("./seed-users");
+    await seedUsers();
+  } catch (e: any) {
+    console.error(`[startup] User seeding failed: ${e.message}`);
+  }
+
   await registerRoutes(httpServer, app);
 
   app.use((err: any, _req: Request, res: Response, next: NextFunction) => {
