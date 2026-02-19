@@ -114,14 +114,15 @@ function AgentCard({ agent, flowMode, syncStatus }: { agent: Agent; flowMode?: s
             {flowMode && flowMode !== "unknown" && agent.status !== "draft" && (
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Badge
-                    variant="secondary"
-                    className={`text-[10px] ${getFlowModeStyle(flowMode)}`}
-                    data-testid={`badge-flow-mode-${agent.id}`}
-                  >
-                    <Zap className="h-3 w-3 mr-1" />
-                    {getFlowModeLabel(flowMode)}
-                  </Badge>
+                  <span data-testid={`badge-flow-mode-${agent.id}`}>
+                    <Badge
+                      variant="secondary"
+                      className={`text-[10px] ${getFlowModeStyle(flowMode)}`}
+                    >
+                      <Zap className="h-3 w-3 mr-1" />
+                      {getFlowModeLabel(flowMode)}
+                    </Badge>
+                  </span>
                 </TooltipTrigger>
                 <TooltipContent side="left">
                   <p className="text-xs">{getFlowModeDescription(flowMode)}</p>
