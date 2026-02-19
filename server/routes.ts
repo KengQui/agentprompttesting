@@ -2180,6 +2180,122 @@ export async function registerRoutes(
     }
   });
 
+  // Export a single agent's config data (for prod-to-dev sync)
+  app.get("/api/admin/export-agent/:agentId", async (req: Request, res: Response) => {
+    try {
+      if (process.env.ENABLE_SYNC !== 'true') {
+        return res.status(404).json({ message: "Not found" });
+      }
+      const syncKey = req.headers['x-sync-key'];
+      if (!process.env.SYNC_SECRET || syncKey !== process.env.SYNC_SECRET) {
+        return res.status(403).json({ message: "Forbidden" });
+      }
+
+      const agent = await storage.getAgent(req.params.agentId);
+      if (!agent) {
+        return res.status(404).json({ message: "Agent not found" });
+      }
+
+      res.json({ success: true, agent });
+    } catch (error: any) {
+      console.error("Export agent error:", error);
+      res.status(500).json({ message: error?.message || "Export failed" });
+    }
+  });
+
+  // List all agents for sync (for prod-to-dev sync UI)
+  app.get("/api/admin/export-agents-list", async (req: Request, res: Response) => {
+    try {
+      if (process.env.ENABLE_SYNC !== 'true') {
+        return res.status(404).json({ message: "Not found" });
+      }
+      const syncKey = req.headers['x-sync-key'];
+      if (!process.env.SYNC_SECRET || syncKey !== process.env.SYNC_SECRET) {
+        return res.status(403).json({ message: "Forbidden" });
+      }
+
+      const agents = await storage.getAgents();
+      const summary = agents.map(a => ({
+        id: a.id,
+        name: a.name,
+        status: a.status,
+        updatedAt: a.updatedAt,
+        hasPrompt: !!(a.customPrompt && a.customPrompt.trim()),
+      }));
+
+      res.json({ success: true, agents: summary });
+    } catch (error: any) {
+      console.error("Export agents list error:", error);
+      res.status(500).json({ message: error?.message || "Export list failed" });
+    }
+  });
+
+  // Import agent config from production into dev (prod-to-dev sync)
+  app.post("/api/admin/sync-from-prod", async (req: Request, res: Response) => {
+    try {
+      const { agentId } = req.body;
+      if (!agentId) {
+        return res.status(400).json({ message: "agentId is required" });
+      }
+
+      const prodUrl = process.env.PROD_APP_URL;
+      if (!prodUrl) {
+        return res.status(400).json({ message: "PROD_APP_URL environment variable is not set. Please set it to your production app URL (e.g., https://your-app.replit.app)." });
+      }
+
+      const syncSecret = process.env.SYNC_SECRET;
+      if (!syncSecret) {
+        return res.status(400).json({ message: "SYNC_SECRET environment variable is not set." });
+      }
+
+      const exportUrl = `${prodUrl.replace(/\/$/, '')}/api/admin/export-agent/${agentId}`;
+      const response = await fetch(exportUrl, {
+        headers: { 'X-Sync-Key': syncSecret },
+      });
+
+      if (!response.ok) {
+        const err = await response.json().catch(() => ({ message: "Failed to fetch from production" }));
+        return res.status(response.status).json({ message: err.message || "Failed to fetch from production" });
+      }
+
+      const { agent: prodAgent } = await response.json();
+      if (!prodAgent) {
+        return res.status(404).json({ message: "Agent not found in production" });
+      }
+
+      const existingAgent = await storage.getAgent(agentId);
+      if (existingAgent) {
+        const updateData: UpdateAgent = {
+          name: prodAgent.name,
+          description: prodAgent.description,
+          status: prodAgent.status,
+          promptStyle: prodAgent.promptStyle,
+          mockMode: prodAgent.mockMode,
+          configurationStep: prodAgent.configurationStep,
+          businessUseCase: prodAgent.businessUseCase,
+          domainKnowledge: prodAgent.domainKnowledge,
+          validationRules: prodAgent.validationRules,
+          guardrails: prodAgent.guardrails,
+          customPrompt: prodAgent.customPrompt,
+          domainDocuments: prodAgent.domainDocuments,
+          sampleDatasets: prodAgent.sampleDatasets,
+          clarifyingInsights: prodAgent.clarifyingInsights,
+          availableActions: prodAgent.availableActions,
+          mockUserState: prodAgent.mockUserState,
+          welcomeConfig: prodAgent.welcomeConfig,
+        };
+        await storage.updateAgent(agentId, updateData);
+      } else {
+        return res.status(404).json({ message: "Agent does not exist in dev. Only existing agents can be synced." });
+      }
+
+      res.json({ success: true, message: "Agent synced from production", agentName: prodAgent.name });
+    } catch (error: any) {
+      console.error("Sync from prod error:", error);
+      res.status(500).json({ message: error?.message || "Sync from production failed" });
+    }
+  });
+
   // Data sync endpoint - only active when ENABLE_SYNC=true env var is set
   const expressModule = await import('express');
   app.post("/api/admin/sync-data", expressModule.json({ limit: '50mb' }), async (req: Request, res: Response) => {
@@ -2188,7 +2304,7 @@ export async function registerRoutes(
         return res.status(404).json({ message: "Not found" });
       }
       const syncKey = req.headers['x-sync-key'];
-      if (syncKey !== process.env.SYNC_SECRET && syncKey !== 'temp-sync-2026') {
+      if (!process.env.SYNC_SECRET || syncKey !== process.env.SYNC_SECRET) {
         return res.status(403).json({ message: "Forbidden" });
       }
 

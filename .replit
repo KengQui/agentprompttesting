@@ -46,6 +46,7 @@ integrations = ["javascript_openai:1.0.0"]
 
 [userenv.development]
 ENABLE_SYNC = "true"
+PROD_APP_URL = "https://workspace.kengquichia.replit.app"
 
 [userenv.production]
 ENABLE_SYNC = "true"

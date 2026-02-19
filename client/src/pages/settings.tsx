@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useParams, useLocation } from "wouter";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { ArrowLeft, Save, Trash2, Bot, Briefcase, Shield, AlertTriangle, Loader2, BookOpen, Upload, X, FileText, Code, Pencil, RotateCcw, HelpCircle, ExternalLink, Info, Sparkles, ChevronDown, ChevronUp, Database, Check, Settings, Activity, FlaskConical, Zap, User, Eye, Filter, Plus, ArrowRight, CheckSquare, CheckCircle2, XCircle, AlertCircle, MessageSquare } from "lucide-react";
+import { ArrowLeft, Save, Trash2, Bot, Briefcase, Shield, AlertTriangle, Loader2, BookOpen, Upload, X, FileText, Code, Pencil, RotateCcw, HelpCircle, ExternalLink, Info, Sparkles, ChevronDown, ChevronUp, Database, Check, Settings, Activity, FlaskConical, Zap, User, Eye, Filter, Plus, ArrowRight, CheckSquare, CheckCircle2, XCircle, AlertCircle, MessageSquare, CloudDownload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -464,6 +464,14 @@ export default function SettingsPage() {
   const [isRegeneratingPrompt, setIsRegeneratingPrompt] = useState(false);
   const [pendingSaveData, setPendingSaveData] = useState<UpdateAgent | null>(null);
 
+  // Sync from production state
+  const [showSyncFromProdDialog, setShowSyncFromProdDialog] = useState(false);
+  const [isSyncingFromProd, setIsSyncingFromProd] = useState(false);
+
+  // Regeneration safeguard state
+  const [showRegenerationWarning, setShowRegenerationWarning] = useState(false);
+  const [pendingRegenerateModel, setPendingRegenerateModel] = useState<GeminiModel | null>(null);
+
   // Clarifying chat dialog state
   const [showValidationChatDialog, setShowValidationChatDialog] = useState(false);
   const [showGuardrailsChatDialog, setShowGuardrailsChatDialog] = useState(false);
@@ -817,13 +825,25 @@ export default function SettingsPage() {
     }
   };
 
-  const handleGeneratePrompt = async (model: GeminiModel) => {
+  const handleGeneratePromptWithSafeguard = (model: GeminiModel) => {
     if (!formData?.name || !formData?.businessUseCase?.trim()) {
       toast({
         title: "Missing information",
         description: "Please fill in the agent name and business use case before generating a prompt.",
         variant: "destructive",
       });
+      return;
+    }
+    if (formData.customPrompt && formData.customPrompt.trim()) {
+      setPendingRegenerateModel(model);
+      setShowRegenerationWarning(true);
+      return;
+    }
+    handleGeneratePrompt(model);
+  };
+
+  const handleGeneratePrompt = async (model: GeminiModel) => {
+    if (!formData?.name || !formData?.businessUseCase?.trim()) {
       return;
     }
     setIsGeneratingPrompt(true);
@@ -1337,6 +1357,34 @@ export default function SettingsPage() {
     }
   };
 
+  const handleSyncFromProd = async () => {
+    if (!params.id) return;
+    setIsSyncingFromProd(true);
+    try {
+      const response = await apiRequest("POST", "/api/admin/sync-from-prod", {
+        agentId: params.id,
+      });
+      const result = await response.json();
+
+      if (result.success) {
+        queryClient.invalidateQueries({ queryKey: ["/api/agents", params.id] });
+        toast({
+          title: "Synced from production",
+          description: `"${result.agentName}" has been updated with the latest production settings.`,
+        });
+      }
+    } catch (error: any) {
+      toast({
+        title: "Sync failed",
+        description: error.message || "Could not sync from production. Make sure the production app has the sync endpoint deployed.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSyncingFromProd(false);
+      setShowSyncFromProdDialog(false);
+    }
+  };
+
   const handleSaveWithoutRegenerate = async () => {
     if (pendingSaveData) {
       try {
@@ -1491,6 +1539,27 @@ export default function SettingsPage() {
                     <SelectItem value="active">Active</SelectItem>
                   </SelectContent>
                 </Select>
+              </div>
+
+              <div className="pt-4 border-t">
+                <Label>Sync from Production</Label>
+                <p className="text-xs text-muted-foreground mt-1 mb-2">
+                  Copy this agent's latest configuration from the production app into this development environment.
+                </p>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowSyncFromProdDialog(true)}
+                  disabled={isSyncingFromProd}
+                  data-testid="button-sync-from-prod"
+                >
+                  {isSyncingFromProd ? (
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  ) : (
+                    <CloudDownload className="h-4 w-4 mr-2" />
+                  )}
+                  {isSyncingFromProd ? "Syncing..." : "Sync from Production"}
+                </Button>
               </div>
             </CardContent>
           </Card>
@@ -2886,7 +2955,7 @@ export default function SettingsPage() {
                         {(Object.keys(geminiModelDisplayNames) as GeminiModel[]).map((model) => (
                           <DropdownMenuItem
                             key={model}
-                            onClick={() => handleGeneratePrompt(model)}
+                            onClick={() => handleGeneratePromptWithSafeguard(model)}
                             data-testid={`settings-generate-prompt-${model}`}
                           >
                             {geminiModelDisplayNames[model]}
@@ -3721,6 +3790,90 @@ export default function SettingsPage() {
         initialQuestion={guardrailsInitialQuestion}
         onComplete={handleGuardrailsChatComplete}
       />
+
+      <AlertDialog open={showRegenerationWarning} onOpenChange={setShowRegenerationWarning}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5 text-yellow-500" />
+              Overwrite Existing Prompt?
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              This agent already has a customized prompt. Regenerating will completely replace it with a new AI-generated prompt based on your current configuration settings.
+              <span className="block mt-2 font-medium text-foreground">
+                Any manual edits or refinements you've made to the current prompt will be lost.
+              </span>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel
+              onClick={() => {
+                setShowRegenerationWarning(false);
+                setPendingRegenerateModel(null);
+              }}
+              data-testid="button-regenerate-cancel"
+            >
+              Keep Current Prompt
+            </AlertDialogCancel>
+            <Button
+              variant="destructive"
+              onClick={() => {
+                setShowRegenerationWarning(false);
+                if (pendingRegenerateModel) {
+                  handleGeneratePrompt(pendingRegenerateModel);
+                  setPendingRegenerateModel(null);
+                }
+              }}
+              data-testid="button-regenerate-confirm"
+            >
+              <Sparkles className="h-4 w-4 mr-2" />
+              Regenerate Prompt
+            </Button>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={showSyncFromProdDialog} onOpenChange={(open) => { if (!open && isSyncingFromProd) return; setShowSyncFromProdDialog(open); }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5 text-yellow-500" />
+              Sync from Production
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              This will overwrite all settings for this agent in your development environment with the latest version from production. This includes the business use case, domain knowledge, guardrails, validation rules, prompt, sample data, and actions.
+              <span className="block mt-2 font-medium text-foreground">
+                Any unsaved changes in development will be lost. This cannot be undone.
+              </span>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel
+              disabled={isSyncingFromProd}
+              data-testid="button-sync-cancel"
+            >
+              Cancel
+            </AlertDialogCancel>
+            <Button
+              onClick={handleSyncFromProd}
+              disabled={isSyncingFromProd}
+              data-testid="button-sync-confirm"
+            >
+              {isSyncingFromProd ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Syncing...
+                </>
+              ) : (
+                <>
+                  <CloudDownload className="h-4 w-4 mr-2" />
+                  Yes, Sync from Production
+                </>
+              )}
+            </Button>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <AlertDialog open={showPromptOutdatedDialog} onOpenChange={(open) => { if (!open && isRegeneratingPrompt) return; }}>
         <AlertDialogContent>
