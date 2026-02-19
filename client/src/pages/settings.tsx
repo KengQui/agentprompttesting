@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useParams, useLocation } from "wouter";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { ArrowLeft, Save, Trash2, Bot, Briefcase, Shield, AlertTriangle, Loader2, BookOpen, Upload, X, FileText, Code, Pencil, RotateCcw, HelpCircle, ExternalLink, Info, Sparkles, ChevronDown, ChevronUp, Database, Check, Settings, Activity, FlaskConical, Zap, User, Eye, Filter, Plus, ArrowRight, CheckSquare, CheckCircle2, XCircle, AlertCircle, MessageSquare, CloudDownload } from "lucide-react";
+import { ArrowLeft, Save, Trash2, Bot, Briefcase, Shield, AlertTriangle, Loader2, BookOpen, Upload, X, FileText, Code, Pencil, RotateCcw, HelpCircle, ExternalLink, Info, Sparkles, ChevronDown, ChevronUp, Database, Check, Settings, Activity, FlaskConical, Zap, User, Eye, Filter, Plus, ArrowRight, CheckSquare, CheckCircle2, XCircle, AlertCircle, MessageSquare, CloudDownload, Copy, Power } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -477,6 +477,9 @@ export default function SettingsPage() {
   const [pendingEnablePromptId, setPendingEnablePromptId] = useState<string | null>(null);
   const [showSaveAsDialog, setShowSaveAsDialog] = useState(false);
   const [saveAsName, setSaveAsName] = useState("");
+  const [viewingPrompt, setViewingPrompt] = useState<SavedPrompt | null>(null);
+  const [inlineEditingNameId, setInlineEditingNameId] = useState<string | null>(null);
+  const [inlineEditingNameValue, setInlineEditingNameValue] = useState("");
 
   const [isGeneratingValidation, setIsGeneratingValidation] = useState(false);
   const [isGeneratingGuardrails, setIsGeneratingGuardrails] = useState(false);
@@ -1038,6 +1041,37 @@ export default function SettingsPage() {
     setEditingPromptId(null);
     setEditedPrompt("");
     toast({ title: "Prompt saved", description: `"${newPrompt.name}" has been added to your prompt library.` });
+  };
+
+  const handleDuplicatePrompt = (prompt: SavedPrompt) => {
+    if (!formData) return;
+    const newPrompt: SavedPrompt = {
+      id: uuidv4(),
+      name: prompt.name + " (Copy)",
+      content: prompt.content,
+      isActive: false,
+      source: prompt.source,
+      model: prompt.model,
+      configHash: prompt.configHash,
+      createdAt: new Date().toISOString(),
+    };
+    const prompts = formData.savedPrompts || [];
+    updateFormDataAndTrackCompletion({ savedPrompts: [...prompts, newPrompt] });
+    toast({ title: "Prompt duplicated", description: `"${newPrompt.name}" has been added.` });
+  };
+
+  const handleInlineNameSave = (promptId: string) => {
+    if (!formData || !inlineEditingNameValue.trim()) {
+      setInlineEditingNameId(null);
+      return;
+    }
+    const prompts = formData.savedPrompts || [];
+    const updatedPrompts = prompts.map(p =>
+      p.id === promptId ? { ...p, name: inlineEditingNameValue.trim() } : p
+    );
+    updateFormDataAndTrackCompletion({ savedPrompts: updatedPrompts });
+    setInlineEditingNameId(null);
+    setInlineEditingNameValue("");
   };
 
   const handleRemoveAction = (id: string) => {
@@ -3098,66 +3132,65 @@ export default function SettingsPage() {
               <CardTitle className="flex items-center gap-2">
                 <Code className="h-5 w-5 text-primary" />
                 Prompt Configuration
-                {savedPrompts.length > 0 && (
-                  <Badge variant="secondary">{savedPrompts.length} saved</Badge>
-                )}
+                <Badge variant="secondary">Optional</Badge>
               </CardTitle>
               <CardDescription>
-                Generate, save, and manage multiple system prompts. Enable the one you want your agent to use. Each prompt captures the config state at creation time so you know when it's outdated.
+                Generate and manage system prompts for your agent to use
               </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="p-3 bg-blue-50 dark:bg-blue-950 rounded-md border border-blue-200 dark:border-blue-800">
-                <div className="flex items-start gap-2">
-                  <Sparkles className="h-4 w-4 text-blue-600 dark:text-blue-400 mt-0.5 shrink-0" />
+            <CardContent>
+              <div className="space-y-6">
+                <div className="flex items-start gap-3 rounded-lg border bg-muted/50 p-4">
+                  <Info className="h-5 w-5 text-muted-foreground mt-0.5 shrink-0" />
                   <div>
-                    <p className="text-sm font-medium text-blue-800 dark:text-blue-200">
-                      Prompt Library
-                    </p>
-                    <p className="text-xs text-blue-700 dark:text-blue-300 mt-1">
-                      Generate as many prompts as you like using different AI models. Edit any prompt or save a modified version under a new name. Only one prompt can be active at a time.
+                    <p className="font-medium text-sm">What is the prompt library?</p>
+                    <p className="text-sm text-muted-foreground">
+                      Generate multiple system prompts using AI and keep them versioned. Only one prompt can be active at a time. Prompts that were created with different settings will show a warning.
                     </p>
                   </div>
                 </div>
-              </div>
 
-              <div className="flex items-center justify-between">
-                <Label>Generate New Prompt</Label>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button
-                      type="button"
-                      variant="default"
-                      size="sm"
-                      disabled={isGeneratingPrompt}
-                      data-testid="settings-button-generate-prompt"
-                    >
-                      {isGeneratingPrompt ? (
-                        <Loader2 className="h-3 w-3 mr-1 animate-spin" />
-                      ) : (
-                        <Sparkles className="h-3 w-3 mr-1" />
-                      )}
-                      {isGeneratingPrompt ? "Generating..." : "AI Generate"}
-                      <ChevronDown className="h-3 w-3 ml-1" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    {(Object.keys(geminiModelDisplayNames) as GeminiModel[]).map((model) => (
-                      <DropdownMenuItem
-                        key={model}
-                        onClick={() => handleGeneratePromptWithSafeguard(model)}
-                        data-testid={`settings-generate-prompt-${model}`}
+                <div className="space-y-4">
+                  <div>
+                    <Label className="text-sm font-medium">Generate with AI</Label>
+                    <p className="text-xs text-muted-foreground mb-2">
+                      Create a system prompt based on your agent's current configuration
+                    </p>
+                  </div>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        type="button"
+                        variant="default"
+                        disabled={isGeneratingPrompt}
+                        className="w-full"
+                        data-testid="settings-button-generate-prompt"
                       >
-                        {geminiModelDisplayNames[model]}
-                      </DropdownMenuItem>
-                    ))}
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
+                        {isGeneratingPrompt ? (
+                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        ) : (
+                          <Sparkles className="h-4 w-4 mr-2" />
+                        )}
+                        {isGeneratingPrompt ? "Generating..." : "Generate Prompt"}
+                        <ChevronDown className="h-3 w-3 ml-2" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="w-56">
+                      {(Object.keys(geminiModelDisplayNames) as GeminiModel[]).map((model) => (
+                        <DropdownMenuItem
+                          key={model}
+                          onClick={() => handleGeneratePromptWithSafeguard(model)}
+                          data-testid={`settings-generate-prompt-${model}`}
+                        >
+                          {geminiModelDisplayNames[model]}
+                        </DropdownMenuItem>
+                      ))}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
 
-              {isEditingPrompt && editingPromptId && (
-                <Card className="border-primary">
-                  <CardContent className="p-4 space-y-3">
+                {isEditingPrompt && editingPromptId && (
+                  <div className="space-y-3 rounded-lg border border-primary p-4">
                     <div className="flex items-center justify-between gap-2 flex-wrap">
                       <div className="flex items-center gap-2 flex-1 min-w-0">
                         <Pencil className="h-4 w-4 text-primary shrink-0" />
@@ -3202,11 +3235,6 @@ export default function SettingsPage() {
                         </Button>
                       </div>
                     </div>
-                    <div className="p-3 bg-amber-50 dark:bg-amber-950 rounded-md border border-amber-200 dark:border-amber-800">
-                      <p className="text-xs text-amber-700 dark:text-amber-300">
-                        Editing this prompt will update its config hash to match your current settings. Use "Save As New" to keep the original and create a separate copy.
-                      </p>
-                    </div>
                     <Textarea
                       value={editedPrompt}
                       onChange={(e) => setEditedPrompt(e.target.value)}
@@ -3214,110 +3242,179 @@ export default function SettingsPage() {
                       placeholder="Enter a custom system prompt..."
                       data-testid="settings-textarea-edit-prompt"
                     />
-                  </CardContent>
-                </Card>
-              )}
+                  </div>
+                )}
 
-              {savedPrompts.length === 0 && !isEditingPrompt && (
-                <div className="rounded-md bg-muted/50 p-8 text-center">
-                  <Code className="h-8 w-8 text-muted-foreground mx-auto mb-3" />
-                  <p className="text-sm text-muted-foreground">
-                    No prompts saved yet. Use "AI Generate" above to create your first prompt, or the system will auto-generate one when you save.
-                  </p>
-                </div>
-              )}
-
-              {savedPrompts.length > 0 && !isEditingPrompt && (
-                <div className="space-y-3">
-                  {savedPrompts.map((prompt) => {
-                    const isStale = prompt.configHash && prompt.configHash !== currentConfigHash;
-                    return (
-                      <Card
-                        key={prompt.id}
-                        className={prompt.isActive ? "border-primary" : ""}
-                        data-testid={`card-prompt-${prompt.id}`}
-                      >
-                        <CardContent className="p-4">
-                          <div className="flex items-start justify-between gap-2 flex-wrap">
-                            <div className="flex items-start gap-2 flex-1 min-w-0">
-                              <div className="min-w-0 flex-1">
-                                <div className="flex items-center gap-2 flex-wrap">
-                                  <span className="text-sm font-medium truncate" data-testid={`text-prompt-name-${prompt.id}`}>
+                {(savedPrompts.length || 0) > 0 && !isEditingPrompt && (
+                  <div className="space-y-2">
+                    <Label className="text-sm font-medium">Saved Prompts ({savedPrompts.length})</Label>
+                    <div className="space-y-2 max-h-[300px] overflow-y-auto">
+                      {savedPrompts.map((prompt) => {
+                        const isStale = prompt.configHash && prompt.configHash !== currentConfigHash;
+                        return (
+                          <div
+                            key={prompt.id}
+                            className={`flex items-start gap-3 p-3 rounded-lg border bg-card ${prompt.isActive ? "border-primary" : ""}`}
+                            data-testid={`card-prompt-${prompt.id}`}
+                          >
+                            <FileText className="h-4 w-4 mt-1 text-muted-foreground shrink-0" />
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 flex-wrap">
+                                {inlineEditingNameId === prompt.id ? (
+                                  <Input
+                                    value={inlineEditingNameValue}
+                                    onChange={(e) => setInlineEditingNameValue(e.target.value)}
+                                    onBlur={() => handleInlineNameSave(prompt.id)}
+                                    onKeyDown={(e) => {
+                                      if (e.key === "Enter") handleInlineNameSave(prompt.id);
+                                      if (e.key === "Escape") setInlineEditingNameId(null);
+                                    }}
+                                    className="text-sm font-medium w-48"
+                                    autoFocus
+                                    data-testid={`input-inline-name-${prompt.id}`}
+                                  />
+                                ) : (
+                                  <p
+                                    className="text-sm font-medium truncate cursor-pointer hover:underline"
+                                    onClick={() => {
+                                      setInlineEditingNameId(prompt.id);
+                                      setInlineEditingNameValue(prompt.name);
+                                    }}
+                                    title="Click to rename"
+                                    data-testid={`text-prompt-name-${prompt.id}`}
+                                  >
                                     {prompt.name}
-                                  </span>
-                                  {prompt.isActive && (
-                                    <Badge variant="default" className="shrink-0" data-testid={`badge-active-${prompt.id}`}>
-                                      Active
-                                    </Badge>
-                                  )}
-                                  <Badge variant="outline" className="shrink-0">
-                                    {prompt.source === "ai" ? "AI Generated" : prompt.source === "coach" ? "Coach" : "Manual"}
+                                  </p>
+                                )}
+                                {prompt.isActive && (
+                                  <Badge variant="default" className="shrink-0" data-testid={`badge-active-${prompt.id}`}>
+                                    Active
                                   </Badge>
-                                  {isStale && (
-                                    <Badge variant="destructive" className="shrink-0 gap-1" data-testid={`badge-stale-${prompt.id}`}>
-                                      <AlertTriangle className="h-3 w-3" />
-                                      Config Changed
-                                    </Badge>
-                                  )}
-                                </div>
-                                <p className="text-xs text-muted-foreground mt-1">
-                                  Created {new Date(prompt.createdAt).toLocaleDateString()}
-                                  {prompt.model && ` with ${prompt.model}`}
-                                  {prompt.updatedAt && ` · Updated ${new Date(prompt.updatedAt).toLocaleDateString()}`}
-                                </p>
+                                )}
+                                <Badge variant="outline" className="text-xs">
+                                  {prompt.source === "ai" ? "AI" : prompt.source === "coach" ? "Coach" : "Manual"}
+                                </Badge>
+                                {isStale && (
+                                  <Badge variant="destructive" className="shrink-0 gap-1" data-testid={`badge-stale-${prompt.id}`}>
+                                    <AlertTriangle className="h-3 w-3" />
+                                    Config Changed
+                                  </Badge>
+                                )}
                               </div>
+                              <p className="text-xs text-muted-foreground truncate">
+                                Created {new Date(prompt.createdAt).toLocaleDateString()}
+                                {prompt.model && ` · ${prompt.model}`}
+                              </p>
                             </div>
                             <div className="flex items-center gap-1 shrink-0">
                               <Button
+                                type="button"
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => setViewingPrompt(prompt)}
+                                title="View prompt"
+                                data-testid={`button-view-prompt-${prompt.id}`}
+                              >
+                                <Eye className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                type="button"
                                 variant="ghost"
                                 size="icon"
                                 onClick={() => handleStartEditPrompt(prompt)}
+                                title="Edit prompt"
                                 data-testid={`button-edit-prompt-${prompt.id}`}
                               >
                                 <Pencil className="h-4 w-4" />
                               </Button>
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => handleDuplicatePrompt(prompt)}
+                                title="Duplicate prompt"
+                                data-testid={`button-duplicate-prompt-${prompt.id}`}
+                              >
+                                <Copy className="h-4 w-4" />
+                              </Button>
+                              {!prompt.isActive ? (
+                                <Button
+                                  type="button"
+                                  variant="ghost"
+                                  size="icon"
+                                  onClick={() => handleEnablePrompt(prompt.id)}
+                                  title="Enable this prompt"
+                                  data-testid={`button-enable-prompt-${prompt.id}`}
+                                >
+                                  <Power className="h-4 w-4" />
+                                </Button>
+                              ) : (
+                                <Button
+                                  type="button"
+                                  variant="ghost"
+                                  size="icon"
+                                  disabled
+                                  title="Currently active"
+                                  data-testid={`button-enable-prompt-${prompt.id}`}
+                                >
+                                  <Check className="h-4 w-4 text-primary" />
+                                </Button>
+                              )}
                               {!prompt.isActive && (
                                 <Button
+                                  type="button"
                                   variant="ghost"
                                   size="icon"
                                   onClick={() => handleDeletePrompt(prompt.id)}
+                                  title="Delete prompt"
                                   data-testid={`button-delete-prompt-${prompt.id}`}
                                 >
-                                  <Trash2 className="h-4 w-4" />
+                                  <X className="h-4 w-4" />
                                 </Button>
                               )}
-                              <Button
-                                variant={prompt.isActive ? "default" : "outline"}
-                                size="sm"
-                                onClick={() => {
-                                  if (!prompt.isActive) handleEnablePrompt(prompt.id);
-                                }}
-                                disabled={prompt.isActive}
-                                data-testid={`button-enable-prompt-${prompt.id}`}
-                              >
-                                {prompt.isActive ? (
-                                  <>
-                                    <Check className="h-3 w-3 mr-1" />
-                                    Enabled
-                                  </>
-                                ) : (
-                                  "Enable"
-                                )}
-                              </Button>
                             </div>
                           </div>
-                          <div
-                            className="mt-3 rounded-md bg-muted/50 p-3 text-xs font-mono max-h-[120px] overflow-y-auto whitespace-pre-wrap"
-                            data-testid={`text-prompt-preview-${prompt.id}`}
-                          >
-                            {prompt.content.substring(0, 500)}{prompt.content.length > 500 ? "..." : ""}
-                          </div>
-                        </CardContent>
-                      </Card>
-                    );
-                  })}
-                </div>
-              )}
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+
+                {savedPrompts.length === 0 && !isEditingPrompt && (
+                  <div className="rounded-md bg-muted/50 p-8 text-center">
+                    <Code className="h-8 w-8 text-muted-foreground mx-auto mb-3" />
+                    <p className="text-sm text-muted-foreground">
+                      No prompts saved yet. Use "Generate Prompt" above to create your first prompt, or the system will auto-generate one when you save.
+                    </p>
+                  </div>
+                )}
+
+                <Dialog open={viewingPrompt !== null} onOpenChange={(open) => !open && setViewingPrompt(null)}>
+                  <DialogContent className="max-w-3xl max-h-[80vh]" data-testid="dialog-prompt-viewer">
+                    <DialogHeader>
+                      <DialogTitle className="flex items-center gap-2">
+                        <FileText className="h-5 w-5 text-primary" />
+                        {viewingPrompt?.name}
+                        <Badge variant="outline">
+                          {viewingPrompt?.source === "ai" ? "AI" : viewingPrompt?.source === "coach" ? "Coach" : "Manual"}
+                        </Badge>
+                        {viewingPrompt?.isActive && (
+                          <Badge variant="default">Active</Badge>
+                        )}
+                      </DialogTitle>
+                      <DialogDescription>
+                        Created {viewingPrompt ? new Date(viewingPrompt.createdAt).toLocaleDateString() : ""}
+                        {viewingPrompt?.model && ` · Model: ${viewingPrompt.model}`}
+                      </DialogDescription>
+                    </DialogHeader>
+                    <div className="overflow-auto max-h-[60vh] rounded-lg border bg-muted/30">
+                      <pre className="p-4 text-sm font-mono whitespace-pre-wrap">
+                        {viewingPrompt?.content}
+                      </pre>
+                    </div>
+                  </DialogContent>
+                </Dialog>
+              </div>
             </CardContent>
           </Card>
         );
