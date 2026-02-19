@@ -74,6 +74,14 @@ function parseSuggestedActions(text: string, isHcmAgent?: boolean): { cleanedTex
   }
   let actions = match[1].split('|').map(a => a.trim()).filter(Boolean);
   const cleanedText = text.replace(regex, '').trim();
+  if (isHcmAgent && !actions.includes('Breakdown in details')) {
+    const looksLikeExplanation = isExplanationMessage(cleanedText)
+      || (/how (it|this|the expression) works/i.test(cleanedText) && !actions.includes('Explain this expression'))
+      || (/step[\s-]*by[\s-]*step/i.test(cleanedText) && /expression/i.test(cleanedText));
+    if (looksLikeExplanation) {
+      actions = ['Breakdown in details', ...actions];
+    }
+  }
   return { cleanedText, actions };
 }
 
