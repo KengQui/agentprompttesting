@@ -2588,6 +2588,60 @@ export async function registerRoutes(
     }
   });
 
+  // Pending sync queue management (for publish-based sync)
+  app.get("/api/admin/pending-sync", async (req: Request, res: Response) => {
+    try {
+      const user = await getUserFromSession(req);
+      if (!user) return res.status(401).json({ message: "Unauthorized" });
+      const { getPendingOps } = await import("./pending-sync");
+      res.json({ success: true, operations: getPendingOps() });
+    } catch (error: any) {
+      res.status(500).json({ message: error?.message || "Failed to get pending ops" });
+    }
+  });
+
+  app.post("/api/admin/pending-sync", async (req: Request, res: Response) => {
+    try {
+      const user = await getUserFromSession(req);
+      if (!user) return res.status(401).json({ message: "Unauthorized" });
+
+      const { type, agentId, agentName, updates } = req.body;
+      if (!type || !agentId) {
+        return res.status(400).json({ message: "type and agentId are required" });
+      }
+
+      if (type === "update" && !updates) {
+        return res.status(400).json({ message: "updates are required for update operations" });
+      }
+
+      const { addPendingOp, getPendingOps } = await import("./pending-sync");
+      const op = {
+        id: `sync-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+        type: type as "update" | "delete",
+        agentId,
+        agentName,
+        updates,
+        addedAt: new Date().toISOString(),
+      };
+      addPendingOp(op);
+      res.json({ success: true, operation: op, totalPending: getPendingOps().length });
+    } catch (error: any) {
+      res.status(500).json({ message: error?.message || "Failed to add pending op" });
+    }
+  });
+
+  app.delete("/api/admin/pending-sync", async (req: Request, res: Response) => {
+    try {
+      const user = await getUserFromSession(req);
+      if (!user) return res.status(401).json({ message: "Unauthorized" });
+      const { clearPendingOps } = await import("./pending-sync");
+      clearPendingOps();
+      res.json({ success: true, message: "Pending sync queue cleared" });
+    } catch (error: any) {
+      res.status(500).json({ message: error?.message || "Failed to clear pending ops" });
+    }
+  });
+
   // Data sync endpoint - only active when ENABLE_SYNC=true env var is set
   const expressModule = await import('express');
   app.post("/api/admin/sync-data", expressModule.json({ limit: '50mb' }), async (req: Request, res: Response) => {

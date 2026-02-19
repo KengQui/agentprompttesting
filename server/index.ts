@@ -70,6 +70,9 @@ app.use((req, res, next) => {
   const { migrateFilesToDb } = await import("./migrate-files-to-db");
   await migrateFilesToDb();
 
+  const { applyPendingSyncOnStartup } = await import("./pending-sync");
+  await applyPendingSyncOnStartup();
+
   await registerRoutes(httpServer, app);
 
   app.use((err: any, _req: Request, res: Response, next: NextFunction) => {

@@ -516,6 +516,9 @@ export default function SettingsPage() {
   const [isLoadingSyncPreview, setIsLoadingSyncPreview] = useState(false);
   const [syncDifferences, setSyncDifferences] = useState<Array<{ field: string; label: string; devValue: string; prodValue: string }> | null>(null);
 
+  // Push to production queue state
+  const [isQueueingPush, setIsQueueingPush] = useState(false);
+
   // Regeneration safeguard state
   const [showRegenerationWarning, setShowRegenerationWarning] = useState(false);
   const [pendingRegenerateModel, setPendingRegenerateModel] = useState<GeminiModel | null>(null);
@@ -1553,6 +1556,52 @@ export default function SettingsPage() {
     }
   };
 
+  const handleQueuePushToProd = async () => {
+    if (!params.id || !agent) return;
+    setIsQueueingPush(true);
+    try {
+      const response = await apiRequest("POST", "/api/admin/pending-sync", {
+        type: "update",
+        agentId: params.id,
+        agentName: agent.name,
+        updates: {
+          name: agent.name,
+          description: agent.description,
+          status: agent.status,
+          promptStyle: agent.promptStyle,
+          mockMode: agent.mockMode,
+          configurationStep: agent.configurationStep,
+          businessUseCase: agent.businessUseCase,
+          domainKnowledge: agent.domainKnowledge,
+          validationRules: agent.validationRules,
+          guardrails: agent.guardrails,
+          customPrompt: agent.customPrompt,
+          domainDocuments: agent.domainDocuments,
+          sampleDatasets: agent.sampleDatasets,
+          clarifyingInsights: agent.clarifyingInsights,
+          availableActions: agent.availableActions,
+          mockUserState: agent.mockUserState,
+          welcomeConfig: agent.welcomeConfig,
+        },
+      });
+      const result = await response.json();
+      if (result.success) {
+        toast({
+          title: "Queued for production",
+          description: `"${agent.name}" will be pushed to production on next publish. (${result.totalPending} pending)`,
+        });
+      }
+    } catch (error: any) {
+      toast({
+        title: "Queue failed",
+        description: error.message || "Could not queue push to production.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsQueueingPush(false);
+    }
+  };
+
   const handleSyncPreview = async () => {
     if (!params.id) return;
     setIsLoadingSyncPreview(true);
@@ -1764,24 +1813,40 @@ export default function SettingsPage() {
               </div>
 
               <div className="pt-4 border-t">
-                <Label>Sync from Production</Label>
+                <Label>Production Sync</Label>
                 <p className="text-xs text-muted-foreground mt-1 mb-2">
-                  Copy this agent's latest configuration from the production app into this development environment.
+                  Sync agent configuration between dev and production environments.
                 </p>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handleSyncPreview}
-                  disabled={isSyncingFromProd || isLoadingSyncPreview}
-                  data-testid="button-sync-from-prod"
-                >
-                  {isLoadingSyncPreview ? (
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  ) : (
-                    <CloudDownload className="h-4 w-4 mr-2" />
-                  )}
-                  {isLoadingSyncPreview ? "Comparing..." : "Sync from Production"}
-                </Button>
+                <div className="flex items-center gap-2 flex-wrap">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleSyncPreview}
+                    disabled={isSyncingFromProd || isLoadingSyncPreview}
+                    data-testid="button-sync-from-prod"
+                  >
+                    {isLoadingSyncPreview ? (
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    ) : (
+                      <CloudDownload className="h-4 w-4 mr-2" />
+                    )}
+                    {isLoadingSyncPreview ? "Comparing..." : "Pull from Prod"}
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleQueuePushToProd}
+                    disabled={isQueueingPush}
+                    data-testid="button-queue-push-to-prod"
+                  >
+                    {isQueueingPush ? (
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    ) : (
+                      <ArrowRight className="h-4 w-4 mr-2" />
+                    )}
+                    {isQueueingPush ? "Queuing..." : "Queue Push to Prod"}
+                  </Button>
+                </div>
               </div>
             </CardContent>
           </Card>

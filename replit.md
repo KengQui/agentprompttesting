@@ -135,6 +135,23 @@ The Prompt Coach is an AI-powered chatbot that helps users improve their agent c
 - **System Context Stripping**: Classifier strips `[SYSTEM CONTEXT: ...]` prefixes injected by the orchestrator before classifying, preventing false keyword matches from prior conversation turns.
 - Runs at the app level in `generateAgentResponse()` — benefits all agents automatically.
 
+### Dev/Prod Database Sync
+- **Platform Limitation**: Since Dec 2025, Replit uses separate databases for dev and prod. Dev workspace CANNOT make HTTP requests to the production deployment URL (network isolation).
+- **Sync Architecture**: Uses a "pending sync" system in `server/pending-sync.ts`:
+  1. Queue sync operations (update/delete) in the `pendingOps` array in code
+  2. On server startup, `applyPendingSyncOnStartup()` runs and applies all pending ops to the local DB
+  3. When published, the production server starts and applies the ops to the production DB
+  4. After confirming ops ran in production (check deployment logs for `[pending-sync]` messages), remove them from the array
+- **UI Integration**: Settings page (Step 1) has "Queue Push to Prod" button that adds the current agent config to the pending sync queue via `POST /api/admin/pending-sync`
+- **API Endpoints**:
+  - `GET /api/admin/pending-sync` — List pending operations
+  - `POST /api/admin/pending-sync` — Add operation (type: update/delete, agentId, updates)
+  - `DELETE /api/admin/pending-sync` — Clear all pending ops
+- **Legacy sync endpoints** (may not work due to network isolation):
+  - `POST /api/admin/sync-from-prod` — Pull agent config from prod (requires prod URL reachable)
+  - `POST /api/admin/sync-to-prod` — Push to prod via HTTP (blocked by network isolation)
+  - `POST /api/admin/import-agent` — Receive sync data (prod-side receiver)
+
 ## External Dependencies
 - **Google Gemini AI**: Used for generating agent responses, system prompts, validation rules, guardrails, and sample data.
 - **Chroma Research**: The concept of context rot and token usage monitoring is based on research from Chroma.
