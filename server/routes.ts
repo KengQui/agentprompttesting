@@ -2186,10 +2186,6 @@ export async function registerRoutes(
       if (process.env.ENABLE_SYNC !== 'true') {
         return res.status(404).json({ message: "Not found" });
       }
-      const syncKey = req.headers['x-sync-key'];
-      if (!process.env.SYNC_SECRET || syncKey !== process.env.SYNC_SECRET) {
-        return res.status(403).json({ message: "Forbidden" });
-      }
 
       const agent = await storage.getAgent(req.params.agentId);
       if (!agent) {
@@ -2208,10 +2204,6 @@ export async function registerRoutes(
     try {
       if (process.env.ENABLE_SYNC !== 'true') {
         return res.status(404).json({ message: "Not found" });
-      }
-      const syncKey = req.headers['x-sync-key'];
-      if (!process.env.SYNC_SECRET || syncKey !== process.env.SYNC_SECRET) {
-        return res.status(403).json({ message: "Forbidden" });
       }
 
       const agents = await storage.getAgents();
@@ -2243,15 +2235,8 @@ export async function registerRoutes(
         return res.status(400).json({ message: "PROD_APP_URL environment variable is not set. Please set it to your production app URL (e.g., https://your-app.replit.app)." });
       }
 
-      const syncSecret = process.env.SYNC_SECRET;
-      if (!syncSecret) {
-        return res.status(400).json({ message: "SYNC_SECRET environment variable is not set." });
-      }
-
       const exportUrl = `${prodUrl.replace(/\/$/, '')}/api/admin/export-agent/${agentId}`;
-      const response = await fetch(exportUrl, {
-        headers: { 'X-Sync-Key': syncSecret },
-      });
+      const response = await fetch(exportUrl);
 
       if (!response.ok) {
         const err = await response.json().catch(() => ({ message: "Failed to fetch from production" }));
@@ -2302,10 +2287,6 @@ export async function registerRoutes(
     try {
       if (process.env.ENABLE_SYNC !== 'true') {
         return res.status(404).json({ message: "Not found" });
-      }
-      const syncKey = req.headers['x-sync-key'];
-      if (!process.env.SYNC_SECRET || syncKey !== process.env.SYNC_SECRET) {
-        return res.status(403).json({ message: "Forbidden" });
       }
 
       const { users: userData, agents: agentData, components, authSessions: authData, chatSessions: sessionData, chatMessages: messageData, traces, snapshots, coachHistory } = req.body;
