@@ -97,13 +97,16 @@ The Prompt Coach is an AI-powered chatbot that helps users improve their agent c
 - `GET /api/agents/:id/prompt-sync-status` — Checks whether the agent's prompt is in sync with the current config fields (businessUseCase, domainKnowledge, validationRules, guardrails). Uses MD5 hash comparison. Returns `{ isInSync, promptLastRevisedBy, promptLastRevisedAt, configFieldsHash, promptConfigFieldsHash }`.
 
 **AI Logic** (in `server/gemini.ts`):
-- `buildPromptCoachSystemPrompt()` — Builds the coach's system prompt, injecting all agent config fields as context
-- `generatePromptCoachResponse()` — Sends to Gemini AI with chat history, returns `{ message, suggestedChanges? }`
+- `isReviewRequest(message, chatHistory?)` — Detects review-mode messages (explicit review requests + follow-up prompts like "anything else?" when a review was recently done)
+- `buildPromptCoachSystemPrompt(context, isReview)` — Builds the coach's system prompt. In review mode, injects a FULL REVIEW MODE section with structured checklist evaluating every field against specific criteria.
+- `generatePromptCoachResponse()` — Sends to Gemini AI with chat history, returns `{ message, suggestedChanges? }`. Uses higher token limits (3000) and lower temperature (0.4) for reviews; 1200 tokens and 0.5 temperature for normal responses.
 - `parseSuggestedChanges()` — Extracts ```suggested_change JSON blocks from AI response, including optional `promptUpdate` field
 - `cleanCoachResponse()` — Strips suggested_change blocks from the display message
 - Coach can suggest changes to 6 apply-able fields: businessUseCase, domainKnowledge, validationRules, guardrails, welcomeGreeting, welcomeSuggestedPrompts
 - Coach is instructed to include `promptUpdate: { findText, replaceText }` in suggestions to surgically update the agent prompt in sync with config field changes
-- Concise coaching mode is the default for all agents (short responses, one suggestion at a time, no filler)
+- **Critical-first coaching**: Coach leads with issues, not praise. Reviews follow structured format: Issues Found (with severity ratings), What's Working (brief), Top 3 Fixes (suggested_change blocks).
+- **Review mode**: Up to 3 suggestions per response during reviews; 1 suggestion for normal responses.
+- **Follow-up awareness**: When users ask "anything else?" after a review, the system maintains review-mode token limits and multi-suggestion behavior.
 - Coach has read-only visibility into the agent's custom prompt (Step 9) for context-aware advice
 
 ### Prompt Library & Revision Tracking
