@@ -1,0 +1,80 @@
+26-02-18 22:37:52.66
+32094281
+User
+[pending-sync] ERROR on delete for b4de4b7b-b638-4637-9a6c-7e6995ec91e6:
+2026-02-18 22:37:53.41
+32094281
+User
+[pending-sync] ERROR on delete for c5bbbf25-b7d8-4d24-bf53-3392ea60848b:
+2026-02-18 22:37:54.16
+32094281
+User
+[pending-sync] ERROR on delete for 4a8ee491-a954-4756-a43e-60c42c2dc8fb:
+2026-02-18 22:37:54.92
+32094281
+User
+[pending-sync] ERROR on delete for 6e20db71-c2fb-40a3-bb96-9dfe6cb4151e:
+2026-02-18 22:40:04.30
+94d5ede9
+System
+command finished with error [node ./dist/index.cjs]: signal: terminated
+2026-02-18 22:40:11.36
+661e2dae
+User
+[pending-sync] Stack: AggregateError [ETIMEDOUT]: | at /home/runner/workspace/dist/index.cjs:68:13356 | at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+2026-02-18 22:40:11.36
+661e2dae
+User
+[pending-sync] ERROR on delete for 96dcbd4b-18b3-432c-b5ea-d80fa9c58d3a ("Action Test Agent Oab5V1"): AggregateError
+2026-02-18 22:40:12.12
+661e2dae
+User
+[pending-sync] ERROR on delete for 70c1b6c9-8a15-4001-ad21-d272448db64e ("Call-In Shift Agent"): AggregateError
+2026-02-18 22:40:12.12
+661e2dae
+User
+[pending-sync] Stack: AggregateError [ETIMEDOUT]: | at /home/runner/workspace/dist/index.cjs:68:13356 | at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+2026-02-18 22:40:12.87
+661e2dae
+User
+[pending-sync] ERROR on delete for c17076bb-46b1-4107-b1ba-d849ced1be30 ("Call-In Test Agent"): AggregateError
+2026-02-18 22:40:12.87
+661e2dae
+User
+[pending-sync] Stack: AggregateError [ETIMEDOUT]: | at /home/runner/workspace/dist/index.cjs:68:13356 | at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+2026-02-18 22:40:13.63
+661e2dae
+User
+[pending-sync] ERROR on delete for 7d42e8b6-9855-47b1-8e5d-8509dd558233 ("Change address"): AggregateError
+2026-02-18 22:40:13.63
+661e2dae
+User
+[pending-sync] Stack: AggregateError [ETIMEDOUT]: | at /home/runner/workspace/dist/index.cjs:68:13356 | at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+2026-02-18 22:40:14.38
+661e2dae
+User
+[pending-sync] ERROR on delete for fdeb64a5-5356-4510-9c76-0dc6a1a94399 ("Copy of Test Agent for Clone"): AggregateError
+2026-02-18 22:40:14.38
+661e2dae
+User
+[pending-sync] Stack: AggregateError [ETIMEDOUT]: | at /home/runner/workspace/dist/index.cjs:68:13356 | at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+2026-02-18 22:40:15.14
+661e2dae
+User
+[pending-sync] Stack: AggregateError [ETIMEDOUT]: | at /home/runner/workspace/dist/index.cjs:68:13356 | at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+2026-02-18 22:40:15.14
+661e2dae
+User
+[pending-sync] ERROR on delete for 5be41caa-a183-493f-96a4-0dc59ffa9347 ("Draft-Agent-TnqJh7"): AggregateError
+2026-02-18 22:40:15.89
+661e2dae
+User
+[pending-sync] ERROR on delete for b29697d1-ffe3-4289-a410-8a0ee579c8d5 ("FlowTestAgent_MbZOxj"): AggregateError
+2026-02-18 22:40:15.89
+661e2dae
+User
+[pending-sync] Stack: AggregateError [ETIMEDOUT]: | at /home/runner/workspace/dist/index.cjs:68:13356 | at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+2026-02-18 22:40:16.65
+661e2dae
+User
+[pending-sync] ERROR on delete for 058c77db-3d7f-42de-8a36-ceb923be26

@@ -1,14 +1,4 @@
-import { db } from "./db";
-import { eq, sql } from "drizzle-orm";
-import {
-  agentsTable,
-  agentComponentsTable,
-  chatSessionsTable,
-  chatMessagesTable,
-  agentTracesTable,
-  configSnapshotsTable,
-  promptCoachHistoryTable,
-} from "@shared/schema";
+import { pool } from "./db";
 
 export interface SyncOperation {
   id: string;
@@ -68,31 +58,6 @@ export function clearPendingOps(): void {
   pendingOps.length = 0;
 }
 
-async function directDeleteAgent(agentId: string): Promise<boolean> {
-  const agentRows = await db.select({ id: agentsTable.id }).from(agentsTable).where(eq(agentsTable.id, agentId));
-  if (agentRows.length === 0) return false;
-
-  const tables = [
-    { table: chatMessagesTable, col: chatMessagesTable.agentId, name: "chat_messages" },
-    { table: chatSessionsTable, col: chatSessionsTable.agentId, name: "chat_sessions" },
-    { table: agentComponentsTable, col: agentComponentsTable.agentId, name: "agent_components" },
-    { table: agentTracesTable, col: agentTracesTable.agentId, name: "agent_traces" },
-    { table: configSnapshotsTable, col: configSnapshotsTable.agentId, name: "config_snapshots" },
-    { table: promptCoachHistoryTable, col: promptCoachHistoryTable.agentId, name: "prompt_coach_history" },
-  ];
-
-  for (const { table, col, name } of tables) {
-    try {
-      await db.delete(table).where(eq(col, agentId));
-    } catch (tableErr: any) {
-      console.warn(`[pending-sync] Warning: failed to delete from ${name} for ${agentId}: ${tableErr?.message || tableErr}`);
-    }
-  }
-
-  await db.delete(agentsTable).where(eq(agentsTable.id, agentId));
-  return true;
-}
-
 export async function applyPendingSyncOnStartup(): Promise<void> {
   if (pendingOps.length === 0) {
     console.log("[pending-sync] No pending sync operations.");
@@ -116,41 +81,69 @@ export async function applyPendingSyncOnStartup(): Promise<void> {
 
   console.log(`[pending-sync] Found ${opsToRun.length} operation(s) to apply (env: ${isProduction ? "production" : "development"})...`);
 
-  let successCount = 0;
-  let skipCount = 0;
-  let errorCount = 0;
-
-  for (const op of opsToRun) {
-    try {
-      if (op.type === "update" && op.updates) {
-        const agentRows = await db.select({ id: agentsTable.id }).from(agentsTable).where(eq(agentsTable.id, op.agentId));
-        if (agentRows.length === 0) {
-          console.log(`[pending-sync] SKIP update: agent ${op.agentId} not found in this DB`);
-          skipCount++;
+  const client = await pool.connect();
+  try {
+    const updatesToRun = opsToRun.filter(op => op.type === "update" && op.updates);
+    for (const op of updatesToRun) {
+      try {
+        const result = await client.query(`SELECT id FROM agents WHERE id = $1`, [op.agentId]);
+        if (result.rows.length === 0) {
+          console.log(`[pending-sync] SKIP update: agent ${op.agentId} not found`);
           continue;
         }
-        await db.update(agentsTable).set(op.updates).where(eq(agentsTable.id, op.agentId));
+        const setClauses: string[] = [];
+        const values: any[] = [];
+        let paramIdx = 1;
+        for (const [key, value] of Object.entries(op.updates!)) {
+          setClauses.push(`"${key}" = $${paramIdx}`);
+          values.push(value);
+          paramIdx++;
+        }
+        values.push(op.agentId);
+        await client.query(`UPDATE agents SET ${setClauses.join(", ")} WHERE id = $${paramIdx}`, values);
         console.log(`[pending-sync] UPDATED agent "${op.agentName || op.agentId}"`);
-        successCount++;
-      } else if (op.type === "delete") {
-        const deleted = await directDeleteAgent(op.agentId);
-        if (!deleted) {
-          console.log(`[pending-sync] SKIP delete: agent ${op.agentId} not found (already deleted?)`);
-          skipCount++;
-          continue;
-        }
-        console.log(`[pending-sync] DELETED agent "${op.agentName || op.agentId}" (${op.agentId})`);
-        successCount++;
-      }
-    } catch (error: any) {
-      errorCount++;
-      const errMsg = error?.message || error?.detail || String(error);
-      console.error(`[pending-sync] ERROR on ${op.type} for ${op.agentId} ("${op.agentName}"): ${errMsg}`);
-      if (error?.stack) {
-        console.error(`[pending-sync] Stack: ${error.stack.split('\n').slice(0, 3).join(' | ')}`);
+      } catch (err: any) {
+        console.error(`[pending-sync] ERROR updating ${op.agentId}: ${err?.message || err}`);
       }
     }
+
+    const deleteIds = opsToRun.filter(op => op.type === "delete").map(op => op.agentId);
+    if (deleteIds.length > 0) {
+      console.log(`[pending-sync] Bulk deleting ${deleteIds.length} agent(s) and related data...`);
+      try {
+        await client.query('BEGIN');
+
+        const tables = [
+          "chat_messages",
+          "chat_sessions",
+          "agent_components",
+          "agent_traces",
+          "config_snapshots",
+          "prompt_coach_history",
+        ];
+        for (const table of tables) {
+          const result = await client.query(`DELETE FROM ${table} WHERE agent_id = ANY($1)`, [deleteIds]);
+          if (result.rowCount && result.rowCount > 0) {
+            console.log(`[pending-sync]   Cleaned ${result.rowCount} row(s) from ${table}`);
+          }
+        }
+
+        const agentResult = await client.query(`DELETE FROM agents WHERE id = ANY($1)`, [deleteIds]);
+        console.log(`[pending-sync] Deleted ${agentResult.rowCount} agent(s) from agents table`);
+
+        await client.query('COMMIT');
+        console.log(`[pending-sync] Bulk delete completed successfully.`);
+      } catch (err: any) {
+        await client.query('ROLLBACK').catch(() => {});
+        console.error(`[pending-sync] Bulk delete failed: ${err?.message || err}`);
+        if (err?.stack) {
+          console.error(`[pending-sync] Stack: ${err.stack.split('\n').slice(0, 3).join(' | ')}`);
+        }
+      }
+    }
+  } finally {
+    client.release();
   }
 
-  console.log(`[pending-sync] Done: ${successCount} succeeded, ${skipCount} skipped, ${errorCount} errors.`);
+  console.log("[pending-sync] All pending operations processed.");
 }
