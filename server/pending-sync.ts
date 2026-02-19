@@ -68,6 +68,20 @@ export async function applyPendingSyncOnStartup(): Promise<void> {
   const deleteOps = pendingOps.filter(op => op.type === "delete");
   const updateOps = pendingOps.filter(op => op.type === "update");
 
+  if (isProduction) {
+    try {
+      const result = await pool.query("SELECT count(*) as cnt FROM agents");
+      const agentCount = Number(result.rows[0]?.cnt || 0);
+      if (agentCount === 0) {
+        console.log("[pending-sync] Production DB has no agents yet. Skipping sync operations (nothing to update/delete).");
+        return;
+      }
+    } catch (e: any) {
+      console.error("[pending-sync] Could not check agent count, skipping sync:", e.message);
+      return;
+    }
+  }
+
   if (!isProduction && deleteOps.length > 0) {
     console.log(`[pending-sync] DEV MODE: Skipping ${deleteOps.length} delete operation(s). Deletes only run in production.`);
   }

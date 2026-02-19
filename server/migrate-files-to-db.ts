@@ -59,10 +59,21 @@ function parseSimpleYaml(content: string): Record<string, string> {
 export async function migrateFilesToDb(): Promise<void> {
   console.log("[migrate] Checking if DB migration is needed...");
 
-  const agentCount = await db.select({ count: sql<number>`count(*)` }).from(agentsTable);
-  const userCount = await db.select({ count: sql<number>`count(*)` }).from(usersTable);
+  let agentCount, userCount;
+  try {
+    agentCount = await db.select({ count: sql<number>`count(*)` }).from(agentsTable);
+    userCount = await db.select({ count: sql<number>`count(*)` }).from(usersTable);
+  } catch (e: any) {
+    console.error("[migrate] Failed to query DB counts:", e.message);
+    console.error("[migrate] Full error:", e.stack || e);
+    throw e;
+  }
 
-  if (Number(agentCount[0]?.count) > 0 || Number(userCount[0]?.count) > 0) {
+  const agents = Number(agentCount[0]?.count);
+  const users = Number(userCount[0]?.count);
+  console.log(`[migrate] Current DB state: ${agents} agents, ${users} users`);
+
+  if (agents > 0 || users > 0) {
     console.log("[migrate] DB already has data. Checking for missing agents...");
     await syncMissingAgentsAndUsers();
     return;
@@ -70,11 +81,46 @@ export async function migrateFilesToDb(): Promise<void> {
 
   console.log("[migrate] DB is empty, starting migration from files...");
 
-  await migrateUsers();
-  await migrateAuthSessions();
-  await migrateAgents();
+  const errors: string[] = [];
 
-  console.log("[migrate] File-to-DB migration complete!");
+  try {
+    await migrateUsers();
+  } catch (e: any) {
+    const msg = `User migration failed: ${e.message}`;
+    console.error(`[migrate] ${msg}`);
+    console.error("[migrate] Full error:", e.stack || e);
+    errors.push(msg);
+  }
+
+  try {
+    await migrateAuthSessions();
+  } catch (e: any) {
+    console.error("[migrate] Auth session migration failed:", e.message);
+  }
+
+  try {
+    await migrateAgents();
+  } catch (e: any) {
+    const msg = `Agent migration failed: ${e.message}`;
+    console.error(`[migrate] ${msg}`);
+    console.error("[migrate] Full error:", e.stack || e);
+    errors.push(msg);
+  }
+
+  const finalAgentCount = await db.select({ count: sql<number>`count(*)` }).from(agentsTable);
+  const finalUserCount = await db.select({ count: sql<number>`count(*)` }).from(usersTable);
+  const finalAgents = Number(finalAgentCount[0]?.count);
+  const finalUsers = Number(finalUserCount[0]?.count);
+  console.log(`[migrate] Migration complete! DB now has ${finalAgents} agents, ${finalUsers} users`);
+
+  if (finalUsers === 0) {
+    const errMsg = "[migrate] CRITICAL: No users in database after migration. Login will not work.";
+    console.error(errMsg);
+    if (errors.length > 0) {
+      console.error(`[migrate] Migration errors encountered: ${errors.join("; ")}`);
+    }
+    throw new Error("Migration completed but no users were created. Check users/users.json file and database connectivity.");
+  }
 }
 
 async function migrateUsers(): Promise<void> {

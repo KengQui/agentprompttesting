@@ -71,7 +71,8 @@ app.use((req, res, next) => {
     const { migrateFilesToDb } = await import("./migrate-files-to-db");
     await migrateFilesToDb();
   } catch (e: any) {
-    console.error(`[startup] Migration failed: ${e.message}`);
+    console.error(`[startup] Migration failed: ${e.message || 'Unknown error'}`);
+    console.error(`[startup] Migration error stack:`, e.stack || e);
     if (process.env.NODE_ENV !== "production") throw e;
   }
 
