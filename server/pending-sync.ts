@@ -1,4 +1,14 @@
-import { storage } from "./storage";
+import { db } from "./db";
+import { eq, sql } from "drizzle-orm";
+import {
+  agentsTable,
+  agentComponentsTable,
+  chatSessionsTable,
+  chatMessagesTable,
+  agentTracesTable,
+  configSnapshotsTable,
+  promptCoachHistoryTable,
+} from "@shared/schema";
 
 export interface SyncOperation {
   id: string;
@@ -58,6 +68,31 @@ export function clearPendingOps(): void {
   pendingOps.length = 0;
 }
 
+async function directDeleteAgent(agentId: string): Promise<boolean> {
+  const agentRows = await db.select({ id: agentsTable.id }).from(agentsTable).where(eq(agentsTable.id, agentId));
+  if (agentRows.length === 0) return false;
+
+  const tables = [
+    { table: chatMessagesTable, col: chatMessagesTable.agentId, name: "chat_messages" },
+    { table: chatSessionsTable, col: chatSessionsTable.agentId, name: "chat_sessions" },
+    { table: agentComponentsTable, col: agentComponentsTable.agentId, name: "agent_components" },
+    { table: agentTracesTable, col: agentTracesTable.agentId, name: "agent_traces" },
+    { table: configSnapshotsTable, col: configSnapshotsTable.agentId, name: "config_snapshots" },
+    { table: promptCoachHistoryTable, col: promptCoachHistoryTable.agentId, name: "prompt_coach_history" },
+  ];
+
+  for (const { table, col, name } of tables) {
+    try {
+      await db.delete(table).where(eq(col, agentId));
+    } catch (tableErr: any) {
+      console.warn(`[pending-sync] Warning: failed to delete from ${name} for ${agentId}: ${tableErr?.message || tableErr}`);
+    }
+  }
+
+  await db.delete(agentsTable).where(eq(agentsTable.id, agentId));
+  return true;
+}
+
 export async function applyPendingSyncOnStartup(): Promise<void> {
   if (pendingOps.length === 0) {
     console.log("[pending-sync] No pending sync operations.");
@@ -81,29 +116,41 @@ export async function applyPendingSyncOnStartup(): Promise<void> {
 
   console.log(`[pending-sync] Found ${opsToRun.length} operation(s) to apply (env: ${isProduction ? "production" : "development"})...`);
 
+  let successCount = 0;
+  let skipCount = 0;
+  let errorCount = 0;
+
   for (const op of opsToRun) {
     try {
       if (op.type === "update" && op.updates) {
-        const agent = await storage.getAgent(op.agentId);
-        if (!agent) {
+        const agentRows = await db.select({ id: agentsTable.id }).from(agentsTable).where(eq(agentsTable.id, op.agentId));
+        if (agentRows.length === 0) {
           console.log(`[pending-sync] SKIP update: agent ${op.agentId} not found in this DB`);
+          skipCount++;
           continue;
         }
-        await storage.updateAgent(op.agentId, op.updates);
+        await db.update(agentsTable).set(op.updates).where(eq(agentsTable.id, op.agentId));
         console.log(`[pending-sync] UPDATED agent "${op.agentName || op.agentId}"`);
+        successCount++;
       } else if (op.type === "delete") {
-        const agent = await storage.getAgent(op.agentId);
-        if (!agent) {
+        const deleted = await directDeleteAgent(op.agentId);
+        if (!deleted) {
           console.log(`[pending-sync] SKIP delete: agent ${op.agentId} not found (already deleted?)`);
+          skipCount++;
           continue;
         }
-        await storage.deleteAgent(op.agentId);
-        console.log(`[pending-sync] DELETED agent "${agent.name}" (${op.agentId})`);
+        console.log(`[pending-sync] DELETED agent "${op.agentName || op.agentId}" (${op.agentId})`);
+        successCount++;
       }
     } catch (error: any) {
-      console.error(`[pending-sync] ERROR on ${op.type} for ${op.agentId}: ${error.message}`);
+      errorCount++;
+      const errMsg = error?.message || error?.detail || String(error);
+      console.error(`[pending-sync] ERROR on ${op.type} for ${op.agentId} ("${op.agentName}"): ${errMsg}`);
+      if (error?.stack) {
+        console.error(`[pending-sync] Stack: ${error.stack.split('\n').slice(0, 3).join(' | ')}`);
+      }
     }
   }
 
-  console.log("[pending-sync] All pending operations processed.");
+  console.log(`[pending-sync] Done: ${successCount} succeeded, ${skipCount} skipped, ${errorCount} errors.`);
 }
