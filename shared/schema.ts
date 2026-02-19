@@ -317,6 +317,18 @@ export const passwordResetSchema = z.object({
 
 export type PasswordResetInput = z.infer<typeof passwordResetSchema>;
 
+// Change password schema (for logged-in users)
+export const changePasswordSchema = z.object({
+  currentPassword: z.string().min(1, "Current password is required"),
+  newPassword: z.string().min(6, "Password must be at least 6 characters"),
+  confirmPassword: z.string().min(6, "Password must be at least 6 characters"),
+}).refine((data) => data.newPassword === data.confirmPassword, {
+  message: "Passwords do not match",
+  path: ["confirmPassword"],
+});
+
+export type ChangePasswordInput = z.infer<typeof changePasswordSchema>;
+
 // Session schema for auth sessions
 export const authSessionSchema = z.object({
   id: z.string(),
