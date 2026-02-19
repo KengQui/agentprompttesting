@@ -132,6 +132,21 @@ export const welcomeConfigSchema = z.object({
 
 export type WelcomeConfig = z.infer<typeof welcomeConfigSchema>;
 
+// Saved prompt schema (for prompt library)
+export const savedPromptSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  content: z.string(),
+  isActive: z.boolean().default(false),
+  source: z.enum(["ai", "manual", "coach"]).default("ai"),
+  model: z.string().optional(),
+  configHash: z.string().optional(),
+  createdAt: z.string(),
+  updatedAt: z.string().optional(),
+});
+
+export type SavedPrompt = z.infer<typeof savedPromptSchema>;
+
 // Agent schema
 export const agentSchema = z.object({
   id: z.string(),
@@ -146,6 +161,7 @@ export const agentSchema = z.object({
   guardrails: z.string().default(""),
   promptStyle: promptStyleEnum.default("gemini"),
   customPrompt: z.string().default(""),
+  savedPrompts: z.array(savedPromptSchema).default([]),
   clarifyingInsights: z.array(clarifyingInsightSchema).default([]),
   availableActions: z.array(agentActionSchema).default([]),
   mockUserState: z.array(mockUserStateSchema).default([]),
@@ -246,6 +262,7 @@ export const wizardStepSchema = z.object({
   guardrails: z.string().default(""),
   promptStyle: promptStyleEnum.default("gemini"),
   customPrompt: z.string().default(""),
+  savedPrompts: z.array(savedPromptSchema).default([]),
   clarifyingInsights: z.array(clarifyingInsightSchema).default([]),
   availableActions: z.array(agentActionSchema).default([]),
   mockUserState: z.array(mockUserStateSchema).default([]),
@@ -580,6 +597,7 @@ export const agentsTable = pgTable("agents", {
   validationRules: text("validation_rules").notNull().default(""),
   guardrails: text("guardrails").notNull().default(""),
   customPrompt: text("custom_prompt").notNull().default(""),
+  savedPrompts: jsonb("saved_prompts").notNull().default([]),
   domainDocuments: jsonb("domain_documents").notNull().default([]),
   sampleDatasets: jsonb("sample_datasets").notNull().default([]),
   clarifyingInsights: jsonb("clarifying_insights").notNull().default([]),

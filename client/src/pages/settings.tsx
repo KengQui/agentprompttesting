@@ -44,7 +44,7 @@ import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { businessUseCaseTemplate, validationRulesTemplate, guardrailsTemplate } from "@/lib/config-templates";
 import { TracingDashboard, SimulationPanel, ConfigHistoryPanel } from "@/components/tracing-dashboard";
-import type { Agent, UpdateAgent, AgentStatus, DomainDocument, SampleDataset, GeminiModel, AgentAction, MockUserState, MockMode, ActionField, ClarifyingInsight, WelcomeConfig, WelcomePrompt } from "@shared/schema";
+import type { Agent, UpdateAgent, AgentStatus, DomainDocument, SampleDataset, GeminiModel, AgentAction, MockUserState, MockMode, ActionField, ClarifyingInsight, WelcomeConfig, WelcomePrompt, SavedPrompt } from "@shared/schema";
 import { geminiModelDisplayNames, defaultGenerationModel, mockModeDescriptions } from "@shared/schema";
 import { ClarifyingChatDialog } from "@/components/clarifying-chat-dialog";
 
@@ -411,6 +411,43 @@ function runSettingsValidationChecklist(formData: UpdateAgent): SettingsCheckRes
   return results;
 }
 
+function computeClientConfigHash(data: Partial<UpdateAgent>): string {
+  const content = [
+    data.businessUseCase || "",
+    data.domainKnowledge || "",
+    data.validationRules || "",
+    data.guardrails || "",
+  ].join("|||");
+  let hash = 0;
+  for (let i = 0; i < content.length; i++) {
+    const char = content.charCodeAt(i);
+    hash = ((hash << 5) - hash) + char;
+    hash |= 0;
+  }
+  return Math.abs(hash).toString(36);
+}
+
+function migrateLegacyPrompt(agent: Agent): SavedPrompt[] {
+  const existing = agent.savedPrompts || [];
+  if (existing.length > 0) return existing;
+  if (!agent.customPrompt || !agent.customPrompt.trim()) return [];
+  const clientHash = computeClientConfigHash({
+    businessUseCase: agent.businessUseCase,
+    domainKnowledge: agent.domainKnowledge,
+    validationRules: agent.validationRules,
+    guardrails: agent.guardrails,
+  });
+  return [{
+    id: uuidv4(),
+    name: "Initial Prompt",
+    content: agent.customPrompt,
+    isActive: true,
+    source: agent.promptLastRevisedBy === "ai-generate" ? "ai" as const : "manual" as const,
+    configHash: clientHash,
+    createdAt: agent.promptGeneratedAt || agent.createdAt,
+  }];
+}
+
 export default function SettingsPage() {
   const params = useParams<{ id: string }>();
   const [, navigate] = useLocation();
@@ -434,6 +471,12 @@ export default function SettingsPage() {
 
   const [isEditingPrompt, setIsEditingPrompt] = useState(false);
   const [editedPrompt, setEditedPrompt] = useState("");
+  const [editingPromptId, setEditingPromptId] = useState<string | null>(null);
+  const [editingPromptName, setEditingPromptName] = useState("");
+  const [showStalePromptDialog, setShowStalePromptDialog] = useState(false);
+  const [pendingEnablePromptId, setPendingEnablePromptId] = useState<string | null>(null);
+  const [showSaveAsDialog, setShowSaveAsDialog] = useState(false);
+  const [saveAsName, setSaveAsName] = useState("");
 
   const [isGeneratingValidation, setIsGeneratingValidation] = useState(false);
   const [isGeneratingGuardrails, setIsGeneratingGuardrails] = useState(false);
@@ -513,13 +556,14 @@ export default function SettingsPage() {
     if (data.availableActions && data.availableActions.length > 0) completed.add(7);
     // Step 8 (Prompt) is auto-completed since prompt is AI-generated based on other steps
     if (data.businessUseCase) completed.add(8);
-    if (data.customPrompt) completed.add(9);
+    if (data.customPrompt || (data.savedPrompts && data.savedPrompts.some(p => p.isActive))) completed.add(9);
     if (data.welcomeConfig?.enabled && data.welcomeConfig.greeting) completed.add(10);
     return completed;
   };
 
   useEffect(() => {
     if (agent && !formData) {
+      const migratedSavedPrompts = migrateLegacyPrompt(agent);
       setFormData({
         name: agent.name,
         businessUseCase: agent.businessUseCase,
@@ -530,6 +574,7 @@ export default function SettingsPage() {
         guardrails: agent.guardrails,
         promptStyle: agent.promptStyle,
         customPrompt: agent.customPrompt,
+        savedPrompts: migratedSavedPrompts,
         clarifyingInsights: agent.clarifyingInsights || [],
         availableActions: agent.availableActions || [],
         mockUserState: agent.mockUserState || [],
@@ -836,11 +881,6 @@ export default function SettingsPage() {
       });
       return;
     }
-    if (formData.customPrompt && formData.customPrompt.trim()) {
-      setPendingRegenerateModel(model);
-      setShowRegenerationWarning(true);
-      return;
-    }
     handleGeneratePrompt(model);
   };
 
@@ -862,12 +902,33 @@ export default function SettingsPage() {
         model,
       });
       const result = await response.json();
-      updateFormDataAndTrackCompletion({ customPrompt: result.systemPrompt });
-      setEditedPrompt(result.systemPrompt);
+      const currentHash = computeClientConfigHash(formData);
+      const existingPrompts = formData.savedPrompts || [];
+      const promptNumber = existingPrompts.filter(p => p.source === "ai").length + 1;
+      const newPrompt: SavedPrompt = {
+        id: uuidv4(),
+        name: `AI Prompt #${promptNumber} (${geminiModelDisplayNames[model]})`,
+        content: result.systemPrompt,
+        isActive: existingPrompts.length === 0,
+        source: "ai",
+        model,
+        configHash: currentHash,
+        createdAt: new Date().toISOString(),
+      };
+      const updatedPrompts = existingPrompts.length === 0
+        ? [newPrompt]
+        : [...existingPrompts, newPrompt];
+      const activePrompt = updatedPrompts.find(p => p.isActive);
+      updateFormDataAndTrackCompletion({
+        savedPrompts: updatedPrompts,
+        customPrompt: activePrompt?.content || formData.customPrompt,
+      });
+      setEditedPrompt("");
       setIsEditingPrompt(false);
+      setEditingPromptId(null);
       toast({
         title: "Prompt generated",
-        description: `Generated using ${geminiModelDisplayNames[model]}.`,
+        description: `Created "${newPrompt.name}". ${existingPrompts.length === 0 ? "It has been set as the active prompt." : "You can enable it from the prompt library."}`,
       });
     } catch (error: any) {
       toast({
@@ -878,6 +939,105 @@ export default function SettingsPage() {
     } finally {
       setIsGeneratingPrompt(false);
     }
+  };
+
+  const handleEnablePrompt = (promptId: string) => {
+    if (!formData) return;
+    const prompts = formData.savedPrompts || [];
+    const targetPrompt = prompts.find(p => p.id === promptId);
+    if (!targetPrompt) return;
+    const currentHash = computeClientConfigHash(formData);
+    if (targetPrompt.configHash && targetPrompt.configHash !== currentHash && !targetPrompt.isActive) {
+      setPendingEnablePromptId(promptId);
+      setShowStalePromptDialog(true);
+      return;
+    }
+    activatePrompt(promptId);
+  };
+
+  const activatePrompt = (promptId: string) => {
+    if (!formData) return;
+    const prompts = formData.savedPrompts || [];
+    const updatedPrompts = prompts.map(p => ({
+      ...p,
+      isActive: p.id === promptId,
+    }));
+    const activePrompt = updatedPrompts.find(p => p.isActive);
+    updateFormDataAndTrackCompletion({
+      savedPrompts: updatedPrompts,
+      customPrompt: activePrompt?.content || "",
+    });
+    toast({
+      title: "Prompt enabled",
+      description: `"${activePrompt?.name}" is now the active prompt.`,
+    });
+  };
+
+  const handleDeletePrompt = (promptId: string) => {
+    if (!formData) return;
+    const prompts = formData.savedPrompts || [];
+    const target = prompts.find(p => p.id === promptId);
+    if (target?.isActive) {
+      toast({
+        title: "Cannot delete active prompt",
+        description: "Please enable a different prompt first.",
+        variant: "destructive",
+      });
+      return;
+    }
+    const updatedPrompts = prompts.filter(p => p.id !== promptId);
+    updateFormDataAndTrackCompletion({ savedPrompts: updatedPrompts });
+  };
+
+  const handleStartEditPrompt = (prompt: SavedPrompt) => {
+    setEditingPromptId(prompt.id);
+    setEditedPrompt(prompt.content);
+    setEditingPromptName(prompt.name);
+    setIsEditingPrompt(true);
+  };
+
+  const handleSaveEditPrompt = () => {
+    if (!formData || !editingPromptId) return;
+    const prompts = formData.savedPrompts || [];
+    const currentHash = computeClientConfigHash(formData);
+    const updatedPrompts = prompts.map(p =>
+      p.id === editingPromptId
+        ? { ...p, content: editedPrompt, name: editingPromptName, configHash: currentHash, updatedAt: new Date().toISOString(), source: "manual" as const }
+        : p
+    );
+    const activePrompt = updatedPrompts.find(p => p.isActive);
+    updateFormDataAndTrackCompletion({
+      savedPrompts: updatedPrompts,
+      customPrompt: activePrompt?.content || formData.customPrompt,
+    });
+    setIsEditingPrompt(false);
+    setEditingPromptId(null);
+    setEditedPrompt("");
+    toast({ title: "Prompt updated" });
+  };
+
+  const handleSaveAsNewPrompt = () => {
+    if (!formData || !editingPromptId || !saveAsName.trim()) return;
+    const currentHash = computeClientConfigHash(formData);
+    const newPrompt: SavedPrompt = {
+      id: uuidv4(),
+      name: saveAsName.trim(),
+      content: editedPrompt,
+      isActive: false,
+      source: "manual",
+      configHash: currentHash,
+      createdAt: new Date().toISOString(),
+    };
+    const prompts = formData.savedPrompts || [];
+    updateFormDataAndTrackCompletion({
+      savedPrompts: [...prompts, newPrompt],
+    });
+    setShowSaveAsDialog(false);
+    setSaveAsName("");
+    setIsEditingPrompt(false);
+    setEditingPromptId(null);
+    setEditedPrompt("");
+    toast({ title: "Prompt saved", description: `"${newPrompt.name}" has been added to your prompt library.` });
   };
 
   const handleRemoveAction = (id: string) => {
@@ -2927,19 +3087,23 @@ export default function SettingsPage() {
         );
       }
 
-      case 9:
+      case 9: {
+        const savedPrompts = formData.savedPrompts || [];
+        const currentConfigHash = computeClientConfigHash(formData);
+        const activePrompt = savedPrompts.find(p => p.isActive);
+
         return (
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Code className="h-5 w-5 text-primary" />
                 Prompt Configuration
-                {formData.customPrompt && (
-                  <Badge variant="secondary">Customized</Badge>
+                {savedPrompts.length > 0 && (
+                  <Badge variant="secondary">{savedPrompts.length} saved</Badge>
                 )}
               </CardTitle>
               <CardDescription>
-                View and optionally customize the system prompt. The prompt is automatically generated using AI-powered prompt engineering based on your agent's configuration.
+                Generate, save, and manage multiple system prompts. Enable the one you want your agent to use. Each prompt captures the config state at creation time so you know when it's outdated.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -2948,119 +3112,216 @@ export default function SettingsPage() {
                   <Sparkles className="h-4 w-4 text-blue-600 dark:text-blue-400 mt-0.5 shrink-0" />
                   <div>
                     <p className="text-sm font-medium text-blue-800 dark:text-blue-200">
-                      AI-Powered Prompt Generation
+                      Prompt Library
                     </p>
                     <p className="text-xs text-blue-700 dark:text-blue-300 mt-1">
-                      Your system prompt is intelligently crafted based on your agent's name, business use case, domain knowledge, validation rules, guardrails, sample data, and available actions. The AI curates and organizes this information following prompt engineering best practices.
+                      Generate as many prompts as you like using different AI models. Edit any prompt or save a modified version under a new name. Only one prompt can be active at a time.
                     </p>
                   </div>
                 </div>
               </div>
 
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <Label>System Prompt</Label>
-                  <div className="flex gap-2">
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button
-                          type="button"
-                          variant="default"
-                          size="sm"
-                          disabled={isGeneratingPrompt}
-                          data-testid="settings-button-generate-prompt"
-                        >
-                          {isGeneratingPrompt ? (
-                            <Loader2 className="h-3 w-3 mr-1 animate-spin" />
-                          ) : (
-                            <Sparkles className="h-3 w-3 mr-1" />
-                          )}
-                          {isGeneratingPrompt ? "Generating..." : "AI Generate"}
-                          <ChevronDown className="h-3 w-3 ml-1" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        {(Object.keys(geminiModelDisplayNames) as GeminiModel[]).map((model) => (
-                          <DropdownMenuItem
-                            key={model}
-                            onClick={() => handleGeneratePromptWithSafeguard(model)}
-                            data-testid={`settings-generate-prompt-${model}`}
-                          >
-                            {geminiModelDisplayNames[model]}
-                          </DropdownMenuItem>
-                        ))}
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                    {formData.customPrompt && (
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => {
-                          updateFormDataAndTrackCompletion({ customPrompt: "" });
-                          setEditedPrompt("");
-                          setIsEditingPrompt(false);
-                        }}
-                        className="gap-1 h-7"
-                        data-testid="settings-button-reset-prompt"
-                      >
-                        <RotateCcw className="h-3 w-3" />
-                        Reset to Auto
-                      </Button>
-                    )}
+              <div className="flex items-center justify-between">
+                <Label>Generate New Prompt</Label>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
                     <Button
                       type="button"
-                      variant="ghost"
+                      variant="default"
                       size="sm"
-                      onClick={() => {
-                        if (isEditingPrompt) {
-                          updateFormDataAndTrackCompletion({ customPrompt: editedPrompt });
-                        } else {
-                          setEditedPrompt(formData.customPrompt || "");
-                        }
-                        setIsEditingPrompt(!isEditingPrompt);
-                      }}
-                      className="gap-1 h-7"
-                      data-testid="settings-button-edit-prompt"
+                      disabled={isGeneratingPrompt}
+                      data-testid="settings-button-generate-prompt"
                     >
-                      <Pencil className="h-3 w-3" />
-                      {isEditingPrompt ? "Save" : "Customize"}
+                      {isGeneratingPrompt ? (
+                        <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                      ) : (
+                        <Sparkles className="h-3 w-3 mr-1" />
+                      )}
+                      {isGeneratingPrompt ? "Generating..." : "AI Generate"}
+                      <ChevronDown className="h-3 w-3 ml-1" />
                     </Button>
-                  </div>
-                </div>
-                
-                {isEditingPrompt && (
-                  <div className="mb-3 p-3 bg-amber-50 dark:bg-amber-950 rounded-md border border-amber-200 dark:border-amber-800">
-                    <p className="text-xs text-amber-700 dark:text-amber-300">
-                      The system prompt is a complete, self-contained document generated from your configuration. When you change business use case, domain knowledge, validation rules, or guardrails, regenerate the prompt to keep it in sync.
-                    </p>
-                  </div>
-                )}
-                
-                {isEditingPrompt ? (
-                  <Textarea
-                    value={editedPrompt}
-                    onChange={(e) => setEditedPrompt(e.target.value)}
-                    className="min-h-[270px] resize-y font-mono text-xs"
-                    placeholder="Enter a custom system prompt..."
-                    data-testid="settings-textarea-edit-prompt"
-                  />
-                ) : (
-                  <div 
-                    className="rounded-md bg-muted/50 p-4 text-xs font-mono max-h-[300px] overflow-y-auto whitespace-pre-wrap"
-                    data-testid="settings-prompt-preview"
-                  >
-                    {formData.customPrompt || (
-                      <div className="text-muted-foreground italic">
-                        The system prompt will be automatically generated when you save. It will incorporate your agent's configuration using AI-powered prompt engineering best practices.
-                      </div>
-                    )}
-                  </div>
-                )}
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    {(Object.keys(geminiModelDisplayNames) as GeminiModel[]).map((model) => (
+                      <DropdownMenuItem
+                        key={model}
+                        onClick={() => handleGeneratePromptWithSafeguard(model)}
+                        data-testid={`settings-generate-prompt-${model}`}
+                      >
+                        {geminiModelDisplayNames[model]}
+                      </DropdownMenuItem>
+                    ))}
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </div>
+
+              {isEditingPrompt && editingPromptId && (
+                <Card className="border-primary">
+                  <CardContent className="p-4 space-y-3">
+                    <div className="flex items-center justify-between gap-2 flex-wrap">
+                      <div className="flex items-center gap-2 flex-1 min-w-0">
+                        <Pencil className="h-4 w-4 text-primary shrink-0" />
+                        <Input
+                          value={editingPromptName}
+                          onChange={(e) => setEditingPromptName(e.target.value)}
+                          className="text-sm font-medium"
+                          data-testid="input-edit-prompt-name"
+                        />
+                      </div>
+                      <div className="flex gap-1">
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => {
+                            setIsEditingPrompt(false);
+                            setEditingPromptId(null);
+                            setEditedPrompt("");
+                          }}
+                          data-testid="button-cancel-edit-prompt"
+                        >
+                          Cancel
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => {
+                            setSaveAsName(editingPromptName + " (copy)");
+                            setShowSaveAsDialog(true);
+                          }}
+                          data-testid="button-save-as-new-prompt"
+                        >
+                          Save As New
+                        </Button>
+                        <Button
+                          size="sm"
+                          onClick={handleSaveEditPrompt}
+                          data-testid="button-save-edit-prompt"
+                        >
+                          <Save className="h-3 w-3 mr-1" />
+                          Save
+                        </Button>
+                      </div>
+                    </div>
+                    <div className="p-3 bg-amber-50 dark:bg-amber-950 rounded-md border border-amber-200 dark:border-amber-800">
+                      <p className="text-xs text-amber-700 dark:text-amber-300">
+                        Editing this prompt will update its config hash to match your current settings. Use "Save As New" to keep the original and create a separate copy.
+                      </p>
+                    </div>
+                    <Textarea
+                      value={editedPrompt}
+                      onChange={(e) => setEditedPrompt(e.target.value)}
+                      className="min-h-[270px] resize-y font-mono text-xs"
+                      placeholder="Enter a custom system prompt..."
+                      data-testid="settings-textarea-edit-prompt"
+                    />
+                  </CardContent>
+                </Card>
+              )}
+
+              {savedPrompts.length === 0 && !isEditingPrompt && (
+                <div className="rounded-md bg-muted/50 p-8 text-center">
+                  <Code className="h-8 w-8 text-muted-foreground mx-auto mb-3" />
+                  <p className="text-sm text-muted-foreground">
+                    No prompts saved yet. Use "AI Generate" above to create your first prompt, or the system will auto-generate one when you save.
+                  </p>
+                </div>
+              )}
+
+              {savedPrompts.length > 0 && !isEditingPrompt && (
+                <div className="space-y-3">
+                  {savedPrompts.map((prompt) => {
+                    const isStale = prompt.configHash && prompt.configHash !== currentConfigHash;
+                    return (
+                      <Card
+                        key={prompt.id}
+                        className={prompt.isActive ? "border-primary" : ""}
+                        data-testid={`card-prompt-${prompt.id}`}
+                      >
+                        <CardContent className="p-4">
+                          <div className="flex items-start justify-between gap-2 flex-wrap">
+                            <div className="flex items-start gap-2 flex-1 min-w-0">
+                              <div className="min-w-0 flex-1">
+                                <div className="flex items-center gap-2 flex-wrap">
+                                  <span className="text-sm font-medium truncate" data-testid={`text-prompt-name-${prompt.id}`}>
+                                    {prompt.name}
+                                  </span>
+                                  {prompt.isActive && (
+                                    <Badge variant="default" className="shrink-0" data-testid={`badge-active-${prompt.id}`}>
+                                      Active
+                                    </Badge>
+                                  )}
+                                  <Badge variant="outline" className="shrink-0">
+                                    {prompt.source === "ai" ? "AI Generated" : prompt.source === "coach" ? "Coach" : "Manual"}
+                                  </Badge>
+                                  {isStale && (
+                                    <Badge variant="destructive" className="shrink-0 gap-1" data-testid={`badge-stale-${prompt.id}`}>
+                                      <AlertTriangle className="h-3 w-3" />
+                                      Config Changed
+                                    </Badge>
+                                  )}
+                                </div>
+                                <p className="text-xs text-muted-foreground mt-1">
+                                  Created {new Date(prompt.createdAt).toLocaleDateString()}
+                                  {prompt.model && ` with ${prompt.model}`}
+                                  {prompt.updatedAt && ` · Updated ${new Date(prompt.updatedAt).toLocaleDateString()}`}
+                                </p>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-1 shrink-0">
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => handleStartEditPrompt(prompt)}
+                                data-testid={`button-edit-prompt-${prompt.id}`}
+                              >
+                                <Pencil className="h-4 w-4" />
+                              </Button>
+                              {!prompt.isActive && (
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  onClick={() => handleDeletePrompt(prompt.id)}
+                                  data-testid={`button-delete-prompt-${prompt.id}`}
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              )}
+                              <Button
+                                variant={prompt.isActive ? "default" : "outline"}
+                                size="sm"
+                                onClick={() => {
+                                  if (!prompt.isActive) handleEnablePrompt(prompt.id);
+                                }}
+                                disabled={prompt.isActive}
+                                data-testid={`button-enable-prompt-${prompt.id}`}
+                              >
+                                {prompt.isActive ? (
+                                  <>
+                                    <Check className="h-3 w-3 mr-1" />
+                                    Enabled
+                                  </>
+                                ) : (
+                                  "Enable"
+                                )}
+                              </Button>
+                            </div>
+                          </div>
+                          <div
+                            className="mt-3 rounded-md bg-muted/50 p-3 text-xs font-mono max-h-[120px] overflow-y-auto whitespace-pre-wrap"
+                            data-testid={`text-prompt-preview-${prompt.id}`}
+                          >
+                            {prompt.content.substring(0, 500)}{prompt.content.length > 500 ? "..." : ""}
+                          </div>
+                        </CardContent>
+                      </Card>
+                    );
+                  })}
+                </div>
+              )}
             </CardContent>
           </Card>
         );
+      }
 
       case 10: {
         const welcomeConfig: WelcomeConfig = formData.welcomeConfig || {
@@ -3860,6 +4121,82 @@ export default function SettingsPage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <AlertDialog open={showStalePromptDialog} onOpenChange={setShowStalePromptDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5 text-yellow-500" />
+              Outdated Prompt Configuration
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              This prompt was created with different agent configuration settings (business use case, domain knowledge, validation rules, or guardrails have changed since). Enabling it may cause your agent to behave inconsistently with your current settings.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel
+              onClick={() => {
+                setShowStalePromptDialog(false);
+                setPendingEnablePromptId(null);
+              }}
+              data-testid="button-stale-cancel"
+            >
+              Cancel
+            </AlertDialogCancel>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setShowStalePromptDialog(false);
+                if (pendingEnablePromptId) {
+                  activatePrompt(pendingEnablePromptId);
+                  setPendingEnablePromptId(null);
+                }
+              }}
+              data-testid="button-stale-enable-anyway"
+            >
+              Enable Anyway
+            </Button>
+            <Button
+              onClick={() => {
+                setShowStalePromptDialog(false);
+                setPendingEnablePromptId(null);
+                handleGeneratePromptWithSafeguard(defaultGenerationModel);
+              }}
+              data-testid="button-stale-regenerate"
+            >
+              <Sparkles className="h-4 w-4 mr-2" />
+              Regenerate New
+            </Button>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <Dialog open={showSaveAsDialog} onOpenChange={setShowSaveAsDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Save As New Prompt</DialogTitle>
+            <DialogDescription>
+              Give your new prompt a name. It will be saved as a separate entry in your prompt library.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3">
+            <Input
+              value={saveAsName}
+              onChange={(e) => setSaveAsName(e.target.value)}
+              placeholder="Enter prompt name..."
+              data-testid="input-save-as-name"
+            />
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowSaveAsDialog(false)} data-testid="button-save-as-cancel">
+              Cancel
+            </Button>
+            <Button onClick={handleSaveAsNewPrompt} disabled={!saveAsName.trim()} data-testid="button-save-as-confirm">
+              Save
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <AlertDialog open={showSyncFromProdDialog} onOpenChange={(open) => { if (!open && isSyncingFromProd) return; setShowSyncFromProdDialog(open); if (!open) setSyncDifferences(null); }}>
         <AlertDialogContent className="max-w-lg max-h-[80vh] flex flex-col">

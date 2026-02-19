@@ -106,15 +106,20 @@ The Prompt Coach is an AI-powered chatbot that helps users improve their agent c
 - Concise coaching mode is the default for all agents (short responses, one suggestion at a time, no filler)
 - Coach has read-only visibility into the agent's custom prompt (Step 9) for context-aware advice
 
-### Prompt Revision Tracking
-- Agent schema includes: `promptLastRevisedBy` (string), `promptLastRevisedAt` (ISO timestamp), `configFieldsHash` (MD5 hash)
+### Prompt Library & Revision Tracking
+- Agent schema includes: `savedPrompts` (array of SavedPrompt objects), `promptLastRevisedBy` (string), `promptLastRevisedAt` (ISO timestamp), `configFieldsHash` (MD5 hash)
+- `SavedPrompt` schema: `{ id, name, content, isActive, source ("ai"|"manual"|"coach"), model?, configHash?, createdAt, updatedAt? }`
+- `savedPrompts` stored as JSONB column in agents table, with backward-compatible migration from legacy `customPrompt` field
 - `computeConfigFieldsHash()` in `server/routes.ts` — Computes MD5 hash of businessUseCase + domainKnowledge + validationRules + guardrails
-- Step 9 (Agent Prompt) UI shows:
-  - "Last revised by" indicator with source (User, Prompt Coach, AI Generate) and timestamp
-  - Out-of-sync warning when config fields have changed since prompt was last saved
-  - Explicit Save button (no auto-save) for manual prompt edits
-  - AI Generate dropdown with model selection; shows confirmation dialog if existing prompt would be replaced
-  - "Create Manually" button for starting from a template
+- Step 9 (Prompt Configuration) UI is a card-based "Prompt Library":
+  - Generate multiple prompts with AI using different models; each saved as a card
+  - Only one prompt can be active at a time (radio-style enable/disable)
+  - Edit any prompt with "Save" (in-place update) or "Save As New" (fork as separate card)
+  - Delete inactive prompts; active prompt cannot be deleted
+  - Config drift detection: each prompt stores a `configHash` at creation; stale prompts show "Config Changed" badge
+  - Enabling a stale prompt shows confirmation dialog with "Enable Anyway" and "Regenerate New" options
+  - Active prompt's content is synced to the `customPrompt` field for backward compatibility with the chat flow
+  - Legacy migration: existing `customPrompt` data auto-converts to a SavedPrompt card on first load
 
 **Current Limitations / Improvement Areas**:
 - Coach sees full agent config every message (no context optimization like the chat system has)
