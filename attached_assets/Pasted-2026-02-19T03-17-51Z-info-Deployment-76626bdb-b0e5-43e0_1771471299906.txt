@@ -1,0 +1,65 @@
+2026-02-19T03:17:51Z info: Deployment: 76626bdb-b0e5-43e0-8579-18f83f4f72cc
+2026-02-19T03:17:51Z info: Running Security Scan
+2026-02-19T03:17:51Z info: Security Scan Complete
+2026-02-19T03:17:51Z info: Connecting to builder
+2026-02-19T03:17:52Z info: Builder connected
+2026-02-19T03:17:52Z info: Installing packages
+2026-02-19T03:17:52Z info: Starting Build
+
+> rest-express@1.0.0 build
+> tsx script/build.ts
+
+
+building client...
+
+vite v7.3.0 building client environment for production...
+
+transforming...
+
+
+A PostCSS plugin did not pass the `from` option to `postcss.parse`. This may cause imported assets to be incorrectly transformed. If you've recently added a PostCSS plugin that raised this warning, please contact the package author to fix the issue.
+
+✓ 2139 modules transformed.
+
+rendering chunks...
+
+computing gzip size...
+
+../dist/public/index.html                   2.27 kB │ gzip:   0.90 kB
+
+✓ built in 5.09s
+building server...
+
+
+  dist/index.cjs  2.0mb ⚠️
+
+⚡ Done in 408ms
+
+npm notice
+npm notice New major version of npm available! 10.8.2 -> 11.10.0
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v11.10.0
+npm notice To update run: npm install -g npm@11.10.0
+npm notice
+
+2026-02-19T03:18:04Z info: Pushing pid1 binary layer...
+2026-02-19T03:18:04Z info: Pushing Repl layer...
+2026-02-19T03:18:04Z info: Pushing hosting layer...
+2026-02-19T03:18:04Z info: Retrieved cached nix layer
+2026-02-19T03:18:05Z info: Created hosting layer
+2026-02-19T03:18:06Z info: Created pid1 binary layer
+2026-02-19T03:18:21Z info: Created Repl layer
+2026-02-19T03:18:21Z info: Pushing Repl (cache) layer...
+2026-02-19T03:18:21Z info: Created Repl (cache) layer
+2026-02-19T03:18:23Z info: Pushed image manifest
+2026-02-19T03:18:24Z info: Pushed soci index manifest
+2026-02-19T03:18:29Z info: Creating Autoscale service
+[migrate] Checking if DB migration is needed...
+/home/runner/workspace/dist/index.cjs:68
+[startup] DB URL hash: 11b9fbe1, NODE_ENV: production
+        at Timeout.internalConnectMultipleTimeout (node:net:1711:38)
+  code: 'ETIMEDOUT',
+        at Timeout.internalConnectMultipleTimeout (node:net:1716:5)
+      syscall: 'connect',
+`);op.write(jL.format.apply(jL,e))}}Object.defineProperty(fs.exports,"isWin",{get:function(){return nh},set:function(t){nh=t}});fs.exports.warnTo=function(t){var e=op;return op=t,e};fs.exports.getFileName=function(t){var e=t||process.env,n=e.PGPASSFILE||(nh?BL.join(e.APPDATA||"./","postgresql","pgpass.conf"):BL.join(e.HOME||"./",".pgpass"));return n};fs.exports.usePgPass=function(t,e){return Object.prototype.hasOwnProperty.call(process.env,"PGPASSWORD")?!1:nh?!0:(e=e||"<unkn>",zse(t.mode)?t.mode&(Bse|jse)?(f1('WARNING: password file "%s" has group or world access; permissions should be u=rw (0600) or less',e),!1):!0:(f1('WARNING: password file "%s" is not a plain file',e),!1))};var Vse=fs.exports.match=function(t,e){return Wc.slice(0,-1).reduce(function(n,r,i){return i==1&&Number(t[r]||Use)===Number(e[r])?n&&!0:n&&(e[r]==="*"||e[r]===t[r])},!0)};fs.exports.getPassword=function(t,e,n){var r,i=e.pipe(Lse());function s(c){var l=Wse(c);l&&Kse(l)&&Vse(t,l)&&(r=l[Hse],i.end())}var o=function...
+      address: '2600:1f16:1ace:218:975e:e6dc:731d:53a0',
+2026-02-19T03:20:06Z error: The deployment is crash looping. This can happen if the run command fails or exits immediately after starting. Check the logs for more information.

@@ -2708,5 +2708,159 @@ export async function registerRoutes(
     }
   });
 
+  app.get("/api/admin/backup-export", async (req: Request, res: Response) => {
+    try {
+      if (process.env.ENABLE_SYNC !== 'true') {
+        return res.status(404).json({ message: "Not found" });
+      }
+      const user = await getUserFromSession(req);
+      if (!user) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+
+      const { db } = await import('./db');
+      const schema = await import('@shared/schema');
+
+      const agents = await db.select().from(schema.agentsTable);
+      const components = await db.select().from(schema.agentComponentsTable);
+      const usersRaw = await db.select().from(schema.usersTable);
+      const users = usersRaw.map(({ password, ...rest }) => rest);
+      const chatSessions = await db.select().from(schema.chatSessionsTable);
+      const chatMessages = await db.select().from(schema.chatMessagesTable);
+      const traces = await db.select().from(schema.agentTracesTable);
+      const snapshots = await db.select().from(schema.configSnapshotsTable);
+      const coachHistory = await db.select().from(schema.promptCoachHistoryTable);
+
+      const backup = {
+        version: "1.0",
+        exportedAt: new Date().toISOString(),
+        exportedBy: user.username,
+        counts: {
+          users: users.length,
+          agents: agents.length,
+          components: components.length,
+          chatSessions: chatSessions.length,
+          chatMessages: chatMessages.length,
+          traces: traces.length,
+          snapshots: snapshots.length,
+          coachHistory: coachHistory.length,
+        },
+        data: {
+          users,
+          agents,
+          components,
+          chatSessions,
+          chatMessages,
+          traces,
+          snapshots,
+          coachHistory,
+        },
+      };
+
+      const filename = `agent-studio-backup-${new Date().toISOString().replace(/[:.]/g, '-')}.json`;
+      res.setHeader('Content-Type', 'application/json');
+      res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+      res.json(backup);
+    } catch (error: any) {
+      console.error("Backup export error:", error);
+      res.status(500).json({ message: error?.message || "Export failed" });
+    }
+  });
+
+  const backupImportParser = (await import('express')).json({ limit: '100mb' });
+  app.post("/api/admin/backup-import", backupImportParser, async (req: Request, res: Response) => {
+    try {
+      if (process.env.ENABLE_SYNC !== 'true') {
+        return res.status(404).json({ message: "Not found" });
+      }
+      const user = await getUserFromSession(req);
+      if (!user) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+
+      const backup = req.body;
+      if (!backup?.version || !backup?.data) {
+        return res.status(400).json({ message: "Invalid backup file format" });
+      }
+
+      const { db } = await import('./db');
+      const { pool } = await import('./db');
+      const schema = await import('@shared/schema');
+
+      const { users: userData, agents: agentData, components, chatSessions: sessionData, chatMessages: messageData, traces, snapshots, coachHistory } = backup.data;
+
+      const client = await pool.connect();
+      try {
+        await client.query('BEGIN');
+
+        await client.query('DELETE FROM prompt_coach_history');
+        await client.query('DELETE FROM config_snapshots');
+        await client.query('DELETE FROM agent_traces');
+        await client.query('DELETE FROM chat_messages');
+        await client.query('DELETE FROM chat_sessions');
+        await client.query('DELETE FROM agent_components');
+        await client.query('DELETE FROM auth_sessions');
+        await client.query('DELETE FROM agents');
+        await client.query('DELETE FROM users');
+
+        const { sql } = await import('drizzle-orm');
+        const txDb = db;
+
+        if (userData?.length) await txDb.insert(schema.usersTable).values(userData);
+        if (agentData?.length) {
+          for (let i = 0; i < agentData.length; i += 5) {
+            await txDb.insert(schema.agentsTable).values(agentData.slice(i, i + 5));
+          }
+        }
+        if (components?.length) {
+          for (let i = 0; i < components.length; i += 20) {
+            await txDb.insert(schema.agentComponentsTable).values(components.slice(i, i + 20));
+          }
+        }
+        if (sessionData?.length) {
+          for (let i = 0; i < sessionData.length; i += 20) {
+            await txDb.insert(schema.chatSessionsTable).values(sessionData.slice(i, i + 20));
+          }
+        }
+        if (messageData?.length) {
+          for (let i = 0; i < messageData.length; i += 20) {
+            await txDb.insert(schema.chatMessagesTable).values(messageData.slice(i, i + 20));
+          }
+        }
+        if (traces?.length) {
+          for (let i = 0; i < traces.length; i += 20) {
+            await txDb.insert(schema.agentTracesTable).values(traces.slice(i, i + 20));
+          }
+        }
+        if (snapshots?.length) {
+          for (let i = 0; i < snapshots.length; i += 20) {
+            await txDb.insert(schema.configSnapshotsTable).values(snapshots.slice(i, i + 20));
+          }
+        }
+        if (coachHistory?.length) {
+          for (let i = 0; i < coachHistory.length; i += 20) {
+            await txDb.insert(schema.promptCoachHistoryTable).values(coachHistory.slice(i, i + 20));
+          }
+        }
+
+        await client.query('COMMIT');
+      } catch (txError) {
+        await client.query('ROLLBACK');
+        throw txError;
+      } finally {
+        client.release();
+      }
+
+      res.json({
+        success: true,
+        message: "Backup restored successfully",
+        counts: backup.counts,
+      });
+    } catch (error: any) {
+      console.error("Backup import error:", error);
+      res.status(500).json({ message: error?.message || "Import failed" });
+    }
+  });
+
   return httpServer;
 }

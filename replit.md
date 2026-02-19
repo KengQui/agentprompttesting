@@ -50,6 +50,9 @@ All data is stored in PostgreSQL using Drizzle ORM. The schema is defined in `sh
 ### Dev/Prod Database Sync
 To manage the separate development and production databases, a "pending sync" system is implemented in `server/pending-sync.ts`. Operations (update/delete) are queued and applied to the local database on development server startup, and then to the production database when published. A UI integration allows queuing agent configurations for push to production.
 
+### Data Backup & Restore
+A full database backup/restore feature is available on the home page (requires ENABLE_SYNC=true). The "Export Backup" button downloads a JSON file containing all agents, components, chat sessions, messages, traces, snapshots, and user data (passwords excluded for security). The "Restore Backup" button allows uploading a previously exported JSON file to fully restore the database. Import runs in a transaction for data integrity. Endpoints: GET /api/admin/backup-export, POST /api/admin/backup-import.
+
 ## External Dependencies
 - **Google Gemini AI**: Utilized for all AI-powered generation tasks, including agent responses, system prompts, validation rules, guardrails, and sample data.
 - **Third-party Libraries**:

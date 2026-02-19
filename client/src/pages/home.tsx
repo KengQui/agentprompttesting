@@ -1,11 +1,22 @@
+import { useState, useRef } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Link, useLocation } from "wouter";
-import { Plus, MessageSquare, Settings, Bot, Sparkles, LogOut, PlayCircle, Copy, Zap, HelpCircle, CloudDownload } from "lucide-react";
+import { Plus, MessageSquare, Settings, Bot, Sparkles, LogOut, PlayCircle, Copy, Zap, HelpCircle, CloudDownload, Download, Upload, Loader2, Database, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { useAuth } from "@/hooks/use-auth";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
@@ -260,6 +271,148 @@ interface SyncStatusResponse {
   statuses: Record<string, SyncStatus>;
 }
 
+function BackupSection() {
+  const { toast } = useToast();
+  const [isExporting, setIsExporting] = useState(false);
+  const [showImportConfirm, setShowImportConfirm] = useState(false);
+  const [pendingFile, setPendingFile] = useState<File | null>(null);
+  const [isImporting, setIsImporting] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleExport = async () => {
+    setIsExporting(true);
+    try {
+      const response = await fetch("/api/admin/backup-export", { credentials: "include" });
+      if (!response.ok) throw new Error("Export failed");
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      const disposition = response.headers.get("Content-Disposition");
+      const filenameMatch = disposition?.match(/filename="(.+)"/);
+      a.href = url;
+      a.download = filenameMatch?.[1] || `agent-studio-backup-${new Date().toISOString().replace(/[:.]/g, '-')}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      toast({ title: "Backup exported", description: "Your backup file has been downloaded." });
+    } catch (error: any) {
+      toast({ title: "Export failed", description: error.message, variant: "destructive" });
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setPendingFile(file);
+    setShowImportConfirm(true);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
+
+  const handleImportConfirm = async () => {
+    if (!pendingFile) return;
+    setShowImportConfirm(false);
+    setIsImporting(true);
+    try {
+      const text = await pendingFile.text();
+      const backup = JSON.parse(text);
+      if (!backup?.version || !backup?.data) {
+        throw new Error("Invalid backup file format");
+      }
+      const response = await fetch("/api/admin/backup-import", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: text,
+      });
+      if (!response.ok) {
+        const err = await response.json();
+        throw new Error(err.message || "Import failed");
+      }
+      const result = await response.json();
+      toast({
+        title: "Backup restored",
+        description: `Restored ${result.counts?.agents || 0} agents, ${result.counts?.users || 0} users, ${result.counts?.chatSessions || 0} chat sessions.`,
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/agents"] });
+    } catch (error: any) {
+      toast({ title: "Import failed", description: error.message, variant: "destructive" });
+    } finally {
+      setIsImporting(false);
+      setPendingFile(null);
+    }
+  };
+
+  return (
+    <>
+      <Card>
+        <CardContent className="p-4">
+          <div className="flex items-center justify-between gap-4 flex-wrap">
+            <div className="flex items-center gap-3">
+              <div className="flex h-9 w-9 items-center justify-center rounded-md bg-muted">
+                <ShieldCheck className="h-5 w-5 text-muted-foreground" />
+              </div>
+              <div>
+                <p className="text-sm font-medium">Data Backup</p>
+                <p className="text-xs text-muted-foreground">Export or restore your database to protect against data loss</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleExport}
+                disabled={isExporting}
+                data-testid="button-backup-export"
+              >
+                {isExporting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
+                <span className="ml-1.5">Export Backup</span>
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={isImporting}
+                data-testid="button-backup-import"
+              >
+                {isImporting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
+                <span className="ml-1.5">Restore Backup</span>
+              </Button>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept=".json"
+                className="hidden"
+                onChange={handleFileSelect}
+                data-testid="input-backup-file"
+              />
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      <AlertDialog open={showImportConfirm} onOpenChange={setShowImportConfirm}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Restore from Backup?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will replace ALL current data (agents, users, chat history) with the data from the backup file "{pendingFile?.name}". This action cannot be undone. Are you sure you want to continue?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setPendingFile(null)} data-testid="button-import-cancel">Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleImportConfirm} data-testid="button-import-confirm">
+              Yes, Restore Backup
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
+  );
+}
+
 export default function Home() {
   const { data: agents, isLoading } = useQuery<Agent[]>({
     queryKey: ["/api/agents"],
@@ -316,7 +469,7 @@ export default function Home() {
         </div>
       </header>
 
-      <main className="container mx-auto px-4 py-8">
+      <main className="container mx-auto px-4 py-8 space-y-6">
         {isLoading ? (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {[1, 2, 3].map((i) => (
@@ -332,6 +485,7 @@ export default function Home() {
         ) : (
           <EmptyState />
         )}
+        <BackupSection />
       </main>
     </div>
   );
