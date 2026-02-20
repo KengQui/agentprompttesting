@@ -353,10 +353,16 @@ function ExpressionExplanationCard({ content, timestamp }: { content: string; ti
   );
 }
 
+interface BreakdownStep {
+  expression: string;
+  annotation: string;
+}
+
 interface BreakdownData {
   expression: string;
-  steps: string[];
+  steps: BreakdownStep[];
   finalStep: string;
+  finalAnnotation: string;
 }
 
 function isBreakdownMessage(text: string): boolean {
@@ -385,34 +391,53 @@ function parseBreakdown(text: string): BreakdownData | null {
 }
 
 function parseStepsBlock(stepsBlock: string, expression: string): BreakdownData | null {
-  const stepLines: string[] = [];
+  const steps: BreakdownStep[] = [];
   let finalStep = '';
+  let finalAnnotation = '';
   const lines = stepsBlock.split('\n');
-  for (const line of lines) {
-    const trimmed = line.trim();
+  for (let i = 0; i < lines.length; i++) {
+    const trimmed = lines[i].trim();
     if (!trimmed) continue;
     const finalMatch = trimmed.match(/^\d+\.\s*\*{0,2}\s*Final:?\s*\*{0,2}\s*(.*)/i);
     if (finalMatch) {
       let finalText = finalMatch[1].replace(/`/g, '').trim();
-      const nextLineIdx = lines.indexOf(line) + 1;
-      if (nextLineIdx < lines.length) {
-        const continuation = lines[nextLineIdx].trim();
-        if (continuation && !/^\d+\./.test(continuation)) {
-          finalText = (finalText + ' ' + continuation.replace(/`/g, '')).trim();
+      for (let j = i + 1; j < lines.length; j++) {
+        const next = lines[j].trim();
+        if (!next) continue;
+        const arrowMatch = next.match(/^→\s*(.*)/);
+        if (arrowMatch) {
+          finalAnnotation = arrowMatch[1].trim();
+          i = j;
+          break;
         }
+        if (/^\d+\./.test(next)) break;
+        finalText = (finalText + ' ' + next.replace(/`/g, '')).trim();
+        i = j;
       }
       finalStep = finalText;
       continue;
     }
     const stepMatch = trimmed.match(/^\d+\.\s*(.*)/);
     if (stepMatch) {
-      stepLines.push(stepMatch[1].replace(/`/g, '').trim());
+      const stepExpr = stepMatch[1].replace(/`/g, '').trim();
+      let annotation = '';
+      for (let j = i + 1; j < lines.length; j++) {
+        const next = lines[j].trim();
+        if (!next) continue;
+        const arrowMatch = next.match(/^→\s*(.*)/);
+        if (arrowMatch) {
+          annotation = arrowMatch[1].trim();
+          i = j;
+        }
+        break;
+      }
+      steps.push({ expression: stepExpr, annotation });
     }
   }
 
-  if (stepLines.length === 0) return null;
+  if (steps.length === 0) return null;
 
-  return { expression, steps: stepLines, finalStep };
+  return { expression, steps, finalStep, finalAnnotation };
 }
 
 function DetailedBreakdownCard({ content, timestamp }: { content: string; timestamp: string }) {
@@ -458,17 +483,27 @@ function DetailedBreakdownCard({ content, timestamp }: { content: string; timest
                 <ListOrdered className="h-3.5 w-3.5 text-muted-foreground" />
                 <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Step-by-Step</span>
               </div>
-              <ol className="space-y-1.5 pl-5.5">
+              <ol className="space-y-2.5 pl-5.5">
                 {breakdown.steps.map((step, idx) => (
-                  <li key={idx} className="text-sm font-mono flex gap-2" data-testid={`breakdown-step-${idx}`}>
-                    <span className="text-muted-foreground shrink-0">{idx + 1}.</span>
-                    <span className="break-all">{step}</span>
+                  <li key={idx} className="flex flex-col gap-0.5" data-testid={`breakdown-step-${idx}`}>
+                    <div className="text-sm font-mono flex gap-2">
+                      <span className="text-muted-foreground shrink-0">{idx + 1}.</span>
+                      <span className="break-all">{step.expression}</span>
+                    </div>
+                    {step.annotation && (
+                      <p className="text-xs text-muted-foreground pl-5 italic">{step.annotation}</p>
+                    )}
                   </li>
                 ))}
                 {breakdown.finalStep && (
-                  <li className="text-sm font-mono flex gap-2 pt-1 border-t border-card-border" data-testid="breakdown-step-final">
-                    <span className="text-muted-foreground shrink-0">{breakdown.steps.length + 1}.</span>
-                    <span className="break-all"><em>Final:</em> {breakdown.finalStep}</span>
+                  <li className="flex flex-col gap-0.5 pt-1.5 border-t border-card-border" data-testid="breakdown-step-final">
+                    <div className="text-sm font-mono flex gap-2">
+                      <span className="text-muted-foreground shrink-0">{breakdown.steps.length + 1}.</span>
+                      <span className="break-all"><em>Final:</em> {breakdown.finalStep}</span>
+                    </div>
+                    {breakdown.finalAnnotation && (
+                      <p className="text-xs text-muted-foreground pl-5 italic">{breakdown.finalAnnotation}</p>
+                    )}
                   </li>
                 )}
               </ol>
