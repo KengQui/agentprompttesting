@@ -106,6 +106,102 @@ function splitColumnBuildResponse(content: string): { before: string; after: str
   return { before, after };
 }
 
+interface DataColumnRow {
+  name: string;
+  type: string;
+  sample: string;
+}
+
+function isDataColumnsTableMessage(text: string): boolean {
+  return /\|\s*Column\s*Name\s*\|/i.test(text) && /\|\s*Data\s*Type\s*\|/i.test(text) && /\|\s*Sample\s*Value\s*\|/i.test(text);
+}
+
+function parseDataColumnsTable(text: string): { introText: string; columns: DataColumnRow[] } | null {
+  const lines = text.split('\n');
+  let tableStart = -1;
+  let tableEnd = -1;
+  const introLines: string[] = [];
+
+  for (let i = 0; i < lines.length; i++) {
+    if (/\|\s*Column\s*Name\s*\|/i.test(lines[i])) {
+      tableStart = i;
+      break;
+    }
+    introLines.push(lines[i]);
+  }
+  if (tableStart === -1) return null;
+
+  const columns: DataColumnRow[] = [];
+  for (let i = tableStart + 2; i < lines.length; i++) {
+    const line = lines[i].trim();
+    if (!line.startsWith('|')) {
+      tableEnd = i;
+      break;
+    }
+    const cells = line.split('|').map(c => c.trim()).filter(Boolean);
+    if (cells.length >= 3) {
+      columns.push({ name: cells[0], type: cells[1], sample: cells[2] });
+    }
+  }
+  if (tableEnd === -1) tableEnd = lines.length;
+
+  return {
+    introText: introLines.join('\n').trim(),
+    columns,
+  };
+}
+
+function DataColumnsTableCard({ content, timestamp }: { content: string; timestamp: string }) {
+  const parsed = parseDataColumnsTable(content);
+  if (!parsed) return null;
+
+  const typeColor = (type: string) => {
+    const t = type.toLowerCase();
+    if (t === 'numeric' || t === 'number' || t === 'amount') return 'text-blue-500 bg-blue-500/10';
+    if (t === 'date') return 'text-amber-500 bg-amber-500/10';
+    return 'text-emerald-500 bg-emerald-500/10';
+  };
+
+  return (
+    <div className="flex gap-3" data-testid="data-columns-card">
+      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-muted">
+        <Bot className="h-4 w-4" />
+      </div>
+      <div className="max-w-[80%] space-y-0.5">
+        {parsed.introText && (
+          <div className="text-sm text-muted-foreground mb-2 px-1">
+            <ReactMarkdown remarkPlugins={[remarkGfm]}>{parsed.introText}</ReactMarkdown>
+          </div>
+        )}
+        <Card className="overflow-hidden p-0">
+          <div className="flex items-center gap-2 px-4 py-3 border-b border-card-border">
+            <Database className="h-4 w-4 text-muted-foreground" />
+            <span className="text-sm font-semibold">Available Data Columns</span>
+            <Badge variant="secondary" className="ml-auto text-xs">{parsed.columns.length} columns</Badge>
+          </div>
+          <div className="divide-y divide-card-border max-h-[400px] overflow-y-auto">
+            {parsed.columns.map((col, idx) => (
+              <div key={idx} className="flex items-center justify-between px-4 py-2.5" data-testid={`data-col-row-${idx}`}>
+                <span className="text-sm font-medium">{col.name}</span>
+                <div className="flex items-center gap-3">
+                  <span className="text-xs text-muted-foreground truncate max-w-[140px]">{col.sample}</span>
+                  <Badge variant="secondary" className={`text-xs shrink-0 ${typeColor(col.type)}`}>{col.type}</Badge>
+                </div>
+              </div>
+            ))}
+          </div>
+        </Card>
+        <p className="text-xs text-muted-foreground px-1 pt-1">
+          {new Date(timestamp).toLocaleTimeString([], {
+            hour: "2-digit",
+            minute: "2-digit",
+          })}
+        </p>
+      </div>
+    </div>
+  );
+}
+
 function AssistantBubble({ content, timestamp, testId }: { content: string; timestamp: string; testId?: string }) {
   return (
     <div
@@ -795,6 +891,17 @@ function MessageBubble({ message, agentId, isLastAssistant, onSendMessage, onRev
           before={splitResult.before}
           after={splitResult.after}
         />
+        {showPills && <SuggestedActionPills actions={actions} onSelect={onSendMessage} onReviseExpression={onReviseExpression} onEditExpression={onEditExpression} />}
+      </>
+    );
+  }
+
+  const isDataColumnsResponse = !isUser && isHcmAgent && isDataColumnsTableMessage(displayContent);
+
+  if (isDataColumnsResponse) {
+    return (
+      <>
+        <DataColumnsTableCard content={displayContent} timestamp={message.timestamp} />
         {showPills && <SuggestedActionPills actions={actions} onSelect={onSendMessage} onReviseExpression={onReviseExpression} onEditExpression={onEditExpression} />}
       </>
     );
