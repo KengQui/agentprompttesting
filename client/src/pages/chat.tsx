@@ -181,12 +181,17 @@ function DataColumnsTableCard({ content, timestamp }: { content: string; timesta
             <span className="text-sm font-semibold">Available Data Columns</span>
             <Badge variant="secondary" className="ml-auto text-xs">{parsed.columns.length} columns</Badge>
           </div>
+          <div className="grid grid-cols-[1fr_auto_auto] items-center gap-x-4 text-xs text-muted-foreground px-4 py-2 border-b border-card-border bg-muted/30">
+            <span className="font-medium uppercase tracking-wide">Column</span>
+            <span className="font-medium uppercase tracking-wide w-[120px]">Sample</span>
+            <span className="font-medium uppercase tracking-wide w-[70px] text-center">Type</span>
+          </div>
           <div className="divide-y divide-card-border max-h-[400px] overflow-y-auto">
             {parsed.columns.map((col, idx) => (
-              <div key={idx} className="flex items-center justify-between px-4 py-2.5" data-testid={`data-col-row-${idx}`}>
+              <div key={idx} className="grid grid-cols-[1fr_auto_auto] items-center gap-x-4 px-4 py-2.5" data-testid={`data-col-row-${idx}`}>
                 <span className="text-sm font-medium">{col.name}</span>
-                <div className="flex items-center gap-3">
-                  <span className="text-xs text-muted-foreground truncate max-w-[140px]">{col.sample}</span>
+                <span className="text-xs text-muted-foreground truncate w-[120px]">{col.sample || '—'}</span>
+                <div className="w-[70px] flex justify-center">
                   <Badge variant="secondary" className={`text-xs shrink-0 ${typeColor(col.type)}`}>{col.type}</Badge>
                 </div>
               </div>
