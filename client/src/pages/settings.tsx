@@ -44,7 +44,7 @@ import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { businessUseCaseTemplate, validationRulesTemplate, guardrailsTemplate } from "@/lib/config-templates";
 import { TracingDashboard, SimulationPanel, ConfigHistoryPanel } from "@/components/tracing-dashboard";
-import type { Agent, UpdateAgent, AgentStatus, DomainDocument, SampleDataset, GeminiModel, AgentAction, MockUserState, MockMode, ActionField, ClarifyingInsight, WelcomeConfig, WelcomePrompt, SavedPrompt } from "@shared/schema";
+import type { Agent, UpdateAgent, AgentStatus, DomainDocument, SampleDataset, GeminiModel, AgentAction, MockUserState, MockMode, ActionField, ClarifyingInsight, WelcomeConfig, WelcomePrompt, SavedPrompt, DataColumnsCard } from "@shared/schema";
 import { geminiModelDisplayNames, defaultGenerationModel, mockModeDescriptions } from "@shared/schema";
 import { ClarifyingChatDialog } from "@/components/clarifying-chat-dialog";
 
@@ -3600,6 +3600,45 @@ export default function SettingsPage() {
 
                 {welcomeConfig.enabled && (
                   <>
+                    <div className="flex items-center justify-between gap-4">
+                      <div>
+                        <Label htmlFor="settings-data-columns-card">Show Data Columns Card</Label>
+                        <p className="text-sm text-muted-foreground">
+                          Display a card showing the count of available data columns from your datasets
+                        </p>
+                      </div>
+                      <Switch
+                        id="settings-data-columns-card"
+                        checked={welcomeConfig.dataColumnsCard?.enabled || false}
+                        onCheckedChange={(checked) => updateWelcomeConfig({
+                          dataColumnsCard: {
+                            enabled: checked,
+                            title: welcomeConfig.dataColumnsCard?.title || "View Existing Data Columns",
+                          },
+                        })}
+                        data-testid="settings-switch-data-columns-card"
+                      />
+                    </div>
+
+                    {welcomeConfig.dataColumnsCard?.enabled && (
+                      <div>
+                        <Label htmlFor="settings-data-columns-title">Data Columns Card Title</Label>
+                        <Input
+                          id="settings-data-columns-title"
+                          placeholder="View Existing Data Columns"
+                          value={welcomeConfig.dataColumnsCard?.title || ""}
+                          onChange={(e) => updateWelcomeConfig({
+                            dataColumnsCard: {
+                              enabled: true,
+                              title: e.target.value,
+                            },
+                          })}
+                          className="mt-1"
+                          data-testid="settings-input-data-columns-title"
+                        />
+                      </div>
+                    )}
+
                     <div>
                       <div className="flex items-center justify-between mb-2 flex-wrap gap-2">
                         <Label htmlFor="settings-greeting">Greeting Message</Label>
@@ -3709,19 +3748,27 @@ export default function SettingsPage() {
                             <p className="text-foreground" data-testid="settings-text-preview-greeting">
                               {welcomeConfig.greeting || "Hi there! How can I help you today?"}
                             </p>
-                            {welcomeConfig.suggestedPrompts.length > 0 && (
-                              <div className="flex flex-wrap justify-center gap-2 mt-2">
-                                {welcomeConfig.suggestedPrompts.map((prompt) => (
-                                  <Badge
-                                    key={prompt.id}
-                                    variant="outline"
-                                    data-testid={`settings-badge-preview-prompt-${prompt.id}`}
-                                  >
-                                    {prompt.title || "Untitled prompt"}
-                                  </Badge>
-                                ))}
-                              </div>
-                            )}
+                            <div className="flex flex-wrap justify-center gap-2 mt-2">
+                              {welcomeConfig.dataColumnsCard?.enabled && (
+                                <Badge
+                                  variant="secondary"
+                                  className="gap-1"
+                                  data-testid="settings-badge-preview-data-columns"
+                                >
+                                  <Database className="h-3 w-3" />
+                                  {welcomeConfig.dataColumnsCard.title || "View Existing Data Columns"} ({extractFieldsFromSampleData(formData.sampleDatasets || []).length})
+                                </Badge>
+                              )}
+                              {welcomeConfig.suggestedPrompts.map((prompt) => (
+                                <Badge
+                                  key={prompt.id}
+                                  variant="outline"
+                                  data-testid={`settings-badge-preview-prompt-${prompt.id}`}
+                                >
+                                  {prompt.title || "Untitled prompt"}
+                                </Badge>
+                              ))}
+                            </div>
                           </div>
                         </CardContent>
                       </Card>

@@ -19,7 +19,7 @@ import { queryClient, apiRequest } from "@/lib/queryClient";
 import { ContextProgressBar } from "@/components/context-progress-bar";
 import { SessionSidebar } from "@/components/session-sidebar";
 import { ResizeHandle, useResizable } from "@/components/resize-handle";
-import type { Agent, ChatMessage, ChatSession, ChatSessionWithPreview, WelcomeConfig } from "@shared/schema";
+import type { Agent, ChatMessage, ChatSession, ChatSessionWithPreview, WelcomeConfig, SampleDataset } from "@shared/schema";
 
 const MAX_MESSAGE_LENGTH = 2000;
 const RATE_LIMIT_COOLDOWN = 2000;
@@ -943,13 +943,40 @@ function CharacterCounter({ current, max }: { current: number; max: number }) {
 }
 
 
-function EmptyChat({ agentName, hasSession, welcomeConfig, onSendPrompt }: { 
+function getColumnCountFromDatasets(datasets: SampleDataset[]): number {
+  const columnNames = new Set<string>();
+  for (const dataset of datasets) {
+    if (dataset.format === "csv") {
+      const lines = dataset.content.split("\n");
+      if (lines.length > 0) {
+        const headers = lines[0].split(",").map(h => h.trim().replace(/^"|"$/g, ""));
+        headers.forEach(h => { if (h) columnNames.add(h); });
+      }
+    } else if (dataset.format === "json") {
+      try {
+        const parsed = JSON.parse(dataset.content);
+        const items = Array.isArray(parsed) ? parsed : [parsed];
+        if (items.length > 0 && typeof items[0] === "object") {
+          Object.keys(items[0]).forEach(k => columnNames.add(k));
+        }
+      } catch {}
+    }
+  }
+  return columnNames.size;
+}
+
+function EmptyChat({ agentName, hasSession, welcomeConfig, onSendPrompt, sampleDatasets }: { 
   agentName: string; 
   hasSession: boolean;
   welcomeConfig?: WelcomeConfig | null;
   onSendPrompt?: (prompt: string) => void;
+  sampleDatasets?: SampleDataset[];
 }) {
-  if (welcomeConfig?.enabled && welcomeConfig.suggestedPrompts?.length > 0) {
+  const showDataColumnsCard = welcomeConfig?.dataColumnsCard?.enabled && sampleDatasets && sampleDatasets.length > 0;
+  const columnCount = sampleDatasets ? getColumnCountFromDatasets(sampleDatasets) : 0;
+  const dataColumnsTitle = welcomeConfig?.dataColumnsCard?.title || "View Existing Data Columns";
+
+  if (welcomeConfig?.enabled && (welcomeConfig.suggestedPrompts?.length > 0 || showDataColumnsCard)) {
     return (
       <div className="flex flex-col items-center justify-center h-full py-8" data-testid="welcome-screen">
         <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary/10 mb-4">
@@ -962,6 +989,22 @@ function EmptyChat({ agentName, hasSession, welcomeConfig, onSendPrompt }: {
           {welcomeConfig.greeting}
         </p>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full max-w-lg">
+          {showDataColumnsCard && (
+            <Card
+              className="p-4 border-primary/20 bg-primary/5"
+              data-testid="card-data-columns"
+            >
+              <div className="flex items-center gap-2 mb-1">
+                <Database className="h-4 w-4 text-primary" />
+                <p className="text-sm font-medium" data-testid="text-data-columns-title">
+                  {dataColumnsTitle}
+                </p>
+              </div>
+              <p className="text-xs text-muted-foreground" data-testid="text-data-columns-count">
+                {columnCount} available columns from your datasets
+              </p>
+            </Card>
+          )}
           {welcomeConfig.suggestedPrompts.map((prompt, index) => (
             <Card
               key={prompt.id || index}
@@ -1596,7 +1639,7 @@ export default function Chat() {
                   ))}
                 </div>
               ) : !activeSessionId || messages.length === 0 ? (
-                <EmptyChat agentName={agent.name} hasSession={!!activeSessionId} welcomeConfig={welcomeConfig} onSendPrompt={handleSendPrompt} />
+                <EmptyChat agentName={agent.name} hasSession={!!activeSessionId} welcomeConfig={welcomeConfig} onSendPrompt={handleSendPrompt} sampleDatasets={agent.sampleDatasets} />
               ) : (
                 <div className="space-y-4">
                   {messages.map((msg, idx) => {

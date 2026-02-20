@@ -1,6 +1,10 @@
 {
   "enabled": true,
   "greeting": "I can help you build custom column expressions for your HCM reports. Describe the new column you want to create, and I'll guide you through writing the expression using your report's data.",
+  "dataColumnsCard": {
+    "enabled": true,
+    "title": "View Existing Data Columns"
+  },
   "suggestedPrompts": [
     {
       "id": "cd30d9b5-21e5-4376-98f0-36c85b55a15b",
@@ -16,11 +20,6 @@
       "id": "6579678f-10b1-43dd-b559-7675395caed1",
       "title": "Days to Credential Expiry",
       "prompt": "Create an expression to calculate the number of days remaining until 'Credential Expires'. If 'Credential Expires' is blank or already passed, display 'N/A' or 'Expired'. Use 'Today()' for the current date."
-    },
-    {
-      "id": "97706792-1844-4851-8d96-fd95563e2752",
-      "title": "Full Contact Info",
-      "prompt": "Build an expression to combine 'Employee Name' and 'Primary Email' into a single text string like 'Sarah Johnson (sarah.johnson@company.com)'. If 'Primary Email' is blank, just show the 'Employee Name'."
     },
     {
       "id": "9801447b-0d39-4130-8775-d154283c6635",

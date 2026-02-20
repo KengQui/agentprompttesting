@@ -123,11 +123,20 @@ export const welcomePromptSchema = z.object({
 
 export type WelcomePrompt = z.infer<typeof welcomePromptSchema>;
 
+// Data columns card schema for welcome screen
+export const dataColumnsCardSchema = z.object({
+  enabled: z.boolean().default(false),
+  title: z.string().default("View Existing Data Columns"),
+});
+
+export type DataColumnsCard = z.infer<typeof dataColumnsCardSchema>;
+
 // Welcome screen config schema
 export const welcomeConfigSchema = z.object({
   enabled: z.boolean().default(true),
   greeting: z.string().default(""),
   suggestedPrompts: z.array(welcomePromptSchema).default([]),
+  dataColumnsCard: dataColumnsCardSchema.optional(),
 });
 
 export type WelcomeConfig = z.infer<typeof welcomeConfigSchema>;
