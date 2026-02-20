@@ -8,6 +8,7 @@ Agent Studio is a web application designed for the end-to-end creation, configur
 - Requires GEMINI_API_KEY secret to be configured
 - GOOGLE_CLOUD_PROJECT and GOOGLE_CLOUD_LOCATION secrets are also stored but not currently used
 - Prompt generation uses only Google Gemini style (standardized)
+- Admin/owner account username: kengqui.chia@ukg.com
 
 ## System Architecture
 Agent Studio employs a modern web application architecture with distinct frontend and backend components.
@@ -21,7 +22,7 @@ The frontend is built with React, TypeScript, TanStack Query, Wouter, Tailwind C
 - **Smart Generation**: AI evaluates context and asks clarifying questions for generating validation rules or guardrails.
 - **Smart Content Extractor**: Automatically extracts business case information from uploaded domain documents.
 - **Prompt Coach**: An AI-powered chatbot that analyzes agent configurations, suggests improvements conversationally, and allows direct application of changes.
-- **Prompt Library & Revision Tracking**: Features a card-based UI for managing multiple AI-generated prompts, allowing users to activate, edit, or regenerate prompts, with mechanisms to detect and manage "config drift."
+- **Prompt Library & Testing**: Features a card-based UI for managing multiple AI-generated prompts. Users can generate, activate, edit, or regenerate prompts, compare different versions, and test how different prompts perform. Includes config drift detection that alerts when agent configuration has changed since the prompt was generated, and revision tracking to see prompt history.
 
 ### Backend
 The backend is developed using Node.js and Express.js.
@@ -47,8 +48,20 @@ All data is stored in PostgreSQL using Drizzle ORM. The schema is defined in `sh
 - **Auto-Migration**: A mechanism exists (`server/migrate-files-to-db.ts`) to migrate existing file-based data into the database on first startup if the DB is empty.
 - **Storage Interface**: `server/storage.ts` provides a `DatabaseStorage` class implementing an `IStorage` interface for database interactions.
 
-### Dev/Prod Database Sync
-To manage the separate development and production databases, a "pending sync" system is implemented in `server/pending-sync.ts`. Operations (update/delete) are queued and applied to the local database on development server startup, and then to the production database when published. A UI integration allows queuing agent configurations for push to production.
+### Dev/Prod Snapshot Sync System
+The old "pending sync" system has been replaced with a snapshot-based sync architecture (`server/snapshot-sync.ts`).
+- **How it works**: A snapshot file (`agent-config-snapshot.json`) captures agent configurations from the dev database. On production startup, the snapshot is read and applied to the production database, inserting new agents or updating existing ones.
+- **User-scoped**: Only syncs agents belonging to `kengqui.chia@ukg.com`. Other users' agents in production are never touched.
+- **Username-based identification**: The snapshot stores the owner's username (not user ID), so it works even if user IDs differ between dev and prod databases. On apply, it looks up the username in the production database and remaps agent ownership accordingly.
+- **Debounced auto-write**: Snapshot is automatically written 2 seconds after any agent create/update/delete operation in dev.
+- **Force-write endpoint**: `POST /api/admin/force-snapshot` triggers an immediate snapshot write (useful before publishing).
+- **Safety**: No agents are deleted in production. If the owner user is not found in the production database, the sync aborts safely.
+- **Key files**: `server/snapshot-sync.ts`, `agent-config-snapshot.json`
+
+### Database Connection Reliability
+The database connection layer (`server/db.ts`) includes resilience features for production stability:
+- 30-second connection timeout
+- Retry logic with exponential backoff for transient connection failures
 
 ### Data Backup & Restore
 A full database backup/restore feature is available on the home page (requires ENABLE_SYNC=true). The "Export Backup" button downloads a JSON file containing all agents, components, chat sessions, messages, traces, snapshots, and user data (passwords excluded for security). The "Restore Backup" button allows uploading a previously exported JSON file to fully restore the database. Import runs in a transaction for data integrity. Endpoints: GET /api/admin/backup-export, POST /api/admin/backup-import.
