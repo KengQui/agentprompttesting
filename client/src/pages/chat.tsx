@@ -308,7 +308,9 @@ function SuggestedActionPills({ actions, onSelect, onReviseExpression, onEditExp
   if (clicked || actions.length === 0) return null;
 
   return (
-    <div className="flex flex-wrap gap-2 ml-11 mt-1" data-testid="suggested-action-pills">
+    <>
+      <p className="text-sm text-muted-foreground ml-11 mt-2 mb-1" data-testid="text-next-action-prompt">What would you like to do next?</p>
+      <div className="flex flex-wrap gap-2 ml-11 mt-1" data-testid="suggested-action-pills">
       {actions.map((action, index) => (
         <Badge
           key={index}
@@ -335,6 +337,7 @@ function SuggestedActionPills({ actions, onSelect, onReviseExpression, onEditExp
         </Badge>
       ))}
     </div>
+    </>
   );
 }
 
