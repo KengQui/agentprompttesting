@@ -169,8 +169,10 @@ function DataColumnsTableCard({ content, timestamp }: { content: string; timesta
       </div>
       <div className="max-w-[80%] space-y-0.5">
         {parsed.introText && (
-          <div className="text-sm text-muted-foreground mb-2 px-1">
-            <ReactMarkdown remarkPlugins={[remarkGfm]}>{parsed.introText}</ReactMarkdown>
+          <div className="rounded-lg px-4 py-2 bg-muted mb-2">
+            <div className="text-sm prose prose-sm dark:prose-invert max-w-none chat-markdown">
+              <ReactMarkdown remarkPlugins={[remarkGfm]}>{parsed.introText}</ReactMarkdown>
+            </div>
           </div>
         )}
         <Card className="overflow-hidden p-0">
