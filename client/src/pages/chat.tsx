@@ -309,7 +309,7 @@ function SuggestedActionPills({ actions, onSelect, onReviseExpression, onEditExp
 
   return (
     <>
-      <p className="text-sm text-muted-foreground ml-11 mt-2 mb-1" data-testid="text-next-action-prompt">What would you like to do next?</p>
+      <p className="text-sm ml-11 mt-2 mb-1 text-[#0f1629]" data-testid="text-next-action-prompt">What would you like to do next?</p>
       <div className="flex flex-wrap gap-2 ml-11 mt-1" data-testid="suggested-action-pills">
       {actions.map((action, index) => (
         <Badge
