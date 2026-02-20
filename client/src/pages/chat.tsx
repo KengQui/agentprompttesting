@@ -991,11 +991,11 @@ function EmptyChat({ agentName, hasSession, welcomeConfig, onSendPrompt, sampleD
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full max-w-lg">
           {showDataColumnsCard && (
             <Card
-              className="p-4 border-primary/20 bg-primary/5"
+              className="hover-elevate cursor-pointer p-4 transition-colors"
               data-testid="card-data-columns"
             >
               <div className="flex items-center gap-2 mb-1">
-                <Database className="h-4 w-4 text-primary" />
+                <Database className="h-4 w-4 text-muted-foreground" />
                 <p className="text-sm font-medium" data-testid="text-data-columns-title">
                   {dataColumnsTitle}
                 </p>
