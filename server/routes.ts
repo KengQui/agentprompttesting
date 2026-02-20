@@ -2863,5 +2863,16 @@ export async function registerRoutes(
     }
   });
 
+  app.post("/api/admin/force-snapshot", async (_req: Request, res: Response) => {
+    try {
+      const { writeAgentSnapshot } = await import("./snapshot-sync");
+      await writeAgentSnapshot();
+      res.json({ success: true, message: "Snapshot written successfully" });
+    } catch (error: any) {
+      console.error("Force snapshot error:", error);
+      res.status(500).json({ message: error?.message || "Snapshot write failed" });
+    }
+  });
+
   return httpServer;
 }
