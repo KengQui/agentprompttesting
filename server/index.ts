@@ -92,6 +92,13 @@ app.use((req, res, next) => {
   }
 
   try {
+    const { applySnapshotOnStartup } = await import("./snapshot-sync");
+    await applySnapshotOnStartup();
+  } catch (e: any) {
+    console.error(`[startup] Snapshot sync failed: ${e.message}`);
+  }
+
+  try {
     const { seedUsers } = await import("./seed-users");
     await seedUsers();
   } catch (e: any) {

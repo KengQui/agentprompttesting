@@ -282,6 +282,7 @@ export class DatabaseStorage implements IStorage {
       console.error(`[storage] Failed to create component templates for agent ${id}:`, error);
     }
 
+    import("./snapshot-sync").then(m => m.scheduleSnapshotWrite()).catch(() => {});
     return agent;
   }
 
@@ -338,6 +339,7 @@ export class DatabaseStorage implements IStorage {
       updatedAt: updatedAgent.updatedAt,
     }).where(eq(agentsTable.id, id));
 
+    import("./snapshot-sync").then(m => m.scheduleSnapshotWrite()).catch(() => {});
     return updatedAgent;
   }
 
@@ -353,6 +355,7 @@ export class DatabaseStorage implements IStorage {
     await db.delete(promptCoachHistoryTable).where(eq(promptCoachHistoryTable.agentId, id));
     await db.delete(agentsTable).where(eq(agentsTable.id, id));
 
+    import("./snapshot-sync").then(m => m.scheduleSnapshotWrite()).catch(() => {});
     return true;
   }
 
