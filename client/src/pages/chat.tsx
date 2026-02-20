@@ -3,7 +3,7 @@ import { useParams, useLocation } from "wouter";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-import { ArrowLeft, Send, Bot, User, Settings, Loader2, X, AlertCircle, MessageSquare, Eraser, Plus, PanelLeftClose, PanelLeft, Target, Columns, FunctionSquare, Layers, Copy, Check, Database, ChevronDown, ListOrdered, Table } from "lucide-react";
+import { ArrowLeft, Send, Bot, User, Settings, Loader2, X, AlertCircle, MessageSquare, Eraser, Plus, PanelLeftClose, PanelLeft, Target, Columns, FunctionSquare, Layers, Copy, Check, Database, ChevronDown, ListOrdered } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Card } from "@/components/ui/card";
@@ -13,7 +13,6 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest } from "@/lib/queryClient";
@@ -966,41 +965,6 @@ function getColumnCountFromDatasets(datasets: SampleDataset[]): number {
   return columnNames.size;
 }
 
-function extractFieldsFromSampleData(datasets: SampleDataset[]): { name: string; type: string; source: string }[] {
-  const fields: { name: string; type: string; source: string }[] = [];
-  for (const dataset of datasets) {
-    if (dataset.format === "json") {
-      try {
-        const parsed = JSON.parse(dataset.content);
-        const items = Array.isArray(parsed) ? parsed : [parsed];
-        if (items.length > 0 && typeof items[0] === "object") {
-          for (const key of Object.keys(items[0])) {
-            const value = items[0][key];
-            let type = "string";
-            if (typeof value === "number") type = "number";
-            else if (typeof value === "boolean") type = "boolean";
-            else if (typeof value === "string" && !isNaN(Date.parse(value)) && value.includes("-")) type = "date";
-            if (!fields.find(f => f.name === key)) {
-              fields.push({ name: key, type, source: dataset.name });
-            }
-          }
-        }
-      } catch {}
-    } else if (dataset.format === "csv") {
-      const lines = dataset.content.split("\n");
-      if (lines.length > 0) {
-        const headers = lines[0].split(",").map(h => h.trim().replace(/^"|"$/g, ""));
-        for (const header of headers) {
-          if (header && !fields.find(f => f.name === header)) {
-            fields.push({ name: header, type: "string", source: dataset.name });
-          }
-        }
-      }
-    }
-  }
-  return fields;
-}
-
 function EmptyChat({ agentName, hasSession, welcomeConfig, onSendPrompt, sampleDatasets }: { 
   agentName: string; 
   hasSession: boolean;
@@ -1008,11 +972,9 @@ function EmptyChat({ agentName, hasSession, welcomeConfig, onSendPrompt, sampleD
   onSendPrompt?: (prompt: string) => void;
   sampleDatasets?: SampleDataset[];
 }) {
-  const [showColumnsDialog, setShowColumnsDialog] = useState(false);
   const showDataColumnsCard = welcomeConfig?.dataColumnsCard?.enabled && sampleDatasets && sampleDatasets.length > 0;
   const columnCount = sampleDatasets ? getColumnCountFromDatasets(sampleDatasets) : 0;
   const dataColumnsTitle = welcomeConfig?.dataColumnsCard?.title || "View Existing Data Columns";
-  const columnFields = sampleDatasets ? extractFieldsFromSampleData(sampleDatasets) : [];
 
   if (welcomeConfig?.enabled && (welcomeConfig.suggestedPrompts?.length > 0 || showDataColumnsCard)) {
     return (
@@ -1031,7 +993,7 @@ function EmptyChat({ agentName, hasSession, welcomeConfig, onSendPrompt, sampleD
             <Card
               className="hover-elevate cursor-pointer p-4 transition-colors"
               data-testid="card-data-columns"
-              onClick={() => setShowColumnsDialog(true)}
+              onClick={() => onSendPrompt?.("Show me the existing data columns")}
             >
               <div className="flex items-center gap-2 mb-1">
                 <Database className="h-4 w-4 text-muted-foreground" />
@@ -1044,44 +1006,6 @@ function EmptyChat({ agentName, hasSession, welcomeConfig, onSendPrompt, sampleD
               </p>
             </Card>
           )}
-
-          <Dialog open={showColumnsDialog} onOpenChange={setShowColumnsDialog}>
-            <DialogContent className="max-w-md max-h-[80vh]" data-testid="dialog-data-columns">
-              <DialogHeader>
-                <DialogTitle className="flex items-center gap-2">
-                  <Table className="h-5 w-5" />
-                  {dataColumnsTitle}
-                </DialogTitle>
-              </DialogHeader>
-              <ScrollArea className="max-h-[60vh] pr-4">
-                <div className="space-y-1">
-                  {columnFields.map((field, idx) => (
-                    <div
-                      key={`${field.name}-${idx}`}
-                      className="flex items-center justify-between py-2 px-3 rounded-md hover:bg-muted/50"
-                      data-testid={`row-column-${idx}`}
-                    >
-                      <div className="flex items-center gap-2 min-w-0">
-                        <Database className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
-                        <span className="text-sm font-medium truncate">{field.name}</span>
-                      </div>
-                      <Badge variant="secondary" className="text-xs shrink-0 ml-2">
-                        {field.type}
-                      </Badge>
-                    </div>
-                  ))}
-                  {columnFields.length === 0 && (
-                    <p className="text-sm text-muted-foreground text-center py-4">
-                      No columns found in the datasets.
-                    </p>
-                  )}
-                </div>
-              </ScrollArea>
-              <p className="text-xs text-muted-foreground mt-2">
-                {columnFields.length} column{columnFields.length !== 1 ? "s" : ""} available
-              </p>
-            </DialogContent>
-          </Dialog>
           {welcomeConfig.suggestedPrompts.map((prompt, index) => (
             <Card
               key={prompt.id || index}

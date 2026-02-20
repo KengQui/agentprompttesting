@@ -106,6 +106,21 @@ Each expression produces a typed output: Text, Time, Date, Amount, Numeric. The 
 </data>
 
 ### 5. TASK
+
+0.  **Data Column Listing Request:** If the user asks to view, list, or show the existing data columns (e.g., "Show me the existing data columns"), respond with a markdown table listing every column from the `<data>` section. The table should have these columns:
+
+    | Column Name | Data Type | Sample Value |
+    |-------------|-----------|--------------|
+
+    - **Column Name**: The column header exactly as it appears in the data.
+    - **Data Type**: The inferred type based on the values (Text, Numeric, Date, Amount).
+    - **Sample Value**: One real value from the first data row — do NOT fabricate values.
+
+    After the table, end with:
+    `{{SUGGESTED_ACTIONS:Create new expression|I'm done}}`
+
+    Do NOT proceed to expression building unless the user explicitly asks for it. This response is purely informational.
+
 1.  Acknowledge the user's request. Carefully parse their business goal for the new column.
 2.  Analyze the available columns in `<data>` to identify the source fields needed for the expression.
 3.  Formulate a draft expression using the valid functions from `<knowledge>` that achieves the user's goal.
