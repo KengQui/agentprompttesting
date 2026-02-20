@@ -1,9 +1,12 @@
 import * as fs from "fs";
 import * as path from "path";
 import { db, pool } from "./db";
-import { agentsTable, agentComponentsTable } from "@shared/schema";
+import { agentsTable, agentComponentsTable, usersTable } from "@shared/schema";
+import { eq } from "drizzle-orm";
 
 const SNAPSHOT_PATH = path.join(process.cwd(), "agent-config-snapshot.json");
+
+const ADMIN_USERNAME = "kengqui.chia@ukg.com";
 
 const SYNC_FIELDS = [
   'name', 'description', 'status', 'promptStyle', 'mockMode',
@@ -17,15 +20,37 @@ const SYNC_FIELDS = [
 
 let snapshotTimeout: ReturnType<typeof setTimeout> | null = null;
 
+async function resolveAdminUserId(): Promise<string | null> {
+  try {
+    const users = await db.select().from(usersTable).where(eq(usersTable.username, ADMIN_USERNAME));
+    if (users.length > 0) return users[0].id;
+    console.error(`[snapshot-sync] Admin user "${ADMIN_USERNAME}" not found in database`);
+    return null;
+  } catch (err: any) {
+    console.error(`[snapshot-sync] Failed to resolve admin user: ${err.message}`);
+    return null;
+  }
+}
+
 export async function writeAgentSnapshot(): Promise<void> {
   if (process.env.NODE_ENV === "production") return;
 
   try {
-    const agents = await db.select().from(agentsTable);
-    const components = await db.select().from(agentComponentsTable);
+    const adminUserId = await resolveAdminUserId();
+    if (!adminUserId) {
+      console.error(`[snapshot-sync] Cannot write snapshot: admin user not found`);
+      return;
+    }
+
+    const agents = await db.select().from(agentsTable).where(eq(agentsTable.userId, adminUserId));
+    const agentIds = new Set(agents.map(a => a.id));
+    const allComponents = await db.select().from(agentComponentsTable);
+    const components = allComponents.filter(c => agentIds.has(c.agentId));
 
     const snapshot = {
       generatedAt: new Date().toISOString(),
+      ownerUsername: ADMIN_USERNAME,
+      ownerDevUserId: adminUserId,
       agents: agents.map(agent => {
         const config: Record<string, any> = {
           id: agent.id,
@@ -48,7 +73,7 @@ export async function writeAgentSnapshot(): Promise<void> {
     };
 
     fs.writeFileSync(SNAPSHOT_PATH, JSON.stringify(snapshot, null, 2));
-    console.log(`[snapshot-sync] Wrote snapshot: ${agents.length} agents, ${components.length} components`);
+    console.log(`[snapshot-sync] Wrote snapshot for "${ADMIN_USERNAME}": ${agents.length} agents, ${components.length} components (other users' agents excluded)`);
   } catch (err: any) {
     console.error(`[snapshot-sync] Failed to write snapshot: ${err.message}`);
   }
@@ -88,9 +113,37 @@ export async function applySnapshotOnStartup(): Promise<void> {
     return;
   }
 
-  console.log(`[snapshot-sync] Applying snapshot from ${snapshot.generatedAt}: ${snapshot.agents.length} agents, ${snapshot.components?.length || 0} components`);
+  const ownerUsername = snapshot.ownerUsername || ADMIN_USERNAME;
+  const devUserId = snapshot.ownerDevUserId;
 
   const client = await pool.connect();
+
+  let prodUserId: string | null = null;
+  try {
+    const userResult = await client.query('SELECT id FROM users WHERE username = $1', [ownerUsername]);
+    if (userResult.rows.length > 0) {
+      prodUserId = userResult.rows[0].id;
+    } else {
+      console.error(`[snapshot-sync] Owner "${ownerUsername}" not found in production database. Aborting sync.`);
+      client.release();
+      return;
+    }
+  } catch (err: any) {
+    console.error(`[snapshot-sync] Failed to look up owner in production: ${err.message}`);
+    client.release();
+    return;
+  }
+
+  const needsUserIdRemap = devUserId && prodUserId && devUserId !== prodUserId;
+  if (needsUserIdRemap) {
+    console.log(`[snapshot-sync] User ID differs between environments (dev: ${devUserId}, prod: ${prodUserId}). Will remap agent ownership.`);
+  }
+
+  const ownerAgents = snapshot.agents.filter((a: any) => a.userId === devUserId);
+  const ownerAgentIds = new Set(ownerAgents.map((a: any) => a.id));
+  const ownerComponents = (snapshot.components || []).filter((c: any) => ownerAgentIds.has(c.agentId));
+
+  console.log(`[snapshot-sync] Applying snapshot from ${snapshot.generatedAt} for "${ownerUsername}": ${ownerAgents.length} agents, ${ownerComponents.length} components (skipping ${snapshot.agents.length - ownerAgents.length} agents from other users)`);
 
   let validColumns: Set<string>;
   try {
@@ -106,14 +159,24 @@ export async function applySnapshotOnStartup(): Promise<void> {
   }
 
   try {
-    for (const agentData of snapshot.agents) {
+    for (const agentData of ownerAgents) {
       try {
+        if (needsUserIdRemap) {
+          agentData.userId = prodUserId;
+        }
+
         const existsResult = await client.query('SELECT id FROM agents WHERE id = $1', [agentData.id]);
 
         if (existsResult.rows.length > 0) {
           const setClauses: string[] = [];
           const values: any[] = [];
           let paramIdx = 1;
+
+          if (needsUserIdRemap && validColumns.has('user_id')) {
+            setClauses.push(`"user_id" = $${paramIdx}`);
+            values.push(prodUserId);
+            paramIdx++;
+          }
 
           for (const field of SYNC_FIELDS) {
             if (!(field in agentData)) continue;
@@ -170,8 +233,8 @@ export async function applySnapshotOnStartup(): Promise<void> {
       }
     }
 
-    if (snapshot.components && Array.isArray(snapshot.components)) {
-      for (const comp of snapshot.components) {
+    if (ownerComponents.length > 0) {
+      for (const comp of ownerComponents) {
         if (!comp.agentId || !comp.fileName) continue;
 
         try {
@@ -195,7 +258,7 @@ export async function applySnapshotOnStartup(): Promise<void> {
           console.error(`[snapshot-sync] Error syncing component ${comp.fileName}: ${compErr.message}`);
         }
       }
-      console.log(`[snapshot-sync] Synced ${snapshot.components.length} components`);
+      console.log(`[snapshot-sync] Synced ${ownerComponents.length} components`);
     }
 
     console.log("[snapshot-sync] Snapshot applied successfully.");
