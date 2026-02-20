@@ -494,7 +494,8 @@ export class DatabaseStorage implements IStorage {
         .where(and(
           eq(chatMessagesTable.agentId, agentId),
           eq(chatMessagesTable.sessionId, sessionId)
-        ));
+        ))
+        .orderBy(chatMessagesTable.timestamp);
       return rows.map(r => ({
         id: r.id,
         agentId: r.agentId,
