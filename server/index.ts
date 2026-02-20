@@ -68,6 +68,14 @@ app.use((req, res, next) => {
   console.log(`[startup] DB URL hash: ${dbUrlHash}, NODE_ENV: ${process.env.NODE_ENV}`);
 
   try {
+    const { waitForDb } = await import("./db");
+    await waitForDb();
+  } catch (e: any) {
+    console.error(`[startup] DB connection failed: ${e.message || 'Unknown error'}`);
+    if (process.env.NODE_ENV !== "production") throw e;
+  }
+
+  try {
     const { migrateFilesToDb } = await import("./migrate-files-to-db");
     await migrateFilesToDb();
   } catch (e: any) {

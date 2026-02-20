@@ -15,14 +15,35 @@ try {
 
 const pool = new pg.Pool({
   connectionString: process.env.DATABASE_URL,
-  connectionTimeoutMillis: 10000,
-  idleTimeoutMillis: 30000,
+  connectionTimeoutMillis: 30000,
+  idleTimeoutMillis: 60000,
   max: 10,
 });
 
 pool.on('error', (err) => {
   console.error('[db] Pool error:', err.message);
 });
+
+export async function waitForDb(maxRetries = 5): Promise<void> {
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      const client = await pool.connect();
+      await client.query('SELECT 1');
+      client.release();
+      console.log(`[db] Connection verified on attempt ${attempt}`);
+      return;
+    } catch (err: any) {
+      console.error(`[db] Connection attempt ${attempt}/${maxRetries} failed: ${err.message}`);
+      if (attempt < maxRetries) {
+        const delay = Math.min(attempt * 3000, 15000);
+        console.log(`[db] Retrying in ${delay}ms...`);
+        await new Promise(res => setTimeout(res, delay));
+      } else {
+        throw new Error(`[db] Could not connect after ${maxRetries} attempts: ${err.message}`);
+      }
+    }
+  }
+}
 
 export const db = drizzle(pool, { schema });
 export { pool };
