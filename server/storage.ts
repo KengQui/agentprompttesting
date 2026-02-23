@@ -235,6 +235,11 @@ export class DatabaseStorage implements IStorage {
       mockUserState: insertAgent.mockUserState || [],
       mockMode: insertAgent.mockMode || "full",
       welcomeConfig: insertAgent.welcomeConfig,
+      promptGeneratedAt: insertAgent.promptGeneratedAt || null,
+      lastConfigUpdate: insertAgent.lastConfigUpdate || null,
+      promptLastRevisedBy: insertAgent.promptLastRevisedBy || null,
+      promptLastRevisedAt: insertAgent.promptLastRevisedAt || null,
+      configFieldsHash: insertAgent.configFieldsHash || null,
       status,
       configurationStep: insertAgent.configurationStep || 1,
       createdAt: now,
@@ -262,6 +267,11 @@ export class DatabaseStorage implements IStorage {
       availableActions: agent.availableActions,
       mockUserState: agent.mockUserState,
       welcomeConfig: agent.welcomeConfig || null,
+      promptGeneratedAt: agent.promptGeneratedAt || null,
+      lastConfigUpdate: agent.lastConfigUpdate || null,
+      promptLastRevisedBy: agent.promptLastRevisedBy || null,
+      promptLastRevisedAt: agent.promptLastRevisedAt || null,
+      configFieldsHash: agent.configFieldsHash || null,
       createdAt: agent.createdAt,
       updatedAt: agent.updatedAt,
     });
@@ -382,9 +392,39 @@ export class DatabaseStorage implements IStorage {
       welcomeConfig: source.welcomeConfig ? JSON.parse(JSON.stringify(source.welcomeConfig)) : undefined,
       status: source.status === "draft" ? "draft" : "configured",
       configurationStep: source.configurationStep,
+      promptGeneratedAt: source.promptGeneratedAt,
+      lastConfigUpdate: source.lastConfigUpdate,
+      promptLastRevisedBy: source.promptLastRevisedBy,
+      promptLastRevisedAt: source.promptLastRevisedAt,
+      configFieldsHash: source.configFieldsHash,
     };
 
-    return this.createAgent(clonedAgent, userId);
+    const newAgent = await this.createAgent(clonedAgent, userId);
+
+    try {
+      const sourceComponents = await db.select().from(agentComponentsTable)
+        .where(eq(agentComponentsTable.agentId, id));
+
+      if (sourceComponents.length > 0) {
+        await db.delete(agentComponentsTable).where(eq(agentComponentsTable.agentId, newAgent.id));
+
+        const now = new Date().toISOString();
+        for (const comp of sourceComponents) {
+          await db.insert(agentComponentsTable).values({
+            id: randomUUID(),
+            agentId: newAgent.id,
+            fileName: comp.fileName,
+            code: comp.code,
+            createdAt: now,
+          });
+        }
+        console.log(`[storage] Cloned ${sourceComponents.length} components from agent ${id} to ${newAgent.id}`);
+      }
+    } catch (error) {
+      console.error(`[storage] Failed to clone components for agent ${newAgent.id}:`, error);
+    }
+
+    return newAgent;
   }
 
   async getSessions(agentId: string): Promise<ChatSessionWithPreview[]> {
