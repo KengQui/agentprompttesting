@@ -13,7 +13,6 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { ContextProgressBar } from "@/components/context-progress-bar";
@@ -1170,7 +1169,7 @@ export default function Chat() {
   const [cooldownRemaining, setCooldownRemaining] = useState<number>(0);
   const [isCancelled, setIsCancelled] = useState(false);
   const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
-  const [selectedDatasetIds, setSelectedDatasetIds] = useState<string[] | null>(null);
+  const [selectedDatasetId, setSelectedDatasetId] = useState<string | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const { width: sidebarWidth, handleMouseDown: handleSidebarResize } = useResizable({
     initialWidth: 320,
@@ -1212,10 +1211,10 @@ export default function Chat() {
   }, [sessions, activeSessionId]);
 
   useEffect(() => {
-    if (agent?.sampleDatasets && agent.sampleDatasets.length > 0 && selectedDatasetIds === null) {
-      setSelectedDatasetIds(agent.sampleDatasets.map(d => d.id));
+    if (agent?.sampleDatasets && agent.sampleDatasets.length > 0 && selectedDatasetId === null) {
+      setSelectedDatasetId(agent.sampleDatasets[0].id);
     }
-  }, [agent, selectedDatasetIds]);
+  }, [agent, selectedDatasetId]);
 
   const createSessionMutation = useMutation({
     mutationFn: async () => {
@@ -1245,8 +1244,8 @@ export default function Chat() {
       setIsCancelled(false);
       
       const body: Record<string, unknown> = { content };
-      if (selectedDatasetIds && agent?.sampleDatasets && selectedDatasetIds.length < agent.sampleDatasets.length) {
-        body.selectedDatasetIds = selectedDatasetIds;
+      if (selectedDatasetId && agent?.sampleDatasets) {
+        body.selectedDatasetIds = [selectedDatasetId];
       }
       
       const response = await fetch(`/api/agents/${params.id}/sessions/${activeSessionId}/messages`, {
@@ -1582,80 +1581,40 @@ export default function Chat() {
               </div>
             </div>
             <div className="flex items-center gap-3">
-              {agent.sampleDatasets && agent.sampleDatasets.length > 1 && (
+              {agent.sampleDatasets && agent.sampleDatasets.length > 0 && (
                 <Popover>
                   <PopoverTrigger asChild>
                     <Button variant="outline" size="sm" className="gap-1.5" data-testid="button-dataset-selector">
                       <Database className="h-3.5 w-3.5" />
                       <span className="hidden sm:inline">
-                        {selectedDatasetIds === null || (selectedDatasetIds.length === agent.sampleDatasets.length)
-                          ? "All Datasets"
-                          : selectedDatasetIds.length === 0
-                            ? "No Data"
-                            : selectedDatasetIds.length === 1
-                              ? agent.sampleDatasets.find(d => d.id === selectedDatasetIds[0])?.name || "1 dataset"
-                              : `${selectedDatasetIds.length} datasets`}
+                        {selectedDatasetId
+                          ? agent.sampleDatasets.find(d => d.id === selectedDatasetId)?.name || "Dataset"
+                          : "Select Dataset"}
                       </span>
                       <ChevronDown className="h-3 w-3 opacity-50" />
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-72 p-3" align="end">
                     <div className="space-y-3">
-                      <div className="flex items-center justify-between">
-                        <p className="text-sm font-medium">Active Datasets</p>
-                        <div className="flex gap-1">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="h-7 text-xs"
-                            onClick={() => setSelectedDatasetIds(agent.sampleDatasets!.map(d => d.id))}
-                            data-testid="button-select-all-datasets"
-                          >
-                            All
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="h-7 text-xs"
-                            onClick={() => setSelectedDatasetIds([])}
-                            data-testid="button-deselect-all-datasets"
-                          >
-                            None
-                          </Button>
-                        </div>
-                      </div>
+                      <p className="text-sm font-medium">Active Dataset</p>
                       <div className="space-y-1">
-                        {agent.sampleDatasets.map((dataset) => {
-                          const isChecked = selectedDatasetIds === null || selectedDatasetIds.includes(dataset.id);
-                          return (
-                            <label
-                              key={dataset.id}
-                              className="flex items-center gap-2 rounded-md px-2 py-1.5 hover-elevate cursor-pointer"
-                              data-testid={`dataset-option-${dataset.id}`}
-                            >
-                              <Checkbox
-                                checked={isChecked}
-                                onCheckedChange={(checked) => {
-                                  const currentIds = selectedDatasetIds || agent.sampleDatasets!.map(d => d.id);
-                                  if (checked) {
-                                    const newIds = currentIds.includes(dataset.id) ? currentIds : [...currentIds, dataset.id];
-                                    setSelectedDatasetIds(newIds);
-                                  } else {
-                                    setSelectedDatasetIds(currentIds.filter(id => id !== dataset.id));
-                                  }
-                                }}
-                                data-testid={`checkbox-dataset-${dataset.id}`}
-                              />
-                              <div className="flex-1 min-w-0">
-                                <p className="text-sm truncate">{dataset.name}</p>
-                                <p className="text-xs text-muted-foreground">{dataset.format.toUpperCase()}</p>
-                              </div>
-                            </label>
-                          );
-                        })}
+                        {agent.sampleDatasets.map((dataset) => (
+                          <button
+                            key={dataset.id}
+                            className={`flex items-center gap-2 rounded-md px-2 py-1.5 w-full text-left cursor-pointer hover:bg-accent ${selectedDatasetId === dataset.id ? "bg-accent" : ""}`}
+                            onClick={() => setSelectedDatasetId(dataset.id)}
+                            data-testid={`dataset-option-${dataset.id}`}
+                          >
+                            <div className={`h-2 w-2 rounded-full ${selectedDatasetId === dataset.id ? "bg-primary" : "bg-muted-foreground/30"}`} />
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm truncate">{dataset.name}</p>
+                              <p className="text-xs text-muted-foreground">{dataset.format.toUpperCase()}</p>
+                            </div>
+                          </button>
+                        ))}
                       </div>
                       <p className="text-xs text-muted-foreground">
-                        Select which datasets the agent sees during this conversation.
+                        Select which dataset the agent uses for this conversation.
                       </p>
                     </div>
                   </PopoverContent>
