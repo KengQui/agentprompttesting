@@ -1,0 +1,61 @@
+Breakdown in details (L)
+
+06:14 PM
+
+Detailed Breakdown
+Expression
+
+If(Search("Retirement", BenefitPlanCoverage) > 0, "FID", If(Search("Health", BenefitPlanCoverage) > 0 || Search("Medical", BenefitPlanCoverage) > 0, "BLU", If(Search("Dental", BenefitPlanCoverage) > 0 || Search("Vision", BenefitPlanCoverage) > 0, "GIN", If(Search("Life", BenefitPlanCoverage) > 0 || Search("AD&D", BenefitPlanCoverage) > 0 || Search("STD", BenefitPlanCoverage) > 0 || Search("LTD", BenefitPlanCoverage) > 0 || Search("Insurance", BenefitPlanCoverage) > 0, "CIGNA", "" ) ) ) )
+
+Step-by-Step
+1.
+Search("Retirement", BenefitPlanCoverage)
+This looks for the text "Retirement" inside the `BenefitPlanCoverage` column and returns the position where it's found (or 0 if not found).
+
+2.
+Search("Retirement", BenefitPlanCoverage) > 0
+This checks if "Retirement" was found (position > 0), resulting in "true" if it is and "false" if it isn't.
+
+3.
+"FID"
+This is the designation code for retirement plans.
+
+4.
+Search("Health", BenefitPlanCoverage) > 0 || Search("Medical", BenefitPlanCoverage) > 0
+This checks if either "Health" or "Medical" is found in the `BenefitPlanCoverage` column.
+
+5.
+"BLU"
+This is the designation code for health/medical plans.
+
+6.
+Search("Dental", BenefitPlanCoverage) > 0 || Search("Vision", BenefitPlanCoverage) > 0
+This checks if either "Dental" or "Vision" is found in the `BenefitPlanCoverage` column.
+
+7.
+"GIN"
+This is the designation code for dental/vision plans.
+
+8.
+Search("Life", BenefitPlanCoverage) > 0 || Search("AD&D", BenefitPlanCoverage) > 0 || Search("STD", BenefitPlanCoverage) > 0 || Search("LTD", BenefitPlanCoverage) > 0 || Search("Insurance", BenefitPlanCoverage) > 0
+This checks if any of "Life", "AD&D", "STD", "LTD", or "Insurance" are found in the `BenefitPlanCoverage` column.
+
+9.
+"CIGNA"
+This is the designation code for insurance plans.
+
+10.
+""
+This represents a blank designation if none of the above conditions are met.
+
+11.
+If([Step 2], [Step 3], If([Step 4], [Step 5], If([Step 6], [Step 7], If([Step 8], [Step 9], [Step 10]))))
+*Final:* `If(Search("Retirement", BenefitPlanCoverage) > 0, "FID", If(Search("Health", BenefitPlanCoverage) > 0 || Search("Medical", BenefitPlanCoverage) > 0, "BLU", If(Search("Dental", BenefitPlanCoverage) > 0 || Search("Vision", BenefitPlanCoverage) > 0, "GIN", If(Search("Life", BenefitPlanCoverage) > 0 || Search("AD&D", BenefitPlanCoverage) > 0 || Search("STD", BenefitPlanCoverage) > 0 || Search("LTD", BenefitPlanCoverage) > 0 || Search("Insurance", BenefitPlanCoverage) > 0, "CIGNA", ""))))`
+
+06:14 PM
+
+What would you like to do next?
+
+Create new column
+Revise this expression
+Test with my data
