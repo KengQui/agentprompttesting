@@ -503,43 +503,63 @@ function parseStepsBlock(stepsBlock: string, expression: string): BreakdownData 
   let finalStep = '';
   let finalAnnotation = '';
   const lines = stepsBlock.split('\n');
-  for (let i = 0; i < lines.length; i++) {
+  let i = 0;
+
+  while (i < lines.length) {
     const trimmed = lines[i].trim();
-    if (!trimmed) continue;
-    const finalMatch = trimmed.match(/^\d+\.\s*\*{0,2}\s*Final:?\s*\*{0,2}\s*(.*)/i);
-    if (finalMatch) {
-      let finalText = finalMatch[1].replace(/`/g, '').trim();
-      for (let j = i + 1; j < lines.length; j++) {
-        const next = lines[j].trim();
-        if (!next) continue;
-        const arrowMatch = next.match(/^→\s*(.*)/);
-        if (arrowMatch) {
-          finalAnnotation = arrowMatch[1].trim();
-          i = j;
-          break;
-        }
-        if (/^\d+\./.test(next)) break;
-        finalText = (finalText + ' ' + next.replace(/`/g, '')).trim();
-        i = j;
-      }
-      finalStep = finalText;
-      continue;
-    }
-    const stepMatch = trimmed.match(/^\d+\.\s*(.*)/);
-    if (stepMatch) {
-      const stepExpr = stepMatch[1].replace(/`/g, '').trim();
-      let annotation = '';
-      for (let j = i + 1; j < lines.length; j++) {
-        const next = lines[j].trim();
-        if (!next) continue;
-        const arrowMatch = next.match(/^→\s*(.*)/);
-        if (arrowMatch) {
-          annotation = arrowMatch[1].trim();
-          i = j;
-        }
+    if (!trimmed) { i++; continue; }
+
+    const stepNumMatch = trimmed.match(/^(\d+)\.\s*(.*)/);
+    if (!stepNumMatch) { i++; continue; }
+
+    let inlineRest = stepNumMatch[2].replace(/`/g, '').trim();
+    i++;
+
+    const isFinalInline = /^\*{0,2}\s*Final:?\s*\*{0,2}\s*(.*)/i.test(inlineRest);
+
+    if (!inlineRest) {
+      while (i < lines.length) {
+        const next = lines[i].trim();
+        if (!next) { i++; continue; }
+        if (/^→/.test(next)) break;
+        inlineRest = next.replace(/`/g, '').trim();
+        i++;
         break;
       }
-      steps.push({ expression: stepExpr, annotation });
+    }
+
+    const isFinal = isFinalInline || /^\*{0,2}\s*Final:?\s*\*{0,2}/i.test(inlineRest);
+    const finalContentMatch = inlineRest.match(/^\*{0,2}\s*Final:?\s*\*{0,2}\s*(.*)/i);
+    let content = isFinal && finalContentMatch ? finalContentMatch[1].replace(/`/g, '').trim() : inlineRest;
+
+    if (isFinal && !content) {
+      while (i < lines.length) {
+        const next = lines[i].trim();
+        if (!next) { i++; continue; }
+        if (/^→/.test(next)) break;
+        content = (content + ' ' + next.replace(/`/g, '')).trim();
+        i++;
+        break;
+      }
+    }
+
+    let annotation = '';
+    while (i < lines.length) {
+      const next = lines[i].trim();
+      if (!next) { i++; continue; }
+      const arrowMatch = next.match(/^→\s*(.*)/);
+      if (arrowMatch) {
+        annotation = arrowMatch[1].trim();
+        i++;
+      }
+      break;
+    }
+
+    if (isFinal) {
+      finalStep = content;
+      finalAnnotation = annotation;
+    } else {
+      steps.push({ expression: content, annotation });
     }
   }
 
