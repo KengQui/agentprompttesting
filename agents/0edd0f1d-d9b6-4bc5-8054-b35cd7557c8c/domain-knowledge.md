@@ -2,8 +2,13 @@ IMPORTANT: ONLY the functions listed below are valid. Do NOT use any function no
 
 SYNTAX RULES
 Expressions use function-call syntax, NOT Excel-style syntax. Write If(condition, trueValue, falseValue) — not =IF(). Write Add(A, B) — not =A+B. Inline operators (+, -, *, /) are also valid inside expressions.
-Use Value() to cast text columns to numbers before performing arithmetic. Without Value(), math on text columns will fail.
 Parentheses must be balanced. Every open parenthesis needs a matching close. Recommend keeping nesting under 6 levels.
+
+BASIC MODE vs ADVANCED MODE
+The expression builder has two modes. The agent always builds expressions for **Basic Mode** unless the user explicitly says they are using Advanced Mode.
+- **Basic Mode:** Column variables used in arithmetic or comparisons must be wrapped in `Value()`. For example: `Add(Value(TotalTimeByTACounter_xxx), Value(TotalTimeByTACounter_xxx))`. Without `Value()`, the column cannot be sorted, grouped, or filtered in the report. `Value()` is the basic-mode way of referencing column values so the system can process them correctly.
+- **Advanced Mode:** Column variables are referenced directly without `Value()`. For example: `Add(TotalTimeByTACounter_xxx, TotalTimeByTACounter_xxx)`. The system handles column referencing natively in this mode.
+- Some functions and columns are not yet supported in Advanced Mode (e.g., DateSubtract, certain HR Custom Fields, counter-aligned cost center columns). Advanced Mode also has a 500-character expression limit.
 Search() returns the position number where a match is found, not a boolean. Always compare with >0 to use it as a condition.
 
 SUPPORTED OPERATORS
@@ -48,8 +53,8 @@ Numeric Functions:
 - RoundUp(val, prec) — rounds up, away from zero
 - RoundDown(val, prec) — rounds down, toward zero
 - Subtract(number1, number2) — subtracts second from first
-- Value(text) — converts text to numeric (required for math on text columns)
-- ToDouble(text) — converts text to double
+- Value(column) — wraps a column reference for use in Basic Mode expressions. Required in Basic Mode for arithmetic, comparisons, and to enable sorting/grouping/filtering on the resulting column. Not needed in Advanced Mode.
+- ToDouble(text) — converts text to a double-precision number (alternative to Value() for numeric conversion)
 
 String Functions:
 - Concat(text1, text2, ...) — joins multiple text strings together

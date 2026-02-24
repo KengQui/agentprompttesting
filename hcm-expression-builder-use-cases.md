@@ -91,24 +91,34 @@ The agent is configured with the following sample employee data:
 
 ---
 
-## Category 2: Value() Type Casting
+## Category 2: Value() Column Wrapping (Basic Mode vs Advanced Mode)
 
-**Purpose:** Verify the agent always wraps text-based numeric columns in `Value()` before performing math. Report columns are stored as text by default, so skipping `Value()` will cause calculations to fail.
+**Purpose:** Verify the agent correctly wraps column references in `Value()` when building expressions for Basic Mode. In Basic Mode, `Value()` is required around column variables used in arithmetic or comparisons — without it, the resulting custom column will not support sorting, grouping, or filtering in the report. In Advanced Mode, `Value()` is not needed because the system handles column referencing natively. The agent defaults to Basic Mode unless the user explicitly says they are using Advanced Mode.
 
-### UC-2.1: Math on Text Column Without Prompting
-- **What to Test:** Agent proactively adds `Value()` around Hourly Pay, Annual Salary, etc. without the user asking
+### UC-2.1: Basic Mode — Value() Applied to Column References
+- **What to Test:** Agent proactively adds `Value()` around column names (Hourly Pay, Annual Salary, etc.) in Basic Mode without the user asking
 - **User Prompt:** "Multiply Hourly Pay by 2080 to get estimated annual pay."
-- **Expected Behavior:** Agent writes `Multiply(Value(Hourly Pay), 2080)` — never `Multiply(Hourly Pay, 2080)`.
+- **Expected Behavior:** Agent writes `Multiply(Value(HourlyPay), 2080)` — never `Multiply(HourlyPay, 2080)`. Agent may explain that `Value()` is needed in Basic Mode so the column can be sorted, grouped, and filtered.
 
-### UC-2.2: Math on Currency-Formatted Column
-- **What to Test:** Agent handles columns formatted with `$` and commas (e.g., "$95,000.00") by using `Value()`
+### UC-2.2: Basic Mode — Multiple Columns Wrapped
+- **What to Test:** Agent wraps all column references in `Value()` when multiple columns are used in arithmetic
 - **User Prompt:** "Add Annual Salary and Scheduled EE Amount together."
-- **Expected Behavior:** Agent wraps both in `Value()` since they contain currency formatting.
+- **Expected Behavior:** Agent wraps both in `Value()`: `Add(Value(AnnualSalary), Value(ScheduledEEAmount))`.
 
-### UC-2.3: Mixed Numeric and Text Columns
-- **What to Test:** Agent applies `Value()` only where needed
+### UC-2.3: Basic Mode — Literal Numbers Not Wrapped
+- **What to Test:** Agent applies `Value()` only to column references, not literal numbers
 - **User Prompt:** "Divide Annual Salary by 365.25 to get a daily rate."
 - **Expected Behavior:** Agent wraps Annual Salary in `Value()` but does not wrap the literal number 365.25.
+
+### UC-2.4: Advanced Mode — Value() Not Needed
+- **What to Test:** When user specifies Advanced Mode, agent omits `Value()` wrappers
+- **User Prompt:** "I'm using Advanced Mode. Add two counter values together."
+- **Expected Behavior:** Agent writes the expression without `Value()` wrappers (e.g., `Add(TotalTimeByTACounter_xxx, TotalTimeByTACounter_xxx)`).
+
+### UC-2.5: Default to Basic Mode
+- **What to Test:** Agent defaults to Basic Mode when user does not specify a mode
+- **User Prompt:** "Calculate total monthly benefit cost."
+- **Expected Behavior:** Agent builds the expression using `Value()` wrappers (Basic Mode) and does not ask the user which mode they are using.
 
 ---
 
@@ -550,9 +560,9 @@ The agent is configured with the following sample employee data:
 - **Expected Behavior:** Agent uses `FormatDouble(Add(Value(Scheduled EE Amount), Value(Scheduled ER Amount)), 2)`.
 
 ### UC-13.9: ToDouble Conversion
-- **What to Test:** Agent uses `ToDouble()` as an alternative to `Value()` for text-to-number conversion
+- **What to Test:** Agent uses `ToDouble()` as an alternative to `Value()` for numeric conversion
 - **User Prompt:** "Convert Hourly Pay to a double for precision calculations."
-- **Expected Behavior:** Agent uses `ToDouble(Hourly Pay)` and explains it works similarly to `Value()`.
+- **Expected Behavior:** Agent uses `ToDouble(HourlyPay)` and explains it works similarly to `Value()` for numeric conversion, though `Value()` is the standard Basic Mode column wrapper.
 
 ### UC-13.10: String Functions — Left, Right, Mid
 - **What to Test:** Agent extracts substrings using positional functions
@@ -668,7 +678,7 @@ The agent is configured with the following sample employee data:
 | Category | Count | Focus Area |
 |----------|-------|------------|
 | 1. Core Expression Building | 10 | Arithmetic, dates, strings, conditionals |
-| 2. Value() Type Casting | 3 | Text-to-numeric conversion for math |
+| 2. Value() Column Wrapping (Basic/Advanced Mode) | 5 | Basic Mode requires Value() for sort/group/filter; Advanced Mode does not |
 | 3. Blank/Empty Field Handling | 4 | Blank values in data |
 | 4. Invalid / Excel-Style Input | 5 | Syntax correction and rejection |
 | 5. Search() Function Handling | 3 | Proper boolean usage of Search() |
