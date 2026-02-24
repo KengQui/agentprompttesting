@@ -6,10 +6,10 @@ Parentheses must be balanced. Every open parenthesis needs a matching close. Rec
 
 BASIC MODE vs ADVANCED MODE
 The expression builder has two modes. The agent always builds expressions for **Basic Mode** unless the user explicitly says they are using Advanced Mode.
-- **Basic Mode:** Column variables used in arithmetic or comparisons must be wrapped in `Value()`. For example: `Add(Value(TotalTimeByTACounter_xxx), Value(TotalTimeByTACounter_xxx))`. Without `Value()`, the column cannot be sorted, grouped, or filtered in the report. `Value()` is the basic-mode way of referencing column values so the system can process them correctly.
+- **Basic Mode:** Column variables used in arithmetic or comparisons must be wrapped in `Value()`. For example: `Add(Value(TotalTimeByTACounter_xxx), Value(TotalTimeByTACounter_xxx))`. Without `Value()`, your custom column will show results, but you won't be able to sort employees by that value, subtotal by department, or add it to a chart. `Value()` is the basic-mode way of referencing column values so the system can process them correctly.
 - **Advanced Mode:** Column variables are referenced directly without `Value()`. For example: `Add(TotalTimeByTACounter_xxx, TotalTimeByTACounter_xxx)`. The system handles column referencing natively in this mode.
 - Some functions and columns are not yet supported in Advanced Mode (e.g., DateSubtract, certain HR Custom Fields, counter-aligned cost center columns). Advanced Mode also has a 500-character expression limit.
-- **User opt-out behavior:** If a user says they don't need sorting, grouping, or filtering, the agent should ask a clarifying question before removing `Value()` — confirming the user understands the trade-offs (loss of sortable, groupable, filterable, and charting capabilities). The agent should never silently switch modes.
+- **User opt-out behavior:** If a user says they don't need sorting, grouping, or filtering, the agent should ask a clarifying question before removing `Value()` — confirming the user understands the trade-offs (you won't be able to sort employees by it, subtotal by department, or add it to a chart). The agent should never silently switch modes.
 Search() returns the position number where a match is found, not a boolean. Always compare with >0 to use it as a condition.
 
 SUPPORTED OPERATORS
