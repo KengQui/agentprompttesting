@@ -34,7 +34,8 @@ const COLUMN_ADDED_FALLBACK_PILLS = ["See related expressions", "Create new expr
 const EXPRESSION_PRESENTED_FALLBACK_PILLS = ["Revise this expression", "Create new column", "Test with my data", "Explain this expression"];
 const VALIDATION_DONE_FALLBACK_PILLS = ["Create new column", "Revise this expression", "Explain this expression"];
 const EXPLANATION_DONE_FALLBACK_PILLS = ["Breakdown in details (L)", "Breakdown in details (S)", "Create new column", "Revise this expression", "Test with my data"];
-const BREAKDOWN_DONE_FALLBACK_PILLS = ["Create new column", "Revise this expression", "Test with my data"];
+const BREAKDOWN_DONE_FALLBACK_PILLS_FROM_L = ["Breakdown in details (S)", "Create new column", "Revise this expression", "Test with my data"];
+const BREAKDOWN_DONE_FALLBACK_PILLS_FROM_S = ["Breakdown in details (L)", "Create new column", "Revise this expression", "Test with my data"];
 const REVISE_CHOICE_PILLS = ["Edit it yourself", "Describe your changes"];
 
 function parseSuggestedActions(text: string, isHcmAgent?: boolean): { cleanedText: string; actions: string[] } {
@@ -63,7 +64,8 @@ function parseSuggestedActions(text: string, isHcmAgent?: boolean): { cleanedTex
         return { cleanedText: text, actions: EXPLANATION_DONE_FALLBACK_PILLS };
       }
       if (isBreakdownMessage(text)) {
-        return { cleanedText: text, actions: BREAKDOWN_DONE_FALLBACK_PILLS };
+        const isLongBreakdown = /→/.test(text) || (text.match(/\n\s*\d+\.\s+/g) || []).length > 6;
+        return { cleanedText: text, actions: isLongBreakdown ? BREAKDOWN_DONE_FALLBACK_PILLS_FROM_L : BREAKDOWN_DONE_FALLBACK_PILLS_FROM_S };
       }
     }
     if (isHcmAgent && /edit it yourself|modify it directly|describe the changes|describe.*changes.*you'd like/i.test(text) && /revise/i.test(text)) {
