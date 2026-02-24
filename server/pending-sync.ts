@@ -14,10 +14,8 @@ const pendingOps: SyncOperation[] = [
   // Add operations here, then publish to apply them to production.
   // After confirming they ran, remove them from this list.
 
-  // 1. Rename agent in production
-  { id: "rename-pm-eng", type: "update", agentId: "2dd70ace-b577-41f4-b6f5-b640940f7c65", agentName: "PM/ENG Custom Column Expression Builder", updates: { name: "PM/ENG Custom Column Expression Builder" }, addedAt: "2026-02-19T00:00:00Z" },
-
-  // 2. Delete test/obsolete agents from production
+  // Delete test/obsolete agents from production
+  { id: "del-pm-eng", type: "delete", agentId: "2dd70ace-b577-41f4-b6f5-b640940f7c65", agentName: "PM/ENG Custom Column Expression Builder", addedAt: "2026-02-24T00:00:00Z" },
   { id: "del-1", type: "delete", agentId: "96dcbd4b-18b3-432c-b5ea-d80fa9c58d3a", agentName: "Action Test Agent Oab5V1", addedAt: "2026-02-19T00:00:00Z" },
   { id: "del-2", type: "delete", agentId: "70c1b6c9-8a15-4001-ad21-d272448db64e", agentName: "Call-In Shift Agent", addedAt: "2026-02-19T00:00:00Z" },
   { id: "del-3", type: "delete", agentId: "c17076bb-46b1-4107-b1ba-d849ced1be30", agentName: "Call-In Test Agent", addedAt: "2026-02-19T00:00:00Z" },

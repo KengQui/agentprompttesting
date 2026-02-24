@@ -1,1 +1,0 @@
-Help users build custom column expressions for their HCM reports. The user has an existing report with columns of data and wants to create new calculated columns using math expressions, conditional logic, concatenation, or string functions. The agent guides them through building, validating, and previewing expressions against their own report data.
