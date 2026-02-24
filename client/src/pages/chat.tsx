@@ -33,7 +33,7 @@ function stripActionBlocks(text: string): string {
 const COLUMN_ADDED_FALLBACK_PILLS = ["See related expressions", "Create new expression", "I'm done"];
 const EXPRESSION_PRESENTED_FALLBACK_PILLS = ["Revise this expression", "Create new column", "Test with my data", "Explain this expression"];
 const VALIDATION_DONE_FALLBACK_PILLS = ["Create new column", "Revise this expression", "Explain this expression"];
-const EXPLANATION_DONE_FALLBACK_PILLS = ["Breakdown in details", "Create new column", "Revise this expression", "Test with my data"];
+const EXPLANATION_DONE_FALLBACK_PILLS = ["Breakdown in details (L)", "Breakdown in details (S)", "Create new column", "Revise this expression", "Test with my data"];
 const BREAKDOWN_DONE_FALLBACK_PILLS = ["Create new column", "Revise this expression", "Test with my data"];
 const REVISE_CHOICE_PILLS = ["Edit it yourself", "Describe your changes"];
 
@@ -73,12 +73,12 @@ function parseSuggestedActions(text: string, isHcmAgent?: boolean): { cleanedTex
   }
   let actions = match[1].split('|').map(a => a.trim()).filter(Boolean);
   const cleanedText = text.replace(regex, '').trim();
-  if (isHcmAgent && !actions.includes('Breakdown in details')) {
+  if (isHcmAgent && !actions.includes('Breakdown in details (L)') && !actions.includes('Breakdown in details (S)')) {
     const looksLikeExplanation = isExplanationMessage(cleanedText)
       || (/how (it|this|the expression) works/i.test(cleanedText) && !actions.includes('Explain this expression'))
       || (/step[\s-]*by[\s-]*step/i.test(cleanedText) && /expression/i.test(cleanedText));
     if (looksLikeExplanation) {
-      actions = ['Breakdown in details', ...actions];
+      actions = ['Breakdown in details (L)', 'Breakdown in details (S)', ...actions];
     }
   }
   return { cleanedText, actions };
