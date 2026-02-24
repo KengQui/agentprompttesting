@@ -64,7 +64,8 @@ function parseSuggestedActions(text: string, isHcmAgent?: boolean): { cleanedTex
         return { cleanedText: text, actions: EXPLANATION_DONE_FALLBACK_PILLS };
       }
       if (isBreakdownMessage(text)) {
-        const isLongBreakdown = /→/.test(text) || (text.match(/\n\s*\d+\.\s+/g) || []).length > 6;
+        const stepCount = (text.match(/\n\s*\d+\.\s+/g) || []).length;
+        const isLongBreakdown = stepCount > 6;
         return { cleanedText: text, actions: isLongBreakdown ? BREAKDOWN_DONE_FALLBACK_PILLS_FROM_L : BREAKDOWN_DONE_FALLBACK_PILLS_FROM_S };
       }
     }
