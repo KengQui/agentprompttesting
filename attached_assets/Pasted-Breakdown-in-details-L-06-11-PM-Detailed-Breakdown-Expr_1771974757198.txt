@@ -1,0 +1,172 @@
+Breakdown in details (L)
+
+06:11 PM
+
+Detailed Breakdown
+Expression
+
+If(Search("401K", Benefit Plan Name) > 0, "FID", If(Or(Eq(Benefit Type, "Medical"), Search("Health", Benefit Plan Name) > 0), "BLU", If(Or(Eq(Benefit Type, "Dental"), Eq(Benefit Type, "Vision"), Search("Vision", Benefit Plan Name) > 0, Search("Dental", Benefit Plan Name) > 0), "GIN", If(Or(Eq(Benefit Type, "Basic Life"), Eq(Benefit Type, "Basic AD&D"), Eq(Benefit Type, "STD"), Eq(Benefit Type, "LTD"), Search("Life", Benefit Plan Name) > 0, Search("AD&D", Benefit Plan Name) > 0, Search("STD", Benefit Plan Name) > 0, Search("LTD", Benefit Plan Name) > 0), "CIGNA", ""))))
+
+Step-by-Step
+1.
+Search("401K", Benefit Plan Name)
+This searches for the text "401K" within the "Benefit Plan Name".
+
+2.
+> 0
+This checks if the result of the `Search` function is greater than 0, meaning "401K" was found.
+
+3.
+"FID"
+This is the designation "FID" assigned if "401K" is found in the "Benefit Plan Name".
+
+4.
+Eq(Benefit Type, "Medical")
+This checks if the "Benefit Type" is exactly "Medical".
+
+5.
+Search("Health", Benefit Plan Name) > 0
+This checks if the "Benefit Plan Name" contains the text "Health".
+
+6.
+Or(Eq(Benefit Type, "Medical"), Search("Health", Benefit Plan Name) > 0)
+This combines the results of steps 4 and 5, resulting in true if either the "Benefit Type" is "Medical" OR the "Benefit Plan Name" contains "Health".
+
+7.
+"BLU"
+This is the designation "BLU" assigned if the condition in Step 6 is true.
+
+8.
+Eq(Benefit Type, "Dental")
+This checks if the "Benefit Type" is exactly "Dental".
+
+9.
+Eq(Benefit Type, "Vision")
+This checks if the "Benefit Type" is exactly "Vision".
+
+10.
+Search("Vision", Benefit Plan Name) > 0
+This checks if the "Benefit Plan Name" contains the text "Vision".
+
+11.
+Search("Dental", Benefit Plan Name) > 0
+This checks if the "Benefit Plan Name" contains the text "Dental".
+
+12.
+Or(Eq(Benefit Type, "Dental"), Eq(Benefit Type, "Vision"), Search("Vision", Benefit Plan Name) > 0, Search("Dental", Benefit Plan Name) > 0)
+This combines the results of steps 8, 9, 10 and 11, resulting in true if any of those conditions are true.
+
+13.
+"GIN"
+This is the designation "GIN" assigned if the condition in Step 12 is true.
+
+14.
+Eq(Benefit Type, "Basic Life")
+This checks if the "Benefit Type" is exactly "Basic Life".
+
+15.
+Eq(Benefit Type, "Basic AD&D")
+This checks if the "Benefit Type" is exactly "Basic AD&D".
+
+16.
+Eq(Benefit Type, "STD")
+This checks if the "Benefit Type" is exactly "STD".
+
+17.
+Eq(Benefit Type, "LTD")
+This checks if the "Benefit Type" is exactly "LTD".
+
+18.
+Search("Life", Benefit Plan Name) > 0
+This checks if the "Benefit Plan Name" contains the text "Life".
+
+19.
+Search("AD&D", Benefit Plan Name) > 0
+This checks if the "Benefit Plan Name" contains the text "AD&D".
+
+20.
+Search("STD", Benefit Plan Name) > 0
+This checks if the "Benefit Plan Name" contains the text "STD".
+
+21.
+Search("LTD", Benefit Plan Name) > 0
+This checks if the "Benefit Plan Name" contains the text "LTD".
+
+22.
+Or(Eq(Benefit Type, "Basic Life"), Eq(Benefit Type, "Basic AD&D"), Eq(Benefit Type, "STD"), Eq(Benefit Type, "LTD"), Search("Life", Benefit Plan Name) > 0, Search("AD&D", Benefit Plan Name) > 0, Search("STD", Benefit Plan Name) > 0, Search("LTD", Benefit Plan Name) > 0)
+This combines the results of steps 14, 15, 16, 17, 18, 19, 20, and 21, resulting in true if any of those conditions are true.
+
+23.
+"CIGNA"
+This is the designation "CIGNA" assigned if the condition in Step 22 is true.
+
+24.
+""
+This is an empty string, returned if none of the above conditions are met.
+
+25.
+Final: If([Step 2], [Step 3], If([Step 6], [Step 7], If([Step 12], [Step 13], If([Step 22], [Step 23], [Step 24]))))
+This entire expression checks a series of conditions in order and assigns a designation based on the first condition that is true, returning an empty string if none apply.
+
+06:11 PM
+
+Breakdown in details (S)
+
+06:11 PM
+
+Detailed Breakdown
+Expression
+
+If(Search("401K", Benefit Plan Name) > 0, "FID", If(Or(Eq(Benefit Type, "Medical"), Search("Health", Benefit Plan Name) > 0), "BLU", If(Or(Eq(Benefit Type, "Dental"), Eq(Benefit Type, "Vision"), Search("Vision", Benefit Plan Name) > 0, Search("Dental", Benefit Plan Name) > 0), "GIN", If(Or(Eq(Benefit Type, "Basic Life"), Eq(Benefit Type, "Basic AD&D"), Eq(Benefit Type, "STD"), Eq(Benefit Type, "LTD"), Search("Life", Benefit Plan Name) > 0, Search("AD&D", Benefit Plan Name) > 0, Search("STD", Benefit Plan Name) > 0, Search("LTD", Benefit Plan Name) > 0), "CIGNA", ""))))
+
+Step-by-Step
+1.
+Search("401K", Benefit Plan Name) > 0
+2.
+"FID"
+3.
+Eq(Benefit Type, "Medical")
+4.
+Search("Health", Benefit Plan Name) > 0
+5.
+Or(Eq(Benefit Type, "Medical"), Search("Health", Benefit Plan Name) > 0)
+6.
+"BLU"
+7.
+Eq(Benefit Type, "Dental")
+8.
+Eq(Benefit Type, "Vision")
+9.
+Search("Vision", Benefit Plan Name) > 0
+10.
+Search("Dental", Benefit Plan Name) > 0
+11.
+Or(Eq(Benefit Type, "Dental"), Eq(Benefit Type, "Vision"), Search("Vision", Benefit Plan Name) > 0, Search("Dental", Benefit Plan Name) > 0)
+12.
+"GIN"
+13.
+Eq(Benefit Type, "Basic Life")
+14.
+Eq(Benefit Type, "Basic AD&D")
+15.
+Eq(Benefit Type, "STD")
+16.
+Eq(Benefit Type, "LTD")
+17.
+Search("Life", Benefit Plan Name) > 0
+18.
+Search("AD&D", Benefit Plan Name) > 0
+19.
+Search("STD", Benefit Plan Name) > 0
+20.
+Search("LTD", Benefit Plan Name) > 0
+21.
+Or(Eq(Benefit Type, "Basic Life"), Eq(Benefit Type, "Basic AD&D"), Eq(Benefit Type, "STD"), Eq(Benefit Type, "LTD"), Search("Life", Benefit Plan Name) > 0, Search("AD&D", Benefit Plan Name) > 0, Search("STD", Benefit Plan Name) > 0, Search("LTD", Benefit Plan Name) > 0)
+22.
+"CIGNA"
+23.
+""
+24.
+If([Step 1], [Step 2], If([Step 5], [Step 6], If([Step 11], [Step 12], If([Step 21], [Step 22], [Step 23]))))
+25.
+Final: If(Search("401K", Benefit Plan Name) > 0, "FID", If(Or(Eq(Benefit Type, "Medical"), Search("Health", Benefit Plan Name) > 0), "BLU", If(Or(Eq(Benefit Type, "Dental"), Eq(Benefit Type, "Vision"), Search("Vision", Benefit Plan Name) > 0, Search("Dental", Benefit Plan Name) > 0), "GIN", If(Or(Eq(Benefit Type, "Basic Life"), Eq(Benefit Type, "Basic AD&D"), Eq(Benefit Type, "STD"), Eq(Benefit Type, "LTD"), Search("Life", Benefit Plan Name) > 0, Search("AD&D", Benefit Plan Name) > 0, Search("STD", Benefit Plan Name) > 0, Search("LTD", Benefit Plan Name) > 0), "CIGNA", ""))))
