@@ -479,6 +479,18 @@ interface BreakdownData {
   finalAnnotation: string;
 }
 
+interface MAStep {
+  letter: string;
+  title: string;
+  expression: string;
+  explanation: string;
+}
+
+interface MABreakdownData {
+  expression: string;
+  steps: MAStep[];
+}
+
 function isBreakdownMessage(text: string): boolean {
   const hasExpression = /\*{0,2}Expression:?\*{0,2}/i.test(text);
   const hasStepByStep = /\*{0,2}Step[\s-]*by[\s-]*Step:?\*{0,2}/i.test(text);
@@ -574,6 +586,64 @@ function parseStepsBlock(stepsBlock: string, expression: string): BreakdownData 
   return { expression, steps, finalStep, finalAnnotation };
 }
 
+function isMABreakdownMessage(text: string): boolean {
+  const hasExpression = /\*{0,2}Expression:?\*{0,2}/i.test(text);
+  const hasStepByStep = /\*{0,2}Step[\s-]*by[\s-]*Step:?\*{0,2}/i.test(text);
+  const hasLetteredSteps = /\*{2}Step\s+[A-Z]\s*[—–\-]/i.test(text);
+  return hasExpression && hasStepByStep && hasLetteredSteps;
+}
+
+function parseMABreakdown(text: string): MABreakdownData | null {
+  const exprMatch = text.match(/\*{0,2}Expression:?\*{0,2}\s*\n([\s\S]*?)(?=\n\s*\*{0,2}Step[\s-]*by[\s-]*Step)/i);
+  let expression = '';
+  if (exprMatch) {
+    expression = exprMatch[1].replace(/```[a-z]*\n?/g, '').replace(/```/g, '').replace(/`/g, '').trim();
+  }
+
+  const stepsMatch = text.match(/\*{0,2}Step[\s-]*by[\s-]*Step:?\*{0,2}\s*\n([\s\S]*)/i);
+  if (!stepsMatch) return null;
+  const stepsBlock = stepsMatch[1];
+
+  const steps: MAStep[] = [];
+  const stepHeaderPattern = /\*{2}Step\s+([A-Z])\s*[—–\-]+\s*(.*?)\*{2}/gi;
+  const stepMatches = [...stepsBlock.matchAll(stepHeaderPattern)];
+
+  const isFormulaLine = (line: string) =>
+    /[A-Za-z]+\s*\(/.test(line) ||
+    /[><!]=?\s*["'\d]/.test(line) ||
+    /\/\s*365/.test(line) ||
+    /&&|\|\|/.test(line);
+
+  for (let i = 0; i < stepMatches.length; i++) {
+    const match = stepMatches[i];
+    const letter = match[1];
+    const title = match[2].replace(/:+$/, '').trim();
+
+    const startIdx = match.index! + match[0].length;
+    const endIdx = i + 1 < stepMatches.length ? stepMatches[i + 1].index! : stepsBlock.length;
+    const blockContent = stepsBlock.slice(startIdx, endIdx).trim();
+
+    const lines = blockContent.split('\n').map(l => l.trim()).filter(l => l);
+
+    let stepExpression = '';
+    const explanationLines: string[] = [];
+
+    for (const line of lines) {
+      if (!stepExpression && isFormulaLine(line)) {
+        stepExpression = line.replace(/`/g, '');
+      } else {
+        explanationLines.push(line);
+      }
+    }
+
+    const explanation = explanationLines.join(' ').trim();
+    steps.push({ letter, title, expression: stepExpression, explanation });
+  }
+
+  if (steps.length === 0) return null;
+  return { expression, steps };
+}
+
 function DetailedBreakdownCard({ content, timestamp }: { content: string; timestamp: string }) {
   const breakdown = parseBreakdown(content);
   const [copiedExpr, setCopiedExpr] = useState(false);
@@ -640,6 +710,79 @@ function DetailedBreakdownCard({ content, timestamp }: { content: string; timest
                     )}
                   </li>
                 )}
+              </ol>
+            </div>
+          </div>
+        </Card>
+        <p className="text-xs text-muted-foreground px-1 pt-1">
+          {new Date(timestamp).toLocaleTimeString([], {
+            hour: "2-digit",
+            minute: "2-digit",
+          })}
+        </p>
+      </div>
+    </div>
+  );
+}
+
+function MABreakdownCard({ content, timestamp }: { content: string; timestamp: string }) {
+  const breakdown = parseMABreakdown(content);
+  const [copiedExpr, setCopiedExpr] = useState(false);
+
+  if (!breakdown) return null;
+
+  const handleCopyExpression = () => {
+    navigator.clipboard.writeText(breakdown.expression);
+    setCopiedExpr(true);
+    setTimeout(() => setCopiedExpr(false), 2000);
+  };
+
+  return (
+    <div className="flex gap-3" data-testid="ma-breakdown-card">
+      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-muted">
+        <Bot className="h-4 w-4" />
+      </div>
+      <div className="max-w-[80%] space-y-0.5">
+        <Card className="overflow-visible p-0">
+          <div className="flex items-center gap-2 px-4 py-3 border-b border-card-border">
+            <ListOrdered className="h-4 w-4 text-muted-foreground" />
+            <span className="text-sm font-semibold">Detailed Breakdown</span>
+          </div>
+          <div className="divide-y divide-card-border">
+            <div className="px-4 py-3" data-testid="ma-breakdown-expression">
+              <div className="flex items-center gap-2 mb-1.5">
+                <FunctionSquare className="h-3.5 w-3.5 text-muted-foreground" />
+                <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Expression</span>
+                <button
+                  className="ml-auto p-1 rounded-md text-muted-foreground hover-elevate active-elevate-2"
+                  onClick={handleCopyExpression}
+                  data-testid="button-copy-ma-breakdown-expression"
+                >
+                  {copiedExpr ? <Check className="h-3.5 w-3.5 text-green-500" /> : <Copy className="h-3.5 w-3.5" />}
+                </button>
+              </div>
+              <p className="text-sm font-mono pl-5.5 break-all">{breakdown.expression}</p>
+            </div>
+            <div className="px-4 py-3" data-testid="ma-breakdown-steps">
+              <div className="flex items-center gap-2 mb-2">
+                <ListOrdered className="h-3.5 w-3.5 text-muted-foreground" />
+                <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Step-by-Step</span>
+              </div>
+              <ol className="space-y-3 pl-5.5" style={{ listStyle: 'none' }}>
+                {breakdown.steps.map((step, idx) => (
+                  <li key={idx} className="flex flex-col gap-0.5" data-testid={`ma-breakdown-step-${idx}`}>
+                    <div className="text-sm flex gap-2">
+                      <span className="text-muted-foreground shrink-0 font-mono">{step.letter}.</span>
+                      <span className="font-semibold">{step.title}</span>
+                    </div>
+                    {step.expression && (
+                      <p className="text-sm font-mono pl-5 break-all text-foreground">{step.expression}</p>
+                    )}
+                    {step.explanation && (
+                      <p className="text-xs text-muted-foreground pl-5 italic">{step.explanation}</p>
+                    )}
+                  </li>
+                ))}
               </ol>
             </div>
           </div>
@@ -953,6 +1096,19 @@ function MessageBubble({ message, agentId, isLastAssistant, onSendMessage, onRev
     return (
       <>
         <ExpressionExplanationCard content={displayContent} timestamp={message.timestamp} />
+        {showPills && <SuggestedActionPills actions={actions} onSelect={onSendMessage} onReviseExpression={onReviseExpression} onEditExpression={onEditExpression} />}
+      </>
+    );
+  }
+
+  const maBreakdownData = !isUser && isHcmAgent && isMABreakdownMessage(displayContent)
+    ? parseMABreakdown(displayContent)
+    : null;
+
+  if (maBreakdownData) {
+    return (
+      <>
+        <MABreakdownCard content={displayContent} timestamp={message.timestamp} />
         {showPills && <SuggestedActionPills actions={actions} onSelect={onSendMessage} onReviseExpression={onReviseExpression} onEditExpression={onEditExpression} />}
       </>
     );
