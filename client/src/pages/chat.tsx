@@ -33,9 +33,10 @@ function stripActionBlocks(text: string): string {
 const COLUMN_ADDED_FALLBACK_PILLS = ["See related expressions", "Create new expression", "I'm done"];
 const EXPRESSION_PRESENTED_FALLBACK_PILLS = ["Revise this expression", "Create new column", "Test with my data", "Explain this expression"];
 const VALIDATION_DONE_FALLBACK_PILLS = ["Create new column", "Revise this expression", "Explain this expression"];
-const EXPLANATION_DONE_FALLBACK_PILLS = ["Breakdown in details (L)", "Breakdown in details (S)", "Create new column", "Revise this expression", "Test with my data"];
-const BREAKDOWN_DONE_FALLBACK_PILLS_FROM_L = ["Breakdown in details (S)", "Create new column", "Revise this expression", "Test with my data"];
-const BREAKDOWN_DONE_FALLBACK_PILLS_FROM_S = ["Breakdown in details (L)", "Create new column", "Revise this expression", "Test with my data"];
+const EXPLANATION_DONE_FALLBACK_PILLS = ["Breakdown in details (L)", "Breakdown in details (S)", "Breakdown in details (MA)", "Create new column", "Revise this expression", "Test with my data"];
+const BREAKDOWN_DONE_FALLBACK_PILLS_FROM_L = ["Breakdown in details (S)", "Breakdown in details (MA)", "Create new column", "Revise this expression", "Test with my data"];
+const BREAKDOWN_DONE_FALLBACK_PILLS_FROM_S = ["Breakdown in details (L)", "Breakdown in details (MA)", "Create new column", "Revise this expression", "Test with my data"];
+const BREAKDOWN_DONE_FALLBACK_PILLS_FROM_MA = ["Breakdown in details (L)", "Breakdown in details (S)", "Create new column", "Revise this expression", "Test with my data"];
 const REVISE_CHOICE_PILLS = ["Edit it yourself", "Describe your changes"];
 
 function parseSuggestedActions(text: string, isHcmAgent?: boolean): { cleanedText: string; actions: string[] } {
@@ -65,8 +66,13 @@ function parseSuggestedActions(text: string, isHcmAgent?: boolean): { cleanedTex
       }
       if (isBreakdownMessage(text)) {
         const stepCount = (text.match(/\n\s*\d+\.\s+/g) || []).length;
-        const isLongBreakdown = stepCount > 6;
-        return { cleanedText: text, actions: isLongBreakdown ? BREAKDOWN_DONE_FALLBACK_PILLS_FROM_L : BREAKDOWN_DONE_FALLBACK_PILLS_FROM_S };
+        if (stepCount >= 10) {
+          return { cleanedText: text, actions: BREAKDOWN_DONE_FALLBACK_PILLS_FROM_L };
+        } else if (stepCount >= 5) {
+          return { cleanedText: text, actions: BREAKDOWN_DONE_FALLBACK_PILLS_FROM_MA };
+        } else {
+          return { cleanedText: text, actions: BREAKDOWN_DONE_FALLBACK_PILLS_FROM_S };
+        }
       }
     }
     if (isHcmAgent && /edit it yourself|modify it directly|describe the changes|describe.*changes.*you'd like/i.test(text) && /revise/i.test(text)) {
@@ -76,12 +82,12 @@ function parseSuggestedActions(text: string, isHcmAgent?: boolean): { cleanedTex
   }
   let actions = match[1].split('|').map(a => a.trim()).filter(Boolean);
   const cleanedText = text.replace(regex, '').trim();
-  if (isHcmAgent && !actions.includes('Breakdown in details (L)') && !actions.includes('Breakdown in details (S)')) {
+  if (isHcmAgent && !actions.includes('Breakdown in details (L)') && !actions.includes('Breakdown in details (S)') && !actions.includes('Breakdown in details (MA)')) {
     const looksLikeExplanation = isExplanationMessage(cleanedText)
       || (/how (it|this|the expression) works/i.test(cleanedText) && !actions.includes('Explain this expression'))
       || (/step[\s-]*by[\s-]*step/i.test(cleanedText) && /expression/i.test(cleanedText));
     if (looksLikeExplanation) {
-      actions = ['Breakdown in details (L)', 'Breakdown in details (S)', ...actions];
+      actions = ['Breakdown in details (L)', 'Breakdown in details (S)', 'Breakdown in details (MA)', ...actions];
     }
   }
   return { cleanedText, actions };
