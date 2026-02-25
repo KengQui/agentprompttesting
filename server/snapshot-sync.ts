@@ -1,8 +1,8 @@
 import * as fs from "fs";
 import * as path from "path";
 import { db, pool } from "./db";
-import { agentsTable, agentComponentsTable, usersTable } from "@shared/schema";
-import { eq } from "drizzle-orm";
+import { agentsTable, agentComponentsTable, usersTable, chatSessionsTable, chatMessagesTable } from "@shared/schema";
+import { eq, inArray } from "drizzle-orm";
 
 const SNAPSHOT_PATH = path.join(process.cwd(), "agent-config-snapshot.json");
 
@@ -47,6 +47,14 @@ export async function writeAgentSnapshot(): Promise<void> {
     const allComponents = await db.select().from(agentComponentsTable);
     const components = allComponents.filter(c => agentIds.has(c.agentId));
 
+    let existingPinnedSessions: any[] = [];
+    if (fs.existsSync(SNAPSHOT_PATH)) {
+      try {
+        const existing = JSON.parse(fs.readFileSync(SNAPSHOT_PATH, "utf-8"));
+        existingPinnedSessions = existing.pinnedSessions || [];
+      } catch {}
+    }
+
     const snapshot = {
       generatedAt: new Date().toISOString(),
       ownerUsername: ADMIN_USERNAME,
@@ -70,13 +78,62 @@ export async function writeAgentSnapshot(): Promise<void> {
         code: comp.code,
         createdAt: comp.createdAt,
       })),
+      pinnedSessions: existingPinnedSessions,
     };
 
     fs.writeFileSync(SNAPSHOT_PATH, JSON.stringify(snapshot, null, 2));
-    console.log(`[snapshot-sync] Wrote snapshot for "${ADMIN_USERNAME}": ${agents.length} agents, ${components.length} components (other users' agents excluded)`);
+    console.log(`[snapshot-sync] Wrote snapshot for "${ADMIN_USERNAME}": ${agents.length} agents, ${components.length} components, ${existingPinnedSessions.length} pinned sessions`);
   } catch (err: any) {
     console.error(`[snapshot-sync] Failed to write snapshot: ${err.message}`);
   }
+}
+
+export async function pinSessionsToSnapshot(sessionIds: string[]): Promise<number> {
+  if (process.env.NODE_ENV === "production") return 0;
+
+  const sessions = sessionIds.length > 0
+    ? await db.select().from(chatSessionsTable).where(inArray(chatSessionsTable.id, sessionIds))
+    : [];
+
+  const messages = sessionIds.length > 0
+    ? await db.select().from(chatMessagesTable).where(inArray(chatMessagesTable.sessionId, sessionIds))
+    : [];
+
+  const messagesBySession = new Map<string, typeof messages>();
+  for (const msg of messages) {
+    if (!messagesBySession.has(msg.sessionId)) messagesBySession.set(msg.sessionId, []);
+    messagesBySession.get(msg.sessionId)!.push(msg);
+  }
+
+  const pinnedSessions = sessions.map(s => ({
+    id: s.id,
+    agentId: s.agentId,
+    title: s.title,
+    createdAt: s.createdAt,
+    updatedAt: s.updatedAt,
+    messages: (messagesBySession.get(s.id) || []).map(m => ({
+      id: m.id,
+      agentId: m.agentId,
+      sessionId: m.sessionId,
+      role: m.role,
+      content: m.content,
+      timestamp: m.timestamp,
+    })),
+  }));
+
+  let snapshot: any = {};
+  if (fs.existsSync(SNAPSHOT_PATH)) {
+    try {
+      snapshot = JSON.parse(fs.readFileSync(SNAPSHOT_PATH, "utf-8"));
+    } catch {}
+  }
+
+  snapshot.pinnedSessions = pinnedSessions;
+  snapshot.pinnedSessionsUpdatedAt = new Date().toISOString();
+
+  fs.writeFileSync(SNAPSHOT_PATH, JSON.stringify(snapshot, null, 2));
+  console.log(`[snapshot-sync] Pinned ${pinnedSessions.length} sessions to snapshot`);
+  return pinnedSessions.length;
 }
 
 export function scheduleSnapshotWrite(): void {
@@ -259,6 +316,49 @@ export async function applySnapshotOnStartup(): Promise<void> {
         }
       }
       console.log(`[snapshot-sync] Synced ${ownerComponents.length} components`);
+    }
+
+    const pinnedSessions: any[] = snapshot.pinnedSessions || [];
+    if (pinnedSessions.length > 0) {
+      console.log(`[snapshot-sync] Restoring ${pinnedSessions.length} pinned sessions to production...`);
+      for (const sessionData of pinnedSessions) {
+        try {
+          const sessionExists = await client.query(
+            'SELECT id FROM chat_sessions WHERE id = $1',
+            [sessionData.id]
+          );
+
+          if (sessionExists.rows.length > 0) {
+            await client.query(
+              'UPDATE chat_sessions SET title = $1, agent_id = $2, updated_at = $3 WHERE id = $4',
+              [sessionData.title, sessionData.agentId, sessionData.updatedAt, sessionData.id]
+            );
+          } else {
+            await client.query(
+              'INSERT INTO chat_sessions (id, agent_id, title, created_at, updated_at) VALUES ($1, $2, $3, $4, $5)',
+              [sessionData.id, sessionData.agentId, sessionData.title, sessionData.createdAt, sessionData.updatedAt]
+            );
+          }
+
+          const messages: any[] = sessionData.messages || [];
+          for (const msg of messages) {
+            const msgExists = await client.query(
+              'SELECT id FROM chat_messages WHERE id = $1',
+              [msg.id]
+            );
+            if (msgExists.rows.length === 0) {
+              await client.query(
+                'INSERT INTO chat_messages (id, agent_id, session_id, role, content, timestamp) VALUES ($1, $2, $3, $4, $5, $6)',
+                [msg.id, msg.agentId, msg.sessionId, msg.role, msg.content, msg.timestamp]
+              );
+            }
+          }
+          console.log(`[snapshot-sync] Restored pinned session: ${sessionData.title} (${messages.length} messages)`);
+        } catch (sessionErr: any) {
+          console.error(`[snapshot-sync] Error restoring session ${sessionData.id}: ${sessionErr.message}`);
+        }
+      }
+      console.log(`[snapshot-sync] Finished restoring pinned sessions.`);
     }
 
     console.log("[snapshot-sync] Snapshot applied successfully.");

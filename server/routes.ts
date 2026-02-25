@@ -79,6 +79,7 @@ function validateAIResponse(response: string): ResponseValidationResult {
 import { v4 as uuidv4 } from "uuid";
 import type { Agent, SampleDataset, MockUserState, AgentAction } from "@shared/schema";
 import type { ActionExecutionResult } from "./gemini";
+import { eq, inArray, desc } from "drizzle-orm";
 
 // Helper to execute action with sample data or legacy mockUserState
 async function executeAgentAction(
@@ -2873,6 +2874,94 @@ export async function registerRoutes(
     } catch (error: any) {
       console.error("Force snapshot error:", error);
       res.status(500).json({ message: error?.message || "Snapshot write failed" });
+    }
+  });
+
+  app.get("/api/admin/snapshot-sessions", async (req: Request, res: Response) => {
+    try {
+      if (process.env.NODE_ENV === "production") {
+        return res.status(404).json({ message: "Not available in production" });
+      }
+      const user = await getUserFromSession(req);
+      if (!user) return res.status(401).json({ message: "Unauthorized" });
+
+      const { db } = await import("./db");
+      const schema = await import("@shared/schema");
+      const fs = await import("fs");
+      const path = await import("path");
+
+      const userAgents = await db.select().from(schema.agentsTable)
+        .where(eq(schema.agentsTable.userId, user.id));
+
+      const agentMap = new Map(userAgents.map(a => [a.id, a.name]));
+      const agentIds = userAgents.map(a => a.id);
+
+      const allSessions = agentIds.length > 0
+        ? await db.select().from(schema.chatSessionsTable)
+            .where(inArray(schema.chatSessionsTable.agentId, agentIds))
+            .orderBy(desc(schema.chatSessionsTable.updatedAt))
+        : [];
+
+      const sessionIds = allSessions.map(s => s.id);
+      const allMessages = sessionIds.length > 0
+        ? await db.select().from(schema.chatMessagesTable)
+            .where(inArray(schema.chatMessagesTable.sessionId, sessionIds))
+        : [];
+
+      const messagesBySession = new Map<string, typeof allMessages>();
+      for (const msg of allMessages) {
+        if (!messagesBySession.has(msg.sessionId)) messagesBySession.set(msg.sessionId, []);
+        messagesBySession.get(msg.sessionId)!.push(msg);
+      }
+
+      const snapshotPath = path.join(process.cwd(), "agent-config-snapshot.json");
+      let pinnedSessionIds: string[] = [];
+      if (fs.existsSync(snapshotPath)) {
+        try {
+          const snap = JSON.parse(fs.readFileSync(snapshotPath, "utf-8"));
+          pinnedSessionIds = (snap.pinnedSessions || []).map((s: any) => s.id);
+        } catch {}
+      }
+
+      const sessions = allSessions.map(s => {
+        const msgs = messagesBySession.get(s.id) || [];
+        const firstUser = msgs.find(m => m.role === "user");
+        return {
+          id: s.id,
+          agentId: s.agentId,
+          agentName: agentMap.get(s.agentId) || "Unknown Agent",
+          title: s.title,
+          createdAt: s.createdAt,
+          updatedAt: s.updatedAt,
+          messageCount: msgs.length,
+          firstMessage: firstUser?.content.substring(0, 120),
+          isPinned: pinnedSessionIds.includes(s.id),
+        };
+      });
+
+      res.json({ sessions });
+    } catch (error: any) {
+      console.error("snapshot-sessions error:", error);
+      res.status(500).json({ message: error?.message || "Failed to fetch sessions" });
+    }
+  });
+
+  app.post("/api/admin/pin-sessions-to-snapshot", async (req: Request, res: Response) => {
+    try {
+      if (process.env.NODE_ENV === "production") {
+        return res.status(404).json({ message: "Not available in production" });
+      }
+      const user = await getUserFromSession(req);
+      if (!user) return res.status(401).json({ message: "Unauthorized" });
+
+      const { sessionIds } = z.object({ sessionIds: z.array(z.string()) }).parse(req.body);
+
+      const { pinSessionsToSnapshot } = await import("./snapshot-sync");
+      const count = await pinSessionsToSnapshot(sessionIds);
+      res.json({ success: true, pinnedCount: count });
+    } catch (error: any) {
+      console.error("pin-sessions-to-snapshot error:", error);
+      res.status(500).json({ message: error?.message || "Failed to pin sessions" });
     }
   });
 

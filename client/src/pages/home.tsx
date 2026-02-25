@@ -1,12 +1,13 @@
 import { useState, useRef } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Link, useLocation } from "wouter";
-import { Plus, MessageSquare, Settings, Bot, Sparkles, LogOut, PlayCircle, Copy, Zap, HelpCircle, CloudDownload, Download, Upload, Loader2, Database, ShieldCheck } from "lucide-react";
+import { Plus, MessageSquare, Settings, Bot, Sparkles, LogOut, PlayCircle, Copy, Zap, HelpCircle, CloudDownload, Download, Upload, Loader2, Database, ShieldCheck, Pin, ChevronDown, ChevronUp, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -271,6 +272,157 @@ interface SyncStatusResponse {
   statuses: Record<string, SyncStatus>;
 }
 
+interface SnapshotSession {
+  id: string;
+  agentId: string;
+  agentName: string;
+  title: string;
+  createdAt: string;
+  updatedAt: string;
+  messageCount: number;
+  firstMessage?: string;
+  isPinned: boolean;
+}
+
+function SessionSnapshotSection() {
+  const { toast } = useToast();
+  const [expanded, setExpanded] = useState(false);
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+
+  const { data, isLoading, refetch } = useQuery<{ sessions: SnapshotSession[] }>({
+    queryKey: ["/api/admin/snapshot-sessions"],
+    enabled: expanded,
+  });
+
+  const pinMutation = useMutation({
+    mutationFn: async (sessionIds: string[]) => {
+      const res = await apiRequest("POST", "/api/admin/pin-sessions-to-snapshot", { sessionIds });
+      return res.json();
+    },
+    onSuccess: (result) => {
+      toast({
+        title: "Sessions pinned",
+        description: `${result.pinnedCount} session(s) will be copied to production on next publish.`,
+      });
+      refetch();
+      setSelected(new Set());
+    },
+    onError: (error: Error) => {
+      toast({ title: "Failed to pin sessions", description: error.message, variant: "destructive" });
+    },
+  });
+
+  const sessions = data?.sessions || [];
+
+  const agentGroups = sessions.reduce<Record<string, SnapshotSession[]>>((acc, s) => {
+    if (!acc[s.agentName]) acc[s.agentName] = [];
+    acc[s.agentName].push(s);
+    return acc;
+  }, {});
+
+  const toggleSession = (id: string) => {
+    setSelected(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  const handleSave = () => {
+    pinMutation.mutate(Array.from(selected));
+  };
+
+  return (
+    <Card>
+      <CardContent className="p-4">
+        <div
+          className="flex items-center justify-between gap-4 cursor-pointer"
+          onClick={() => setExpanded(v => !v)}
+          data-testid="button-toggle-session-snapshot"
+        >
+          <div className="flex items-center gap-3">
+            <div className="flex h-9 w-9 items-center justify-center rounded-md bg-muted">
+              <Pin className="h-5 w-5 text-muted-foreground" />
+            </div>
+            <div>
+              <p className="text-sm font-medium">Pin Sessions to Production</p>
+              <p className="text-xs text-muted-foreground">Select chat sessions to copy to production on next publish</p>
+            </div>
+          </div>
+          {expanded ? <ChevronUp className="h-4 w-4 text-muted-foreground" /> : <ChevronDown className="h-4 w-4 text-muted-foreground" />}
+        </div>
+
+        {expanded && (
+          <div className="mt-4 space-y-4">
+            {isLoading ? (
+              <div className="space-y-2">
+                {[1, 2, 3].map(i => <Skeleton key={i} className="h-12 w-full" />)}
+              </div>
+            ) : sessions.length === 0 ? (
+              <p className="text-sm text-muted-foreground text-center py-4">No chat sessions found.</p>
+            ) : (
+              <>
+                {Object.entries(agentGroups).map(([agentName, agentSessions]) => (
+                  <div key={agentName}>
+                    <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">{agentName}</p>
+                    <div className="space-y-1">
+                      {agentSessions.map(session => (
+                        <div
+                          key={session.id}
+                          className="flex items-start gap-3 rounded-md border p-3 hover:bg-muted/50 cursor-pointer"
+                          onClick={() => toggleSession(session.id)}
+                          data-testid={`row-session-${session.id}`}
+                        >
+                          <Checkbox
+                            checked={selected.has(session.id)}
+                            onCheckedChange={() => toggleSession(session.id)}
+                            onClick={e => e.stopPropagation()}
+                            data-testid={`checkbox-session-${session.id}`}
+                          />
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <span className="text-sm font-medium truncate">{session.title}</span>
+                              {session.isPinned && (
+                                <Badge variant="secondary" className="text-[10px] bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 shrink-0" data-testid={`badge-pinned-${session.id}`}>
+                                  <Check className="h-3 w-3 mr-1" />
+                                  Pinned
+                                </Badge>
+                              )}
+                              <span className="text-xs text-muted-foreground shrink-0">{session.messageCount} messages</span>
+                            </div>
+                            {session.firstMessage && (
+                              <p className="text-xs text-muted-foreground truncate mt-0.5">{session.firstMessage}</p>
+                            )}
+                          </div>
+                          <span className="text-xs text-muted-foreground shrink-0">
+                            {new Date(session.updatedAt).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+                <div className="flex justify-end pt-2">
+                  <Button
+                    size="sm"
+                    onClick={handleSave}
+                    disabled={selected.size === 0 || pinMutation.isPending}
+                    data-testid="button-pin-sessions"
+                  >
+                    {pinMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin mr-1.5" /> : <Pin className="h-4 w-4 mr-1.5" />}
+                    {selected.size === 0 ? "Select sessions to pin" : `Pin ${selected.size} session${selected.size > 1 ? "s" : ""} to Snapshot`}
+                  </Button>
+                </div>
+              </>
+            )}
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
 function BackupSection() {
   const { toast } = useToast();
   const [isExporting, setIsExporting] = useState(false);
@@ -485,6 +637,7 @@ export default function Home() {
         ) : (
           <EmptyState />
         )}
+        {user?.username === "kengqui.chia@ukg.com" && <SessionSnapshotSection />}
         <BackupSection />
       </main>
     </div>
