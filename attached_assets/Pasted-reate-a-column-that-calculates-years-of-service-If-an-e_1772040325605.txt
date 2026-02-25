@@ -1,0 +1,49 @@
+reate a column that calculates years of service. If an employee has a rehire date, use that to calculate tenure, otherwise use the original hire date. Only show the years of service if it's 5 years or greater; otherwise, show a blank space
+
+12:24 PM
+
+from datetime import datetime
+
+def calculate_years_of_service(date_hired, date_re_hired):
+    today = datetime(2026, 2, 25)
+    years_of_service = ''
+    if date_re_hired:
+        time_difference = today - date_re_hired
+        years = time_difference.days / 365.25
+    else:
+        time_difference = today - date_hired
+        years = time_difference.days / 365.25
+    
+    if years >= 5:
+        years_of_service = str(round(years, 2))
+    
+    return years_of_service
+
+data = [
+    {"Row": 8, "Date Hired": "23-06-2017", "Date Re-Hired": "06/12/2018"},
+    {"Row": 9, "Date Hired": "20-04-2017", "Date Re-Hired": None},
+    {"Row": 12, "Date Hired": "25-04-2018", "Date Re-Hired": None},
+    {"Row": 13, "Date Hired": "16-07-2025", "Date Re-Hired": None},
+    {"Row": 14, "Date Hired": "04-04-2016", "Date Re-Hired": None},
+    {"Row": 21, "Date Hired": "01-01-2014", "Date Re-Hired": None},
+    {"Row": 28, "Date Hired": "18-08-2025", "Date Re-Hired": None},
+]
+
+for row in data:
+    date_hired_str = row["Date Hired"]
+    date_re_hired_str = row["Date Re-Hired"]
+
+    date_hired = datetime.strptime(date_hired_str, "%d-%m-%Y") if date_hired_str else None
+    date_re_hired = datetime.strptime(date_re_hired_str, "%m/%d/%Y") if date_re_hired_str else None
+    
+    row["Years Of Service"] = calculate_years_of_service(date_hired, date_re_hired)
+
+print(data)
+[{'Row': 8, 'Date Hired': '23-06-2017', 'Date Re-Hired': '06/12/2018', 'Years Of Service': '7.69'}, {'Row': 9, 'Date Hired': '20-04-2017', 'Date Re-Hired': None, 'Years Of Service': '8.85'}, {'Row': 12, 'Date Hired': '25-04-2018', 'Date Re-Hired': None, 'Years Of Service': ''}, {'Row': 13, 'Date Hired': '16-07-2025', 'Date Re-Hired': None, 'Years Of Service': ''}, {'Row': 14, 'Date Hired': '04-04-2016', 'Date Re-Hired': None, 'Years Of Service': '9.8'}, {'Row': 21, 'Date Hired': '01-01-2014', 'Date Re-Hired': None, 'Years Of Service': '12.15'}, {'Row': 28, 'Date Hired': '18-08-2025', 'Date Re-Hired': None, 'Years Of Service': ''}]
+Okay, I can create that for you. This expression calculates years of service. It uses the rehire date if available, otherwise it uses the original hire date. It only shows years of service if it's 5 years or greater; otherwise, it shows a blank space.
+
+If(DateReHired != "", If(DateDiff(DateReHired, Today()) / 365.25 >= 5, Round(DateDiff(DateReHired, Today()) / 365.25, 2), ""), If(DateDiff(DateHired, Today()) / 365.25 >= 5, Round(DateDiff(DateHired, Today()) / 365.25, 2), ""))
+Output type: Text
+Suggested column name: Years Of Service
+Column properties: ✗Sortable , ✓Filterable , ✓Groupable , ✓Charting
+These are recommended defaults — let me know if you'd like to change any.

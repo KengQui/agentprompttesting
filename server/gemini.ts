@@ -36,6 +36,35 @@ const ai = new GoogleGenAI({
   apiKey: process.env.GEMINI_API_KEY || "",
 });
 
+async function generateWithRetry(
+  params: Parameters<typeof ai.models.generateContent>[0],
+  maxRetries = 3
+): Promise<Awaited<ReturnType<typeof ai.models.generateContent>>> {
+  const delays = [1000, 2000, 4000];
+  let lastError: any;
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    try {
+      return await ai.models.generateContent(params);
+    } catch (error: any) {
+      lastError = error;
+      const isRateLimit =
+        error?.message?.includes("429") ||
+        error?.message?.includes("RESOURCE_EXHAUSTED") ||
+        error?.message?.includes("Resource exhausted");
+      if (isRateLimit && attempt < maxRetries) {
+        const delay = delays[attempt] ?? 4000;
+        console.warn(
+          `[generateWithRetry] Rate limit hit, retrying in ${delay}ms (attempt ${attempt + 1}/${maxRetries})`
+        );
+        await new Promise((resolve) => setTimeout(resolve, delay));
+        continue;
+      }
+      throw error;
+    }
+  }
+  throw lastError;
+}
+
 export interface AgentContext {
   name: string;
   businessUseCase: string;
@@ -732,7 +761,7 @@ export async function generateAgentResponse(
   ];
 
   try {
-    const response = await ai.models.generateContent({
+    const response = await generateWithRetry({
       model: "gemini-2.0-flash",
       config: {
         systemInstruction: systemPrompt,
@@ -1090,7 +1119,7 @@ ${domainDocsText ? `Domain Documents:\n${domainDocsText}` : ""}
 Generate validation rules for an AI agent handling this use case.`;
 
   try {
-    const response = await ai.models.generateContent({
+    const response = await generateWithRetry({
       model: modelToUse,
       config: {
         systemInstruction: systemPrompt,
@@ -1138,7 +1167,7 @@ ${domainDocsText ? `Domain Documents:\n${domainDocsText}` : ""}
 Generate safety guardrails for an AI agent handling this use case.`;
 
   try {
-    const response = await ai.models.generateContent({
+    const response = await generateWithRetry({
       model: modelToUse,
       config: {
         systemInstruction: systemPrompt,
@@ -1339,7 +1368,7 @@ ${actionsText}
 Now create a well-structured system prompt following the instructions above.`;
 
   try {
-    const response = await ai.models.generateContent({
+    const response = await generateWithRetry({
       model: modelToUse,
       config: {
         systemInstruction: metaPrompt,
@@ -1426,7 +1455,7 @@ Output Format: ${format.toUpperCase()}
 Generate sample ${dataType} data for testing this AI chatbot.`;
 
   try {
-    const response = await ai.models.generateContent({
+    const response = await generateWithRetry({
       model: modelToUse,
       config: {
         systemInstruction: systemPrompt,
@@ -1501,7 +1530,7 @@ ${domainDocsText ? `Domain Documents:\n${domainDocsText}` : "Domain Documents: (
 Respond with the JSON evaluation.`;
 
   try {
-    const response = await ai.models.generateContent({
+    const response = await generateWithRetry({
       model: "gemini-2.0-flash",
       config: {
         systemInstruction: systemPrompt,
@@ -1594,7 +1623,7 @@ If the user just answered a question, include gatheredInsight. If you're asking 
   ];
 
   try {
-    const response = await ai.models.generateContent({
+    const response = await generateWithRetry({
       model: "gemini-2.0-flash",
       config: {
         systemInstruction: systemPrompt,
@@ -1679,7 +1708,7 @@ ${insightsText ? `Additional Context from Q&A:\n${insightsText}` : ""}
 Generate validation rules for an AI agent handling this use case.`;
 
   try {
-    const response = await ai.models.generateContent({
+    const response = await generateWithRetry({
       model: modelToUse,
       config: {
         systemInstruction: systemPrompt,
@@ -1738,7 +1767,7 @@ ${insightsText ? `Additional Context from Q&A:\n${insightsText}` : ""}
 Generate safety guardrails for an AI agent handling this use case.`;
 
   try {
-    const response = await ai.models.generateContent({
+    const response = await generateWithRetry({
       model: modelToUse,
       config: {
         systemInstruction: systemPrompt,
@@ -1847,7 +1876,7 @@ ${domainDocsText ? `Domain Documents:\n${domainDocsText}` : ""}
 Generate actions for this AI agent.`;
 
   try {
-    const response = await ai.models.generateContent({
+    const response = await generateWithRetry({
       model: modelToUse,
       config: {
         systemInstruction: systemPrompt,
@@ -2006,7 +2035,7 @@ ${businessCaseText}
 Return only the JSON response with extracted content.`;
 
   try {
-    const response = await ai.models.generateContent({
+    const response = await generateWithRetry({
       model: modelToUse,
       config: {
         systemInstruction: systemPrompt,
@@ -2113,7 +2142,7 @@ ${context.sampleData ? `Sample Data (CRITICAL: You MUST reference the EXACT colu
 Generate the welcome screen configuration.`;
 
   try {
-    const response = await ai.models.generateContent({
+    const response = await generateWithRetry({
       model: modelToUse,
       contents: [{ role: "user", parts: [{ text: userPrompt }] }],
       config: {
@@ -2434,7 +2463,7 @@ export async function generatePromptCoachResponse(
       parts: [{ text: userMessage }],
     });
 
-    const response = await ai.models.generateContent({
+    const response = await generateWithRetry({
       model: model,
       contents,
       config: {
