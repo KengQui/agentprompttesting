@@ -483,7 +483,8 @@ interface MAStep {
   letter: string;
   title: string;
   expression: string;
-  explanation: string;
+  preText: string;
+  postText: string;
 }
 
 interface MABreakdownData {
@@ -626,18 +627,24 @@ function parseMABreakdown(text: string): MABreakdownData | null {
     const lines = blockContent.split('\n').map(l => l.trim()).filter(l => l);
 
     let stepExpression = '';
-    const explanationLines: string[] = [];
+    let foundFormula = false;
+    const preLines: string[] = [];
+    const postLines: string[] = [];
 
     for (const line of lines) {
-      if (!stepExpression && isFormulaLine(line)) {
+      if (!foundFormula && isFormulaLine(line)) {
         stepExpression = line.replace(/`/g, '');
+        foundFormula = true;
+      } else if (!foundFormula) {
+        preLines.push(line);
       } else {
-        explanationLines.push(line);
+        postLines.push(line);
       }
     }
 
-    const explanation = explanationLines.join(' ').trim();
-    steps.push({ letter, title, expression: stepExpression, explanation });
+    const preText = preLines.join(' ').trim();
+    const postText = postLines.join(' ').trim();
+    steps.push({ letter, title, expression: stepExpression, preText, postText });
   }
 
   if (steps.length === 0) return null;
@@ -775,11 +782,14 @@ function MABreakdownCard({ content, timestamp }: { content: string; timestamp: s
                       <span className="text-muted-foreground shrink-0 font-mono">{step.letter}.</span>
                       <span className="font-semibold">{step.title}</span>
                     </div>
+                    {step.preText && (
+                      <p className="text-xs text-muted-foreground pl-5 italic">{step.preText}</p>
+                    )}
                     {step.expression && (
                       <p className="text-sm font-mono pl-5 break-all text-foreground">{step.expression}</p>
                     )}
-                    {step.explanation && (
-                      <p className="text-xs text-muted-foreground pl-5 italic">{step.explanation}</p>
+                    {step.postText && (
+                      <p className="text-xs text-muted-foreground pl-5 italic">{step.postText}</p>
                     )}
                   </li>
                 ))}
