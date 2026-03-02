@@ -267,7 +267,7 @@ function Step3DomainKnowledge({
           Domain Knowledge
           <Badge variant="secondary">Optional</Badge>
         </CardTitle>
-        <CardDescription>
+        <CardDescription className="text-muted-foreground text-[12px]">
           Add knowledge that your agent should know about. You can type it in or upload documents.
         </CardDescription>
       </CardHeader>
