@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-02-25T01:02:35.518Z",
+  "generatedAt": "2026-03-02T19:47:39.316Z",
   "ownerUsername": "kengqui.chia@ukg.com",
   "ownerDevUserId": "22e95869-718c-428a-a9ae-a4694723ac19",
   "agents": [
@@ -1386,5 +1386,6 @@
       "code": "/**\n * Turn Manager - life agent 8\n * \n * Customized intent classification for this agent.\n * Modify keywords to match your domain-specific language.\n * \n * TEMPLATE NOTE: When adding new features to agent turn management,\n * update this template file so new agents automatically get those features.\n */\n\nimport { TurnManager as BaseTurnManager, TurnManagerConfig } from '../../../server/components/turn-manager';\n\nconst CONFIG: TurnManagerConfig = {\n  useLlmFallback: true,\n  \n  goBackKeywords: ['back', 'previous', 'return', 'undo', 'earlier', 'start over'],\n  \n  correctionKeywords: [\n    'change', 'actually', 'meant', 'should be', 'revise', 'update', \n    'i mean', 'correct the', 'correction', 'let me rephrase'\n  ],\n  \n  clarificationKeywords: [\n    'what', 'how', 'why', 'explain', 'help', \"don't understand\",\n    'tell me', 'can you', 'could you', 'would you', 'describe',\n    'confused', 'clarify', 'understand', 'more info', 'details'\n  ],\n  \n  confirmationKeywords: [\n    'yes', 'yeah', 'yep', 'y', 'yup', 'sure', 'ok', 'okay',\n    'confirm', 'correct', 'right', \"that's right\", 'looks good',\n    'sounds good', 'that works', 'perfect', 'great', 'thanks'\n  ],\n  \n  rejectionKeywords: [\n    'no', 'nope', 'n', 'nah', 'not quite', 'not exactly', 'not right',\n    'incorrect', 'wrong', 'disagree', 'not what i meant'\n  ]\n};\n\nexport class Lifeagent8TurnManager extends BaseTurnManager {\n  constructor() {\n    super(CONFIG);\n  }\n}\n\nexport function createTurnManager(): Lifeagent8TurnManager {\n  return new Lifeagent8TurnManager();\n}\n",
       "createdAt": "2026-02-03T15:02:56.370Z"
     }
-  ]
+  ],
+  "pinnedSessions": []
 }
