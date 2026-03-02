@@ -1577,8 +1577,7 @@ function Step7AvailableActions({
         )}
 
         <div className="p-4 rounded-lg border bg-muted/50 space-y-4">
-          <Label className="text-sm font-medium flex items-center gap-2">
-            <Shield className="h-4 w-4" />
+          <Label className="text-sm font-medium">
             Mock Mode
           </Label>
           <RadioGroup
