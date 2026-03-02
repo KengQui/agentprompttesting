@@ -175,7 +175,7 @@ function Step2AgentName({
           <Bot className="h-5 w-5 text-primary" />
           Agent Name
         </CardTitle>
-        <CardDescription>
+        <CardDescription className="text-muted-foreground text-[12px]">
           Give your agent a name that describes its purpose.
         </CardDescription>
       </CardHeader>
