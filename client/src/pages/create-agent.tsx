@@ -993,16 +993,6 @@ function Step6SampleData({
       </CardHeader>
       <CardContent>
         <div className="space-y-6">
-          <div className="flex items-start gap-3 rounded-lg border bg-muted/50 p-4">
-            <Info className="h-5 w-5 text-muted-foreground mt-0.5 shrink-0" />
-            <div>
-              <p className="font-medium text-sm">What is sample data?</p>
-              <p className="text-sm text-muted-foreground">
-                Sample data helps your chatbot understand the structure and format of data it might encounter. This can include customer records, product catalogs, order details, or any other relevant data.
-              </p>
-            </div>
-          </div>
-
           <div className="grid md:grid-cols-2 gap-6">
             <div className="space-y-4">
               <div>
