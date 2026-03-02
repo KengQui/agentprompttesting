@@ -465,16 +465,6 @@ function Step4ValidationRules({
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
-          <div className="flex items-start gap-3 rounded-lg border bg-muted/50 p-4">
-            <Info className="h-5 w-5 text-muted-foreground mt-0.5 shrink-0" />
-            <div>
-              <p className="font-medium text-sm">What are validation rules?</p>
-              <p className="text-sm text-muted-foreground">
-                Validation rules help ensure your agent processes data correctly and provides accurate responses. Define rules for input formats, required fields, and response constraints.
-              </p>
-            </div>
-          </div>
-
           <div>
             <div className="flex items-center justify-between mb-2">
               <div className="flex items-center gap-3">
