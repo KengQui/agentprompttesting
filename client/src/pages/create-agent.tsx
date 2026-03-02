@@ -126,7 +126,7 @@ function Step1BusinessUseCase({
           <Briefcase className="h-5 w-5 text-primary" />
           Business Use Case
         </CardTitle>
-        <CardDescription>
+        <CardDescription className="text-muted-foreground text-[12px]">
           Describe what problem this agent will solve. Be specific about the use case and target users.
         </CardDescription>
       </CardHeader>
