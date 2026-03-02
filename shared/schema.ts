@@ -679,3 +679,142 @@ export const promptCoachHistoryTable = pgTable("prompt_coach_history", {
   messages: jsonb("messages").notNull().default([]),
   savedAt: text("saved_at").notNull(),
 });
+
+// =====================================================
+// Swarm Orchestrator Tables
+// =====================================================
+
+export const swarmsTable = pgTable("swarms", {
+  id: text("id").primaryKey(),
+  userId: text("user_id").notNull(),
+  name: text("name").notNull(),
+  description: text("description").notNull().default(""),
+  orchestratorPrompt: text("orchestrator_prompt").notNull().default(""),
+  isActive: pgBoolean("is_active").notNull().default(true),
+  createdAt: text("created_at").notNull(),
+  updatedAt: text("updated_at").notNull(),
+});
+
+export const swarmAgentsTable = pgTable("swarm_agents", {
+  id: text("id").primaryKey(),
+  swarmId: text("swarm_id").notNull(),
+  agentId: text("agent_id").notNull(),
+  role: text("role").notNull().default(""),
+  addedBy: text("added_by").notNull(),
+  sortOrder: integer("sort_order").notNull().default(0),
+  addedAt: text("added_at").notNull(),
+});
+
+export const swarmSessionsTable = pgTable("swarm_sessions", {
+  id: text("id").primaryKey(),
+  swarmId: text("swarm_id").notNull(),
+  userId: text("user_id").notNull(),
+  title: text("title").notNull().default("New Session"),
+  createdAt: text("created_at").notNull(),
+  updatedAt: text("updated_at").notNull(),
+});
+
+export const swarmMessagesTable = pgTable("swarm_messages", {
+  id: text("id").primaryKey(),
+  sessionId: text("session_id").notNull(),
+  role: text("role").notNull(),
+  content: text("content").notNull(),
+  routedToAgentId: text("routed_to_agent_id"),
+  routedToAgentName: text("routed_to_agent_name"),
+  routingReason: text("routing_reason"),
+  createdAt: text("created_at").notNull(),
+});
+
+// =====================================================
+// Swarm Zod Schemas & Types
+// =====================================================
+
+export const swarmSchema = z.object({
+  id: z.string(),
+  userId: z.string(),
+  name: z.string().min(1, "Name is required"),
+  description: z.string().default(""),
+  orchestratorPrompt: z.string().default(""),
+  isActive: z.boolean().default(true),
+  createdAt: z.string(),
+  updatedAt: z.string(),
+});
+
+export type Swarm = z.infer<typeof swarmSchema>;
+
+export const insertSwarmSchema = swarmSchema.omit({
+  id: true,
+  userId: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type InsertSwarm = z.infer<typeof insertSwarmSchema>;
+
+export const updateSwarmSchema = insertSwarmSchema.partial();
+export type UpdateSwarm = z.infer<typeof updateSwarmSchema>;
+
+export const swarmAgentSchema = z.object({
+  id: z.string(),
+  swarmId: z.string(),
+  agentId: z.string(),
+  role: z.string().default(""),
+  addedBy: z.string(),
+  sortOrder: z.number().default(0),
+  addedAt: z.string(),
+});
+
+export type SwarmAgent = z.infer<typeof swarmAgentSchema>;
+
+export const insertSwarmAgentSchema = swarmAgentSchema.omit({
+  id: true,
+  addedBy: true,
+  addedAt: true,
+});
+
+export type InsertSwarmAgent = z.infer<typeof insertSwarmAgentSchema>;
+
+export const swarmSessionSchema = z.object({
+  id: z.string(),
+  swarmId: z.string(),
+  userId: z.string(),
+  title: z.string().default("New Session"),
+  createdAt: z.string(),
+  updatedAt: z.string(),
+});
+
+export type SwarmSession = z.infer<typeof swarmSessionSchema>;
+
+export const insertSwarmSessionSchema = swarmSessionSchema.omit({
+  id: true,
+  userId: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type InsertSwarmSession = z.infer<typeof insertSwarmSessionSchema>;
+
+export const swarmMessageSchema = z.object({
+  id: z.string(),
+  sessionId: z.string(),
+  role: z.enum(["user", "assistant", "system"]),
+  content: z.string(),
+  routedToAgentId: z.string().nullable().default(null),
+  routedToAgentName: z.string().nullable().default(null),
+  routingReason: z.string().nullable().default(null),
+  createdAt: z.string(),
+});
+
+export type SwarmMessage = z.infer<typeof swarmMessageSchema>;
+
+export const insertSwarmMessageSchema = swarmMessageSchema.omit({
+  id: true,
+  createdAt: true,
+});
+
+export type InsertSwarmMessage = z.infer<typeof insertSwarmMessageSchema>;
+
+export type SelectSwarm = typeof swarmsTable.$inferSelect;
+export type SelectSwarmAgent = typeof swarmAgentsTable.$inferSelect;
+export type SelectSwarmSession = typeof swarmSessionsTable.$inferSelect;
+export type SelectSwarmMessage = typeof swarmMessagesTable.$inferSelect;

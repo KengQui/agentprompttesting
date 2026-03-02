@@ -12,13 +12,32 @@ export interface PromptContext {
   guardrails?: string;
 }
 
-function getPersonalityPrompt(): string {
+let brytePromptCache: string | null = null;
+
+export function invalidateBrytePromptCache(): void {
+  brytePromptCache = null;
+}
+
+export function getBryteSystemPrompt(): string {
+  if (brytePromptCache !== null) {
+    return brytePromptCache;
+  }
+
   try {
-    const promptPath = path.join(process.cwd(), "personality-prompt.txt");
-    return fs.readFileSync(promptPath, "utf-8").trim();
-  } catch (error) {
-    console.warn("Could not read personality-prompt.txt, using default");
-    return "You are a helpful AI assistant.";
+    const mdPath = path.join(process.cwd(), "bryte-system-prompt.md");
+    brytePromptCache = fs.readFileSync(mdPath, "utf-8").trim();
+    return brytePromptCache;
+  } catch {
+    try {
+      const txtPath = path.join(process.cwd(), "personality-prompt.txt");
+      brytePromptCache = fs.readFileSync(txtPath, "utf-8").trim();
+      return brytePromptCache;
+    } catch {
+      console.warn("Could not read bryte-system-prompt.md or personality-prompt.txt, using default");
+      const fallback = "You are a helpful, friendly, and professional AI assistant.";
+      brytePromptCache = fallback;
+      return fallback;
+    }
   }
 }
 
@@ -147,22 +166,26 @@ function buildSampleDataSection(context: PromptContext): string {
 }
 
 export function generatePrompt(style: PromptStyle, context: PromptContext): string {
-  const personality = getPersonalityPrompt();
+  const bryteGlobalPrompt = getBryteSystemPrompt();
   const domainKnowledge = buildDomainKnowledgeSection(context);
   const sampleData = buildSampleDataSection(context);
   const currentDate = new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
   
-  let prompt = `You are "${context.name}", an AI assistant.
+  let prompt = `# TIER 1 — BRYTE GLOBAL GUIDELINES
+${bryteGlobalPrompt}
+
+---
+
+# TIER 2 — AGENT-SPECIFIC CONFIGURATION
+
+You are "${context.name}", an AI assistant.
 
 ## Current Date
 Today is: ${currentDate}
 Use this to understand relative time references like "last month", "last year", "this week", etc.
 
 ## Purpose
-${context.businessUseCase}
-
-## Personality & Behavior
-${personality}`;
+${context.businessUseCase}`;
 
   if (domainKnowledge) {
     prompt += `
@@ -175,24 +198,7 @@ ${domainKnowledge}`;
     prompt += `
 
 ## User Data Records
-${sampleData}
-
-**CRITICAL INSTRUCTIONS FOR DATA ACCESS:**
-- You HAVE ACCESS to the user's personal data shown above
-- When the user asks about their pay, salary, deductions, or any personal records, ANALYZE the data above and respond with a clear, helpful answer
-- DO NOT say you don't have access to their information - you DO have it above
-- DO NOT generate code or tool calls - just read the data and provide the answer in plain English
-- **NEVER output raw JSON, code blocks, or data dumps** - always provide human-readable explanations and summaries
-- Respond naturally with specific numbers, dates, and insights from the data
-- If the user asks about changes over time (like pay increases), compare the relevant records and explain what changed
-
-**CRITICAL: DATA COUNT AND ROW NUMBER ACCURACY:**
-- Each dataset above includes a "Total records" count. Use that exact number when stating how many records exist.
-- If you display a table or list of records, the number of rows you display MUST match the count you state. Do NOT say "there are 3 employees" and then list 5.
-- If data was truncated, clearly state "showing N of M total records" so the user knows not all data is visible.
-- NEVER guess or estimate record counts — always count the actual records you can see in the data above before stating a number.
-- CSV datasets have a "Row" column prepended as the first column. These row numbers match the user's spreadsheet (where row 1 is the header row). When referring to a specific data row, ALWAYS use the value in the "Row" column — do NOT count rows yourself or assign your own row numbers.
-- ONLY use data values that actually appear in the dataset. NEVER fabricate, invent, or guess data values. If a field value is not visible in the data, say so rather than making one up.`;
+${sampleData}`;
   }
 
   if (context.validationRules) {
@@ -201,28 +207,6 @@ ${sampleData}
 ## Validation Rules
 ${context.validationRules}`;
   }
-
-  prompt += `
-
-## Response Guidelines
-- Be direct and precise in your responses
-- Use the domain knowledge to inform accurate answers
-- Stay focused on your defined purpose
-- When the user asks about their personal data, use the provided data records to answer accurately
-- Do not address the user by name in every response. Use their name sparingly, only when it adds clarity or on first greeting.
-- CRITICAL: NEVER output placeholder text like "Describe your question or issue", "What can I help you with today?", or any template/help text. Always provide a real, substantive response. If you cannot answer, explain what you can help with instead.
-- CRITICAL: NEVER output Python, JavaScript, or any other programming language code in your responses. If you need to demonstrate a calculation or logic, use only the custom expression language (e.g. If(), DateDiff(), And(), etc.) and plain English explanations.
-
-## Request Faithfulness
-- Carefully parse the user's request BEFORE acting — extract the exact calculation, logic, or output format they specified and follow it faithfully
-- NEVER contradict or ignore what the user explicitly stated (e.g., if they say "percentage", the output must be a percentage, not a raw decimal; if they say "relative to X", use X as the reference point)
-- Only ask clarifying questions when the request is genuinely ambiguous — do NOT ask for clarification on details the user already provided
-
-## Clarification Consistency
-- When a request IS genuinely ambiguous, identify ALL decision points that need clarification — not just the first one that comes to mind
-- Ask about each one at a time, in order of impact — start with the most significant decision first
-- The same type of ambiguous request should always surface the same set of clarifying questions regardless of session
-- Ask only ONE question at a time — never ask multiple questions in a single response`;
 
   if (context.guardrails) {
     prompt += `

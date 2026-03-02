@@ -11,6 +11,8 @@ import SettingsPage from "@/pages/settings";
 import LoginPage from "@/pages/login";
 import RegisterPage from "@/pages/register";
 import ForgotPasswordPage from "@/pages/forgot-password";
+import BryteChat from "@/pages/bryte-chat";
+import SwarmsPage from "@/pages/swarms";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -42,6 +44,21 @@ function Router() {
       <Route path="/settings/:id">
         <ProtectedRoute>
           <SettingsPage />
+        </ProtectedRoute>
+      </Route>
+      <Route path="/swarms">
+        <ProtectedRoute>
+          <SwarmsPage />
+        </ProtectedRoute>
+      </Route>
+      <Route path="/swarms/:id">
+        <ProtectedRoute>
+          <SwarmsPage />
+        </ProtectedRoute>
+      </Route>
+      <Route path="/swarms/:id/chat">
+        <ProtectedRoute>
+          <BryteChat />
         </ProtectedRoute>
       </Route>
       <Route component={NotFound} />

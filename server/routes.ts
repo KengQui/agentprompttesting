@@ -29,8 +29,22 @@ async function requireAuth(req: AuthenticatedRequest, res: Response, next: NextF
   req.user = user;
   next();
 }
+
+async function requireAdmin(req: AuthenticatedRequest, res: Response, next: NextFunction) {
+  const user = await getUserFromSession(req);
+  if (!user) {
+    return res.status(401).json({ message: "Unauthorized" });
+  }
+  const userRow = await storage.getUserByUsername(user.username);
+  if (!userRow || (userRow as any).role !== "admin") {
+    return res.status(403).json({ message: "Forbidden: admin access required" });
+  }
+  req.user = user;
+  next();
+}
 import { generateAgentResponse, generateValidationRules, generateGuardrails, generateSystemPrompt, generateSampleData, evaluateContextSufficiency, processClarifyingChat, generateValidationRulesWithInsights, generateGuardrailsWithInsights, generateActionsAndMockData, parseActionFromResponse, stripActionBlocks, executeSimulatedAction, executeActionWithSampleData, extractBusinessCaseContent, sampleDatasetsToWorkingData, workingDataToSampleDatasets, generateWelcomeConfig, extractPendingQuestion, detectTopicSwitch, isOpenEndedInvitation, generatePromptCoachResponse, type GenerationContext, type SystemPromptContext, type SampleDataGenerationContext, type ClarifyingChatContext, type ActionsGenerationContext, type ExtractionResult, type WelcomeConfigGenerationContext, type PromptCoachMessage, type PromptCoachContext } from "./gemini";
 import { loadAgentComponents, clearAgentCache, hasCustomComponents } from "./agent-loader";
+import { invalidateBrytePromptCache } from "./prompt-templates";
 import { createRecoveryManager } from "./components/recovery-manager";
 import multer from "multer";
 
@@ -2118,6 +2132,17 @@ export async function registerRoutes(
     }
   });
 
+  app.post("/api/admin/recompile-all", requireAdmin as any, async (_req: Request, res: Response) => {
+    try {
+      invalidateBrytePromptCache();
+      clearAgentCache();
+      res.json({ success: true, message: "All agent caches cleared and Bryte system prompt reloaded" });
+    } catch (error: any) {
+      console.error("Error recompiling agents:", error);
+      res.status(500).json({ message: error?.message || "Failed to recompile agents" });
+    }
+  });
+
   // Diagnostic endpoint - returns DB info and agent counts (no auth required)
   app.get("/api/admin/db-info", async (_req: Request, res: Response) => {
     try {
@@ -2988,6 +3013,214 @@ export async function registerRoutes(
     } catch (error: any) {
       console.error("pin-sessions-to-snapshot error:", error);
       res.status(500).json({ message: error?.message || "Failed to pin sessions" });
+    }
+  });
+
+  // =====================================================
+  // Swarm Orchestrator Routes
+  // =====================================================
+
+  app.post("/api/swarms", requireAuth as any, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const data = z.object({
+        name: z.string().min(1),
+        description: z.string().default(""),
+      }).parse(req.body);
+      const swarm = await storage.createSwarm(data, req.user!.id);
+      res.status(201).json(swarm);
+    } catch (error: any) {
+      res.status(400).json({ message: error?.message || "Failed to create swarm" });
+    }
+  });
+
+  app.get("/api/swarms", requireAuth as any, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const swarms = await storage.getSwarmsByUser(req.user!.id);
+      res.json(swarms);
+    } catch (error: any) {
+      res.status(500).json({ message: error?.message || "Failed to fetch swarms" });
+    }
+  });
+
+  app.get("/api/swarms/:id", requireAuth as any, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const swarm = await storage.getSwarm(req.params.id);
+      if (!swarm) return res.status(404).json({ message: "Swarm not found" });
+      const rawAgents = await storage.getSwarmAgents(req.params.id);
+      const agents = rawAgents.map((sa) => ({
+        ...sa,
+        agentName: sa.agent?.name || "Unknown Agent",
+        agentStatus: sa.agent?.status || "unknown",
+        agent: undefined,
+      }));
+      res.json({ ...swarm, agents });
+    } catch (error: any) {
+      res.status(500).json({ message: error?.message || "Failed to fetch swarm" });
+    }
+  });
+
+  app.patch("/api/swarms/:id", requireAuth as any, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const data = z.object({
+        name: z.string().min(1).optional(),
+        description: z.string().optional(),
+        isActive: z.boolean().optional(),
+      }).parse(req.body);
+      const swarm = await storage.updateSwarm(req.params.id, data);
+      if (!swarm) return res.status(404).json({ message: "Swarm not found" });
+      res.json(swarm);
+    } catch (error: any) {
+      res.status(400).json({ message: error?.message || "Failed to update swarm" });
+    }
+  });
+
+  app.delete("/api/swarms/:id", requireAuth as any, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const deleted = await storage.deleteSwarm(req.params.id);
+      if (!deleted) return res.status(404).json({ message: "Swarm not found" });
+      res.json({ success: true });
+    } catch (error: any) {
+      res.status(500).json({ message: error?.message || "Failed to delete swarm" });
+    }
+  });
+
+  app.post("/api/swarms/:id/agents", requireAuth as any, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const data = z.object({
+        agentId: z.string(),
+        role: z.string().default(""),
+        sortOrder: z.number().default(0),
+      }).parse(req.body);
+      const swarmAgent = await storage.addAgentToSwarm(
+        req.params.id,
+        data.agentId,
+        data.role,
+        req.user!.id,
+        data.sortOrder
+      );
+      res.status(201).json(swarmAgent);
+    } catch (error: any) {
+      res.status(400).json({ message: error?.message || "Failed to add agent to swarm" });
+    }
+  });
+
+  app.delete("/api/swarms/:id/agents/:agentId", requireAuth as any, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const removed = await storage.removeAgentFromSwarm(req.params.id, req.params.agentId);
+      if (!removed) return res.status(404).json({ message: "Agent not found in swarm" });
+      res.json({ success: true });
+    } catch (error: any) {
+      res.status(500).json({ message: error?.message || "Failed to remove agent from swarm" });
+    }
+  });
+
+  app.patch("/api/swarms/:id/agents/:agentId", requireAuth as any, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const data = z.object({ role: z.string() }).parse(req.body);
+      const updated = await storage.updateSwarmAgentRole(req.params.id, req.params.agentId, data.role);
+      if (!updated) return res.status(404).json({ message: "Agent not found in swarm" });
+      res.json({ success: true });
+    } catch (error: any) {
+      res.status(400).json({ message: error?.message || "Failed to update agent role" });
+    }
+  });
+
+  app.patch("/api/admin/swarms/:id/settings", requireAdmin as any, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const data = z.object({
+        orchestratorPrompt: z.string().optional(),
+      }).parse(req.body);
+      const swarm = await storage.updateSwarm(req.params.id, data);
+      if (!swarm) return res.status(404).json({ message: "Swarm not found" });
+      res.json(swarm);
+    } catch (error: any) {
+      res.status(400).json({ message: error?.message || "Failed to update swarm settings" });
+    }
+  });
+
+  app.post("/api/swarms/:id/sessions", requireAuth as any, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const swarm = await storage.getSwarm(req.params.id);
+      if (!swarm) return res.status(404).json({ message: "Swarm not found" });
+      const session = await storage.createSwarmSession({
+        swarmId: req.params.id,
+        title: "New Session",
+      }, req.user!.id);
+      res.status(201).json(session);
+    } catch (error: any) {
+      res.status(500).json({ message: error?.message || "Failed to create session" });
+    }
+  });
+
+  app.get("/api/swarms/:id/sessions", requireAuth as any, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const sessions = await storage.getSwarmSessions(req.params.id);
+      res.json(sessions);
+    } catch (error: any) {
+      res.status(500).json({ message: error?.message || "Failed to fetch sessions" });
+    }
+  });
+
+  app.get("/api/swarms/:id/sessions/:sessionId/messages", requireAuth as any, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const messages = await storage.getSwarmMessages(req.params.sessionId);
+      res.json(messages);
+    } catch (error: any) {
+      res.status(500).json({ message: error?.message || "Failed to fetch messages" });
+    }
+  });
+
+  app.post("/api/swarms/:id/sessions/:sessionId/messages", requireAuth as any, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const { routeMessage } = await import("./swarm-orchestrator");
+      const data = z.object({ content: z.string().min(1) }).parse(req.body);
+
+      const userMsg = await storage.addSwarmMessage({
+        sessionId: req.params.sessionId,
+        role: "user",
+        content: data.content,
+        routedToAgentId: null,
+        routedToAgentName: null,
+        routingReason: null,
+      });
+
+      const routingResult = await routeMessage(
+        req.params.id,
+        req.params.sessionId,
+        data.content
+      );
+
+      const assistantMsg = await storage.addSwarmMessage({
+        sessionId: req.params.sessionId,
+        role: "assistant",
+        content: routingResult.response,
+        routedToAgentId: routingResult.agentId === "NONE" ? null : routingResult.agentId,
+        routedToAgentName: routingResult.agentName,
+        routingReason: routingResult.reason,
+      });
+
+      res.json({
+        userMessage: userMsg,
+        assistantMessage: assistantMsg,
+        routing: {
+          agentId: routingResult.agentId,
+          agentName: routingResult.agentName,
+          reason: routingResult.reason,
+        },
+      });
+    } catch (error: any) {
+      console.error("Swarm message error:", error);
+      res.status(500).json({ message: error?.message || "Failed to process message" });
+    }
+  });
+
+  app.delete("/api/swarms/:id/sessions/:sessionId", requireAuth as any, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const deleted = await storage.deleteSwarmSession(req.params.sessionId);
+      if (!deleted) return res.status(404).json({ message: "Session not found" });
+      res.json({ success: true });
+    } catch (error: any) {
+      res.status(500).json({ message: error?.message || "Failed to delete session" });
     }
   });
 

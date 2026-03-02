@@ -1,7 +1,7 @@
 import { useState, useRef } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Link, useLocation } from "wouter";
-import { Plus, MessageSquare, Settings, Bot, Sparkles, LogOut, PlayCircle, Copy, Zap, HelpCircle, CloudDownload, Download, Upload, Loader2, Database, ShieldCheck, Pin, ChevronDown, ChevronUp, Check } from "lucide-react";
+import { Plus, MessageSquare, Settings, Bot, Sparkles, LogOut, PlayCircle, Copy, Zap, HelpCircle, CloudDownload, Download, Upload, Loader2, Database, ShieldCheck, Pin, ChevronDown, ChevronUp, Check, Network } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -602,6 +602,12 @@ export default function Home() {
                   {user.username}
                 </span>
               )}
+              <Link href="/swarms">
+                <Button variant="outline" className="gap-2" data-testid="button-swarms">
+                  <Network className="h-4 w-4" />
+                  Swarms
+                </Button>
+              </Link>
               <Link href="/create">
                 <Button className="gap-2" data-testid="button-create-agent">
                   <Plus className="h-4 w-4" />

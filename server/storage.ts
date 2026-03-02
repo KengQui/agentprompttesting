@@ -14,6 +14,10 @@ import {
   configSnapshotsTable,
   authSessionsTable,
   promptCoachHistoryTable,
+  swarmsTable,
+  swarmAgentsTable,
+  swarmSessionsTable,
+  swarmMessagesTable,
 } from "@shared/schema";
 import type {
   Agent, InsertAgent, UpdateAgent,
@@ -26,6 +30,10 @@ import type {
   ConfigSnapshot, ConfigHistory,
   User, InsertUser, AuthSession, PublicUser,
   AgentAction, MockUserState, MockMode,
+  Swarm, InsertSwarm, UpdateSwarm,
+  SwarmAgent, InsertSwarmAgent,
+  SwarmSession, InsertSwarmSession,
+  SwarmMessage, InsertSwarmMessage,
 } from "@shared/schema";
 
 const TEMPLATES_DIR = path.join(process.cwd(), 'server', 'templates', 'agent-components');
@@ -196,6 +204,27 @@ export interface IStorage {
   getPromptCoachHistory(agentId: string): Promise<any[]>;
   savePromptCoachHistory(agentId: string, messages: any[]): Promise<void>;
   clearPromptCoachHistory(agentId: string): Promise<void>;
+
+  createSwarm(swarm: InsertSwarm, userId: string): Promise<Swarm>;
+  getSwarm(id: string): Promise<Swarm | undefined>;
+  getSwarms(): Promise<Swarm[]>;
+  getSwarmsByUser(userId: string): Promise<Swarm[]>;
+  updateSwarm(id: string, updates: UpdateSwarm): Promise<Swarm | undefined>;
+  deleteSwarm(id: string): Promise<boolean>;
+
+  addAgentToSwarm(swarmId: string, agentId: string, role: string, addedBy: string, sortOrder?: number): Promise<SwarmAgent>;
+  removeAgentFromSwarm(swarmId: string, agentId: string): Promise<boolean>;
+  getSwarmAgents(swarmId: string): Promise<(SwarmAgent & { agent?: Agent })[]>;
+  updateSwarmAgentRole(swarmId: string, agentId: string, role: string): Promise<SwarmAgent | undefined>;
+  isAgentInSwarm(swarmId: string, agentId: string): Promise<boolean>;
+
+  createSwarmSession(session: InsertSwarmSession, userId: string): Promise<SwarmSession>;
+  getSwarmSessions(swarmId: string): Promise<SwarmSession[]>;
+  getSwarmSession(sessionId: string): Promise<SwarmSession | undefined>;
+  deleteSwarmSession(sessionId: string): Promise<boolean>;
+
+  addSwarmMessage(message: InsertSwarmMessage): Promise<SwarmMessage>;
+  getSwarmMessages(sessionId: string): Promise<SwarmMessage[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -967,6 +996,315 @@ export class DatabaseStorage implements IStorage {
 
   async clearPromptCoachHistory(agentId: string): Promise<void> {
     await db.delete(promptCoachHistoryTable).where(eq(promptCoachHistoryTable.agentId, agentId));
+  }
+
+  async createSwarm(insertSwarm: InsertSwarm, userId: string): Promise<Swarm> {
+    const id = randomUUID();
+    const now = new Date().toISOString();
+
+    const swarm: Swarm = {
+      id,
+      userId,
+      name: insertSwarm.name,
+      description: insertSwarm.description || "",
+      orchestratorPrompt: insertSwarm.orchestratorPrompt || "",
+      isActive: insertSwarm.isActive ?? true,
+      createdAt: now,
+      updatedAt: now,
+    };
+
+    await db.insert(swarmsTable).values({
+      id: swarm.id,
+      userId: swarm.userId,
+      name: swarm.name,
+      description: swarm.description,
+      orchestratorPrompt: swarm.orchestratorPrompt,
+      isActive: swarm.isActive,
+      createdAt: swarm.createdAt,
+      updatedAt: swarm.updatedAt,
+    });
+
+    return swarm;
+  }
+
+  async getSwarm(id: string): Promise<Swarm | undefined> {
+    const rows = await db.select().from(swarmsTable).where(eq(swarmsTable.id, id)).limit(1);
+    if (rows.length === 0) return undefined;
+    const r = rows[0];
+    return {
+      id: r.id,
+      userId: r.userId,
+      name: r.name,
+      description: r.description,
+      orchestratorPrompt: r.orchestratorPrompt,
+      isActive: r.isActive,
+      createdAt: r.createdAt,
+      updatedAt: r.updatedAt,
+    };
+  }
+
+  async getSwarms(): Promise<Swarm[]> {
+    const rows = await db.select().from(swarmsTable).orderBy(desc(swarmsTable.createdAt));
+    return rows.map(r => ({
+      id: r.id,
+      userId: r.userId,
+      name: r.name,
+      description: r.description,
+      orchestratorPrompt: r.orchestratorPrompt,
+      isActive: r.isActive,
+      createdAt: r.createdAt,
+      updatedAt: r.updatedAt,
+    }));
+  }
+
+  async getSwarmsByUser(userId: string): Promise<Swarm[]> {
+    const rows = await db.select().from(swarmsTable)
+      .where(eq(swarmsTable.userId, userId))
+      .orderBy(desc(swarmsTable.createdAt));
+    return rows.map(r => ({
+      id: r.id,
+      userId: r.userId,
+      name: r.name,
+      description: r.description,
+      orchestratorPrompt: r.orchestratorPrompt,
+      isActive: r.isActive,
+      createdAt: r.createdAt,
+      updatedAt: r.updatedAt,
+    }));
+  }
+
+  async updateSwarm(id: string, updates: UpdateSwarm): Promise<Swarm | undefined> {
+    const swarm = await this.getSwarm(id);
+    if (!swarm) return undefined;
+
+    const updatedSwarm: Swarm = {
+      ...swarm,
+      ...updates,
+      updatedAt: new Date().toISOString(),
+    };
+
+    await db.update(swarmsTable).set({
+      name: updatedSwarm.name,
+      description: updatedSwarm.description,
+      orchestratorPrompt: updatedSwarm.orchestratorPrompt,
+      isActive: updatedSwarm.isActive,
+      updatedAt: updatedSwarm.updatedAt,
+    }).where(eq(swarmsTable.id, id));
+
+    return updatedSwarm;
+  }
+
+  async deleteSwarm(id: string): Promise<boolean> {
+    const swarm = await this.getSwarm(id);
+    if (!swarm) return false;
+
+    const sessions = await this.getSwarmSessions(id);
+    for (const session of sessions) {
+      await db.delete(swarmMessagesTable).where(eq(swarmMessagesTable.sessionId, session.id));
+    }
+    await db.delete(swarmSessionsTable).where(eq(swarmSessionsTable.swarmId, id));
+    await db.delete(swarmAgentsTable).where(eq(swarmAgentsTable.swarmId, id));
+    await db.delete(swarmsTable).where(eq(swarmsTable.id, id));
+
+    return true;
+  }
+
+  async addAgentToSwarm(swarmId: string, agentId: string, role: string, addedBy: string, sortOrder?: number): Promise<SwarmAgent> {
+    const id = randomUUID();
+    const now = new Date().toISOString();
+
+    const swarmAgent: SwarmAgent = {
+      id,
+      swarmId,
+      agentId,
+      role,
+      addedBy,
+      sortOrder: sortOrder ?? 0,
+      addedAt: now,
+    };
+
+    await db.insert(swarmAgentsTable).values({
+      id: swarmAgent.id,
+      swarmId: swarmAgent.swarmId,
+      agentId: swarmAgent.agentId,
+      role: swarmAgent.role,
+      addedBy: swarmAgent.addedBy,
+      sortOrder: swarmAgent.sortOrder,
+      addedAt: swarmAgent.addedAt,
+    });
+
+    return swarmAgent;
+  }
+
+  async removeAgentFromSwarm(swarmId: string, agentId: string): Promise<boolean> {
+    const rows = await db.select().from(swarmAgentsTable)
+      .where(and(eq(swarmAgentsTable.swarmId, swarmId), eq(swarmAgentsTable.agentId, agentId)))
+      .limit(1);
+    if (rows.length === 0) return false;
+
+    await db.delete(swarmAgentsTable).where(
+      and(eq(swarmAgentsTable.swarmId, swarmId), eq(swarmAgentsTable.agentId, agentId))
+    );
+    return true;
+  }
+
+  async getSwarmAgents(swarmId: string): Promise<(SwarmAgent & { agent?: Agent })[]> {
+    const rows = await db.select().from(swarmAgentsTable)
+      .where(eq(swarmAgentsTable.swarmId, swarmId))
+      .orderBy(swarmAgentsTable.sortOrder);
+
+    const results: (SwarmAgent & { agent?: Agent })[] = [];
+    for (const r of rows) {
+      const agent = await this.getAgent(r.agentId);
+      results.push({
+        id: r.id,
+        swarmId: r.swarmId,
+        agentId: r.agentId,
+        role: r.role,
+        addedBy: r.addedBy,
+        sortOrder: r.sortOrder,
+        addedAt: r.addedAt,
+        agent,
+      });
+    }
+    return results;
+  }
+
+  async updateSwarmAgentRole(swarmId: string, agentId: string, role: string): Promise<SwarmAgent | undefined> {
+    const rows = await db.select().from(swarmAgentsTable)
+      .where(and(eq(swarmAgentsTable.swarmId, swarmId), eq(swarmAgentsTable.agentId, agentId)))
+      .limit(1);
+    if (rows.length === 0) return undefined;
+
+    await db.update(swarmAgentsTable).set({ role }).where(eq(swarmAgentsTable.id, rows[0].id));
+
+    return {
+      ...rows[0],
+      role,
+    };
+  }
+
+  async isAgentInSwarm(swarmId: string, agentId: string): Promise<boolean> {
+    const rows = await db.select().from(swarmAgentsTable)
+      .where(and(eq(swarmAgentsTable.swarmId, swarmId), eq(swarmAgentsTable.agentId, agentId)))
+      .limit(1);
+    return rows.length > 0;
+  }
+
+  async createSwarmSession(insertSession: InsertSwarmSession, userId: string): Promise<SwarmSession> {
+    const id = randomUUID();
+    const now = new Date().toISOString();
+
+    const session: SwarmSession = {
+      id,
+      swarmId: insertSession.swarmId,
+      userId,
+      title: insertSession.title || "New Session",
+      createdAt: now,
+      updatedAt: now,
+    };
+
+    await db.insert(swarmSessionsTable).values({
+      id: session.id,
+      swarmId: session.swarmId,
+      userId: session.userId,
+      title: session.title,
+      createdAt: session.createdAt,
+      updatedAt: session.updatedAt,
+    });
+
+    return session;
+  }
+
+  async getSwarmSessions(swarmId: string): Promise<SwarmSession[]> {
+    const rows = await db.select().from(swarmSessionsTable)
+      .where(eq(swarmSessionsTable.swarmId, swarmId))
+      .orderBy(desc(swarmSessionsTable.updatedAt));
+
+    return rows.map(r => ({
+      id: r.id,
+      swarmId: r.swarmId,
+      userId: r.userId,
+      title: r.title,
+      createdAt: r.createdAt,
+      updatedAt: r.updatedAt,
+    }));
+  }
+
+  async getSwarmSession(sessionId: string): Promise<SwarmSession | undefined> {
+    const rows = await db.select().from(swarmSessionsTable)
+      .where(eq(swarmSessionsTable.id, sessionId))
+      .limit(1);
+    if (rows.length === 0) return undefined;
+
+    const r = rows[0];
+    return {
+      id: r.id,
+      swarmId: r.swarmId,
+      userId: r.userId,
+      title: r.title,
+      createdAt: r.createdAt,
+      updatedAt: r.updatedAt,
+    };
+  }
+
+  async deleteSwarmSession(sessionId: string): Promise<boolean> {
+    const session = await this.getSwarmSession(sessionId);
+    if (!session) return false;
+
+    await db.delete(swarmMessagesTable).where(eq(swarmMessagesTable.sessionId, sessionId));
+    await db.delete(swarmSessionsTable).where(eq(swarmSessionsTable.id, sessionId));
+    return true;
+  }
+
+  async addSwarmMessage(insertMessage: InsertSwarmMessage): Promise<SwarmMessage> {
+    const id = randomUUID();
+    const now = new Date().toISOString();
+
+    const message: SwarmMessage = {
+      id,
+      sessionId: insertMessage.sessionId,
+      role: insertMessage.role,
+      content: insertMessage.content,
+      routedToAgentId: insertMessage.routedToAgentId || null,
+      routedToAgentName: insertMessage.routedToAgentName || null,
+      routingReason: insertMessage.routingReason || null,
+      createdAt: now,
+    };
+
+    await db.insert(swarmMessagesTable).values({
+      id: message.id,
+      sessionId: message.sessionId,
+      role: message.role,
+      content: message.content,
+      routedToAgentId: message.routedToAgentId,
+      routedToAgentName: message.routedToAgentName,
+      routingReason: message.routingReason,
+      createdAt: message.createdAt,
+    });
+
+    await db.update(swarmSessionsTable).set({
+      updatedAt: now,
+    }).where(eq(swarmSessionsTable.id, insertMessage.sessionId));
+
+    return message;
+  }
+
+  async getSwarmMessages(sessionId: string): Promise<SwarmMessage[]> {
+    const rows = await db.select().from(swarmMessagesTable)
+      .where(eq(swarmMessagesTable.sessionId, sessionId))
+      .orderBy(swarmMessagesTable.createdAt);
+
+    return rows.map(r => ({
+      id: r.id,
+      sessionId: r.sessionId,
+      role: r.role as "user" | "assistant" | "system",
+      content: r.content,
+      routedToAgentId: r.routedToAgentId,
+      routedToAgentName: r.routedToAgentName,
+      routingReason: r.routingReason,
+      createdAt: r.createdAt,
+    }));
   }
 }
 

@@ -66,6 +66,26 @@ The database connection layer (`server/db.ts`) includes resilience features for 
 ### Data Backup & Restore
 A full database backup/restore feature is available on the home page (requires ENABLE_SYNC=true). The "Export Backup" button downloads a JSON file containing all agents, components, chat sessions, messages, traces, snapshots, and user data (passwords excluded for security). The "Restore Backup" button allows uploading a previously exported JSON file to fully restore the database. Import runs in a transaction for data integrity. Endpoints: GET /api/admin/backup-export, POST /api/admin/backup-import.
 
+### Two-Tier Prompt Architecture
+Agent prompts use a two-tier system:
+- **Tier 1 — Bryte Global System Prompt** (`bryte-system-prompt.md`): Defines the brand voice, communication style, response formatting, emotional intelligence, and UX personality for ALL Bryte agents. This file is NOT exposed in the UI — edit it directly and call `POST /api/admin/recompile-all` to propagate changes.
+- **Tier 2 — Agent-Local Prompt**: Per-agent configuration (name, purpose, domain knowledge, data, validation rules, guardrails) defined through the agent builder UI.
+- The old `personality-prompt.txt` is kept as a deprecated fallback.
+- **Key files**: `bryte-system-prompt.md`, `server/prompt-templates.ts`
+- **Workflow**: Edit `bryte-system-prompt.md` → call recompile endpoint → test agent behavior
+
+### Swarm Orchestrator System
+A multi-agent swarm architecture that connects existing agents under a unified "Bryte Assistant" experience.
+- **Architecture**: User → Bryte Assistant → Orchestrator → Domain Agents (WFM, HR, Payroll, etc.)
+- **Orchestrator** (`server/swarm-orchestrator.ts`): Handles intent detection, agent routing (via Gemini), context management (sticky routing for follow-ups), topic switch detection, and fallback handling.
+- **Swarm Configuration**: Stored in the database. Users create swarms, connect agents with role descriptions, and chat through a unified interface.
+- **Access Control**: Any authenticated user can create swarms and connect agents. Admin-only: orchestrator core settings (`orchestratorPrompt` field), recompile endpoint.
+- **Database Tables**: `swarms`, `swarm_agents` (many-to-many join), `swarm_sessions`, `swarm_messages` (with routing metadata: `routed_to_agent_id`, `routed_to_agent_name`, `routing_reason`).
+- **Frontend Pages**:
+  - `/swarms` — Swarm management (create, list, configure, connect agents)
+  - `/swarms/:id/chat` — Bryte Assistant chat interface with agent routing badges
+- **Key files**: `server/swarm-orchestrator.ts`, `client/src/pages/swarms.tsx`, `client/src/pages/bryte-chat.tsx`
+
 ## External Dependencies
 - **Google Gemini AI**: Utilized for all AI-powered generation tasks, including agent responses, system prompts, validation rules, guardrails, and sample data.
 - **Third-party Libraries**:
