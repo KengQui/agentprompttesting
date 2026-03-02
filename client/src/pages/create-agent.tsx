@@ -469,9 +469,6 @@ function Step4ValidationRules({
             <div className="flex items-center justify-between mb-2">
               <div className="flex items-center gap-3">
                 <Label htmlFor="validationRules">Validation Configuration</Label>
-                <span className="text-xs text-muted-foreground" data-testid="validation-model-info">
-                  AI model used: {geminiModelDisplayNames[defaultGenerationModel]}
-                </span>
               </div>
               <div className="flex items-center gap-2">
                 <button
