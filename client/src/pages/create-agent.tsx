@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { useLocation, useParams } from "wouter";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { ArrowLeft, ArrowRight, Check, Briefcase, Shield, AlertTriangle, Eye, Bot, BookOpen, Upload, X, FileText, Code, Pencil, RotateCcw, HelpCircle, ExternalLink, Info, Sparkles, Loader2, ChevronDown, Database, Zap, Plus, Trash2, User, Filter, ChevronUp, Save, CheckSquare, CheckCircle2, XCircle, AlertCircle, MessageSquare } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check, Briefcase, Shield, AlertTriangle, Eye, Bot, BookOpen, Upload, X, FileText, Code, Pencil, RotateCcw, HelpCircle, ExternalLink, Info, Sparkles, Loader2, ChevronDown, Database, Zap, Plus, Trash2, User, ChevronUp, Save, CheckSquare, CheckCircle2, XCircle, AlertCircle, MessageSquare } from "lucide-react";
 import { v4 as uuidv4 } from "uuid";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -107,13 +107,6 @@ function StepIndicator({ currentStep }: { currentStep: number }) {
   );
 }
 
-interface ExtractionResult {
-  extractedContent: string;
-  discardedSummary: string[];
-  keepCategories: string[];
-  success: boolean;
-  error?: string;
-}
 
 function Step1BusinessUseCase({
   data,
@@ -122,56 +115,8 @@ function Step1BusinessUseCase({
   data: WizardStepData;
   onUpdate: (data: Partial<WizardStepData>) => void;
 }) {
-  const [isExtracting, setIsExtracting] = useState(false);
-  const [extractionResult, setExtractionResult] = useState<ExtractionResult | null>(null);
-  const [showDetails, setShowDetails] = useState(false);
-  const { toast } = useToast();
-
   const handleUseTemplate = () => {
     onUpdate({ businessUseCase: businessUseCaseTemplate });
-    setExtractionResult(null);
-  };
-
-  const handleExtract = async () => {
-    if (!data.businessUseCase.trim()) {
-      toast({
-        title: "Nothing to extract",
-        description: "Please enter a business case first.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setIsExtracting(true);
-    try {
-      const response = await apiRequest("POST", "/api/extract-business-case", {
-        businessCaseText: data.businessUseCase,
-      });
-      const result: ExtractionResult = await response.json();
-      
-      if (result.success) {
-        setExtractionResult(result);
-        onUpdate({ businessUseCase: result.extractedContent });
-        toast({
-          title: "Content extracted",
-          description: `Kept ${result.keepCategories.length} categories, removed ${result.discardedSummary.length} sections.`,
-        });
-      } else {
-        toast({
-          title: "Extraction failed",
-          description: result.error || "Could not extract content.",
-          variant: "destructive",
-        });
-      }
-    } catch (error: any) {
-      toast({
-        title: "Extraction failed",
-        description: error?.message || "Failed to extract business case content.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsExtracting(false);
-    }
   };
 
   return (
@@ -199,94 +144,17 @@ function Step1BusinessUseCase({
                 >
                   Use Template
                 </button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handleExtract}
-                  disabled={isExtracting || !data.businessUseCase.trim()}
-                  data-testid="button-extract-content"
-                >
-                  {isExtracting ? (
-                    <>
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      Extracting...
-                    </>
-                  ) : (
-                    <>
-                      <Filter className="h-4 w-4 mr-2" />
-                      Extract Key Info
-                    </>
-                  )}
-                </Button>
               </div>
             </div>
             <Textarea
               id="businessUseCase"
               placeholder="e.g., This agent helps customer support teams quickly answer product-related questions by accessing our knowledge base and providing accurate, helpful responses..."
               value={data.businessUseCase}
-              onChange={(e) => {
-                onUpdate({ businessUseCase: e.target.value });
-                setExtractionResult(null);
-              }}
+              onChange={(e) => onUpdate({ businessUseCase: e.target.value })}
               className="mt-2 min-h-[270px] resize-y"
               data-testid="textarea-business-usecase"
             />
-            
-            {extractionResult && extractionResult.success && (
-              <div className="mt-3 p-3 bg-muted rounded-md border">
-                <button
-                  onClick={() => setShowDetails(!showDetails)}
-                  className="flex items-center gap-2 text-sm font-medium w-full text-left"
-                  data-testid="button-toggle-extraction-details"
-                >
-                  {showDetails ? (
-                    <ChevronUp className="h-4 w-4" />
-                  ) : (
-                    <ChevronDown className="h-4 w-4" />
-                  )}
-                  Extraction Summary
-                  <Badge variant="secondary" className="ml-auto">
-                    {extractionResult.discardedSummary.length} removed
-                  </Badge>
-                </button>
-                
-                {showDetails && (
-                  <div className="mt-3 space-y-3 text-sm">
-                    {extractionResult.keepCategories.length > 0 && (
-                      <div>
-                        <span className="text-muted-foreground">Kept:</span>
-                        <div className="flex flex-wrap gap-1 mt-1">
-                          {extractionResult.keepCategories.map((cat, i) => (
-                            <Badge key={i} variant="outline" className="text-xs">
-                              {cat}
-                            </Badge>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                    {extractionResult.discardedSummary.length > 0 && (
-                      <div>
-                        <span className="text-muted-foreground">Removed:</span>
-                        <div className="flex flex-wrap gap-1 mt-1">
-                          {extractionResult.discardedSummary.map((item, i) => (
-                            <Badge key={i} variant="secondary" className="text-xs">
-                              {item}
-                            </Badge>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                )}
-              </div>
-            )}
           </div>
-          
-          <p className="text-xs text-muted-foreground">
-            Tip: If you paste a full business case document, click "Extract Key Info" to automatically 
-            remove ROI calculations, metrics, and implementation details - keeping only what's needed 
-            for the agent's behavior.
-          </p>
         </div>
       </CardContent>
     </Card>
