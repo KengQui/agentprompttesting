@@ -1490,7 +1490,7 @@ function Step7AvailableActions({
           <Zap className="h-5 w-5 text-primary" />
           Available Actions
         </CardTitle>
-        <CardDescription>
+        <CardDescription className="text-muted-foreground text-[12px]">
           Define what actions your agent can simulate. Actions use your sample data to perform operations like updating records, adding entries, or making changes. Make sure to add sample data in Step 6 first.
         </CardDescription>
       </CardHeader>
