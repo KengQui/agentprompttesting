@@ -1577,41 +1577,38 @@ function Step7AvailableActions({
         )}
 
         <div className="p-4 rounded-lg border bg-muted/50 space-y-4">
-          <div className="flex items-center justify-between">
-            <div className="space-y-1">
-              <Label className="text-sm font-medium flex items-center gap-2">
-                <Shield className="h-4 w-4" />
-                Mock Mode
+          <Label className="text-sm font-medium flex items-center gap-2">
+            <Shield className="h-4 w-4" />
+            Mock Mode
+          </Label>
+          <RadioGroup
+            value={data.mockMode || "full"}
+            onValueChange={(value: MockMode) => onUpdate({ mockMode: value })}
+            className="space-y-3"
+            data-testid="radio-mock-mode"
+          >
+            <div className="flex items-start space-x-3">
+              <RadioGroupItem value="full" id="mock-full" className="mt-0.5" data-testid="radio-mock-full" />
+              <Label htmlFor="mock-full" className="text-sm cursor-pointer leading-normal">
+                <span className="font-medium">Full Mock</span>
+                <span className="block text-xs text-muted-foreground mt-0.5">Agent simulates all actions locally using mock data. No API calls are made.</span>
               </Label>
-              <p className="text-xs text-muted-foreground">
-                {mockModeDescriptions[data.mockMode || "full"]}
-              </p>
             </div>
-            <RadioGroup
-              value={data.mockMode || "full"}
-              onValueChange={(value: MockMode) => onUpdate({ mockMode: value })}
-              className="flex gap-2"
-              data-testid="radio-mock-mode"
-            >
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="full" id="mock-full" data-testid="radio-mock-full" />
-                <Label htmlFor="mock-full" className="text-sm cursor-pointer">Full Mock</Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="read_only" id="mock-readonly" data-testid="radio-mock-readonly" />
-                <Label htmlFor="mock-readonly" className="text-sm cursor-pointer">Read-Only</Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="disabled" id="mock-disabled" data-testid="radio-mock-disabled" />
-                <Label htmlFor="mock-disabled" className="text-sm cursor-pointer">Disabled</Label>
-              </div>
-            </RadioGroup>
-          </div>
-          <div className="text-xs text-muted-foreground space-y-1">
-            <p><strong>Full Mock:</strong> Agent simulates all actions locally using mock data. No API calls are made.</p>
-            <p><strong>Read-Only:</strong> Agent can read real data but simulates write operations locally.</p>
-            <p><strong>Disabled:</strong> Agent uses real API calls (requires actual backend integration).</p>
-          </div>
+            <div className="flex items-start space-x-3 opacity-50">
+              <RadioGroupItem value="read_only" id="mock-readonly" className="mt-0.5" disabled data-testid="radio-mock-readonly" />
+              <Label htmlFor="mock-readonly" className="text-sm leading-normal">
+                <span className="font-medium">Read-Only</span>
+                <span className="block text-xs text-muted-foreground mt-0.5">Agent can read real data but simulates write operations locally. (Planning stage).</span>
+              </Label>
+            </div>
+            <div className="flex items-start space-x-3 opacity-50">
+              <RadioGroupItem value="disabled" id="mock-disabled" className="mt-0.5" disabled data-testid="radio-mock-disabled" />
+              <Label htmlFor="mock-disabled" className="text-sm leading-normal">
+                <span className="font-medium">Disabled</span>
+                <span className="block text-xs text-muted-foreground mt-0.5">Agent uses real API calls (requires actual backend integration).</span>
+              </Label>
+            </div>
+          </RadioGroup>
         </div>
 
         {(data.availableActions?.length || 0) > 0 && (
