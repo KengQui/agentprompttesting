@@ -988,9 +988,8 @@ function Step6SampleData({
           Sample Data
           <Badge variant="secondary">Optional</Badge>
         </CardTitle>
-        <CardDescription>
-          Upload or generate sample data for your chatbot to reference
-        </CardDescription>
+        <CardDescription className="text-muted-foreground text-[12px]">Upload or generate sample data for your chatbot to reference. Sample data helps your chatbot understand the structure and format of data it might encounter. This can include customer records, product catalogs, order details, or any other relevant data.
+</CardDescription>
       </CardHeader>
       <CardContent>
         <div className="space-y-6">
