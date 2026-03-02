@@ -461,7 +461,7 @@ function Step4ValidationRules({
           Validation Rules
           <Badge variant="secondary">Optional</Badge>
         </CardTitle>
-        <CardDescription>Validation rules help ensure your agent processes data correctly and provides accurate responses. Define rules for input formats, required fields, and response constraints.</CardDescription>
+        <CardDescription className="text-muted-foreground text-[12px]">Validation rules help ensure your agent processes data correctly and provides accurate responses. Define rules for input formats, required fields, and response constraints.</CardDescription>
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
