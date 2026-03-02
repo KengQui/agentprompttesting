@@ -735,9 +735,7 @@ function Step5Guardrails({
           Guardrails
           <Badge variant="secondary">Optional</Badge>
         </CardTitle>
-        <CardDescription>
-          Set safety boundaries and content restrictions
-        </CardDescription>
+        <CardDescription className="text-muted-foreground text-[12px]">Guardrails protect your brand by preventing inappropriate responses, ensuring compliance, and maintaining consistent behavior even in edge cases.</CardDescription>
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
@@ -877,7 +875,6 @@ function Step5Guardrails({
           </div>
         </div>
       </CardContent>
-
       <ClarifyingChatDialog
         open={showChatDialog}
         onOpenChange={setShowChatDialog}
