@@ -3207,6 +3207,7 @@ export async function registerRoutes(
           agentName: routingResult.agentName,
           reason: routingResult.reason,
         },
+        error: routingResult.error || null,
       });
     } catch (error: any) {
       console.error("Swarm message error:", error);

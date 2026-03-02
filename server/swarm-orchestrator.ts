@@ -3,11 +3,19 @@ import { generateAgentResponse, type AgentContext, type ChatHistory } from "./ge
 import { getBryteSystemPrompt } from "./prompt-templates";
 import type { Agent, SwarmMessage } from "@shared/schema";
 
+export interface SwarmRoutingError {
+  type: "agent_failure" | "routing_failure" | "no_agents";
+  agentId?: string;
+  agentName?: string;
+  message: string;
+}
+
 export interface SwarmRoutingResult {
   agentId: string;
   agentName: string;
   reason: string;
   response: string;
+  error?: SwarmRoutingError;
 }
 
 interface AgentCapability {
@@ -100,6 +108,10 @@ export async function routeMessage(
       reason: "No agents are connected to this swarm",
       response:
         "I don't have any specialized agents connected right now. Please ask an administrator to configure the swarm with the appropriate agents.",
+      error: {
+        type: "no_agents",
+        message: "No agents are connected to this swarm. Connect agents in the swarm configuration to start routing conversations.",
+      },
     };
   }
 
@@ -122,6 +134,10 @@ export async function routeMessage(
       reason: "Connected agents could not be found",
       response:
         "The agents connected to this swarm are no longer available. Please update the swarm configuration.",
+      error: {
+        type: "no_agents",
+        message: "The agents connected to this swarm could not be found in the database. They may have been deleted.",
+      },
     };
   }
 
@@ -187,6 +203,10 @@ export async function routeMessage(
       agentName: "Bryte Assistant",
       reason: "Selected agent not found",
       response: "I encountered an issue routing your request. Please try again.",
+      error: {
+        type: "routing_failure",
+        message: "The selected agent could not be found. It may have been removed from the system.",
+      },
     };
   }
 
@@ -212,18 +232,34 @@ export async function routeMessage(
   );
   const chatHistory = buildSwarmChatHistory(agentMessages);
 
-  const response = await generateAgentResponse(
-    agentContext,
-    userMessage,
-    chatHistory
-  );
+  try {
+    const response = await generateAgentResponse(
+      agentContext,
+      userMessage,
+      chatHistory
+    );
 
-  return {
-    agentId: selectedAgentId,
-    agentName: selectedAgentName,
-    reason: routingReason,
-    response,
-  };
+    return {
+      agentId: selectedAgentId,
+      agentName: selectedAgentName,
+      reason: routingReason,
+      response,
+    };
+  } catch (agentError: any) {
+    console.error(`[SwarmOrchestrator] Agent "${selectedAgentName}" failed:`, agentError?.message);
+    return {
+      agentId: selectedAgentId,
+      agentName: selectedAgentName,
+      reason: routingReason,
+      response: `I routed your request to **${selectedAgentName}**, but it encountered an error while processing. This usually means the agent's configuration needs attention. You can try again, or check the agent's setup.`,
+      error: {
+        type: "agent_failure",
+        agentId: selectedAgentId,
+        agentName: selectedAgentName,
+        message: agentError?.message || "The agent encountered an unexpected error while generating a response.",
+      },
+    };
+  }
 }
 
 async function classifyAndRoute(

@@ -81,9 +81,14 @@ A multi-agent swarm architecture that connects existing agents under a unified "
 - **Swarm Configuration**: Stored in the database. Users create swarms, connect agents with role descriptions, and chat through a unified interface.
 - **Access Control**: Any authenticated user can create swarms and connect agents. Admin-only: orchestrator core settings (`orchestratorPrompt` field), recompile endpoint.
 - **Database Tables**: `swarms`, `swarm_agents` (many-to-many join), `swarm_sessions`, `swarm_messages` (with routing metadata: `routed_to_agent_id`, `routed_to_agent_name`, `routing_reason`).
+- **Error Handling**: The orchestrator returns structured `SwarmRoutingError` objects (`agent_failure`, `routing_failure`, `no_agents`) with agent IDs so the frontend can show actionable error cards with "Fix Agent" links.
 - **Frontend Pages**:
   - `/swarms` — Swarm management (create, list, configure, connect agents)
-  - `/swarms/:id/chat` — Bryte Assistant chat interface with agent routing badges
+  - `/swarms/:id/chat` — Bryte Assistant chat interface with:
+    - Multi-phase routing status indicator ("Analyzing..." → "Routing to the right agent...")
+    - Inline agent handoff banners when the orchestrator switches between agents
+    - Per-message routing badges showing which agent handled each response
+    - Actionable error cards with "Fix Agent Configuration" button linking to agent edit page
 - **Key files**: `server/swarm-orchestrator.ts`, `client/src/pages/swarms.tsx`, `client/src/pages/bryte-chat.tsx`
 
 ## External Dependencies

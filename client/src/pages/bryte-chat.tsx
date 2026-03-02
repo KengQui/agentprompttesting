@@ -3,7 +3,7 @@ import { useParams, useLocation } from "wouter";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-import { ArrowLeft, Send, Bot, User, Loader2, MessageSquare, Plus, Trash2, Pencil, Check, X, Network, ArrowRight, Users } from "lucide-react";
+import { ArrowLeft, Send, Bot, User, Loader2, MessageSquare, Plus, Trash2, Pencil, Check, X, Network, ArrowRight, Users, AlertTriangle, Wrench, Shuffle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Card } from "@/components/ui/card";
@@ -173,17 +173,87 @@ function MessageBubble({ message }: { message: SwarmMessage }) {
   );
 }
 
-function TypingIndicator() {
+function RoutingStatusIndicator() {
+  const [phase, setPhase] = useState(0);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setPhase(1), 1500);
+    return () => clearTimeout(timer);
+  }, []);
+
+  const statusText = phase === 0 ? "Analyzing your request..." : "Routing to the right agent...";
+  const StatusIcon = phase === 0 ? Loader2 : Shuffle;
+
   return (
-    <div className="flex gap-3" data-testid="typing-indicator">
-      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-muted">
-        <Bot className="h-4 w-4" />
+    <div className="flex gap-3" data-testid="routing-status-indicator">
+      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10">
+        <Network className="h-4 w-4 text-primary" />
       </div>
-      <div className="rounded-lg px-4 py-3 bg-muted">
-        <div className="flex gap-1">
-          <div className="w-2 h-2 rounded-full bg-muted-foreground/50 animate-bounce" style={{ animationDelay: "0ms" }} />
-          <div className="w-2 h-2 rounded-full bg-muted-foreground/50 animate-bounce" style={{ animationDelay: "150ms" }} />
-          <div className="w-2 h-2 rounded-full bg-muted-foreground/50 animate-bounce" style={{ animationDelay: "300ms" }} />
+      <div className="rounded-lg px-4 py-3 bg-muted/70 border border-border/50">
+        <div className="flex items-center gap-2">
+          <StatusIcon className="h-3.5 w-3.5 text-primary animate-spin" />
+          <span className="text-sm text-muted-foreground">{statusText}</span>
+          <span className="flex gap-0.5 ml-1">
+            <span className="w-1.5 h-1.5 rounded-full bg-primary/50 animate-bounce" style={{ animationDelay: "0ms" }} />
+            <span className="w-1.5 h-1.5 rounded-full bg-primary/50 animate-bounce" style={{ animationDelay: "150ms" }} />
+            <span className="w-1.5 h-1.5 rounded-full bg-primary/50 animate-bounce" style={{ animationDelay: "300ms" }} />
+          </span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function AgentHandoffBanner({ fromAgent, toAgent }: { fromAgent: string; toAgent: string }) {
+  return (
+    <div className="flex items-center justify-center gap-2 py-2" data-testid="banner-agent-handoff">
+      <div className="h-px flex-1 bg-border" />
+      <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-muted/60 border border-border/50">
+        <Shuffle className="h-3 w-3 text-muted-foreground" />
+        <span className="text-xs text-muted-foreground">
+          Switched to <span className="font-medium text-foreground">{toAgent}</span>
+        </span>
+      </div>
+      <div className="h-px flex-1 bg-border" />
+    </div>
+  );
+}
+
+interface RoutingError {
+  type: "agent_failure" | "routing_failure" | "no_agents";
+  agentId?: string;
+  agentName?: string;
+  message: string;
+}
+
+function ErrorCard({ error, onNavigateToAgent }: { error: RoutingError; onNavigateToAgent?: (agentId: string) => void }) {
+  return (
+    <div className="flex gap-3" data-testid="error-card">
+      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-destructive/10">
+        <AlertTriangle className="h-4 w-4 text-destructive" />
+      </div>
+      <div className="max-w-[80%] rounded-lg px-4 py-3 bg-destructive/5 border border-destructive/20">
+        <div className="space-y-2">
+          <p className="text-sm font-medium text-destructive">
+            {error.type === "agent_failure"
+              ? `${error.agentName || "An agent"} encountered an error`
+              : error.type === "no_agents"
+                ? "No agents available"
+                : "Routing error"}
+          </p>
+          <p className="text-xs text-muted-foreground">{error.message}</p>
+          {error.type === "agent_failure" && error.agentId && onNavigateToAgent && (
+            <Button
+              variant="outline"
+              size="sm"
+              className="mt-1 gap-1.5 text-xs"
+              onClick={() => onNavigateToAgent(error.agentId!)}
+              data-testid="button-fix-agent"
+            >
+              <Wrench className="h-3 w-3" />
+              Fix Agent Configuration
+            </Button>
+          )}
         </div>
       </div>
     </div>
@@ -199,6 +269,7 @@ export default function BryteChat() {
   const scrollRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [prevAgentName, setPrevAgentName] = useState<string | null>(null);
+  const [lastError, setLastError] = useState<RoutingError | null>(null);
 
   const swarmId = params.id;
 
@@ -282,7 +353,12 @@ export default function BryteChat() {
       const res = await apiRequest("POST", `/api/swarms/${swarmId}/sessions/${activeSessionId}/messages`, { content });
       return res.json();
     },
-    onSuccess: () => {
+    onSuccess: (data: any) => {
+      if (data?.error) {
+        setLastError(data.error);
+      } else {
+        setLastError(null);
+      }
       queryClient.invalidateQueries({ queryKey: ["/api/swarms", swarmId, "sessions", activeSessionId, "messages"] });
     },
     onError: (error: Error) => {
@@ -311,6 +387,10 @@ export default function BryteChat() {
   const handleNewSession = useCallback(() => {
     createSessionMutation.mutate();
   }, [createSessionMutation]);
+
+  const handleNavigateToAgent = useCallback((agentId: string) => {
+    navigate(`/agents/${agentId}/edit`);
+  }, [navigate]);
 
   if (swarmLoading) {
     return (
@@ -447,10 +527,30 @@ export default function BryteChat() {
                 <WelcomeScreen swarm={swarm} />
               ) : (
                 <div className="space-y-4">
-                  {messages.map((msg) => (
-                    <MessageBubble key={msg.id} message={msg} />
-                  ))}
-                  {sendMutation.isPending && <TypingIndicator />}
+                  {messages.map((msg, idx) => {
+                    let handoffBanner = null;
+                    if (msg.role === "assistant" && msg.routedToAgentName) {
+                      const prevAssistant = messages.slice(0, idx).reverse().find(m => m.role === "assistant");
+                      if (prevAssistant?.routedToAgentName && prevAssistant.routedToAgentName !== msg.routedToAgentName) {
+                        handoffBanner = (
+                          <AgentHandoffBanner
+                            fromAgent={prevAssistant.routedToAgentName}
+                            toAgent={msg.routedToAgentName}
+                          />
+                        );
+                      }
+                    }
+                    return (
+                      <div key={msg.id}>
+                        {handoffBanner}
+                        <MessageBubble message={msg} />
+                      </div>
+                    );
+                  })}
+                  {lastError && !sendMutation.isPending && (
+                    <ErrorCard error={lastError} onNavigateToAgent={handleNavigateToAgent} />
+                  )}
+                  {sendMutation.isPending && <RoutingStatusIndicator />}
                 </div>
               )}
             </div>
