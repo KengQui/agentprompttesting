@@ -739,16 +739,6 @@ function Step5Guardrails({
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
-          <div className="flex items-start gap-3 rounded-lg border bg-muted/50 p-4">
-            <Info className="h-5 w-5 text-muted-foreground mt-0.5 shrink-0" />
-            <div>
-              <p className="font-medium text-sm">Why are guardrails important?</p>
-              <p className="text-sm text-muted-foreground">
-                Guardrails protect your brand by preventing inappropriate responses, ensuring compliance, and maintaining consistent behavior even in edge cases.
-              </p>
-            </div>
-          </div>
-
           {conflicts.length > 0 && (
             <div className="rounded-lg border border-yellow-500/50 bg-yellow-50 dark:bg-yellow-950/20 p-4" data-testid="guardrail-conflicts-alert">
               <div className="flex items-center gap-2 mb-3">
