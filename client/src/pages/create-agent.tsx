@@ -993,132 +993,121 @@ function Step6SampleData({
       </CardHeader>
       <CardContent>
         <div className="space-y-6">
-          <div className="grid md:grid-cols-2 gap-6">
-            <div className="space-y-4">
-              <div>
-                <Label className="text-sm font-medium">Upload Sample Data</Label>
-                <p className="text-xs text-muted-foreground mb-2">
-                  Upload CSV, JSON, or text files containing sample data
-                </p>
-                <div className="flex items-center gap-2">
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept=".csv,.json,.txt"
-                    onChange={handleFileUpload}
-                    className="hidden"
-                    multiple
-                    data-testid="input-upload-sample-data"
-                  />
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => fileInputRef.current?.click()}
-                    disabled={isUploading}
-                    className="w-full"
-                    data-testid="button-upload-sample-data"
-                  >
-                    {isUploading ? (
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    ) : (
-                      <Upload className="h-4 w-4 mr-2" />
-                    )}
-                    {isUploading ? "Uploading..." : "Upload File"}
-                  </Button>
-                </div>
+          <div className="space-y-4">
+            <div>
+              <div className="flex items-center justify-between flex-wrap gap-2">
+                <Label htmlFor="dataDescription" className="text-sm font-medium">Generate with AI</Label>
+                <button
+                  type="button"
+                  onClick={() => setDataType(sampleDataTemplate)}
+                  className="text-sm text-primary hover:underline"
+                  data-testid="button-use-template-sample-data"
+                >
+                  Use Template
+                </button>
               </div>
+              <Textarea
+                id="dataDescription"
+                value={dataType}
+                onChange={(e) => setDataType(e.target.value)}
+                placeholder="Describe the sample data you need, e.g.: Generate 10 customer records with names, emails, order IDs, products, and order status. Include a mix of delivered, shipped, and processing orders."
+                className="mt-1 min-h-[270px] resize-y"
+                data-testid="textarea-data-description"
+              />
             </div>
-
-            <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-2">
               <div>
-                <Label className="text-sm font-medium">Generate with AI</Label>
-                <p className="text-xs text-muted-foreground mb-2">
-                  Let Gemini create sample data based on your use case
-                </p>
-              </div>
-              <div>
-                <div className="flex items-center justify-between flex-wrap gap-2">
-                  <Label htmlFor="dataDescription" className="text-xs">Describe the data you need</Label>
-                  <button
-                    type="button"
-                    onClick={() => setDataType(sampleDataTemplate)}
-                    className="text-sm text-primary hover:underline"
-                    data-testid="button-use-template-sample-data"
-                  >
-                    Use Template
-                  </button>
-                </div>
-                <Textarea
-                  id="dataDescription"
-                  value={dataType}
-                  onChange={(e) => setDataType(e.target.value)}
-                  placeholder="Describe the sample data you need, e.g.: Generate 10 customer records with names, emails, order IDs, products, and order status. Include a mix of delivered, shipped, and processing orders."
-                  className="mt-1 min-h-[270px] resize-y"
-                  data-testid="textarea-data-description"
+                <Label htmlFor="recordCount" className="text-xs">Records</Label>
+                <Input
+                  id="recordCount"
+                  type="number"
+                  min={1}
+                  max={100}
+                  value={recordCount}
+                  onChange={(e) => setRecordCount(Math.min(100, Math.max(1, parseInt(e.target.value) || 10)))}
+                  className="mt-1"
+                  data-testid="input-record-count"
                 />
               </div>
-              <div className="grid grid-cols-2 gap-2">
-                <div>
-                  <Label htmlFor="recordCount" className="text-xs">Records</Label>
-                  <Input
-                    id="recordCount"
-                    type="number"
-                    min={1}
-                    max={100}
-                    value={recordCount}
-                    onChange={(e) => setRecordCount(Math.min(100, Math.max(1, parseInt(e.target.value) || 10)))}
-                    className="mt-1"
-                    data-testid="input-record-count"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="format" className="text-xs">Format</Label>
-                  <select
-                    id="format"
-                    value={format}
-                    onChange={(e) => setFormat(e.target.value as "json" | "csv" | "text")}
-                    className="mt-1 w-full h-9 rounded-md border border-input bg-background px-3 py-1 text-sm"
-                    data-testid="select-format"
-                  >
-                    <option value="json">JSON</option>
-                    <option value="csv">CSV</option>
-                    <option value="text">Text</option>
-                  </select>
-                </div>
+              <div>
+                <Label htmlFor="format" className="text-xs">Format</Label>
+                <select
+                  id="format"
+                  value={format}
+                  onChange={(e) => setFormat(e.target.value as "json" | "csv" | "text")}
+                  className="mt-1 w-full h-9 rounded-md border border-input bg-background px-3 py-1 text-sm"
+                  data-testid="select-format"
+                >
+                  <option value="json">JSON</option>
+                  <option value="csv">CSV</option>
+                  <option value="text">Text</option>
+                </select>
               </div>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    type="button"
-                    variant="default"
-                    disabled={isGenerating}
-                    className="w-full"
-                    data-testid="button-generate-sample-data"
+            </div>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  type="button"
+                  variant="default"
+                  disabled={isGenerating}
+                  className="w-full"
+                  data-testid="button-generate-sample-data"
+                >
+                  {isGenerating ? (
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  ) : (
+                    <Sparkles className="h-4 w-4 mr-2" />
+                  )}
+                  {isGenerating ? "Generating..." : "Generate Sample Data"}
+                  <ChevronDown className="h-3 w-3 ml-2" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56">
+                {(Object.keys(geminiModelDisplayNames) as GeminiModel[]).map((model) => (
+                  <DropdownMenuItem
+                    key={model}
+                    onClick={() => {
+                      setSelectedModel(model);
+                      handleGenerate(model);
+                    }}
+                    data-testid={`menu-item-sample-data-model-${model}`}
                   >
-                    {isGenerating ? (
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    ) : (
-                      <Sparkles className="h-4 w-4 mr-2" />
-                    )}
-                    {isGenerating ? "Generating..." : "Generate Sample Data"}
-                    <ChevronDown className="h-3 w-3 ml-2" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-56">
-                  {(Object.keys(geminiModelDisplayNames) as GeminiModel[]).map((model) => (
-                    <DropdownMenuItem
-                      key={model}
-                      onClick={() => {
-                        setSelectedModel(model);
-                        handleGenerate(model);
-                      }}
-                      data-testid={`menu-item-sample-data-model-${model}`}
-                    >
-                      {geminiModelDisplayNames[model]}
-                    </DropdownMenuItem>
-                  ))}
-                </DropdownMenuContent>
-              </DropdownMenu>
+                    {geminiModelDisplayNames[model]}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+
+          <div className="border-t pt-4 space-y-2">
+            <Label className="text-sm font-medium">Upload Sample Data</Label>
+            <p className="text-xs text-muted-foreground">
+              Upload CSV, JSON, or text files containing sample data
+            </p>
+            <div className="flex items-center gap-2">
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept=".csv,.json,.txt"
+                onChange={handleFileUpload}
+                className="hidden"
+                multiple
+                data-testid="input-upload-sample-data"
+              />
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={isUploading}
+                data-testid="button-upload-sample-data"
+              >
+                {isUploading ? (
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                ) : (
+                  <Upload className="h-4 w-4 mr-2" />
+                )}
+                {isUploading ? "Uploading..." : "Choose Files"}
+              </Button>
             </div>
           </div>
 
