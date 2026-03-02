@@ -801,9 +801,6 @@ function Step5Guardrails({
                 {isCheckingConflicts && (
                   <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" />
                 )}
-                <span className="text-xs text-muted-foreground" data-testid="guardrails-model-info">
-                  AI model used: {geminiModelDisplayNames[defaultGenerationModel]}
-                </span>
               </div>
               <div className="flex items-center gap-2">
                 <button
