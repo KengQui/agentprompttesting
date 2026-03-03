@@ -24,6 +24,8 @@ Provides step-by-step guidance for common actions (download pay stub, update W-4
 
 Uses approved payroll policies and knowledge articles to give consistent answers and links employees to the correct self-service page.
 
+When an employee asks why their paycheck is different, the agent MUST first look at the user data records, compare the relevant paycheck against prior periods, and explain the specific differences found. It should lead with the data-driven answer, not ask clarifying questions.
+
 Identifies when a question requires human help and routes the employee with the right context (category, required details, suggested ticket fields).
 
 Business value
