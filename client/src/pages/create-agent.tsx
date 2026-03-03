@@ -2684,76 +2684,8 @@ function Step8Review({
     } catch { return ts; }
   };
 
-  const domainDocsCount = data.domainDocuments?.length || 0;
-  const domainKnowledgeValue = data.domainKnowledge 
-    ? data.domainKnowledge 
-    : (domainDocsCount > 0 ? `${domainDocsCount} document(s) uploaded` : "");
-  const sampleDatasetsCount = data.sampleDatasets?.length || 0;
-  const sampleDatasetsValue = sampleDatasetsCount > 0 
-    ? `${sampleDatasetsCount} dataset(s) configured` 
-    : "";
-  const actionsCount = data.availableActions?.length || 0;
-  const actionsValue = actionsCount > 0 
-    ? `${actionsCount} action(s) defined` 
-    : "";
-
-  const sections = [
-    { label: "Business Use Case", value: data.businessUseCase, icon: Briefcase },
-    { label: "Agent Name", value: data.name, icon: Bot },
-    { label: "Domain Knowledge", value: domainKnowledgeValue, icon: BookOpen, optional: true },
-    { label: "Validation Rules", value: data.validationRules, icon: Shield, optional: true },
-    { label: "Guardrails", value: data.guardrails, icon: AlertTriangle, optional: true },
-    { label: "Sample Data", value: sampleDatasetsValue, icon: Database, optional: true },
-    { label: "Available Actions", value: actionsValue, icon: Zap, optional: true },
-  ];
-
-  const ConfigReviewSummary = () => (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Eye className="h-5 w-5 text-primary" />
-          Review Configuration
-        </CardTitle>
-        <CardDescription>
-          Review your agent configuration before creating the prompt.
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-3">
-          {sections.map((section) => {
-            const Icon = section.icon;
-            return (
-              <div key={section.label} className="flex items-start gap-2">
-                <Icon className="h-4 w-4 mt-0.5 text-muted-foreground flex-shrink-0" />
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
-                    <h4 className="font-medium text-xs">{section.label}</h4>
-                    {section.optional && !section.value && (
-                      <Badge variant="secondary" className="text-xs py-0 h-4">Not set</Badge>
-                    )}
-                  </div>
-                  <p
-                    className="text-xs text-muted-foreground mt-0.5 break-words line-clamp-2"
-                    data-testid={`review-${section.label.toLowerCase().replace(/\s+/g, "-")}`}
-                  >
-                    {section.value ? (
-                      section.value.length > 80 ? section.value.slice(0, 80) + "..." : section.value
-                    ) : (
-                      <span className="italic">Not provided</span>
-                    )}
-                  </p>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </CardContent>
-    </Card>
-  );
-
   return (
     <div className="space-y-6">
-      <ConfigReviewSummary />
 
       {isOutOfSync && hasExistingPrompt && (
         <div className="flex items-start gap-3 p-3 rounded-md bg-yellow-500/10 border border-yellow-500/30" data-testid="prompt-out-of-sync-warning">
