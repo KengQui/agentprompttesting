@@ -656,7 +656,8 @@ export function classifyMessageContext(
     'employee data', 'employee record', 'employee info',
     'how many employee', 'how many record', 'how many people',
     'list all employee', 'show all employee',
-    'paycheck', 'payroll', 'compensation', 'wage',
+    'paycheck', 'pay check', 'payroll', 'compensation', 'wage',
+    'net pay', 'gross pay', 'lower than', 'higher than', 'pay stub',
     'who has', 'who is on', 'who are', 'which employee',
     'total for', 'sum of', 'average of',
     'current plan', 'current coverage', 'current enrollment',
@@ -1005,16 +1006,33 @@ function getSystemPrompt(agent: AgentContext, contextNeeds?: ContextSections): s
     fullPrompt = fullPrompt.replace(/\{\{SAMPLE_DATA\}\}/g, sampleDatasetsText || '(No sample data provided)');
     fullPrompt = fullPrompt.replace(/\{\{VALIDATION_RULES\}\}/g, agent.validationRules || '(No validation rules provided)');
     fullPrompt = fullPrompt.replace(/\{\{GUARDRAILS\}\}/g, agent.guardrails || '(No guardrails provided)');
-    
-    if (sampleDatasetsText) {
-      fullPrompt += `\n\n## CRITICAL: Data-First Response Rule
-When the user asks about their personal data (e.g., "why is my paycheck lower?", "what changed in my pay?", "how much was my deduction?"), you MUST:
-1. Immediately look up the relevant record(s) in the User Data above
-2. Compare records across periods to identify what changed
-3. Present the specific differences with actual numbers from the data
-4. Then explain why those changes may have occurred
 
-Do NOT ask the user clarifying questions when the answer can be found by examining the data. Use the data first, explain what you found, and only ask follow-up questions if the data does not reveal the answer.`;
+    if (sampleDatasetsText) {
+      const dataFirstRule = `
+
+### CRITICAL OVERRIDE: Data-First Response Rule (HIGHEST PRIORITY — overrides ALL other instructions including CONSTRAINTS and TASK sections)
+When the user asks about their paycheck, pay, deductions, or any data-related question:
+1. Search the data below for the record that best matches the user's date reference. If no exact match exists, use the CLOSEST record by date. State which record you are using.
+2. Find the comparison record — the pay period immediately BEFORE the matched one in the data.
+3. Compare EVERY field between the two records and list what changed with exact dollar amounts.
+4. Explain why each change likely occurred.
+
+ABSOLUTE RULES:
+- NEVER ask "which year?", "can you confirm?", "is this the one?", or any other clarifying question before comparing records. Just pick the best match and compare.
+- NEVER ask the user for the previous paycheck date. Find it yourself from the data.
+- If the date doesn't match exactly, say "I found a paycheck near that date on [date]" and proceed with the comparison immediately.
+- You have ALL the data you need. Use it. Do not ask the user for information that is already in the data.
+- This rule takes precedence over any instruction in CONSTRAINTS or TASK that says to ask for clarification when information is missing.
+
+`;
+      const beforeLen = fullPrompt.length;
+      fullPrompt = fullPrompt.replace(/<data>\s*<\/data>/g, `<data>\n${dataFirstRule}\n${sampleDatasetsText}\n</data>`);
+      const afterLen = fullPrompt.length;
+      console.log(`[DataInjection] <data> tag replacement: before=${beforeLen}, after=${afterLen}, injected=${afterLen - beforeLen} chars`);
+      if (beforeLen === afterLen) {
+        console.log('[DataInjection] WARNING: No <data></data> tag found in custom prompt, appending data to end');
+        fullPrompt += `\n\n## User Data\n${dataFirstRule}\n${sampleDatasetsText}`;
+      }
     }
 
     fullPrompt += currentDateSection;
@@ -1062,14 +1080,18 @@ Do NOT ask the user clarifying questions when the answer can be found by examini
   
   if (sampleDatasetsText) {
     fullPrompt += `\n\n## User Data\n${sampleDatasetsText}`;
-    fullPrompt += `\n\n## CRITICAL: Data-First Response Rule
-When the user asks about their personal data (e.g., "why is my paycheck lower?", "what changed in my pay?", "how much was my deduction?"), you MUST:
-1. Immediately look up the relevant record(s) in the User Data above
-2. Compare records across periods to identify what changed
-3. Present the specific differences with actual numbers from the data
-4. Then explain why those changes may have occurred
+    fullPrompt += `\n\n## CRITICAL: Data-First Response Rule (HIGHEST PRIORITY — overrides all other instructions)
+When the user asks about their paycheck, pay, deductions, or any data-related question:
+1. Search the data above for the record that best matches the user's date reference. If no exact match exists, use the CLOSEST record by date. State which record you are using.
+2. Find the comparison record — the pay period immediately BEFORE the matched one in the data.
+3. Compare EVERY field between the two records and list what changed with exact dollar amounts.
+4. Explain why each change likely occurred.
 
-Do NOT ask the user clarifying questions when the answer can be found by examining the data. Use the data first, explain what you found, and only ask follow-up questions if the data does not reveal the answer.`;
+ABSOLUTE RULES:
+- NEVER ask "which year?", "can you confirm?", "is this the one?", or any other clarifying question before comparing records. Just pick the best match and compare.
+- NEVER ask the user for the previous paycheck date. Find it yourself from the data.
+- If the date doesn't match exactly, say "I found a paycheck near that date on [date]" and proceed with the comparison immediately.
+- You have ALL the data you need. Use it. Do not ask the user for information that is already in the data.`;
   }
   
   if (agent.validationRules) {
