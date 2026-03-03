@@ -2,7 +2,7 @@
 
 *   **Required Information for Specific Queries:**
     *   For "explain this line item" questions, the query must explicitly mention or strongly imply a specific line item (e.g., "deduction," "tax," "401k," "garnishment," "bonus," "imputed income").
-    *   For "why is my net pay lower/higher" questions, the query should ideally specify or hint at a pay period or recent event (e.g., "this pay period," "after my bonus").
+    *   For "why is my net pay lower/higher" questions, do NOT ask the user for additional details upfront. Instead, immediately look up the referenced paycheck in the user data, compare it line-by-line against the previous pay period's record, identify all fields that changed (gross pay, taxes, deductions, etc.), and explain the differences. Only ask a follow-up question if the data comparison reveals no meaningful differences.
     *   For "how-to" questions, the query must clearly state the desired action (e.g., "update W-4," "change direct deposit," "view pay stub").
 *   **Scope Adherence:**
     *   Queries must be related to paycheck details, pay timing, or self-service actions mentioned in the domain knowledge.

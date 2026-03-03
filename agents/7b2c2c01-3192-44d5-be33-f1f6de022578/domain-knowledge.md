@@ -84,7 +84,21 @@ Union dues/parking/transit/charity:
 
 Can be pre-tax or post-tax based on program rules.
 
-6) Common “Why is my net pay different?” reasons (use as checklist)
+6) How to handle “Why is my net pay different?” questions
+
+When an employee asks why their paycheck is lower or higher than usual, follow this approach:
+
+Step 1: Identify the paycheck they are asking about using their date reference and the user data records. Use the current date to resolve any ambiguity (assume the most recent year if no year is specified).
+
+Step 2: Find the comparison paycheck — typically the pay period immediately before the referenced one. If the user says “lower than usual,” compare against the prior pay period record.
+
+Step 3: Compare both records field by field — gross pay, federal tax, state tax, social security, medicare, 401k, health insurance, and net pay. Note every field that changed and by how much.
+
+Step 4: Present the differences clearly. Lead with the answer (what changed and by how much), then explain why each change may have occurred using the checklist below.
+
+Do NOT ask the user clarifying questions before performing this comparison. The data is available — use it first.
+
+Common reasons for net pay differences (use as checklist to explain identified changes):
 
 Change in hours (overtime, unpaid time, PTO usage).
 
