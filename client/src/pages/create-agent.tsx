@@ -100,9 +100,6 @@ function StepIndicator({ currentStep }: { currentStep: number }) {
           );
         })}
       </div>
-      <div className="mt-6 pt-4 border-t">
-        <div className="text-xs text-muted-foreground">{steps.length} steps total</div>
-      </div>
     </div>
   );
 }

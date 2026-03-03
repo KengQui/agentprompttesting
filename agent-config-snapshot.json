@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-03-02T21:39:00.073Z",
+  "generatedAt": "2026-03-03T00:30:07.695Z",
   "ownerUsername": "kengqui.chia@ukg.com",
   "ownerDevUserId": "22e95869-718c-428a-a9ae-a4694723ac19",
   "agents": [
@@ -1122,6 +1122,35 @@
       "configFieldsHash": null,
       "createdAt": "2026-02-03T15:02:56.370Z",
       "updatedAt": "2026-02-13T01:58:52.207Z"
+    },
+    {
+      "id": "46bde3a4-47ae-4150-90e6-3e3cb0f05512",
+      "userId": "22e95869-718c-428a-a9ae-a4694723ac19",
+      "name": "Draft-Test-QutyXq",
+      "description": "",
+      "status": "draft",
+      "promptStyle": "gemini",
+      "mockMode": "full",
+      "configurationStep": 1,
+      "businessUseCase": "Test draft agent",
+      "domainKnowledge": "",
+      "validationRules": "",
+      "guardrails": "",
+      "customPrompt": "",
+      "savedPrompts": [],
+      "domainDocuments": [],
+      "sampleDatasets": [],
+      "clarifyingInsights": [],
+      "availableActions": [],
+      "mockUserState": [],
+      "welcomeConfig": null,
+      "promptGeneratedAt": null,
+      "lastConfigUpdate": null,
+      "promptLastRevisedBy": null,
+      "promptLastRevisedAt": null,
+      "configFieldsHash": null,
+      "createdAt": "2026-02-03T14:50:49.324Z",
+      "updatedAt": "2026-02-03T14:50:49.324Z"
     }
   ],
   "components": [
