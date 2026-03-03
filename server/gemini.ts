@@ -717,10 +717,16 @@ export function classifyMessageContext(
 
   const promptRequiresData = !!(agent.customPrompt && agent.customPrompt.includes('{{SAMPLE_DATA}}') && hasData);
 
+  // Check if recent chat history involved data-related topics (for follow-up messages)
+  const chatHistoryNeedsData = hasData && _chatHistory.length > 0 && _chatHistory.some(msg => {
+    const msgText = msg.content.toLowerCase();
+    return dataKeywords.some(kw => msgText.includes(kw));
+  });
+
   const noSignals = !hasDataSignal && !hasActionSignal && !hasDomainSignal;
   if (noSignals) {
     return {
-      needsData: promptRequiresData,
+      needsData: promptRequiresData || chatHistoryNeedsData,
       needsActions: false,
       needsMockState: false,
       needsDomainKnowledge: false,
@@ -728,7 +734,7 @@ export function classifyMessageContext(
   }
 
   return {
-    needsData: (hasDataSignal && hasData) || promptRequiresData,
+    needsData: (hasDataSignal && hasData) || promptRequiresData || chatHistoryNeedsData,
     needsActions: hasActionSignal && hasActions,
     needsMockState: hasActionSignal && hasMockState,
     needsDomainKnowledge: hasDomainSignal && hasDomain,
