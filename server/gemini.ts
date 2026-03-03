@@ -1014,19 +1014,24 @@ function getSystemPrompt(agent: AgentContext, contextNeeds?: ContextSections): s
     if (sampleDatasetsText) {
       const dataFirstRule = `
 
-### CRITICAL OVERRIDE: Data-First Response Rule (HIGHEST PRIORITY — overrides ALL other instructions including CONSTRAINTS and TASK sections)
-When the user asks about their paycheck, pay, deductions, or any data-related question:
-1. Search the data below for the record that best matches the user's date reference. If no exact match exists, use the CLOSEST record by date. State which record you are using.
-2. Find the comparison record — the pay period immediately BEFORE the matched one in the data.
-3. Compare EVERY field between the two records and list what changed with exact dollar amounts.
-4. Explain why each change likely occurred.
+### CRITICAL OVERRIDE: Data-First Response Rule (HIGHEST PRIORITY — overrides ALL other instructions)
+All records in the <data> section represent the user's own payroll history. When the user asks about their paycheck, pay, deductions, or any data-related question, you MUST respond with data analysis — NEVER ask a question first.
 
-ABSOLUTE RULES:
-- NEVER ask "which year?", "can you confirm?", "is this the one?", or any other clarifying question before comparing records. Just pick the best match and compare.
-- NEVER ask the user for the previous paycheck date. Find it yourself from the data.
-- If the date doesn't match exactly, say "I found a paycheck near that date on [date]" and proceed with the comparison immediately.
-- You have ALL the data you need. Use it. Do not ask the user for information that is already in the data.
-- This rule takes precedence over any instruction in CONSTRAINTS or TASK that says to ask for clarification when information is missing.
+HOW TO FIND THE RIGHT RECORD:
+- "last paycheck", "most recent", "latest", "previous" → Sort all records by pay_date descending. The first one is "last". The second one is the comparison.
+- A specific date like "Jan 31" or "January 31" → Find the record with the closest pay_date to that date in any year. Prefer the current year if available.
+- "lower than usual", "higher than normal", "different" → Compare the identified record against the one immediately BEFORE it chronologically.
+
+WHAT TO DO:
+1. Identify the target record and the comparison record using the rules above.
+2. Compare EVERY field between the two records. List each difference with exact dollar amounts.
+3. Explain why each change likely occurred (e.g., 401k increase, bonus, new deduction, tax change).
+
+YOUR FIRST RESPONSE MUST CONTAIN THE COMPARISON. You are FORBIDDEN from:
+- Asking "which paycheck?", "what pay date?", "can you confirm?", "could you tell me?", or ANY question before showing the comparison
+- Saying you need more information — you have all the data you need
+- Asking the user for the previous paycheck date — find it yourself from the data
+This rule overrides CONSTRAINTS, TASK, and any other instruction that says to ask for clarification.
 
 `;
       const beforeLen = fullPrompt.length;
@@ -1044,16 +1049,24 @@ ABSOLUTE RULES:
         fullPrompt = fullPrompt.substring(0, constraintsIdx) + dataFirstRule + '\n' + fullPrompt.substring(constraintsIdx);
         console.log('[DataInjection] Injected data-first rule before CONSTRAINTS section');
       } else {
-        // Also try other constraint patterns
         const altIdx = fullPrompt.indexOf('## CONSTRAINTS') || fullPrompt.indexOf('### CONSTRAINTS');
         if (altIdx > 0) {
           fullPrompt = fullPrompt.substring(0, altIdx) + dataFirstRule + '\n' + fullPrompt.substring(altIdx);
         } else {
-          // Fallback: prepend to the beginning
           fullPrompt = dataFirstRule + '\n' + fullPrompt;
           console.log('[DataInjection] No CONSTRAINTS section found, prepended data-first rule');
         }
       }
+
+      // T003: Patch CONSTRAINTS to add data-available exceptions
+      fullPrompt = fullPrompt.replace(
+        /Must only ask clarifying questions when the request is genuinely ambiguous/g,
+        'Must only ask clarifying questions when the request is genuinely ambiguous. IMPORTANT: A question about pay, paychecks, or deductions when payroll data is available in the <data> section is NOT ambiguous — use the data to answer directly'
+      );
+      fullPrompt = fullPrompt.replace(
+        /\*\*For Insufficient Information\*\*:/g,
+        '**For Insufficient Information** (EXCEPTION: When payroll data is available in <data>, pay-related questions are NOT "insufficient information" — analyze the data and answer directly):'
+      );
     }
 
     fullPrompt += currentDateSection;
