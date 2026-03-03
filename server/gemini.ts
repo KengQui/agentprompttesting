@@ -724,10 +724,14 @@ export function classifyMessageContext(
     return dataKeywords.some(kw => msgText.includes(kw));
   });
 
+  // Always load sample data when agent has it - the data is small enough that
+  // it's better to always have it available than to risk not loading it
+  const alwaysLoadData = hasData;
+
   const noSignals = !hasDataSignal && !hasActionSignal && !hasDomainSignal;
   if (noSignals) {
     return {
-      needsData: promptRequiresData || chatHistoryNeedsData,
+      needsData: alwaysLoadData || promptRequiresData || chatHistoryNeedsData,
       needsActions: false,
       needsMockState: false,
       needsDomainKnowledge: false,
@@ -735,7 +739,7 @@ export function classifyMessageContext(
   }
 
   return {
-    needsData: (hasDataSignal && hasData) || promptRequiresData || chatHistoryNeedsData,
+    needsData: alwaysLoadData || (hasDataSignal && hasData) || promptRequiresData || chatHistoryNeedsData,
     needsActions: hasActionSignal && hasActions,
     needsMockState: hasActionSignal && hasMockState,
     needsDomainKnowledge: hasDomainSignal && hasDomain,
@@ -1026,12 +1030,29 @@ ABSOLUTE RULES:
 
 `;
       const beforeLen = fullPrompt.length;
-      fullPrompt = fullPrompt.replace(/<data>\s*<\/data>/g, `<data>\n${dataFirstRule}\n${sampleDatasetsText}\n</data>`);
+      fullPrompt = fullPrompt.replace(/<data>\s*<\/data>/g, `<data>\n${sampleDatasetsText}\n</data>`);
       const afterLen = fullPrompt.length;
       console.log(`[DataInjection] <data> tag replacement: before=${beforeLen}, after=${afterLen}, injected=${afterLen - beforeLen} chars`);
       if (beforeLen === afterLen) {
         console.log('[DataInjection] WARNING: No <data></data> tag found in custom prompt, appending data to end');
-        fullPrompt += `\n\n## User Data\n${dataFirstRule}\n${sampleDatasetsText}`;
+        fullPrompt += `\n\n## User Data\n${sampleDatasetsText}`;
+      }
+
+      // Inject data-first rule BEFORE the CONSTRAINTS section for maximum priority
+      const constraintsIdx = fullPrompt.indexOf('### 3. CONSTRAINTS');
+      if (constraintsIdx > 0) {
+        fullPrompt = fullPrompt.substring(0, constraintsIdx) + dataFirstRule + '\n' + fullPrompt.substring(constraintsIdx);
+        console.log('[DataInjection] Injected data-first rule before CONSTRAINTS section');
+      } else {
+        // Also try other constraint patterns
+        const altIdx = fullPrompt.indexOf('## CONSTRAINTS') || fullPrompt.indexOf('### CONSTRAINTS');
+        if (altIdx > 0) {
+          fullPrompt = fullPrompt.substring(0, altIdx) + dataFirstRule + '\n' + fullPrompt.substring(altIdx);
+        } else {
+          // Fallback: prepend to the beginning
+          fullPrompt = dataFirstRule + '\n' + fullPrompt;
+          console.log('[DataInjection] No CONSTRAINTS section found, prepended data-first rule');
+        }
       }
     }
 
