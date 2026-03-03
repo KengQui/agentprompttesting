@@ -1000,6 +1000,17 @@ function getSystemPrompt(agent: AgentContext, contextNeeds?: ContextSections): s
     fullPrompt = fullPrompt.replace(/\{\{VALIDATION_RULES\}\}/g, agent.validationRules || '(No validation rules provided)');
     fullPrompt = fullPrompt.replace(/\{\{GUARDRAILS\}\}/g, agent.guardrails || '(No guardrails provided)');
     
+    if (sampleDatasetsText) {
+      fullPrompt += `\n\n## CRITICAL: Data-First Response Rule
+When the user asks about their personal data (e.g., "why is my paycheck lower?", "what changed in my pay?", "how much was my deduction?"), you MUST:
+1. Immediately look up the relevant record(s) in the User Data above
+2. Compare records across periods to identify what changed
+3. Present the specific differences with actual numbers from the data
+4. Then explain why those changes may have occurred
+
+Do NOT ask the user clarifying questions when the answer can be found by examining the data. Use the data first, explain what you found, and only ask follow-up questions if the data does not reveal the answer.`;
+    }
+
     fullPrompt += currentDateSection;
     
     if (actionsText) {
@@ -1045,6 +1056,14 @@ function getSystemPrompt(agent: AgentContext, contextNeeds?: ContextSections): s
   
   if (sampleDatasetsText) {
     fullPrompt += `\n\n## User Data\n${sampleDatasetsText}`;
+    fullPrompt += `\n\n## CRITICAL: Data-First Response Rule
+When the user asks about their personal data (e.g., "why is my paycheck lower?", "what changed in my pay?", "how much was my deduction?"), you MUST:
+1. Immediately look up the relevant record(s) in the User Data above
+2. Compare records across periods to identify what changed
+3. Present the specific differences with actual numbers from the data
+4. Then explain why those changes may have occurred
+
+Do NOT ask the user clarifying questions when the answer can be found by examining the data. Use the data first, explain what you found, and only ask follow-up questions if the data does not reveal the answer.`;
   }
   
   if (agent.validationRules) {
