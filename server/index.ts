@@ -76,6 +76,15 @@ app.use((req, res, next) => {
   }
 
   try {
+    const { execSync } = await import("child_process");
+    console.log("[startup] Running db:push to ensure schema is up to date...");
+    execSync("npx drizzle-kit push --force", { stdio: "pipe", timeout: 30000 });
+    console.log("[startup] Database schema is up to date.");
+  } catch (e: any) {
+    console.error(`[startup] db:push failed: ${e.message || 'Unknown error'}`);
+  }
+
+  try {
     const { migrateFilesToDb } = await import("./migrate-files-to-db");
     await migrateFilesToDb();
   } catch (e: any) {
