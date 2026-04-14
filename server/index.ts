@@ -85,6 +85,13 @@ app.use((req, res, next) => {
   }
 
   try {
+    const { importSeedDataIfNeeded } = await import("./import-seed-data");
+    await importSeedDataIfNeeded();
+  } catch (e: any) {
+    console.error(`[startup] Seed data import failed: ${e.message}`);
+  }
+
+  try {
     const { applyPendingSyncOnStartup } = await import("./pending-sync");
     await applyPendingSyncOnStartup();
   } catch (e: any) {
